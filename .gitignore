@@ -1,0 +1,6 @@
+dist
+node_modules
+environments.json
+inquirer-command-prompt-history.json
+*.log
+*.tgz

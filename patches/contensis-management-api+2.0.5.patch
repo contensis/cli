@@ -1,0 +1,92 @@
+diff --git a/node_modules/contensis-management-api/lib/entries/entry-operations.js b/node_modules/contensis-management-api/lib/entries/entry-operations.js
+index 27c519f..d89c443 100644
+--- a/node_modules/contensis-management-api/lib/entries/entry-operations.js
++++ b/node_modules/contensis-management-api/lib/entries/entry-operations.js
+@@ -56,19 +56,24 @@ class EntryOperations {
+         let pageSize = query.pageSize || params.pageSize;
+         let pageIndex = query.pageIndex || 0;
+         let orderBy = (query.orderBy && (query.orderBy._items || query.orderBy));
++        let isZenQL = typeof(query.where) === 'string';
+         let includeArchived = query.includeArchived ? true : null;
+         let includeDeleted = query.includeDeleted ? true : null;
+         let { clientType, clientDetails, projectId, language, responseHandler, rootUrl, versionStatus } = params, requestParams = tslib_1.__rest(params, ["clientType", "clientDetails", "projectId", "language", "responseHandler", "rootUrl", "versionStatus"]);
+         let payload = Object.assign({}, requestParams, { includeArchived,
+             includeDeleted,
+             pageSize,
+-            pageIndex, where: JSON.stringify(query.where) });
++            pageIndex,
++            fields: query.fields && query.fields.length > 0 ? query.fields : null,
++            where: !isZenQL ? JSON.stringify(query.where) : null, zenQL: isZenQL ? query.where : null
++        });
+         if (orderBy && orderBy.length > 0) {
+             payload['orderBy'] = JSON.stringify(orderBy);
+         }
+-        let url = contensis_core_api_1.UrlBuilder.create('/api/management/projects/:projectId/entries/search', Object.assign({}, payload))
+-            .setParams(Object.assign({}, payload, { projectId }))
+-            .toUrl();
++        const endpointUrl = isZenQL ? '/api/management/projects/:projectId/entries' : '/api/management/projects/:projectId/entries/search';
++        let url = contensis_core_api_1.UrlBuilder.create(endpointUrl, Object.assign({}, payload))
++          .setParams(Object.assign({}, payload, { projectId }))
++          .toUrl();
+         let absoluteUrl = (!params.rootUrl || params.rootUrl === '/') ? url : params.rootUrl + url;
+         if (contensis_core_api_1.isBrowser() && contensis_core_api_1.isIE() && absoluteUrl.length > 2083) {
+             return this.searchUsingPost(query);
+diff --git a/node_modules/contensis-management-api/lib/security/users/user-operations.d.ts b/node_modules/contensis-management-api/lib/security/users/user-operations.d.ts
+index 688c311..a9ddcf5 100644
+--- a/node_modules/contensis-management-api/lib/security/users/user-operations.d.ts
++++ b/node_modules/contensis-management-api/lib/security/users/user-operations.d.ts
+@@ -18,6 +18,7 @@ export declare class UserOperations implements IUserOperations {
+     suspendUser(userId: string): Promise<void>;
+     unlockUser(userId: string): Promise<void>;
+     unsuspendUser(userId: string): Promise<void>;
++    searchZenQl(query: any): Promise<PagedList<User>>;
+     private performUserAction;
+     private getUser;
+ }
+diff --git a/node_modules/contensis-management-api/lib/security/users/user-operations.js b/node_modules/contensis-management-api/lib/security/users/user-operations.js
+index 1461ab4..c595b4e 100644
+--- a/node_modules/contensis-management-api/lib/security/users/user-operations.js
++++ b/node_modules/contensis-management-api/lib/security/users/user-operations.js
+@@ -1,5 +1,6 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
++const tslib_1 = require("tslib");
+ const contensis_core_api_1 = require("contensis-core-api");
+ let listMappers = {
+     pageIndex: (value, options, params) => (options && options.pageOptions && options.pageOptions.pageIndex) || (params.pageIndex),
+@@ -187,5 +188,35 @@ class UserOperations {
+             });
+         });
+     }
++    searchZenQl(query) {
++        if (!query) {
++            return new Promise((resolve) => { resolve(null); });
++        }
++        let params = this.contensisClient.getParams();
++        let pageSize = query.pageSize || params.pageSize;
++        let pageIndex = query.pageIndex || 0;
++        let orderBy = (query.orderBy && (query.orderBy._items || query.orderBy));
++        let isZenQL = typeof(query.where) === 'string';
++        let { clientType, clientDetails, projectId, language, responseHandler, rootUrl, versionStatus } = params, requestParams = tslib_1.__rest(params, ["clientType", "clientDetails", "projectId", "language", "responseHandler", "rootUrl", "versionStatus"]);
++        let payload = Object.assign({}, requestParams, { pageSize,
++            pageIndex, fields: query.fields && query.fields.length > 0 ? query.fields : null, where: !isZenQL ? JSON.stringify(query.where) : null, zenQL: isZenQL ? query.where : null });
++        if (orderBy && orderBy.length > 0) {
++            payload['orderBy'] = JSON.stringify(orderBy);
++        }
++        const endpointUrl = isZenQL ? '/api/security/users' : '/api/security/users/search';
++        let url = contensis_core_api_1.UrlBuilder.create(endpointUrl, Object.assign({}, payload))
++            .setParams(Object.assign({}, payload ))
++            .toUrl();
++        let absoluteUrl = (!params.rootUrl || params.rootUrl === '/') ? url : params.rootUrl + url;
++        if (contensis_core_api_1.isBrowser() && contensis_core_api_1.isIE() && absoluteUrl.length > 2083) {
++            return this.searchUsingPost(query);
++        }
++        return this.contensisClient.ensureBearerToken().then(() => {
++            return this.httpClient.request(url, {
++                method: 'GET',
++                headers: this.contensisClient.getHeaders(),
++            });
++        });
++    }
+ }
+ exports.UserOperations = UserOperations;

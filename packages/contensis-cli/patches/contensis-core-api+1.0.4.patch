@@ -1,0 +1,22 @@
+diff --git a/node_modules/contensis-core-api/lib/models/search/query.d.ts b/node_modules/contensis-core-api/lib/models/search/query.d.ts
+index 0538d78..5546709 100644
+--- a/node_modules/contensis-core-api/lib/models/search/query.d.ts
++++ b/node_modules/contensis-core-api/lib/models/search/query.d.ts
+@@ -4,7 +4,7 @@ import { WhereExpression, Operators } from './Operators';
+ export declare const Op: Operators;
+ export declare const OrderBy: ContensisQueryOrderBy;
+ export declare class Query implements ContensisQuery {
+-    where: WhereExpression;
++    where: WhereExpression | string;
+     orderBy: string | string[] | ContensisQueryOrderBy;
+     pageIndex: number;
+     pageSize: number;
+@@ -13,7 +13,7 @@ export declare class Query implements ContensisQuery {
+     toJSON(): any;
+ }
+ export declare class ManagementQuery implements Omit<ContensisQuery, 'fields'> {
+-    where: WhereExpression;
++    where: WhereExpression | string;
+     orderBy: string | string[] | ContensisQueryOrderBy;
+     pageIndex: number;
+     pageSize: number;
