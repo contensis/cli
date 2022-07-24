@@ -32,6 +32,8 @@ jobs:
           yarn run build
           cd packages/contensis-cli
           npm pack
+          npm run cli -- connect trial-006
+          npm run cli -- login zengenti 123456
       - name: Get npm version
         id: npm-version
         uses: martinbeentjes/npm-get-version-action@main
@@ -47,3 +49,4 @@ jobs:
             packages/contensis-cli/shell.js
             packages/contensis-cli/package.json
             packages/contensis-cli/README.md
+            packages/contensis-cli/contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
