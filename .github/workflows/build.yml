@@ -32,12 +32,13 @@ jobs:
           yarn run build
           cd packages/contensis-cli
           npm pack
-      - name: Get npm version and archive packaged artifacts
-        id: package-version
+      - name: Get npm version
+        id: npm-version
         uses: martinbeentjes/npm-get-version-action@main
         with:
           path: packages/contensis-cli
+      - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: contensis-cli-${{ steps.package-version.outputs.current-version}}.tgz
-          path: packages/contensis-cli/contensis-cli-${{ steps.package-version.outputs.current-version}}.tgz
+          name: contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+          path: packages/contensis-cli/contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
