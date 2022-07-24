@@ -16,7 +16,7 @@
     "build": "node esbuild.config.js",
     "build:watch": "node esbuild.config.js --watch",
     "cli": "node ./dist/index.js",
-    "shell": "node ./dist/shell.js",
+    "shell": "node ./shell.js",
     "postinstall": "patch-package",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
