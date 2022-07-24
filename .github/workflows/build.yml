@@ -40,5 +40,12 @@ jobs:
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
-          path: packages/contensis-cli/contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+          name: contensis-cli-${{ steps.npm-version.outputs.current-version}}
+          path: |
+          packages/contensis-cli/dist
+          packages/contensis-cli/cli.js
+          packages/contensis-cli/shell.js
+          packages/contensis-cli/package.json
+          packages/contensis-cli/README.md
+          # packages/contensis-cli/contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+          
