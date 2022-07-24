@@ -1,0 +1,44 @@
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - master
+      - contensis-14
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+      - name: Install apt packages for build
+        # The app uses keytar package which requires libsecret and
+        # an unlocked keyring to be able to store passwords and login.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-0 dbus-x11 gnome-keyring
+          export $(dbus-launch)
+          dbus-launch
+          gnome-keyring-daemon --start --daemonize --components=secrets
+          echo 'random' | gnome-keyring-daemon -r -d --unlock
+      - name: Build and package
+        run: |
+          yarn run bootstrap
+          yarn run build
+          cd packages/contensis-cli
+          npm pack
+      - name: Get npm version and archive packaged artifacts
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+        with:
+          path: packages/contensis-cli
+        uses: actions/upload-artifact@v3
+        with:
+          name: contensis-cli-${{ steps.package-version.outputs.current-version}}.tgz
+          path: packages/contensis-cli/contensis-cli-${{ steps.package-version.outputs.current-version}}.tgz
