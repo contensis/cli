@@ -14,7 +14,7 @@
   "scripts": {
     "prepare": "lerna run prepare",
     "build": "lerna run build --stream",
-    "bootstrap": "npx lerna bootstrap --force-local && lerna link --force-local",
+    "bootstrap": "npx lerna bootstrap --force-local -- --ignore-scripts && lerna link --force-local",
     "clean": "lerna clean",
     "nuke": "rimraf ./node_modules && rimraf ./packages/*/node_modules",
     "postinstall": "patch-package",
