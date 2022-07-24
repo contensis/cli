@@ -2,6 +2,8 @@
   "name": "contensis-cli",
   "version": "1.0.0-beta.0",
   "description": "A fully featured Contensis command line interface with a shell UI provides simple and intuitive ways to manage or profile your content in any NodeJS terminal.",
+  "repository": "https://github.com/contensis/node-cli",
+  "homepage": "https://github.com/contensis/node-cli/tree/main/packages/contensis-cli#readme",
   "main": "dist/index.js",
   "bin": {
     "contensis": "./shell.js",
@@ -30,7 +32,7 @@
     "inquirer-command-prompt": "^0.1.0",
     "keytar": "^7.9.0",
     "lodash": "^4.17.21",
-    "migratortron": "^1.0.0-beta.3",
+    "migratortron": "^1.0.0-beta.4",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
