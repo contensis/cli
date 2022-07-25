@@ -42,14 +42,14 @@ class CredentialProvider {
       keytar.setPassword(this.serviceId, this.userId, password)
     );
 
-    Logger.info(`Saved credentials for ${this.serviceId}\n`);
+    Logger.info(`${this.serviceId} - credentials saved`);
     return err || true;
   };
 
   Delete = async () => {
     const [err] = await to(keytar.deletePassword(this.serviceId, this.userId));
 
-    Logger.warning(`Removed invalid credentials for ${this.serviceId}\n`);
+    Logger.warning(`${this.serviceId} - invalid credentials removed`);
     return err || true;
   };
 

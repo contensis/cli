@@ -49,11 +49,14 @@ class ContensisCli {
   constructor(args: string[], contensisOpts: Partial<MigrateRequest> = {}) {
     // console.log('args: ', JSON.stringify(args, null, 2));
 
-    this.verb = args?.[2]?.toLowerCase();
-    this.noun = args?.[3]?.toLowerCase();
-    this.thirdArg = args?.[4];
+    const [exe, script, verb = '', noun = '', ...restArgs] = args;
+    this.verb = verb?.toLowerCase();
+    this.noun = noun?.toLowerCase();
+    this.thirdArg = restArgs?.[0];
 
-    const commandText = `${this.verb} ${this.noun}`.trim();
+    const commandText = `${this.verb} ${this.noun} ${
+      restArgs ? restArgs.join(' ') : ''
+    }`.trim();
 
     this.session = new SessionCacheProvider();
     this.cache = this.session.Get();
@@ -62,7 +65,7 @@ class ContensisCli {
     const { currentEnvironment = '', environments = {} } = this.cache;
     const env = (this.env = environments[currentEnvironment]);
     this.currentEnv = currentEnvironment;
-    this.currentProject = env?.currentProject || '';
+    this.currentProject = env?.currentProject || 'null';
 
     if (currentEnvironment) {
       this.urls = url(currentEnvironment, env?.currentProject || 'website');
@@ -90,61 +93,6 @@ class ContensisCli {
       this.session.Update({ environments, history: [commandText] });
   }
 
-  DoCommandTasksAsync = async () => {
-    const { messages, Log } = await Logging('en-GB');
-    this.log = Log;
-    this.messages = messages;
-
-    const { verb, noun, thirdArg } = this;
-
-    switch (verb) {
-      case 'list':
-        switch (noun) {
-          case 'envs':
-            this.PrintEnvironments();
-            break;
-          case 'projects':
-            await this.PrintProjects();
-            break;
-          case 'contenttypes':
-            await this.PrintContentTypes();
-            break;
-          case 'components':
-            await this.PrintComponents();
-            break;
-        }
-        break;
-      case 'connect':
-        await this.Connect(noun);
-        break;
-      case 'login':
-        await this.Login(noun, { password: thirdArg });
-        break;
-      case 'set':
-        switch (noun) {
-          case 'project':
-            await this.SetProject(this.thirdArg);
-            break;
-        }
-        break;
-      case 'get':
-        switch (noun) {
-          case 'contenttype':
-            await this.PrintContentType(thirdArg);
-            break;
-          case 'component':
-            await this.PrintComponent(thirdArg);
-            break;
-        }
-        break;
-      default:
-        this.log.error(`${verb} is not known`);
-        break;
-    }
-
-    ContensisCli.quit();
-  };
-
   PrintEnvironments = () => {
     const { log, messages } = this;
     const { currentEnvironment, environments = {} } = this.cache;
@@ -163,8 +111,10 @@ class ContensisCli {
     const { cache, log, messages, session } = this;
 
     if (environment) {
-      this.urls = url(environment, 'website');
+      this.currentEnv = environment;
       this.env = cache.environments[environment];
+      this.urls = url(environment, 'website');
+
       const [fetchErr, response] = await to(fetch(this.urls.cms));
       if (response && response?.status < 400) {
         log.success(messages.connect.connected(environment));
@@ -234,8 +184,8 @@ class ContensisCli {
         });
       }
     } else {
-      if (!currentEnv) log.info(messages.connect.help());
-      if (!userId) log.info(messages.connect.tip());
+      if (!currentEnv) log.help(messages.connect.help());
+      if (!userId) log.help(messages.connect.tip());
     }
   };
 
@@ -302,10 +252,12 @@ class ContensisCli {
 
           // Login successful
           if (bearerToken) {
-            if (!silent)
-              Logger.success(messages.login.success(currentEnv, userId));
             env.lastUserId = userId;
             env.authToken = bearerToken;
+            if (!silent) {
+              Logger.success(messages.login.success(currentEnv, userId));
+              await this.PrintProjects();
+            }
             if (inputPassword) await storedCredentials.Save(inputPassword);
           } else if (authError) {
             Logger.error(authError.toString());
@@ -348,7 +300,9 @@ class ContensisCli {
         // save these projects in cache
         const currentVals = cache.environments[currentEnv] || {};
         const nextCurrentProject =
-          currentProject || projects.some(p => p.id === 'website')
+          currentProject && currentProject !== 'null'
+            ? currentProject
+            : projects.some(p => p.id === 'website')
             ? 'website'
             : undefined;
 
@@ -372,6 +326,11 @@ class ContensisCli {
         session.Update({
           environments: cache.environments,
         });
+
+        if (nextCurrentProject) {
+          this.env = cache.environments[currentEnv];
+          this.SetProject(nextCurrentProject);
+        }
       }
 
       if (projectsErr) {
@@ -436,7 +395,6 @@ class ContensisCli {
       this.components = this.contensis.models.sourceRepo.components;
     } else {
       log.warning(messages.contenttypes.noList(currentProject));
-      log.help(messages.connect.tip());
     }
   };
 

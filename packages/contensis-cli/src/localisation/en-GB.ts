@@ -81,7 +81,7 @@ export const LogMessages = {
   projects: {
     list: () => `Available projects:`,
     noList: () => `Cannot retrieve projects list`,
-    set: (projectId: string) => `Current project is "${projectId}"`,
+    set: (projectId: string) => `Current project is set to "${projectId}"`,
     failedSet: (projectId: string) => `Project "${projectId}" not found`,
   },
   contenttypes: {

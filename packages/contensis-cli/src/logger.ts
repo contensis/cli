@@ -59,7 +59,7 @@ export class Logger {
   static info: LogMethod = content => {
     const message = `${Logger.getPrefix()} ${
       Logger.isUserTerminal ? chalk.bgCyan(' ℹ ') : '[INFO]'
-    } ${Logger.infoText(content)}\n`;
+    } ${Logger.infoText(content)}`;
     if (progress.active) progress.current.interrupt(message);
     else console.log(message);
   };

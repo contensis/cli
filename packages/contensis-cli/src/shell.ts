@@ -23,6 +23,7 @@ class ContensisShell {
     const {
       cache: { currentEnvironment = '', environments = {} },
     } = new ContensisCli([]);
+    // console.log(`refreshing env w/${currentEnvironment}`);
     this.currentEnvironment = currentEnvironment;
     this.env = environments[currentEnvironment];
 
@@ -35,7 +36,6 @@ class ContensisShell {
 
   constructor() {
     this.refreshEnvironment();
-
     inquirerPrompt.setConfig({
       history: {
         save: true,
@@ -44,7 +44,7 @@ class ContensisShell {
         blacklist: ['quit'],
       },
     });
-    inquirer.registerPrompt('command', inquirerPrompt);
+    // inquirer.registerPrompt('command', inquirerPrompt);
 
     const { log, messages } = this;
 
@@ -108,6 +108,7 @@ class ContensisShell {
 
   contensisPrompt = async (): Promise<any> => {
     const { currentEnvironment, env, log, messages, userId } = this;
+
     const availableCommands = [
       {
         filter: (str: string) => {
@@ -131,33 +132,36 @@ class ContensisShell {
         'list models'
       );
 
-    return inquirer
-      .prompt([
-        {
-          type: 'command',
-          name: 'cmd',
-          autoCompletion: availableCommands,
-          autocompletePrompt: log.infoText(messages.app.autocomplete()),
-          message: `${userId ? `${userId}@` : ''}${currentEnvironment || ''}>`,
-          context: 0,
-          // onClose: () => {
-          //   // console.log('**in onClose**');
-          //   console.log('');
-          // },
-          validate: (val: string) => {
-            if (!val) this.emptyInputCounter++;
-            if (this.emptyInputCounter > 1)
-              console.log(this.log.infoText(this.messages.app.suggestions()));
-            if (val) {
-              this.emptyInputCounter = 0;
-              return true;
-            }
-          },
+    // console.log(`availableCommands ${JSON.stringify(availableCommands)}`);
 
-          prefix: `${env?.currentProject || 'contensis'}`,
-          short: true,
+    const prompt = inquirer.createPromptModule();
+    prompt.registerPrompt('command', inquirerPrompt);
+    return prompt([
+      {
+        type: 'command',
+        name: 'cmd',
+        autoCompletion: availableCommands,
+        autocompletePrompt: log.infoText(messages.app.autocomplete()),
+        message: `${userId ? `${userId}@` : ''}${currentEnvironment || ''}>`,
+        context: 0,
+        // onClose: () => {
+        //   // console.log('**in onClose**');
+        //   console.log('');
+        // },
+        validate: (val: string) => {
+          if (!val) this.emptyInputCounter++;
+          if (this.emptyInputCounter > 1)
+            console.log(this.log.infoText(this.messages.app.suggestions()));
+          if (val) {
+            this.emptyInputCounter = 0;
+            return true;
+          }
         },
-      ])
+
+        prefix: `${env?.currentProject || 'contensis'}`,
+        short: true,
+      },
+    ])
       .then(async (answers: { cmd: string }) => {
         // console.log(JSON.stringify(answers, null, 2));
 
@@ -178,8 +182,9 @@ class ContensisShell {
             }
           } catch (ex: any) {
             log.error(ex.toString());
+          } finally {
+            return this.contensisPrompt();
           }
-          return this.contensisPrompt();
         }
       })
       .catch((err: Error) => {
@@ -203,18 +208,10 @@ class ContensisShell {
   };
 }
 
-// const temp = process.exit;
-
-// process.exit = function (code = 0) {
-//   console.trace();
-//   console.log('exitCode: ', process.exitCode);
-//   process.exit = temp;
-//   process.exit(code);
-// };
-
 let globalShell: ContensisShell;
 
 export const shell = () => {
+  if (typeof process.argv?.[2] !== 'undefined') return { start() {} } as any;
   if (!globalShell) globalShell = new ContensisShell();
   return globalShell;
 };
