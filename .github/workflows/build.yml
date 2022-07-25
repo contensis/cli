@@ -26,19 +26,20 @@ jobs:
           dbus-launch
           gnome-keyring-daemon --start --daemonize --components=secrets
           echo 'random' | gnome-keyring-daemon -r -d --unlock
-      - name: Build and package
-        run: |
-          yarn run bootstrap
-          yarn run build
-          cd packages/contensis-cli
-          npm pack
-          npm run cli -- connect trial-006
-          npm run cli -- login zengenti 123456
       - name: Get npm version
         id: npm-version
         uses: martinbeentjes/npm-get-version-action@main
         with:
           path: packages/contensis-cli
+      - name: Build and package
+        run: |
+          yarn run bootstrap:ci
+          yarn run build
+          cd packages/contensis-cli
+          npm pack
+          npm i -g contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+          contensis-cli connect trial-006
+          contensis-cli login zengenti 123456
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
