@@ -33,7 +33,7 @@ jobs:
           path: packages/contensis-cli
       - name: Build and package
         run: |
-          yarn run bootstrap
+          yarn run bootstrap:ci
           yarn run build
           cd packages/contensis-cli
           npm pack
