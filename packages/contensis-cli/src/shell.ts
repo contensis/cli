@@ -129,7 +129,10 @@ class ContensisShell {
         'get entries',
         'list contenttypes',
         'list components',
-        'list models'
+        'list models',
+        'list keys',
+        'create key',
+        'remove key'
       );
 
     // console.log(`availableCommands ${JSON.stringify(availableCommands)}`);
@@ -181,7 +184,9 @@ class ContensisShell {
               );
             }
           } catch (ex: any) {
-            log.error(ex.toString());
+            const str = ex.toString();
+            if (!str.includes('CommanderError'))
+              log.error(`shell error: ${ex.toString()}`);
           } finally {
             return this.contensisPrompt();
           }

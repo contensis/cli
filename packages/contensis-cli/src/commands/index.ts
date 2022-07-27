@@ -2,9 +2,11 @@ import { Command } from 'commander';
 import { Logger } from '~/logger';
 import { LIB_VERSION } from '~/version';
 import { connect } from './connect';
+import { create } from './create';
 import { makeGetCommand } from './get';
 import { list } from './list';
 import { login } from './login';
+import { remove } from './remove';
 import { set } from './set';
 
 const commands = () => {
@@ -14,7 +16,7 @@ const commands = () => {
     .configureOutput({
       writeErr: str => {
         return str.toLowerCase().includes('error')
-          ? Logger.error(str)
+          ? Logger.error(`commands.writeErr ${str}`)
           : str.trim() && Logger.help(str);
       },
     })
@@ -25,7 +27,9 @@ const commands = () => {
   program.addCommand(makeGetCommand().copyInheritedSettings(program));
   program.addCommand(list.copyInheritedSettings(program));
   program.addCommand(login.copyInheritedSettings(program));
+  program.addCommand(create.copyInheritedSettings(program));
   program.addCommand(set.copyInheritedSettings(program));
+  program.addCommand(remove.copyInheritedSettings(program));
 
   program;
 

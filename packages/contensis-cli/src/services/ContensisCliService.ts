@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import inquirer from 'inquirer';
 import to from 'await-to-js';
 import { Component, ContentType } from 'contensis-core-api';
-import { isUuid, Logging, url } from '~/util';
+import { isUuid, url } from '~/util';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import ContensisAuthService from './ContensisAuthService';
 import CredentialProvider from '~/providers/CredentialProvider';
@@ -367,6 +367,31 @@ class ContensisCli {
     return nextProjectId;
   };
 
+  SetVersion = async (versionStatus: 'latest' | 'published') => {
+    const { cache, env, log, messages, session } = this;
+    if (!['latest', 'published'].includes(versionStatus)) {
+      log.error(messages.version.invalid(versionStatus));
+      return false;
+    }
+    if (!env) {
+      log.help(messages.version.noEnv());
+      return false;
+    }
+    if (env?.projects.length > 0 && env?.lastUserId) {
+      env.versionStatus = versionStatus;
+      session.Update({
+        environments: cache.environments,
+      });
+      log.success(messages.version.set(this.currentEnv, versionStatus));
+      return true;
+    } else {
+      // No projects for currentEnv, try logging in
+      log.warning(messages.projects.noList());
+      log.help(messages.connect.tip());
+      return false;
+    }
+  };
+
   HydrateContensis = async () => {
     const { log } = this;
     if (!this.contensis) await this.ConnectContensis();
@@ -384,6 +409,89 @@ class ContensisCli {
     }
   };
 
+  PrintApiKeys = async () => {
+    const { currentEnv, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+
+    if (this.contensis) {
+      // Retrieve keys list for env
+      const [keysErr, apiKeys] = await this.contensis.apiKeys.GetKeys();
+
+      if (Array.isArray(apiKeys)) {
+        // print the keys to console
+        log.success(messages.keys.list(currentEnv));
+        for (const {
+          id,
+          sharedSecret,
+          name,
+          description,
+          dateModified,
+          modifiedBy,
+        } of apiKeys) {
+          console.log(
+            `  - ${name}${
+              description ? ` (${description})` : ''
+            } [${dateModified.toString().substring(0, 10)} ${modifiedBy}]`
+          );
+          console.log(`      ${id}`);
+          console.log(`      ${sharedSecret}`);
+        }
+        console.log('');
+      }
+
+      if (keysErr) {
+        log.error(messages.keys.noList(currentEnv));
+        log.error(JSON.stringify(keysErr, null, 2));
+      }
+    }
+  };
+
+  CreateApiKey = async (name: string, description?: string) => {
+    const { currentEnv, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+
+    if (this.contensis) {
+      const [err, key] = await this.contensis.apiKeys.CreateKey(
+        name,
+        description
+      );
+
+      if (key) {
+        log.success(messages.keys.created(currentEnv, name));
+
+        // print the key details to console
+        console.log(
+          `  - ${key.name}${
+            key.description ? ` (${key.description})` : ''
+          } [${key.dateModified.toString().substring(0, 10)} ${key.modifiedBy}]`
+        );
+        console.log(`  - id: ${key.id}`);
+        console.log(`  - sharedSecret: ${key.sharedSecret}`);
+      }
+      console.log('');
+
+      if (err) {
+        log.error(messages.keys.failedCreate(currentEnv, name), err);
+      }
+    }
+  };
+
+  RemoveApiKey = async (id: string) => {
+    const { currentEnv, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+
+    if (this.contensis) {
+      const [err, key] = await this.contensis.apiKeys.RemoveKey(id);
+
+      if (!err) {
+        log.success(messages.keys.removed(currentEnv, id));
+        console.log('');
+      } else {
+        log.error(messages.keys.failedRemove(currentEnv, id), err);
+      }
+    }
+  };
+
   GetContentTypes = async () => {
     const { currentProject, log, messages } = this;
     let err;
@@ -391,8 +499,8 @@ class ContensisCli {
 
     if (err) log.error(messages.contenttypes.noList(currentProject));
     if (this.contensis) {
-      this.contentTypes = this.contensis.models.sourceRepo.contentTypes;
-      this.components = this.contensis.models.sourceRepo.components;
+      this.contentTypes = this.contensis.models.contentTypes();
+      this.components = this.contensis.models.components();
     } else {
       log.warning(messages.contenttypes.noList(currentProject));
     }

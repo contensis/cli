@@ -22,3 +22,6 @@ list.command('contenttypes').action(async () => {
 list.command('components').action(async () => {
   await cliCommand(['list', 'components']).PrintComponents();
 });
+list.command('keys').action(async () => {
+  await cliCommand(['list', 'keys']).PrintApiKeys();
+});

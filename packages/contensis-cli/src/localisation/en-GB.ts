@@ -111,8 +111,14 @@ export const LogMessages = {
       `No Contensis environment set, connect to your Contensis cloud instance using "contensis connect {cms alias}"`,
   },
   keys: {
-    get: (env: string) => `[${env}] API keys:`,
+    list: (env: string) => `[${env}] API keys:`,
+    noList: (env: string) => `[${env}] Cannot retrieve API`,
     created: (env: string, name: string) =>
       `[${env}] Created API key "${name}"`,
+    failedCreate: (env: string, name: string) =>
+      `[${env}] Unable to create API key "${name}"`,
+    removed: (env: string, id: string) => `[${env}] Deleted API key "${id}"`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete API key "${id}"`,
   },
 };

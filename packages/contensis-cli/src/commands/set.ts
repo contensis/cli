@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import { Argument, Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
 
@@ -13,4 +13,20 @@ set
       projectId
     );
     if (project) await shell().start();
+  });
+set
+  .command('version')
+  .addArgument(
+    new Argument('<versionStatus>', 'content version status')
+      .choices(['latest', 'published'])
+      .default('latest')
+  )
+  .usage('<latest/published>')
+  .action(async versionStatus => {
+    const success = await cliCommand([
+      'set',
+      'version',
+      versionStatus,
+    ]).SetVersion(versionStatus);
+    if (success) await shell().start();
   });

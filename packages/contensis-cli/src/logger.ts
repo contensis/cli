@@ -5,7 +5,8 @@ import deepCleaner from 'deep-cleaner';
 import ProgressBar from 'progress';
 import { tryStringify } from './util';
 
-type LogMethod = (content: string, print?: boolean) => void;
+type LogMethod = (content: string) => void;
+type LogErrorMethod = (content: string, err?: any) => void;
 type LogJsonMethod = (content: any) => void;
 type LogArrayMethod = (contentArray: string[]) => void;
 type LogErrorFunc = (
@@ -33,9 +34,11 @@ export class Logger {
     )} ${content}`;
     console.log(message);
   };
-  static error: LogMethod = content => {
+  static error: LogErrorMethod = (content, err) => {
     const message = `${Logger.getPrefix()} ${Logger.errorText(
-      `${Logger.isUserTerminal ? '❌' : '[ERROR]'} ${content}`
+      `${Logger.isUserTerminal ? '❌' : '[ERROR]'} ${content}${
+        err ? `\n\n${JSON.stringify(err, null, 2)}` : ''
+      }`
     )}\n`;
     if (progress.active) progress.current.interrupt(message);
     else console.log(message);

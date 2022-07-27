@@ -416,3 +416,50 @@ Results will usually default to JSON when saved with the `--output` flag.
 Override the output format with the `--format` or `-f` option.
 
 Availalabe options are: CSV and JSON (not yet implemented)
+
+## Manage API keys
+
+You can use a logged in cli or shell instance to manage API keys that are used to provide access to external application integrations
+
+### List keys
+
+```shell
+website t.durden@example-dev> list keys
+[cli] ✅ [example-dev] API keys:
+  - Slack webhooks [2021-09-22 zengenti]
+      144ea36d-3cb1-406e-b6d1-931162780d0b
+      6fad017d75ce434eb0b0703bf40d4dac-842394737615483e95a22eee6cdcff1d-a238f992b45640708336781029838ec9
+  - Contensis blocks [2021-10-26 zengenti]
+      e4376db2-ed3e-49d3-a799-a6ec733a3611
+      a8590f6b4630404186b72fea198d3c12-c6f1f565eb86428ea0170e1b4b8a4b7f-de88eb42e46c4d548a8c36f490f34866
+  - Content migration API [2022-03-01 t.durden]
+      5bea0a71-cd21-41a9-84a3-2f64a2c4394a
+      22c7808a109749c8b37723a8572e5323-ea79651f111a464d980db162e5254b02-954790ca475a4fa186e91f76ce38b4c6
+
+website t.durden@example-dev>
+```
+
+### Create key
+
+```shell
+website t.durden@example-dev> create key "Test key" "Key to demonstrate cli"
+[cli] ✅ [example-dev] Created API key "Test key"
+  - Test key (Key to demonstrate cli) [2022-07-27 t.durden]
+  - id: af645b8b-fa3b-4196-a1b7-ac035f7598a3
+  - sharedSecret: 1ff8b259423c4be08589a63f180c1bdc-63bd3a4f421c44c2afd0ba61e837d671-6aa9532442f149e6a9a837326a9a98e9
+
+website t.durden@example-dev>
+```
+
+Run `list keys` again and you will see your new API key added to the returned list of keys
+
+### Remove key
+
+```shell
+website t.durden@example-dev> remove key af645b8b-fa3b-4196-a1b7-ac035f7598a3
+[cli] ✅ [example-dev] Deleted API key "af645b8b-fa3b-4196-a1b7-ac035f7598a3"
+
+website t.durden@example-dev>
+```
+
+Run `list keys` again and you will see your new API key has been removed from the list of keys
