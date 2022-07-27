@@ -20,7 +20,7 @@ jobs:
         # The app uses keytar package which requires libsecret and
         # an unlocked keyring to be able to store passwords and login.
         run:
-          ./headless-setup.sh
+          ${PWD}/packages/contensis-cli/headless-setup.sh
           # sudo apt-get update
           # sudo apt-get install -y libsecret-1-0 dbus-x11 gnome-keyring
           # export $(dbus-launch)
