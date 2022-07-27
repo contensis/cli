@@ -16,6 +16,22 @@ contensis-cli connect example-dev
 
 The CLI uses the same commands and arguments as the shell. It is recommended you use and familiarise yourself with the cli via the shell and use the `contensis-cli` command to use the same cli commands in script-based context such as continuous deployment.
 
+### Running headless?
+
+The required credentials to run commands are stored and read from a secret store `libsecret`. Without the secret store running and unlocked we receive an error `Cannot autolaunch D-Bus without X11 $DISPLAY`
+
+```shell
+sudo apt-get update && sudo apt-get install -y libsecret-1-0 dbus-x11 gnome-keyring
+export $(dbus-launch)
+dbus-launch
+gnome-keyring-daemon --start --daemonize --components=secrets
+echo 'neil' | gnome-keyring-daemon -r -d --unlock
+```
+
+Also, if you are running within a docker container, it requires `--cap-add=IPC_LOCK` option when running the container. Otherwise gnome-keyring-daemon will fail with: `gnome-keyring-daemon: Operation not permitted`
+
+An executable script is available to test: `contensis-cli-headless` you will need sudo access to install additional libraries with `apt-get`
+
 # Contensis Shell
 
 The shell is the preferred way to use the cli, if the package is installed to your global `node_modules` you can start it by opening your terminal and typing `contensis`.

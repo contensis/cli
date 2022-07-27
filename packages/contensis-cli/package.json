@@ -7,7 +7,8 @@
   "main": "dist/index.js",
   "bin": {
     "contensis": "./shell.js",
-    "contensis-cli": "./cli.js"
+    "contensis-cli": "./cli.js",
+    "contensis-cli-headless": "./headless-setup.sh"
   },
   "scripts": {
     "prestart": "npm run build",
@@ -32,7 +33,7 @@
     "inquirer-command-prompt": "^0.1.0",
     "keytar": "^7.9.0",
     "lodash": "^4.17.21",
-    "migratortron": "^1.0.0-beta.5",
+    "migratortron": "^1.0.0-beta.6",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
