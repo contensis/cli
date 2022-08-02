@@ -1882,17 +1882,7 @@ console-table-printer@^2.10.0:
   dependencies:
     simple-wcswidth "^1.0.1"
 
-contensis-core-api@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/contensis-core-api/-/contensis-core-api-1.0.4.tgz"
-  integrity sha512-HG6ocZuTZUozrrSKVSoCUdna+AP86F4vHRXYljXYejKRJ6ItoeguXL8vCKMC5Dz0ZLXnjdN8wTKm9Kz8lk346g==
-  dependencies:
-    "@types/detect-node" "^2.0.0"
-    detect-node "^2.0.4"
-    es6-promise "^4.2.6"
-    tslib "^1.9.3"
-
-contensis-core-api@1.0.5:
+contensis-core-api@1.0.5, contensis-core-api@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npmjs.org/contensis-core-api/-/contensis-core-api-1.0.5.tgz"
   integrity sha512-UunFPehrz7aViC9jGTszBCkEcjw0+aeot4aPHT3U6/XssgCDItDQQa5W30zqJrtZ5eSN6PaoDnStuNADQDH0LQ==
@@ -1902,7 +1892,7 @@ contensis-core-api@1.0.5:
     es6-promise "^4.2.6"
     tslib "^1.9.3"
 
-contensis-delivery-api@^1.1.9:
+contensis-delivery-api@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/contensis-delivery-api/-/contensis-delivery-api-1.2.0.tgz"
   integrity sha512-aDT8slJ9DTk7l50ZxP3K8nj8tH8QZodx2hwBW507xXKOlc7oLEm4EYk1pncC54tQdRwwLp1lABkJ9wCJiRUYsw==
@@ -1913,13 +1903,13 @@ contensis-delivery-api@^1.1.9:
     tslib "^1.10.0"
     whatwg-fetch "^3.0.0"
 
-contensis-management-api@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.npmjs.org/contensis-management-api/-/contensis-management-api-2.0.5.tgz"
-  integrity sha512-HbTNIODVznQvhn0VMSgmgRg9PVM+YuRR5QXSa+cbbs+R/ztUzv8wq/QoszQskGWtPpetx6JdM2eqAgjF79/eAw==
+contensis-management-api@^2.0.9:
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/contensis-management-api/-/contensis-management-api-2.0.9.tgz#2fb978a187b3d03aa370dbd8df271b82b8664645"
+  integrity sha512-JZs/h2Slk4Kd1zvHklYvrzReinOF+KSkRWBIdgaOAVqLrXydvwUn0v4CuDGgqylzVvyfPRUrdUSvNq7y7OqTaA==
   dependencies:
     "@types/graceful-fs" "^4.1.3"
-    contensis-core-api "1.0.4"
+    contensis-core-api "1.0.5"
     cross-fetch "^3.0.6"
     es6-promise "^4.2.8"
     form-data "^3.0.0"
@@ -2397,7 +2387,7 @@ enquirer@^2.3.5:
   dependencies:
     ansi-colors "^4.1.1"
 
-enterprise-fetch@^1.0.0-alpha.5:
+enterprise-fetch@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/enterprise-fetch/-/enterprise-fetch-1.0.0.tgz"
   integrity sha512-y8m/OXmkc0w6VlYgmdkvzfyY47/ldttdWqvqc2qF3hyWV+tEG2ayqnwL+JhiGWJ/+VzaNuSSgS1H0cmPq6TEgg==

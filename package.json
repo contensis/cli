@@ -11,13 +11,18 @@
       "**/app-root-path/**"
     ]
   },
+  "main": "packages/contensis-cli/dist/index.js",
+  "bin": {
+    "contensis": "./packages/contensis-cli/shell.js",
+    "contensis-cli": "./packages/contensis-cli/cli.js"
+  },
   "scripts": {
     "prepare": "lerna run prepare",
     "build": "lerna run build --stream",
     "bootstrap": "npx lerna bootstrap --force-local && lerna link --force-local",
     "bootstrap:ci": "npx lerna bootstrap --force-local -- --ignore-scripts && lerna link --force-local",
     "clean": "lerna clean",
-    "nuke": "rimraf ./node_modules && rimraf ./packages/*/node_modules",
+    "nuke": "rimraf ./packages/*/node_modules && rimraf ./node_modules",
     "postinstall": "patch-package",
     "prestart": "kill-port --port 3000,3001,3002",
     "start": "lerna exec --parallel --stream -- yarn start",
@@ -27,7 +32,9 @@
   "devDependencies": {
     "kill-port": "^1.6.1",
     "lerna": "^4.0.0",
-    "patch-package": "^6.4.7",
     "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "patch-package": "^6.4.7"
   }
 }
