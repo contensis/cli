@@ -34,7 +34,8 @@
     "keytar": "^7.9.0",
     "lodash": "^4.17.21",
     "migratortron": "^1.0.0-beta.7",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "patch-package": "^6.4.7"
   },
   "devDependencies": {
     "@types/figlet": "^1.5.4",
