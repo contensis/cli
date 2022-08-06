@@ -7,5 +7,5 @@ export const output = new Option(
 
 export const format = new Option(
   '-f, --format <format>',
-  'format output as csv, json or table (default)'
-).choices(['csv', 'json', 'table']);
+  'format output as csv, json, xml or table (default)'
+).choices(['csv', 'json', 'xml', 'table']);

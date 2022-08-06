@@ -186,7 +186,7 @@ class ContensisShell {
           } catch (ex: any) {
             const str = ex.toString();
             if (!str.includes('CommanderError'))
-              log.error(`shell error: ${ex.toString()}`);
+              log.error(`shell error: ${ex.toString()}`, ex);
           } finally {
             return this.contensisPrompt();
           }

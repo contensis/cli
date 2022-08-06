@@ -12,6 +12,8 @@ import { Logger } from '~/logger';
 import { LogMessages } from '~/localisation/en-GB';
 import { ContensisMigrationService, MigrateRequest } from 'migratortron';
 import { logEntriesTable } from 'migratortron/dist/transformations/logging';
+import { entriesToCsv } from '~/csv';
+import { entriesToXml } from '~/xml';
 
 class ContensisCli {
   static quit = (error?: Error) => {
@@ -602,11 +604,11 @@ class ContensisCli {
   };
 
   GetEntries = async ({
-    format,
+    format = 'json',
     output,
     withDependents = false,
   }: {
-    format?: 'json' | 'csv';
+    format?: 'json' | 'csv' | 'xml';
     output?: string;
     withDependents?: boolean;
   }) => {
@@ -619,10 +621,22 @@ class ContensisCli {
       const entries = await this.contensis.GetEntries({ withDependents });
 
       if (output) {
-        // write entries to file
         const localFilePath = path.join(__dirname, '../../', output);
-        fs.writeFileSync(localFilePath, JSON.stringify(entries, null, 2));
-        log.success(`Output file: ${log.infoText(localFilePath)}`);
+        let writeString = '';
+        if (format === 'csv') {
+          writeString = entriesToCsv(entries);
+        } else if (format === 'xml') {
+          writeString = entriesToXml(entries);
+        } else writeString = JSON.stringify(entries, null, 2);
+        // write entries to file
+        if (writeString) {
+          fs.writeFileSync(localFilePath, writeString);
+          log.success(
+            `Output ${format} file: ${log.infoText(localFilePath)}\n`
+          );
+        } else {
+          log.info(`No output written\n`);
+        }
       } else {
         if (!format)
           logEntriesTable(
@@ -630,8 +644,10 @@ class ContensisCli {
             currentProject,
             this.contensis.payload.query?.fields
           );
-        else if (format === 'csv') log.info('not yet implemented');
-        else if (format === 'json') log.info(JSON.stringify(entries, null, 2));
+        else if (format === 'csv') {
+          log.info(entriesToCsv(entries));
+        } else if (format === 'json')
+          log.info(JSON.stringify(entries, null, 2));
       }
     } else {
       log.warning(messages.contenttypes.noList(currentProject));
