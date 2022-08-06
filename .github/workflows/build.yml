@@ -34,6 +34,7 @@ jobs:
           path: packages/contensis-cli
       - name: Build and package
         run: |
+          yarn cache clean
           yarn run bootstrap:ci
           yarn run build
           cd packages/contensis-cli
