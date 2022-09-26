@@ -131,6 +131,7 @@ class ContensisShell {
         'list components',
         'list models',
         'list keys',
+        'list webhooks',
         'create key',
         'remove key'
       );

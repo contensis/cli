@@ -12,6 +12,9 @@ export const LogMessages = {
       `\n${Logger.errorText('>>')} Press [TAB] for suggestions\n`,
     autocomplete: () => `\n${Logger.errorText('>>')} Available commands:`,
     unknownError: () => `Something went wrong...`,
+    fileOutput: (format = 'json', path?: string) =>
+      `Output ${format} file: ${Logger.infoText(path)}\n`,
+    noFileOutput: () => `No output written\n`,
   },
   command: {
     notKnown: (command: string) => `${command} is not known`,
@@ -120,5 +123,17 @@ export const LogMessages = {
     removed: (env: string, id: string) => `[${env}] Deleted API key "${id}"`,
     failedRemove: (env: string, id: string) =>
       `[${env}] Unable to delete API key "${id}"`,
+  },
+  webhooks: {
+    list: (env: string) => `[${env}] Webhook subscriptions:`,
+    noList: (env: string) => `[${env}] Cannot retrieve webhook subscriptions`,
+    created: (env: string, name: string) =>
+      `[${env}] Created Webhook subscription "${name}"`,
+    failedCreate: (env: string, name: string) =>
+      `[${env}] Unable to create Webhook subscription "${name}"`,
+    deleted: (env: string, id: string) =>
+      `[${env}] Deleted Webhook subscription "${id}"`,
+    failedDelete: (env: string, id: string) =>
+      `[${env}] Unable to delete Webhook subscription "${id}"`,
   },
 };

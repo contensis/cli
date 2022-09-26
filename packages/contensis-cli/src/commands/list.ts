@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
+import { format, output } from './globalOptions';
 
 // projects
 // content types
@@ -25,3 +26,15 @@ list.command('components').action(async () => {
 list.command('keys').action(async () => {
   await cliCommand(['list', 'keys']).PrintApiKeys();
 });
+list
+  .command('webhooks')
+  .argument('[name]', 'find webhooks matching the supplied name')
+  .option('-id --id <id...>', 'the subscription id(s) to get')
+  .addOption(format)
+  .addOption(output)
+  .action(async (name?: string, { id, format, output }: any = {}) => {
+    await cliCommand(['list', 'webhooks'], {
+      format,
+      output,
+    }).PrintWebhookSubscriptions(id, name);
+  });

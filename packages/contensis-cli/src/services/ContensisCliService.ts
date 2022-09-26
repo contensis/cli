@@ -15,6 +15,13 @@ import { logEntriesTable } from 'migratortron/dist/transformations/logging';
 import { entriesToCsv } from '~/csv';
 import { entriesToXml } from '~/xml';
 
+type OutputFormat = 'json' | 'csv' | 'xml';
+
+type OutputOptions = {
+  format?: OutputFormat;
+  output?: string;
+};
+
 class ContensisCli {
   static quit = (error?: Error) => {
     process.removeAllListeners('exit');
@@ -23,7 +30,7 @@ class ContensisCli {
 
   cache: SessionCache;
   contensis?: ContensisMigrationService;
-  contensisOpts: Partial<MigrateRequest> = {};
+  contensisOpts: Partial<MigrateRequest> | { id: string } = {};
   contentTypes?: ContentType[];
   components?: Component[];
   currentEnv: string;
@@ -40,6 +47,8 @@ class ContensisCli {
       }
     | undefined;
   private command: CliCommand;
+  private format?: OutputFormat;
+  private output?: string;
   private log = Logger;
   private messages = LogMessages;
   private session: SessionCacheProvider;
@@ -48,7 +57,11 @@ class ContensisCli {
   noun: string;
   thirdArg: string;
 
-  constructor(args: string[], contensisOpts: Partial<MigrateRequest> = {}) {
+  constructor(
+    args: string[],
+    outputOpts?: OutputOptions,
+    contensisOpts: Partial<MigrateRequest> | { id: string } = {}
+  ) {
     // console.log('args: ', JSON.stringify(args, null, 2));
 
     const [exe, script, verb = '', noun = '', ...restArgs] = args;
@@ -63,6 +76,9 @@ class ContensisCli {
     this.session = new SessionCacheProvider();
     this.cache = this.session.Get();
     this.contensisOpts = contensisOpts;
+    this.format = outputOpts?.format;
+    this.output =
+      outputOpts?.output && path.join(__dirname, '../../', outputOpts.output);
 
     const { currentEnvironment = '', environments = {} } = this.cache;
     const env = (this.env = environments[currentEnvironment]);
@@ -604,15 +620,11 @@ class ContensisCli {
   };
 
   GetEntries = async ({
-    format = 'json',
-    output,
     withDependents = false,
   }: {
-    format?: 'json' | 'csv' | 'xml';
-    output?: string;
     withDependents?: boolean;
   }) => {
-    const { currentProject, log, messages } = this;
+    const { currentProject, format, log, messages, output } = this;
     await this.ConnectContensis();
 
     if (this.contensis) {
@@ -621,21 +633,18 @@ class ContensisCli {
       const entries = await this.contensis.GetEntries({ withDependents });
 
       if (output) {
-        const localFilePath = path.join(__dirname, '../../', output);
         let writeString = '';
         if (format === 'csv') {
           writeString = entriesToCsv(entries);
         } else if (format === 'xml') {
           writeString = entriesToXml(entries);
         } else writeString = JSON.stringify(entries, null, 2);
-        // write entries to file
+        // write output to file
         if (writeString) {
-          fs.writeFileSync(localFilePath, writeString);
-          log.success(
-            `Output ${format} file: ${log.infoText(localFilePath)}\n`
-          );
+          fs.writeFileSync(output, writeString);
+          log.success(messages.app.fileOutput(format, output));
         } else {
-          log.info(`No output written\n`);
+          log.info(messages.app.noFileOutput());
         }
       } else {
         if (!format)
@@ -654,12 +663,85 @@ class ContensisCli {
       log.help(messages.connect.tip());
     }
   };
+
+  PrintWebhookSubscriptions = async (
+    subscriptionIds?: string[],
+    name?: string
+  ) => {
+    const { currentEnv, format, log, messages, output } = this;
+    if (!this.contensis) await this.ConnectContensis();
+    if (this.contensis) {
+      // Retrieve webhooks list for env
+      const [webhooksErr, webhooks] =
+        await this.contensis.subscriptions.webhooks.GetSubscriptions();
+
+      const filteredResults =
+        typeof name === 'string'
+          ? webhooks.filter(w =>
+              w.name?.toLowerCase().includes(name.toLowerCase())
+            )
+          : Array.isArray(subscriptionIds)
+          ? webhooks.filter(w => subscriptionIds?.some(id => id === w.id))
+          : webhooks;
+
+      if (Array.isArray(filteredResults)) {
+        if (output) {
+          let writeString = '';
+          if (format === 'csv') {
+            writeString = entriesToCsv(filteredResults as any);
+          } else if (format === 'xml') {
+            writeString = entriesToXml(filteredResults as any);
+          } else writeString = JSON.stringify(filteredResults, null, 2);
+          // write output to file
+          if (writeString) {
+            fs.writeFileSync(output, writeString);
+            log.success(messages.app.fileOutput(format, output));
+          } else {
+            log.info(messages.app.noFileOutput());
+          }
+        } else {
+          if (!format) {
+            // print the keys to console
+            log.success(messages.webhooks.list(currentEnv));
+            for (const {
+              id,
+              description,
+              method,
+              name,
+              version,
+              url,
+            } of filteredResults) {
+              console.log(
+                `  - ${name}${
+                  description ? ` (${description})` : ''
+                } [${version.modified.toString().substring(0, 10)} ${
+                  version.modifiedBy
+                }]`
+              );
+              console.log(`      ${id}`);
+              console.log(`      [${method}] ${url}`);
+            }
+            console.log('');
+          } else if (format === 'csv') {
+            log.info(entriesToCsv(filteredResults as any));
+          } else if (format === 'json')
+            log.info(JSON.stringify(filteredResults, null, 2));
+        }
+      }
+
+      if (webhooksErr) {
+        log.error(messages.webhooks.noList(currentEnv));
+        log.error(JSON.stringify(webhooksErr, null, 2));
+      }
+    }
+  };
 }
 
 export const cliCommand = (
   commandArgs: string[],
-  contensisOpts: Partial<MigrateRequest> = {}
+  outputOpts: OutputOptions = {},
+  contensisOpts: Partial<MigrateRequest> | { id: string } = {}
 ) => {
-  return new ContensisCli(['', '', ...commandArgs], contensisOpts);
+  return new ContensisCli(['', '', ...commandArgs], outputOpts, contensisOpts);
 };
 export default ContensisCli;

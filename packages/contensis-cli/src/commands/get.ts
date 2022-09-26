@@ -46,19 +46,24 @@ export const makeGetCommand = () => {
     .action(async (phrase: string, opts, cmd) => {
       // console.log('phrase: ', phrase, '\nopts:', JSON.stringify(opts, null, 2));
       // console.log('opts:', JSON.stringify(opts, null, 2));
-      await cliCommand(['get', 'entries'], {
-        query:
-          opts.id || phrase || opts.fields
-            ? {
-                fields: opts.fields,
-                includeIds: opts.id,
-                searchTerm: phrase,
-              }
-            : undefined,
-        zenQL: opts.zenql,
-      }).GetEntries({
-        format: opts.format,
-        output: opts.output,
+      await cliCommand(
+        ['get', 'entries'],
+        {
+          format: opts.format,
+          output: opts.output,
+        },
+        {
+          query:
+            opts.id || phrase || opts.fields
+              ? {
+                  fields: opts.fields,
+                  includeIds: opts.id,
+                  searchTerm: phrase,
+                }
+              : undefined,
+          zenQL: opts.zenql,
+        }
+      ).GetEntries({
         withDependents: opts.dependents,
       });
     });
