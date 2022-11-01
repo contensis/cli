@@ -23,7 +23,7 @@ rimraf('./dist', () => {
       platform: 'node',
       format: 'cjs',
       sourcemap: true,
-      target: 'node14',
+      target: 'node16',
       plugins: [globPlugin(), nodeExternalsPlugin()],
       watch: watch && {
         onRebuild(error) {
