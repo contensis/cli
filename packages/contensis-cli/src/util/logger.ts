@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import dateFormat from 'dateformat';
 import deepCleaner from 'deep-cleaner';
 import ProgressBar from 'progress';
-import { tryStringify } from './util';
+import { tryStringify } from '.';
 
 type LogMethod = (content: string) => void;
 type LogErrorMethod = (content: string, err?: any) => void;

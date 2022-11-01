@@ -1,5 +1,5 @@
 import commands from './commands';
-import { logError, Logger } from './logger';
+import { logError, Logger } from './util/logger';
 import ContensisCli from './services/ContensisCliService';
 // new ContensisCli(process.argv).DoCommandTasksAsync();
 

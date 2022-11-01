@@ -1,5 +1,4 @@
 import mergeWith from 'lodash/mergeWith';
-import merge from 'lodash/mergeWith';
 import { Logger } from './logger';
 
 export const tryParse = (str: string) => {
@@ -46,10 +45,10 @@ export const url = (alias: string, project: string) => {
 
 export const Logging = async (language = 'en-GB') => {
   const { LogMessages: defaultMessages } = await import(
-    `./localisation/en-GB.js`
+    `../localisation/en-GB.js`
   );
   const { LogMessages: localisedMessages } = await import(
-    `./localisation/${language}.js`
+    `../localisation/${language}.js`
   );
   return {
     messages: mergeWith(

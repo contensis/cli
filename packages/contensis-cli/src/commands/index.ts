@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { Logger } from '~/logger';
+import { Logger } from '~/util/logger';
 import { LIB_VERSION } from '~/version';
 import { connect } from './connect';
 import { create } from './create';

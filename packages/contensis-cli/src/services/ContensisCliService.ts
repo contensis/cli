@@ -8,12 +8,13 @@ import { isUuid, url } from '~/util';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import ContensisAuthService from './ContensisAuthService';
 import CredentialProvider from '~/providers/CredentialProvider';
-import { Logger } from '~/logger';
+import { Logger } from '~/util/logger';
 import { LogMessages } from '~/localisation/en-GB';
 import { ContensisMigrationService, MigrateRequest } from 'migratortron';
 import { logEntriesTable } from 'migratortron/dist/transformations/logging';
-import { entriesToCsv } from '~/csv';
-import { entriesToXml } from '~/xml';
+import { csvFormatter } from '~/util/csv.formatter';
+import { xmlFormatter } from '~/util/xml.formatter';
+import { jsonFormatter } from '~/util/json.formatter';
 
 type OutputFormat = 'json' | 'csv' | 'xml';
 
@@ -24,6 +25,7 @@ type OutputOptions = {
 
 class ContensisCli {
   static quit = (error?: Error) => {
+    console.log('called ContensisCli.quit()');
     process.removeAllListeners('exit');
     process.exit(error ? 1 : 0);
   };
@@ -78,7 +80,7 @@ class ContensisCli {
     this.contensisOpts = contensisOpts;
     this.format = outputOpts?.format;
     this.output =
-      outputOpts?.output && path.join(__dirname, '../../', outputOpts.output);
+      outputOpts?.output && path.join(process.cwd(), outputOpts.output);
 
     const { currentEnvironment = '', environments = {} } = this.cache;
     const env = (this.env = environments[currentEnvironment]);
@@ -330,16 +332,17 @@ class ContensisCli {
           currentProject: nextCurrentProject,
         };
 
-        // print the projects to console
         log.success(messages.projects.list());
-        for (const project of projects) {
-          console.log(
-            `  - ${nextCurrentProject === project.id ? '* ' : ''}[${
-              project.primaryLanguage
-            }] ${project.id}`
-          );
-        }
-        console.log('');
+        this.HandleFormattingAndOutput(projects, () => {
+          // print the projects to console
+          for (const project of projects) {
+            console.log(
+              `  - ${nextCurrentProject === project.id ? '* ' : ''}[${
+                project.primaryLanguage
+              }] ${project.id}`
+            );
+          }
+        });
 
         session.Update({
           environments: cache.environments,
@@ -436,30 +439,31 @@ class ContensisCli {
       const [keysErr, apiKeys] = await this.contensis.apiKeys.GetKeys();
 
       if (Array.isArray(apiKeys)) {
-        // print the keys to console
         log.success(messages.keys.list(currentEnv));
-        for (const {
-          id,
-          sharedSecret,
-          name,
-          description,
-          dateModified,
-          modifiedBy,
-        } of apiKeys) {
-          console.log(
-            `  - ${name}${
-              description ? ` (${description})` : ''
-            } [${dateModified.toString().substring(0, 10)} ${modifiedBy}]`
-          );
-          console.log(`      ${id}`);
-          console.log(`      ${sharedSecret}`);
-        }
-        console.log('');
+        this.HandleFormattingAndOutput(apiKeys, () => {
+          // print the keys to console
+          for (const {
+            id,
+            sharedSecret,
+            name,
+            description,
+            dateModified,
+            modifiedBy,
+          } of apiKeys) {
+            console.log(
+              `  - ${name}${
+                description ? ` (${description})` : ''
+              } [${dateModified.toString().substring(0, 10)} ${modifiedBy}]`
+            );
+            console.log(`      ${id}`);
+            console.log(`      ${sharedSecret}`);
+          }
+        });
       }
 
       if (keysErr) {
         log.error(messages.keys.noList(currentEnv));
-        log.error(JSON.stringify(keysErr, null, 2));
+        log.error(jsonFormatter(keysErr));
       }
     }
   };
@@ -533,15 +537,17 @@ class ContensisCli {
 
       if (Array.isArray(contentTypes)) {
         log.success(messages.contenttypes.list(currentProject));
-        for (const contentType of contentTypes) {
-          const fieldsLength = contentType.fields?.length || 0;
-          console.log(
-            `  - ${contentType.id} [${fieldsLength} field${
-              fieldsLength !== 1 ? 's' : ''
-            }]`
-          );
-        }
-        console.log('');
+        this.HandleFormattingAndOutput(contentTypes, () => {
+          // print the content types to console
+          for (const contentType of contentTypes) {
+            const fieldsLength = contentType.fields?.length || 0;
+            console.log(
+              `  - ${contentType.id} [${fieldsLength} field${
+                fieldsLength !== 1 ? 's' : ''
+              }]`
+            );
+          }
+        });
       }
     }
   };
@@ -561,15 +567,13 @@ class ContensisCli {
           log.success(
             messages.contenttypes.get(currentProject, contentType.id)
           );
-
-          // console.log(JSON.stringify(contentType, null, 2));
-          log.object(contentType);
+          // print the content type to console
+          this.HandleFormattingAndOutput(contentType, log.object);
         } else {
           log.error(
             messages.contenttypes.failedGet(currentProject, contentTypeId)
           );
         }
-        console.log('');
       }
     }
   };
@@ -583,21 +587,24 @@ class ContensisCli {
 
       if (Array.isArray(components)) {
         log.success(messages.components.list(currentProject));
-        for (const component of components) {
-          const fieldsLength = component.fields?.length || 0;
-          console.log(
-            `  - ${component.id} [${fieldsLength} field${
-              fieldsLength !== 1 ? 's' : ''
-            }]`
-          );
-        }
-        console.log('');
+
+        this.HandleFormattingAndOutput(components, () => {
+          // print the components to console
+          for (const component of components) {
+            const fieldsLength = component.fields?.length || 0;
+            console.log(
+              `  - ${component.id} [${fieldsLength} field${
+                fieldsLength !== 1 ? 's' : ''
+              }]`
+            );
+          }
+        });
       }
     }
   };
 
   PrintComponent = async (componentId: string) => {
-    const { currentProject, log, messages } = this;
+    const { currentProject, format, log, messages, output } = this;
     await this.GetContentTypes();
     if (this.contensis) {
       // Retrieve content types list for env
@@ -609,12 +616,11 @@ class ContensisCli {
         );
         if (component) {
           log.success(messages.components.get(currentProject, component.id));
-
-          log.object(component);
+          // print the component to console
+          this.HandleFormattingAndOutput(component, log.object);
         } else {
           log.error(messages.components.failedGet(currentProject, componentId));
         }
-        console.log('');
       }
     }
   };
@@ -629,35 +635,15 @@ class ContensisCli {
 
     if (this.contensis) {
       log.line();
-      // console.log('payload: ', JSON.stringify(this.contensis.payload, null, 2));
       const entries = await this.contensis.GetEntries({ withDependents });
-
-      if (output) {
-        let writeString = '';
-        if (format === 'csv') {
-          writeString = entriesToCsv(entries);
-        } else if (format === 'xml') {
-          writeString = entriesToXml(entries);
-        } else writeString = JSON.stringify(entries, null, 2);
-        // write output to file
-        if (writeString) {
-          fs.writeFileSync(output, writeString);
-          log.success(messages.app.fileOutput(format, output));
-        } else {
-          log.info(messages.app.noFileOutput());
-        }
-      } else {
-        if (!format)
-          logEntriesTable(
-            entries,
-            currentProject,
-            this.contensis.payload.query?.fields
-          );
-        else if (format === 'csv') {
-          log.info(entriesToCsv(entries));
-        } else if (format === 'json')
-          log.info(JSON.stringify(entries, null, 2));
-      }
+      this.HandleFormattingAndOutput(entries, () =>
+        // print the entries to console
+        logEntriesTable(
+          entries,
+          currentProject,
+          this.contensis?.payload.query?.fields
+        )
+      );
     } else {
       log.warning(messages.contenttypes.noList(currentProject));
       log.help(messages.connect.tip());
@@ -685,54 +671,69 @@ class ContensisCli {
           : webhooks;
 
       if (Array.isArray(filteredResults)) {
-        if (output) {
-          let writeString = '';
-          if (format === 'csv') {
-            writeString = entriesToCsv(filteredResults as any);
-          } else if (format === 'xml') {
-            writeString = entriesToXml(filteredResults as any);
-          } else writeString = JSON.stringify(filteredResults, null, 2);
-          // write output to file
-          if (writeString) {
-            fs.writeFileSync(output, writeString);
-            log.success(messages.app.fileOutput(format, output));
-          } else {
-            log.info(messages.app.noFileOutput());
+        this.HandleFormattingAndOutput(filteredResults, () => {
+          // print the keys to console
+          log.success(messages.webhooks.list(currentEnv));
+          for (const {
+            id,
+            description,
+            method,
+            name,
+            version,
+            url,
+          } of filteredResults) {
+            console.log(
+              `  - ${name}${
+                description ? ` (${description})` : ''
+              } [${version.modified.toString().substring(0, 10)} ${
+                version.modifiedBy
+              }]`
+            );
+            console.log(`      ${id}`);
+            console.log(`      [${method}] ${url}`);
           }
-        } else {
-          if (!format) {
-            // print the keys to console
-            log.success(messages.webhooks.list(currentEnv));
-            for (const {
-              id,
-              description,
-              method,
-              name,
-              version,
-              url,
-            } of filteredResults) {
-              console.log(
-                `  - ${name}${
-                  description ? ` (${description})` : ''
-                } [${version.modified.toString().substring(0, 10)} ${
-                  version.modifiedBy
-                }]`
-              );
-              console.log(`      ${id}`);
-              console.log(`      [${method}] ${url}`);
-            }
-            console.log('');
-          } else if (format === 'csv') {
-            log.info(entriesToCsv(filteredResults as any));
-          } else if (format === 'json')
-            log.info(JSON.stringify(filteredResults, null, 2));
-        }
+          console.log('');
+        });
       }
 
       if (webhooksErr) {
         log.error(messages.webhooks.noList(currentEnv));
-        log.error(JSON.stringify(webhooksErr, null, 2));
+        log.error(jsonFormatter(webhooksErr));
       }
+    }
+  };
+
+  HandleFormattingAndOutput = <T>(obj: T, logFn: (obj: T) => void) => {
+    const { format, log, messages, output } = this;
+    if (output) {
+      let writeString = '';
+      if (format === 'csv') {
+        writeString = csvFormatter(obj as any);
+      } else if (format === 'xml') {
+        writeString = xmlFormatter(obj as any);
+      } else writeString = jsonFormatter(obj);
+      // write output to file
+      if (writeString) {
+        fs.writeFileSync(output, writeString);
+        log.success(messages.app.fileOutput(format, output));
+      } else {
+        log.info(messages.app.noFileOutput());
+      }
+    } else {
+      if (!format) {
+        // print the object to console
+        logFn(obj);
+      } else if (format === 'csv') {
+        log.raw('');
+        log.raw(log.infoText(csvFormatter(obj)));
+      } else if (format === 'xml') {
+        log.raw('');
+        log.raw(log.infoText(xmlFormatter(obj)));
+      } else if (format === 'json') {
+        log.raw('');
+        log.raw(log.infoText(jsonFormatter(obj)));
+      }
+      log.raw('');
     }
   };
 }

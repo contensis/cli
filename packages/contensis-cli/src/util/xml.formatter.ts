@@ -1,9 +1,8 @@
 import xml2js from 'xml2js';
 import cleaner from 'deep-cleaner';
-import { Entry } from 'contensis-management-api/lib/models';
 import { Logger } from './logger';
 
-export const entriesToXml = (entries: Entry[]) => {
+export const xmlFormatter = <T>(entries: T | T[]) => {
   try {
     const cleanedEntries = cleaner(cleaner(entries, ['workflow']));
 

@@ -4,7 +4,7 @@ import clone from 'lodash/cloneDeep';
 import mergeWith from 'lodash/mergeWith';
 import unionBy from 'lodash/unionBy';
 import { isJson, tryParse, tryStringify } from '~/util';
-import { Logger } from '~/logger';
+import { Logger } from '~/util/logger';
 
 class SessionCacheProvider {
   private localFilePath: string;

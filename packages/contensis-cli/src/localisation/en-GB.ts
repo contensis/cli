@@ -1,4 +1,4 @@
-import { Logger } from '~/logger';
+import { Logger } from '~/util/logger';
 
 export const LogMessages = {
   app: {

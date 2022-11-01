@@ -1,6 +1,6 @@
 import keytar from 'keytar';
 import to from 'await-to-js';
-import { Logger } from '~/logger';
+import { Logger } from '~/util/logger';
 
 const SERVICE_NAME = 'contensis-cli';
 
