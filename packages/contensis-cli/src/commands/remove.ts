@@ -23,6 +23,13 @@ remove
   .command('key')
   .argument('<id>', 'the id of the API key to delete')
   .usage('<id>')
+  .addHelpText(
+    'after',
+    `
+Example call:
+  > remove key 4ceb9575-28d3-4d5b-a77b-5e5221e603dd
+`
+  )
   .action(async id => {
     await cliCommand(['remove', 'key', id]).RemoveApiKey(id);
     // if (success) await shell().start();

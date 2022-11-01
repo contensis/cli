@@ -18,7 +18,8 @@ export const login = new Command()
     'after',
     `
 Example call:
-  > login myuserid\n  -- or --\n  > login {clientId} -s {sharedSecret}`
+  > login myuserid\n  -- or --\n  > login {clientId} -s {sharedSecret}
+`
   )
   .action(async (user, password, opts) => {
     const token = await cliCommand(['login', user]).Login(user, {
