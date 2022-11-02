@@ -9,6 +9,7 @@ type SessionCache = {
 
 type EnvironmentCache = {
   lastUserId: string;
+  passwordFallback?: string;
   authToken?: string;
   currentProject?: string;
   projects: string[];

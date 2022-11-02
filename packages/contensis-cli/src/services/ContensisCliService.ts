@@ -120,9 +120,9 @@ class ContensisCli {
     log.success(messages.envs.found(envKeys.length));
     this.HandleFormattingAndOutput(envKeys, () => {
       // print the envKeys to console
-    for (const env of envKeys) {
-      console.log(`  - ${currentEnvironment === env ? '* ' : ''}${env}`);
-    }
+      for (const env of envKeys) {
+        console.log(`  - ${currentEnvironment === env ? '* ' : ''}${env}`);
+      }
     });
     if (envKeys.length === 0 || !currentEnvironment) {
       log.help(messages.envs.tip());
@@ -177,9 +177,12 @@ class ContensisCli {
     const isGuidId = userId && isUuid(userId);
 
     if (currentEnv && userId) {
-      const [credentialError, storedCredentials] = await new CredentialProvider(
-        userId,
-        currentEnv
+      const [credentialError, credentials] = await new CredentialProvider(
+        {
+          userId,
+          alias: currentEnv,
+        },
+        env.passwordFallback
       ).Init();
 
       if (credentialError) {
@@ -187,7 +190,7 @@ class ContensisCli {
         log.error(credentialError as any);
         return;
       }
-      const cachedPassword = storedCredentials?.current?.password;
+      const cachedPassword = credentials?.current?.password;
 
       if (cachedPassword) {
         this.contensis = new ContensisMigrationService({
@@ -232,15 +235,20 @@ class ContensisCli {
       const { cache, currentEnv, env } = this;
 
       if (currentEnv) {
-        const [credentialError, storedCredentials] =
-          await new CredentialProvider(userId, currentEnv).Init();
+        const [credentialError, credentials] = await new CredentialProvider(
+          { userId, alias: currentEnv },
+          inputPassword || sharedSecret
+        ).Init();
 
         if (credentialError) {
           // Log problem with Credential Provider
           log.error(credentialError as any);
           return;
         }
-        const cachedPassword = storedCredentials?.current?.password;
+
+        if (credentials.remarks.secure !== true)
+          messages.login.insecurePassword();
+        const cachedPassword = credentials?.current?.password;
 
         if (
           !sharedSecret &&
@@ -261,7 +269,7 @@ class ContensisCli {
         }
 
         if (sharedSecret || inputPassword || cachedPassword) {
-          const auth = new ContensisAuthService({
+          const authService = new ContensisAuthService({
             username: userId,
             password: inputPassword || cachedPassword,
             projectId: env?.currentProject || 'website',
@@ -270,27 +278,39 @@ class ContensisCli {
             clientSecret: sharedSecret,
           });
 
-          const [authError, bearerToken] = await to(auth.BearerToken());
+          const [authError, bearerToken] = await to(authService.BearerToken());
 
           // Login successful
           if (bearerToken) {
-            env.lastUserId = userId;
+            // Set env vars
             env.authToken = bearerToken;
+            env.lastUserId = userId;
+            env.passwordFallback =
+              credentials.remarks.secure !== true
+                ? credentials.current?.password
+                : undefined;
+
             if (!silent) {
               Logger.success(messages.login.success(currentEnv, userId));
               await this.PrintProjects();
             }
-            if (inputPassword) await storedCredentials.Save(inputPassword);
+            if (inputPassword) await credentials.Save(inputPassword);
           } else if (authError) {
             Logger.error(authError.toString());
-            env.lastUserId = '';
+            // Clear env vars
             env.authToken = '';
-            if (cachedPassword) {
-              // Remove any bad stored credential and trigger login again
-              await storedCredentials.Delete();
+            env.lastUserId = '';
+            env.passwordFallback = undefined;
+
+            // If the auth error was raised using a cached password
+            if (cachedPassword && credentials.remarks.secure) {
+              // Remove any bad stored credential and trigger login prompt again
+              await credentials.Delete();
               return await this.Login(userId, { password, sharedSecret });
             }
           }
+
+          // Persist env
           this.session.Update({
             environments: cache.environments,
           });

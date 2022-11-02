@@ -4,19 +4,29 @@ import { Logger } from '~/util/logger';
 
 const SERVICE_NAME = 'contensis-cli';
 
+interface Remarks {
+  secure: boolean;
+}
+
 class CredentialProvider {
   private serviceId: string;
   private userId: string = '';
+  private passwordFallback?: string;
 
   current: {
     account: string;
     password: string;
   } | null = null;
+  remarks: Remarks = { secure: true };
 
-  constructor(userId: string, alias?: string) {
+  constructor(
+    { userId, alias }: { userId: string; alias?: string },
+    passwordFallback?: string
+  ) {
     this.serviceId =
       typeof alias !== 'undefined' ? `${SERVICE_NAME}_${alias}` : SERVICE_NAME;
     this.userId = userId;
+    this.passwordFallback = passwordFallback;
   }
 
   Init = async (): Promise<[Error, CredentialProvider]> => {
@@ -29,11 +39,16 @@ class CredentialProvider {
         password: string;
       }[]
     ];
-    if (!err)
+    if (err && this.passwordFallback) {
+      this.current = { account: this.userId, password: this.passwordFallback };
+      this.remarks = { secure: false };
+    }
+    if (!err) {
       this.current =
         stored?.find(
           u => u?.account?.toLowerCase() === this.userId.toLowerCase()
         ) || null;
+    }
     return [err, this];
   };
 
@@ -47,19 +62,26 @@ class CredentialProvider {
   };
 
   Delete = async () => {
-    const [err] = await to(keytar.deletePassword(this.serviceId, this.userId));
+    if (this.passwordFallback) {
+      this.passwordFallback = undefined;
+      return true;
+    } else {
+      const [err] = await to(
+        keytar.deletePassword(this.serviceId, this.userId)
+      );
 
-    Logger.warning(`${this.serviceId} - invalid credentials removed`);
-    return err || true;
+      Logger.warning(`${this.serviceId} - invalid credentials removed`);
+      return err || true;
+    }
   };
 
-  GetPassword = async () => {
-    const [err, password] = await to(
-      keytar.getPassword(this.serviceId, this.userId)
-    );
+  // GetPassword = async () => {
+  //   const [err, password] = await to(
+  //     keytar.getPassword(this.serviceId, this.userId)
+  //   );
 
-    return err || password;
-  };
+  //   return err || password;
+  // };
 }
 
 export default CredentialProvider;

@@ -80,8 +80,11 @@ class ContensisShell {
 
     if (env?.lastUserId) {
       const [credsErr, creds] = await new CredentialProvider(
-        env.lastUserId,
-        currentEnvironment
+        {
+          userId: env.lastUserId,
+          alias: currentEnvironment,
+        },
+        env.passwordFallback
       ).Init();
       if (credsErr) {
         log.error(credsErr.message);
