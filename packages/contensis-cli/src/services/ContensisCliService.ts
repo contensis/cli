@@ -118,10 +118,12 @@ class ContensisCli {
     const { currentEnvironment, environments = {} } = this.cache;
     const envKeys = Object.keys(environments);
     log.success(messages.envs.found(envKeys.length));
+    this.HandleFormattingAndOutput(envKeys, () => {
+      // print the envKeys to console
     for (const env of envKeys) {
       console.log(`  - ${currentEnvironment === env ? '* ' : ''}${env}`);
     }
-    if (envKeys.length) console.log('');
+    });
     if (envKeys.length === 0 || !currentEnvironment) {
       log.help(messages.envs.tip());
     }

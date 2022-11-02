@@ -1,8 +1,9 @@
 import commands from './commands';
-import { logError, Logger } from './util/logger';
+import { logError } from './util/logger';
 import ContensisCli from './services/ContensisCliService';
 // new ContensisCli(process.argv).DoCommandTasksAsync();
 
+// This is the CLI part of the app
 const program = commands();
 program
   .parseAsync(process.argv)

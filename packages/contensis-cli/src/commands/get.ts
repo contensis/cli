@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { format, output } from './globalOptions';
+import { addGlobalOptions } from './globalOptions';
 
 export const makeGetCommand = () => {
   const program = new Command()
@@ -18,8 +18,6 @@ export const makeGetCommand = () => {
   program
     .command('contenttype')
     .argument('<contentTypeId>', 'the API id of the content type to get')
-    .addOption(format)
-    .addOption(output)
     .addHelpText(
       'after',
       `
@@ -35,8 +33,6 @@ Example call:
   program
     .command('component')
     .argument('<componentId>', 'the API id of the component to get')
-    .addOption(format)
-    .addOption(output)
     .addHelpText(
       'after',
       `
@@ -68,8 +64,6 @@ Example call:
       '-q, --zenql <zenql>',
       'get entries with a supplied ZenQL statement'
     )
-    .addOption(format)
-    .addOption(output)
     .addHelpText(
       'after',
       `
@@ -94,6 +88,9 @@ Example call:
         withDependents: opts.dependents,
       });
     });
+
+  addGlobalOptions(program);
+
   return program;
 };
 

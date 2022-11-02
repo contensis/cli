@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { format, output } from './globalOptions';
+import { addGlobalOptions } from './globalOptions';
 
 // projects
 // content types
@@ -11,6 +11,11 @@ import { format, output } from './globalOptions';
 
 export const list = new Command()
   .command('list')
+  // .hook('preAction', (t, a) => {
+  //   console.log('preAction list command');
+  //   console.log('args: ', a.args);
+  //   console.log('opts: ', a.opts());
+  // })
   .showHelpAfterError(true)
   .exitOverride();
 
@@ -23,20 +28,14 @@ Example call:
   > list envs
 `
   )
-  .action(() => {
-    cliCommand(['list', 'envs']).PrintEnvironments();
+  .action(opts => {
+    cliCommand(['list', 'envs'], opts).PrintEnvironments();
   });
-list
-  .command('projects')
-  .addOption(format)
-  .addOption(output)
-  .action(async opts => {
-    await cliCommand(['list', 'projects'], opts).PrintProjects();
-  });
+list.command('projects').action(async opts => {
+  await cliCommand(['list', 'projects'], opts).PrintProjects();
+});
 list
   .command('contenttypes')
-  .addOption(format)
-  .addOption(output)
   .addHelpText(
     'after',
     `
@@ -49,8 +48,6 @@ Example call:
   });
 list
   .command('components')
-  .addOption(format)
-  .addOption(output)
   .addHelpText(
     'after',
     `
@@ -63,8 +60,6 @@ Example call:
   });
 list
   .command('keys')
-  .addOption(format)
-  .addOption(output)
   .addHelpText(
     'after',
     `
@@ -79,11 +74,11 @@ list
   .command('webhooks')
   .argument('[name]', 'find webhooks matching the supplied name')
   .option('-id --id <id...>', 'the subscription id(s) to get')
-  .addOption(format)
-  .addOption(output)
   .action(async (name?: string, { id, format, output }: any = {}) => {
     await cliCommand(['list', 'webhooks'], {
       format,
       output,
     }).PrintWebhookSubscriptions(id, name);
   });
+
+addGlobalOptions(list);

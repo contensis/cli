@@ -31,8 +31,6 @@ const commands = () => {
   program.addCommand(set.copyInheritedSettings(program));
   program.addCommand(remove.copyInheritedSettings(program));
 
-  program;
-
   return program;
 };
 
