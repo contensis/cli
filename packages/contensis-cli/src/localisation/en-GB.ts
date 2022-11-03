@@ -47,7 +47,7 @@ export const LogMessages = {
     projects: () => `Available projects:`,
     noProjects: () => `Cannot retrieve projects list`,
     tip: () =>
-      `Introduce yourself with "login {username}" or "login {clientId} -s {secret}"`,
+      `Introduce yourself with "login {username}" or "login {clientId} -s {secret}" or by passing credentials as options with your command`,
   },
   login: {
     command: {

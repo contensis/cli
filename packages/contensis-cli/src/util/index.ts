@@ -1,6 +1,12 @@
 import mergeWith from 'lodash/mergeWith';
 import { Logger } from './logger';
 
+export const isSharedSecret = (str = '') =>
+  str.length > 80 && str.split('-').length === 3 ? str : undefined;
+
+export const isPassword = (str = '') =>
+  !isSharedSecret(str) ? str : undefined;
+
 export const tryParse = (str: string) => {
   try {
     return typeof str === 'object' ? str : JSON.parse(str);

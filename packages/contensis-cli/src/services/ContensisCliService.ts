@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import inquirer from 'inquirer';
 import to from 'await-to-js';
 import { Component, ContentType } from 'contensis-core-api';
-import { isUuid, url } from '~/util';
+import { isPassword, isSharedSecret, isUuid, url } from '~/util';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import ContensisAuthService from './ContensisAuthService';
 import CredentialProvider from '~/providers/CredentialProvider';
@@ -258,9 +258,9 @@ class ContensisCli {
   Login = async (
     userId: string,
     {
-      password = this.env.passwordFallback,
+      password = isPassword(this.env.passwordFallback),
       promptPassword = true,
-      sharedSecret,
+      sharedSecret = isSharedSecret(this.env.passwordFallback),
       silent = false,
     }: {
       password?: string;
@@ -290,12 +290,14 @@ class ContensisCli {
         if (credentials.remarks.secure !== true)
           log.warning(messages.login.insecurePassword());
 
-        const cachedPassword = credentials?.current?.password;
+        const cachedPassword = isPassword(credentials?.current?.password);
+        const cachedSecret = isSharedSecret(credentials?.current?.password);
 
         if (
           !sharedSecret &&
           !inputPassword &&
           !cachedPassword &&
+          !cachedSecret &&
           promptPassword
         ) {
           // Password prompt
@@ -310,14 +312,14 @@ class ContensisCli {
           ]));
         }
 
-        if (sharedSecret || inputPassword || cachedPassword) {
+        if (sharedSecret || cachedSecret || inputPassword || cachedPassword) {
           const authService = new ContensisAuthService({
             username: userId,
             password: inputPassword || cachedPassword,
             projectId: env?.currentProject || 'website',
             rootUrl: this.urls?.cms || '',
             clientId: userId,
-            clientSecret: sharedSecret,
+            clientSecret: sharedSecret || cachedSecret,
           });
 
           const [authError, bearerToken] = await to(authService.BearerToken());
@@ -337,6 +339,7 @@ class ContensisCli {
               await this.PrintProjects();
             }
             if (inputPassword) await credentials.Save(inputPassword);
+            if (sharedSecret) await credentials.Save(sharedSecret);
           } else if (authError) {
             Logger.error(authError.toString());
             // Clear env vars
@@ -345,7 +348,10 @@ class ContensisCli {
             env.passwordFallback = undefined;
 
             // If the auth error was raised using a cached password
-            if (cachedPassword && credentials.remarks.secure) {
+            if (
+              (cachedPassword || cachedSecret) &&
+              credentials.remarks.secure
+            ) {
               // Remove any bad stored credential and trigger login prompt again
               await credentials.Delete();
               return await this.Login(userId, { password, sharedSecret });
