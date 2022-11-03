@@ -47,7 +47,7 @@ export class Logger {
     // if (process.env.DEBUG === 'true') {
     const message = `${Logger.getPrefix()} ${Logger.warningText(
       `${Logger.isUserTerminal ? '⚠️ ' : '[WARN]'} ${content}`
-    )}`;
+    )}\n`;
     if (progress.active) progress.current.interrupt(message);
     else console.log(message);
     // }
@@ -146,7 +146,7 @@ export const logError: LogErrorFunc = (
     if ('data' in error)
       Logger.raw(`  ${Logger.infoText(tryStringify(error.data))}`);
   });
-  Logger.line();
+  //Logger.line();
   return null;
 };
 

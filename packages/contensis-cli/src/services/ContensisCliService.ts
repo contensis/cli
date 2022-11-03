@@ -185,7 +185,7 @@ class ContensisCli {
         env.passwordFallback
       ).Init();
 
-      if (credentialError) {
+      if (credentialError && !credentials.current) {
         // Log problem with Credential Provider
         log.error(credentialError as any);
         return;
@@ -240,14 +240,15 @@ class ContensisCli {
           inputPassword || sharedSecret
         ).Init();
 
-        if (credentialError) {
+        if (credentialError && !credentials.current) {
           // Log problem with Credential Provider
           log.error(credentialError as any);
           return;
         }
 
         if (credentials.remarks.secure !== true)
-          messages.login.insecurePassword();
+          log.warning(messages.login.insecurePassword());
+        
         const cachedPassword = credentials?.current?.password;
 
         if (

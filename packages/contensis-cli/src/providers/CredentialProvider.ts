@@ -17,7 +17,7 @@ class CredentialProvider {
     account: string;
     password: string;
   } | null = null;
-  remarks: Remarks = { secure: true };
+  remarks: Remarks = { secure: false };
 
   constructor(
     { userId, alias }: { userId: string; alias?: string },
@@ -41,9 +41,10 @@ class CredentialProvider {
     ];
     if (err && this.passwordFallback) {
       this.current = { account: this.userId, password: this.passwordFallback };
-      this.remarks = { secure: false };
+      // this.remarks = { secure: false };
     }
     if (!err) {
+      this.remarks = { secure: true };
       this.current =
         stored?.find(
           u => u?.account?.toLowerCase() === this.userId.toLowerCase()
@@ -57,8 +58,8 @@ class CredentialProvider {
       keytar.setPassword(this.serviceId, this.userId, password)
     );
 
-    Logger.info(`${this.serviceId} - credentials saved`);
-    return err || true;
+    if (!err) Logger.info(`${this.serviceId} - credentials saved`);
+    return err && !this.passwordFallback ? err : true;
   };
 
   Delete = async () => {

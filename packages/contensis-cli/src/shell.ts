@@ -79,21 +79,22 @@ class ContensisShell {
     const { currentEnvironment, env, log, messages } = this;
 
     if (env?.lastUserId) {
-      const [credsErr, creds] = await new CredentialProvider(
+      const [credsErr, credentials] = await new CredentialProvider(
         {
           userId: env.lastUserId,
           alias: currentEnvironment,
         },
         env.passwordFallback
       ).Init();
-      if (credsErr) {
+      if (credsErr && !credentials.current) {
         log.error(credsErr.message);
       }
-      if (creds.current) {
+      if (credentials.current) {
         if (this.firstStart) {
           const token = await cliCommand(['login', env.lastUserId]).Login(
             env.lastUserId,
             {
+              password: env.passwordFallback,
               promptPassword: false,
               silent: true,
             }

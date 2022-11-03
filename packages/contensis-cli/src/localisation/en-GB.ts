@@ -79,7 +79,7 @@ export const LogMessages = {
     success: (env: string, userId: string) =>
       `User ${userId} connected to ${env} successfully\n`,
     insecurePassword: () =>
-      `Could not connect to local keystore - your password could be stored unencrypted`,
+      `Could not connect to local keystore - your password could be stored unencrypted!`,
     noEnv: () => `No environment set, use "contensis connect {alias}" first`,
     noUserId: () => `No user id specified`,
   },
