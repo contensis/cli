@@ -15,18 +15,18 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '16.x'
-      - name: Install apt packages for build
-        # The app uses keytar package which requires libsecret and
-        # an unlocked keyring to be able to store passwords and login.
-        run:
-          ${PWD}/packages/contensis-cli/headless-setup.sh
-          # sudo apt-get update
-          # sudo apt-get install -y libsecret-1-0 dbus-x11 gnome-keyring
-          # export $(dbus-launch)
-          # dbus-launch
-          # gnome-keyring-daemon --start --daemonize --components=secrets
-          # echo 'random' | gnome-keyring-daemon -r -d --unlock
+          node-version: '18.x'
+      # - name: Install apt packages for build
+      #   # The app uses keytar package which requires libsecret and
+      #   # an unlocked keyring to be able to store passwords and login.
+      #   run:
+      #     ${PWD}/packages/contensis-cli/headless-setup.sh
+      #     # sudo apt-get update
+      #     # sudo apt-get install -y libsecret-1-0 dbus-x11 gnome-keyring
+      #     # export $(dbus-launch)
+      #     # dbus-launch
+      #     # gnome-keyring-daemon --start --daemonize --components=secrets
+      #     # echo 'random' | gnome-keyring-daemon -r -d --unlock
       - name: Get npm version
         id: npm-version
         uses: martinbeentjes/npm-get-version-action@main
@@ -39,7 +39,10 @@ jobs:
           yarn run build
           cd packages/contensis-cli
           npm pack
+      - name: Test running the cli
+        run: |
           npm i -g contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+          contensis-cli get entries -q "externalURL EXISTS" -a trial-006 -p leif2 -id e4376db2-ed3e-49d3-a799-a6ec733a3611 -s a8590f6b4630404186b72fea198d3c12-c6f1f565eb86428ea0170e1b4b8a4b7f-de88eb42e46c4d548a8c36f490f34866
           contensis-cli connect trial-006
           contensis-cli login zengenti 123456
       - name: Archive packaged artifacts
