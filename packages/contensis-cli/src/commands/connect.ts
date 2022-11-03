@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
+import { addAuthenticationOptions } from './globalOptions';
 
 export const connect = new Command()
   .command('connect')
@@ -12,7 +13,9 @@ export const connect = new Command()
 Example call:
   > connect example-dev`
   )
-  .action(async alias => {
-    await cliCommand(['connect', alias]).Connect(alias);
+  .action(async (alias, opts) => {
+    await cliCommand(['connect', alias], opts).Connect(alias);
     await shell().start();
   });
+
+addAuthenticationOptions(connect);

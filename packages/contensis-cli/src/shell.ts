@@ -94,7 +94,6 @@ class ContensisShell {
           const token = await cliCommand(['login', env.lastUserId]).Login(
             env.lastUserId,
             {
-              password: env.passwordFallback,
               promptPassword: false,
               silent: true,
             }

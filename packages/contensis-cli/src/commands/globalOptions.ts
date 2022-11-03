@@ -27,7 +27,7 @@ const sharedSecret = new Option(
   'the shared secret to use when logging in with a client id'
 );
 
-const addAuthenticationOptions = (program: Command) =>
+export const addAuthenticationOptions = (program: Command) =>
   program
     .addOption(user.hideHelp())
     .addOption(password.hideHelp())
