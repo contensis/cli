@@ -11,12 +11,11 @@ create
   .command('project')
   .argument('<projectId>', 'the project id to create')
   .usage('<projectId>')
-  .action(async projectId => {
-    const project = await cliCommand([
-      'create',
-      'project',
-      projectId,
-    ]).SetProject(projectId);
+  .action(async (projectId, opts) => {
+    const project = await cliCommand(
+      ['create', 'project', projectId],
+      opts
+    ).SetProject(projectId);
     if (project) await shell().start();
   });
 create
@@ -30,7 +29,10 @@ create
 Example call:
   > create key "my new key" "Created key for demonstration"\n`
   )
-  .action(async (name, description) => {
-    await cliCommand(['create', 'key', name]).CreateApiKey(name, description);
+  .action(async (name, description, opts) => {
+    await cliCommand(['create', 'key', name], opts).CreateApiKey(
+      name,
+      description
+    );
     // if (success) await shell().start();
   });

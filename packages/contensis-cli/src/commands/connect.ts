@@ -1,11 +1,12 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
-import { addAuthenticationOptions } from './globalOptions';
+import { project } from './globalOptions';
 
 export const connect = new Command()
   .command('connect')
   .argument('<alias>', 'the Contensis Cloud alias to connect with')
+  .addOption(project)
   .usage('<alias>')
   .addHelpText(
     'after',
@@ -17,5 +18,3 @@ Example call:
     await cliCommand(['connect', alias], opts).Connect(alias);
     await shell().start();
   });
-
-addAuthenticationOptions(connect);

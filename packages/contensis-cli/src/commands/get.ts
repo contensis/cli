@@ -1,6 +1,5 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { addGlobalOptions } from './globalOptions';
 
 export const makeGetCommand = () => {
   const program = new Command()
@@ -88,8 +87,6 @@ Example call:
         withDependents: opts.dependents,
       });
     });
-
-  addGlobalOptions(program);
 
   return program;
 };

@@ -11,12 +11,11 @@ remove
   .command('project')
   .argument('<projectId>', 'the project id to delete')
   .usage('<projectId>')
-  .action(async projectId => {
-    const project = await cliCommand([
-      'remove',
-      'project',
-      projectId,
-    ]).SetProject(projectId);
+  .action(async (projectId, opts) => {
+    const project = await cliCommand(
+      ['remove', 'project', projectId],
+      opts
+    ).SetProject(projectId);
     if (project) await shell().start();
   });
 remove
@@ -30,7 +29,6 @@ Example call:
   > remove key 4ceb9575-28d3-4d5b-a77b-5e5221e603dd
 `
   )
-  .action(async id => {
-    await cliCommand(['remove', 'key', id]).RemoveApiKey(id);
-    // if (success) await shell().start();
+  .action(async (id, opts) => {
+    await cliCommand(['remove', 'key', id], opts).RemoveApiKey(id);
   });

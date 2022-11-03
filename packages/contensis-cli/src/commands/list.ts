@@ -1,6 +1,5 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { addGlobalOptions } from './globalOptions';
 
 // projects
 // content types
@@ -80,5 +79,3 @@ list
       output,
     }).PrintWebhookSubscriptions(id, name);
   });
-
-addGlobalOptions(list);

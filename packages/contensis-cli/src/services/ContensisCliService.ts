@@ -23,9 +23,20 @@ type OutputOptions = {
   output?: string;
 };
 
+interface IConnectOptions extends IAuthOptions {
+  alias?: string;
+  projectId?: string;
+}
+
+interface IAuthOptions {
+  user?: string;
+  password?: string;
+  clientId?: string;
+  sharedSecret?: string;
+}
+
 class ContensisCli {
   static quit = (error?: Error) => {
-    console.log('called ContensisCli.quit()');
     process.removeAllListeners('exit');
     process.exit(error ? 1 : 0);
   };
@@ -61,7 +72,7 @@ class ContensisCli {
 
   constructor(
     args: string[],
-    outputOpts?: OutputOptions,
+    outputOpts?: OutputOptions & IConnectOptions,
     contensisOpts: Partial<MigrateRequest> | { id: string } = {}
   ) {
     // console.log('args: ', JSON.stringify(args, null, 2));
@@ -82,8 +93,31 @@ class ContensisCli {
     this.output =
       outputOpts?.output && path.join(process.cwd(), outputOpts.output);
 
-    const { currentEnvironment = '', environments = {} } = this.cache;
-    const env = (this.env = environments[currentEnvironment]);
+    const currentEnvironment =
+      outputOpts?.alias || this.cache.currentEnvironment || '';
+    const environments = this.cache.environments || {};
+
+    if (!currentEnvironment) this.env = {} as EnvironmentCache;
+    else if (!!environments[currentEnvironment])
+      this.env = environments[currentEnvironment];
+    else {
+      this.env = {
+        history: [],
+        lastUserId: '',
+        projects: [],
+        versionStatus: 'latest',
+      };
+    }
+
+    const env = this.env;
+
+    if (outputOpts?.projectId) env.currentProject = outputOpts.projectId;
+    if (outputOpts?.user) env.lastUserId = outputOpts.user;
+    if (outputOpts?.password) env.passwordFallback = outputOpts.password;
+    if (outputOpts?.clientId) env.lastUserId = outputOpts.clientId;
+    if (outputOpts?.sharedSecret)
+      env.passwordFallback = outputOpts.sharedSecret;
+
     this.currentEnv = currentEnvironment;
     this.currentProject = env?.currentProject || 'null';
 
@@ -98,19 +132,16 @@ class ContensisCli {
     };
 
     if (currentEnvironment) {
-      if (!env) {
-        environments[currentEnvironment] = {
-          history: [this.command],
-          lastUserId: '',
-          projects: [],
-          versionStatus: 'latest',
-        };
-      } else {
-        env.history = [this.command];
+      env.history = [this.command];
+      if (commandText) {
+        environments[currentEnvironment] = this.env;
+        this.session.Update({
+          currentEnvironment,
+          environments,
+          history: [commandText],
+        });
       }
     }
-    if (commandText)
-      this.session.Update({ environments, history: [commandText] });
   }
 
   PrintEnvironments = () => {
@@ -133,8 +164,18 @@ class ContensisCli {
     const { cache, log, messages, session } = this;
 
     if (environment) {
-      this.currentEnv = environment;
+      const envCache = cache.environments[environment];
+      if (!envCache)
+        cache.environments[environment] = {
+          versionStatus: 'published',
+          history: [],
+          lastUserId: '',
+          projects: [],
+          ...(!this.currentEnv ? this.env : {}),
+        };
+
       this.env = cache.environments[environment];
+      this.currentEnv = environment;
       this.urls = url(environment, 'website');
 
       const [fetchErr, response] = await to(fetch(this.urls.cms));
@@ -147,12 +188,12 @@ class ContensisCli {
         } else {
           log.warning(messages.projects.noList());
           log.help(messages.connect.tip());
-          cache.environments[environment] = {
-            versionStatus: 'published',
-            history: [],
-            lastUserId: '',
-            projects: [],
-          };
+          // cache.environments[environment] = {
+          //   versionStatus: 'published',
+          //   history: [],
+          //   lastUserId: '',
+          //   projects: [],
+          // };
         }
 
         session.Update({
@@ -217,7 +258,7 @@ class ContensisCli {
   Login = async (
     userId: string,
     {
-      password,
+      password = this.env.passwordFallback,
       promptPassword = true,
       sharedSecret,
       silent = false,
@@ -248,7 +289,7 @@ class ContensisCli {
 
         if (credentials.remarks.secure !== true)
           log.warning(messages.login.insecurePassword());
-        
+
         const cachedPassword = credentials?.current?.password;
 
         if (
@@ -763,7 +804,7 @@ class ContensisCli {
 
 export const cliCommand = (
   commandArgs: string[],
-  outputOpts: OutputOptions = {},
+  outputOpts: OutputOptions & IConnectOptions = {},
   contensisOpts: Partial<MigrateRequest> | { id: string } = {}
 ) => {
   return new ContensisCli(['', '', ...commandArgs], outputOpts, contensisOpts);
