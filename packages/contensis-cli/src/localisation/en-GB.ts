@@ -126,6 +126,16 @@ export const LogMessages = {
     failedRemove: (env: string, id: string) =>
       `[${env}] Unable to delete API key "${id}"`,
   },
+  blocks: {
+    list: (env: string) => `[${env}] Blocks:`,
+    noList: (env: string) => `[${env}] Cannot retrieve blocks`,
+    created: (env: string, name: string) => `[${env}] Created block "${name}"`,
+    failedCreate: (env: string, name: string) =>
+      `[${env}] Unable to create blockn "${name}"`,
+    deleted: (env: string, id: string) => `[${env}] Deleted block "${id}"`,
+    failedDelete: (env: string, id: string) =>
+      `[${env}] Unable to delete block "${id}"`,
+  },
   webhooks: {
     list: (env: string) => `[${env}] Webhook subscriptions:`,
     noList: (env: string) => `[${env}] Cannot retrieve webhook subscriptions`,

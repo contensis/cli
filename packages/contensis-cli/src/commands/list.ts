@@ -58,6 +58,18 @@ Example call:
     await cliCommand(['list', 'components'], opts).PrintComponents();
   });
 list
+  .command('blocks')
+  .addHelpText(
+    'after',
+    `
+Example call:
+  > list blocks
+`
+  )
+  .action(async opts => {
+    await cliCommand(['list', 'blocks'], opts).PrintBlocks();
+  });
+list
   .command('keys')
   .addHelpText(
     'after',

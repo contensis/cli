@@ -674,7 +674,7 @@ class ContensisCli {
   };
 
   PrintComponent = async (componentId: string) => {
-    const { currentProject, format, log, messages, output } = this;
+    const { currentProject, log, messages } = this;
     await this.GetContentTypes();
     if (this.contensis) {
       // Retrieve content types list for env
@@ -700,7 +700,7 @@ class ContensisCli {
   }: {
     withDependents?: boolean;
   }) => {
-    const { currentProject, format, log, messages, output } = this;
+    const { currentProject, log, messages } = this;
     await this.ConnectContensis();
 
     if (this.contensis) {
@@ -724,7 +724,7 @@ class ContensisCli {
     subscriptionIds?: string[],
     name?: string
   ) => {
-    const { currentEnv, format, log, messages, output } = this;
+    const { currentEnv, log, messages } = this;
     if (!this.contensis) await this.ConnectContensis();
     if (this.contensis) {
       // Retrieve webhooks list for env
@@ -773,6 +773,124 @@ class ContensisCli {
     }
   };
 
+  PrintBlocks = async () => {
+    const { currentEnv, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+    if (this.contensis) {
+      // Retrieve blocks list for env
+      const [err, blocks] = await this.contensis.blocks.GetBlocks();
+
+      if (Array.isArray(blocks)) {
+        this.HandleFormattingAndOutput(blocks, () => {
+          // print the blocks to console
+          log.success(messages.blocks.list(currentEnv));
+          for (const {
+            id,
+            description,
+            branches,
+            liveVersion,
+            madeLive,
+            versionsSinceLive,
+          } of blocks) {
+            console.log(
+              `  - ${id}${description ? ` (${description})` : ''}${
+                madeLive
+                  ? ` [${madeLive.toString().substring(0, 10)} v${liveVersion}]`
+                  : ''
+              }${
+                versionsSinceLive
+                  ? log.warningText(` +${versionsSinceLive}`)
+                  : ''
+              }`
+            );
+            for (const branch of branches)
+              console.log(
+                log.infoText(`      [${branch.id}]: ${branch.status}`)
+              );
+          }
+        });
+      }
+
+      if (err) {
+        log.error(messages.blocks.noList(currentEnv));
+        log.error(jsonFormatter(err));
+      }
+    }
+  };
+
+  PrintBlockVersion = async (
+    blockId: string,
+    branch: string,
+    version: string
+  ) => {
+    const { currentEnv, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+    if (this.contensis) {
+      // Retrieve block version
+      const [err, blockVersion] = await this.contensis.blocks.GetBlockVersion(
+        blockId,
+        branch,
+        version
+      );
+
+      if (blockVersion) {
+        this.HandleFormattingAndOutput(blockVersion, () => {
+          // print the version detail to console
+          log.success(messages.blocks.list(currentEnv));
+
+          console.log(
+            `  - ${blockVersion.id}${
+              blockVersion.status ? ` [${blockVersion.status}]` : ''
+            }`
+          );
+        });
+      }
+
+      if (err) {
+        log.error(messages.blocks.noList(currentEnv));
+        log.error(jsonFormatter(err));
+      }
+    }
+  };
+
+  PrintBlockLogs = async (
+    blockId: string,
+    branch: string,
+    version: string,
+    dataCenter: string
+  ) => {
+    const { currentEnv, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+    if (this.contensis) {
+      // Retrieve block logs
+      const [err, blockLogs] = await this.contensis.blocks.GetBlockLogs({
+        blockId,
+        branchId: branch,
+        version,
+        dataCenter,
+      });
+
+      if (blockLogs) {
+        this.HandleFormattingAndOutput(blockLogs, () => {
+          // print the  logs to console
+          log.success(messages.blocks.list(currentEnv));
+          console.log(
+            `  - ${blockId}${branch} ${
+              Number(version) ? `v${version}` : version
+            } [${dataCenter}]`
+          );
+          log.line();
+          console.log(log.infoText(blockLogs));
+          log.line();
+        });
+      }
+
+      if (err) {
+        log.error(messages.blocks.noList(currentEnv));
+        log.error(jsonFormatter(err));
+      }
+    }
+  };
   HandleFormattingAndOutput = <T>(obj: T, logFn: (obj: T) => void) => {
     const { format, log, messages, output } = this;
     if (output) {

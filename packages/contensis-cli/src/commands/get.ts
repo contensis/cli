@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import { Argument, Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 
 export const makeGetCommand = () => {
@@ -87,6 +87,67 @@ Example call:
         withDependents: opts.dependents,
       });
     });
+
+  const block = program.command('block');
+
+  block
+    .command('version')
+    .argument('[blockId]', 'the block to get version details for')
+    .argument(
+      '[branch]',
+      'the branch of the block to get version details for',
+      'main'
+    )
+    .argument(
+      '[version]',
+      'the version of the block pushed to the branch to get details for (default: latest)',
+      'latest'
+    )
+    .action(async (blockId: string, branch: string, version: string, opts) => {
+      await cliCommand(['get', 'block', 'version'], opts).PrintBlockVersion(
+        blockId,
+        branch,
+        version
+      );
+    });
+
+  const dataCenter = new Argument(
+    '[dataCenter]',
+    'the datacentre of the block to get logs for (default: hq)'
+  )
+    .choices(['hq', 'london', 'manchester'])
+    .default('hq');
+
+  block
+    .command('logs')
+    .argument('[blockId]', 'the block to get version logs for')
+    .argument(
+      '[branch]',
+      'the branch of the block to get version details for',
+      'main'
+    )
+    .argument(
+      '[version]',
+      'the version of the block pushed to the branch to get logs for (default: latest)',
+      'latest'
+    )
+    .addArgument(dataCenter)
+    .action(
+      async (
+        blockId: string,
+        branch: string,
+        version: string,
+        dataCenter: string,
+        opts
+      ) => {
+        await cliCommand(['get', 'block', 'logs'], opts).PrintBlockLogs(
+          blockId,
+          branch,
+          version,
+          dataCenter
+        );
+      }
+    );
 
   return program;
 };

@@ -127,19 +127,21 @@ class ContensisShell {
       availableCommands.push('login', 'list projects', 'set project');
     if (userId)
       availableCommands.push(
+        'get block logs',
+        'get block version',
         'get contenttype',
         'get component',
         'get entries',
+        'list blocks',
         'list contenttypes',
         'list components',
         'list models',
         'list keys',
         'list webhooks',
         'create key',
+        'push block',
         'remove key'
       );
-
-    // console.log(`availableCommands ${JSON.stringify(availableCommands)}`);
 
     const prompt = inquirer.createPromptModule();
     prompt.registerPrompt('command', inquirerPrompt);
@@ -151,10 +153,6 @@ class ContensisShell {
         autocompletePrompt: log.infoText(messages.app.autocomplete()),
         message: `${userId ? `${userId}@` : ''}${currentEnvironment || ''}>`,
         context: 0,
-        // onClose: () => {
-        //   // console.log('**in onClose**');
-        //   console.log('');
-        // },
         validate: (val: string) => {
           if (!val) this.emptyInputCounter++;
           if (this.emptyInputCounter > 1)
@@ -164,14 +162,11 @@ class ContensisShell {
             return true;
           }
         },
-
         prefix: `${env?.currentProject || 'contensis'}`,
         short: true,
       },
     ])
       .then(async (answers: { cmd: string }) => {
-        // console.log(JSON.stringify(answers, null, 2));
-
         if (answers.cmd === 'quit') {
           this.quit();
         } else {
