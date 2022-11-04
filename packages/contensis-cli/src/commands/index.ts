@@ -1,18 +1,19 @@
 import { Command } from 'commander';
 import { Logger } from '~/util/logger';
 import { LIB_VERSION } from '~/version';
-import { connect } from './connect';
-import { create } from './create';
+import { makeConnectCommand } from './connect';
+import { makeCreateCommand } from './create';
 import { makeGetCommand } from './get';
 import {
   addAuthenticationOptions,
   addConnectOptions,
   addGlobalOptions,
 } from './globalOptions';
-import { list } from './list';
-import { login } from './login';
-import { remove } from './remove';
-import { set } from './set';
+import { makeListCommand } from './list';
+import { makeLoginCommand } from './login';
+import { makePushCommand } from './push';
+import { makeRemoveCommand } from './remove';
+import { makeSetCommand } from './set';
 
 const commands = () => {
   const program = new Command()
@@ -29,19 +30,32 @@ const commands = () => {
     .showHelpAfterError(true);
 
   program.addCommand(
-    addAuthenticationOptions(connect).copyInheritedSettings(program)
+    addAuthenticationOptions(makeConnectCommand()).copyInheritedSettings(
+      program
+    )
+  );
+  program.addCommand(
+    addGlobalOptions(makeCreateCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(makeGetCommand()).copyInheritedSettings(program)
   );
-  program.addCommand(addGlobalOptions(list).copyInheritedSettings(program));
-  program.addCommand(addConnectOptions(login).copyInheritedSettings(program));
-  program.addCommand(addGlobalOptions(create).copyInheritedSettings(program));
-  program.addCommand(addConnectOptions(set).copyInheritedSettings(program));
   program.addCommand(
-    addConnectOptions(addAuthenticationOptions(remove)).copyInheritedSettings(
-      program
-    )
+    addGlobalOptions(makeListCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addConnectOptions(makeLoginCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addGlobalOptions(makePushCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addConnectOptions(
+      addAuthenticationOptions(makeRemoveCommand())
+    ).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addConnectOptions(makeSetCommand()).copyInheritedSettings(program)
   );
 
   return program;
