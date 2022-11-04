@@ -463,3 +463,59 @@ website t.durden@example-dev>
 ```
 
 Run `list keys` again and you will see your new API key has been removed from the list of keys
+
+## Manage Content Blocks
+
+You can manage blocks for any Contensis project using the following commands
+
+### List blocks
+
+```shell
+website t.durden@example-dev> list blocks
+[cli] ✅ [zenhub-dev] Blocks in project website:
+  - cli-test-block
+      [master]: running
+  - simple-block +9
+      [feature-test-feature-branch]: running
+      [master]: running
+
+website t.durden@example-dev>
+```
+
+### Get block
+
+```shell
+website t.durden@example-dev> get block simple-block master
+[cli] ✅ [zenhub-dev:contensis] Block versions:
+  v15 simple-block
+    state: available
+    released: [03/11/2022 17:06] zengenti
+    source:
+      commit: 16b04ecb
+      message: Update index.html
+      committed: [03/11/2022 17:03] b.macka@zengenti.com
+      pushed: [03/11/2022 17:04] Gitlab CI block push
+      https://gitlab.example-org.com/product-dev/simple-block/-/commit/16b04ecb
+    staging url: https://staging-example-dev.cloud.contensis.com?block-simple-block-versionstatus=released
+
+  v14 simple-block
+    state: stopped
+    released: [03/11/2022 17:01] zengenti
+    source:
+      commit: fbad8514
+      message: Added v16 to demo homepage
+      committed: [03/11/2022 16:57] b.macka@zengenti.com
+      pushed: [03/11/2022 16:58] Gitlab CI block push
+      https://gitlab.example-org.com/product-dev/simple-block/-/commit/fbad8514
+
+website t.durden@example-dev>
+```
+
+### Push block
+
+```shell
+website t.durden@example-dev> push block cli-test-block ghcr.io/contensis/contensis-app:build-4359 master --release --commit-id 9ee20333 --commit-message "chore: sample commit message" --commit-datetime 2022-11-03T22:34 --author-email b.macka@zengenti.com --committer-email b.macka@zengenti.com --repository-url https://github.com/contensis/contensis-app.git --provider GitlabSelfHosted
+[cli] ✅ [zenhub-dev] Created block "cli-test-block" in project contensis
+
+website t.durden@example-dev>
+```
