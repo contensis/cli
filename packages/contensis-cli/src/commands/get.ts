@@ -1,5 +1,6 @@
 import { Argument, Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
+import { addGlobalOptions } from './globalOptions';
 
 export const makeGetCommand = () => {
   const program = new Command()
@@ -88,10 +89,8 @@ Example call:
       });
     });
 
-  const block = program.command('block');
-
-  block
-    .command('version')
+  const block = program
+    .command('block')
     .argument('[blockId]', 'the block to get version details for')
     .argument(
       '[branch]',
@@ -100,11 +99,10 @@ Example call:
     )
     .argument(
       '[version]',
-      'the version of the block pushed to the branch to get details for (default: latest)',
-      'latest'
+      'get a specific version of the block pushed to the specified branch'
     )
     .action(async (blockId: string, branch: string, version: string, opts) => {
-      await cliCommand(['get', 'block', 'version'], opts).PrintBlockVersion(
+      await cliCommand(['get', 'block', 'version'], opts).PrintBlockVersions(
         blockId,
         branch,
         version
@@ -137,7 +135,7 @@ Example call:
         blockId: string,
         branch: string,
         version: string,
-        dataCenter: string,
+        dataCenter: 'hq' | 'manchester' | 'london',
         opts
       ) => {
         await cliCommand(['get', 'block', 'logs'], opts).PrintBlockLogs(

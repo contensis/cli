@@ -15,6 +15,8 @@ import { logEntriesTable } from 'migratortron/dist/transformations/logging';
 import { csvFormatter } from '~/util/csv.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
 import { jsonFormatter } from '~/util/json.formatter';
+import { PushBlockParams } from 'migratortron/dist/models/Contensis';
+import { printBlockVersion } from '~/util/console.printer';
 
 type OutputFormat = 'json' | 'csv' | 'xml';
 
@@ -62,8 +64,8 @@ class ContensisCli {
   private command: CliCommand;
   private format?: OutputFormat;
   private output?: string;
-  private log = Logger;
-  private messages = LogMessages;
+  log = Logger;
+  messages = LogMessages;
   private session: SessionCacheProvider;
 
   verb: string;
@@ -818,37 +820,74 @@ class ContensisCli {
     }
   };
 
-  PrintBlockVersion = async (
+  PrintBlockVersions = async (
     blockId: string,
     branch: string,
     version: string
   ) => {
-    const { currentEnv, log, messages } = this;
+    const { currentEnv, env, log, messages } = this;
     if (!this.contensis) await this.ConnectContensis();
     if (this.contensis) {
       // Retrieve block version
-      const [err, blockVersion] = await this.contensis.blocks.GetBlockVersion(
+      const [err, blocks] = await this.contensis.blocks.GetBlockVersions(
         blockId,
         branch,
         version
       );
 
-      if (blockVersion) {
-        this.HandleFormattingAndOutput(blockVersion, () => {
+      if (blocks) {
+        this.HandleFormattingAndOutput(blocks, () => {
           // print the version detail to console
-          log.success(messages.blocks.list(currentEnv));
-
-          console.log(
-            `  - ${blockVersion.id}${
-              blockVersion.status ? ` [${blockVersion.status}]` : ''
-            }`
+          log.success(
+            messages.blocks.get(`${currentEnv}:${env.currentProject}`)
           );
+          for (const block of blocks)
+            printBlockVersion(
+              this,
+              block,
+              !version
+                ? {
+                    showImage: false,
+                    showSource: true,
+                    showStaticPaths: false,
+                    showStatus: false,
+                  }
+                : undefined
+            );
         });
       }
 
       if (err) {
-        log.error(messages.blocks.noList(currentEnv));
+        log.error(messages.blocks.noList(currentEnv, env.currentProject));
         log.error(jsonFormatter(err));
+      }
+    }
+  };
+
+  PushBlock = async (block: PushBlockParams) => {
+    const { currentEnv, env, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+    if (this.contensis) {
+      // Push new block version
+      const [err, blockVersion] = await this.contensis.blocks.PushBlockVersion(
+        block
+      );
+
+      if (!err) {
+        log.success(
+          messages.blocks.pushed(block.id, currentEnv, env.currentProject)
+        );
+      }
+      if (blockVersion) {
+        this.HandleFormattingAndOutput(blockVersion, () => {
+          // print the version detail to console
+          printBlockVersion(this, blockVersion);
+        });
+      } else if (err) {
+        log.error(
+          messages.blocks.failedPush(block.id, currentEnv, env.currentProject),
+          err
+        );
       }
     }
   };
@@ -857,7 +896,7 @@ class ContensisCli {
     blockId: string,
     branch: string,
     version: string,
-    dataCenter: string
+    dataCenter: 'hq' | 'manchester' | 'london'
   ) => {
     const { currentEnv, log, messages } = this;
     if (!this.contensis) await this.ConnectContensis();
@@ -875,7 +914,7 @@ class ContensisCli {
           // print the  logs to console
           log.success(messages.blocks.list(currentEnv));
           console.log(
-            `  - ${blockId}${branch} ${
+            `  - ${blockId} ${branch} ${
               Number(version) ? `v${version}` : version
             } [${dataCenter}]`
           );
@@ -891,6 +930,7 @@ class ContensisCli {
       }
     }
   };
+
   HandleFormattingAndOutput = <T>(obj: T, logFn: (obj: T) => void) => {
     const { format, log, messages, output } = this;
     if (output) {

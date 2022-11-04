@@ -1,3 +1,4 @@
+import { BlockRunningStatus } from 'migratortron/dist/models/Contensis';
 import { Logger } from '~/util/logger';
 
 export const LogMessages = {
@@ -127,14 +128,35 @@ export const LogMessages = {
       `[${env}] Unable to delete API key "${id}"`,
   },
   blocks: {
-    list: (env: string) => `[${env}] Blocks:`,
-    noList: (env: string) => `[${env}] Cannot retrieve blocks`,
-    created: (env: string, name: string) => `[${env}] Created block "${name}"`,
-    failedCreate: (env: string, name: string) =>
-      `[${env}] Unable to create blockn "${name}"`,
-    deleted: (env: string, id: string) => `[${env}] Deleted block "${id}"`,
-    failedDelete: (env: string, id: string) =>
-      `[${env}] Unable to delete block "${id}"`,
+    runningStatus: (status: BlockRunningStatus | 'broken') => {
+      switch (status) {
+        case 'available':
+          return Logger.successText(status);
+        case 'pending':
+        case 'starting':
+        case 'stopped':
+          return Logger.warningText(status);
+        case 'degraded':
+        case 'faulted':
+        case 'broken':
+          return Logger.errorText(status);
+        default:
+          return Logger.infoText(status);
+      }
+    },
+    get: (env: string) => `[${env}] Block versions:`,
+    list: (env: string, projectId?: string) =>
+      `[${env}] Blocks in project ${projectId}:`,
+    noList: (env: string, projectId?: string) =>
+      `[${env}] Cannot retrieve blocks in project ${projectId}`,
+    pushed: (id: string, env: string, projectId?: string) =>
+      `[${env}] Created block "${id}" in project ${projectId}`,
+    failedPush: (id: string, env: string, projectId?: string) =>
+      `[${env}] Unable to create block "${id}" in project ${projectId}`,
+    deleted: (id: string, env: string, projectId?: string) =>
+      `[${env}] Deleted block "${id}" in project ${projectId}`,
+    failedDelete: (id: string, env: string, projectId?: string) =>
+      `[${env}] Unable to delete block "${id}" in project ${projectId}`,
   },
   webhooks: {
     list: (env: string) => `[${env}] Webhook subscriptions:`,

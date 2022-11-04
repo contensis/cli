@@ -127,8 +127,8 @@ class ContensisShell {
       availableCommands.push('login', 'list projects', 'set project');
     if (userId)
       availableCommands.push(
+        'get block',
         'get block logs',
-        'get block version',
         'get contenttype',
         'get component',
         'get entries',
