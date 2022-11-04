@@ -47,7 +47,7 @@ The shell is the preferred way to use the cli, if the package is installed to yo
    _|_|_|    _|_|    _|    _|      _|_|    _|_|_|  _|    _|  _|_|_|    _|  _|_|_|
 
 
-© 2001-2022 t.durden 🇬🇧.
+© 2001-2022 Zengenti 🇬🇧.
  - Creators of Contensis and purveyors of other fine software
 
 👋 Welcome to the contensis-cli
@@ -472,7 +472,7 @@ You can manage blocks for any Contensis project using the following commands
 
 ```shell
 website t.durden@example-dev> list blocks
-[cli] ✅ [zenhub-dev] Blocks in project website:
+[cli] ✅ [example-dev] Blocks in project website:
   - cli-test-block
       [master]: running
   - simple-block +9
@@ -486,7 +486,7 @@ website t.durden@example-dev>
 
 ```shell
 website t.durden@example-dev> get block simple-block master
-[cli] ✅ [zenhub-dev:contensis] Block versions:
+[cli] ✅ [example-dev:website] Block versions:
   v15 simple-block
     state: available
     released: [03/11/2022 17:06] zengenti
@@ -515,7 +515,7 @@ website t.durden@example-dev>
 
 ```shell
 website t.durden@example-dev> push block cli-test-block ghcr.io/contensis/contensis-app:build-4359 master --release --commit-id 9ee20333 --commit-message "chore: sample commit message" --commit-datetime 2022-11-03T22:34 --author-email b.macka@zengenti.com --committer-email b.macka@zengenti.com --repository-url https://github.com/contensis/contensis-app.git --provider GitlabSelfHosted
-[cli] ✅ [zenhub-dev] Created block "cli-test-block" in project contensis
+[cli] ✅ [example-dev] Created block "cli-test-block" in project website
 
 website t.durden@example-dev>
 ```
