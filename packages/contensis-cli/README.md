@@ -14,11 +14,34 @@ npm i contensis-cli --global
 contensis-cli connect example-dev
 ```
 
-The CLI uses the same commands and arguments as the shell. It is recommended you use and familiarise yourself with the cli via the shell and use the `contensis-cli` command to use the same cli commands in script-based context such as continuous deployment.
+The CLI uses the same commands and arguments as the shell. It is recommended you use and familiarise yourself with the cli via the shell and use the `contensis-cli` command to use the same cli commands in script-based context such as continuous integration.
+
+### Pass connection details anywhere
+
+If you need to, you can supply all the necessary options to connect to a Contensis project and perform an operation in a single command
+
+You can supply the following options with any command - although they don't appear in help text:
+
+```
+ --alias
+ --projectId
+ --user
+ --password
+ --clientId
+ --sharedSecret
+```
 
 ### Running headless?
 
-The required credentials to run commands are stored and read from a secret store `libsecret`. Without the secret store running and unlocked we receive an error `Cannot autolaunch D-Bus without X11 $DISPLAY`
+Most lightweight CI environments will likely not ship with the ability to easily load and unlock an encrypted keychain.
+
+In these environments you will see a warning message when using the cli with any credentials
+
+```shell
+  [WARN] Could not connect to local keystore - your password could be stored unencrypted!
+```
+
+~~The required credentials to run commands are stored and read from a secret store `libsecret`. Without the secret store running and unlocked we receive an error `Cannot autolaunch D-Bus without X11 $DISPLAY`~~
 
 ```shell
 sudo apt-get update && sudo apt-get install -y libsecret-1-0 dbus-x11 gnome-keyring
@@ -28,9 +51,9 @@ gnome-keyring-daemon --start --daemonize --components=secrets
 echo 'neil' | gnome-keyring-daemon -r -d --unlock
 ```
 
-Also, if you are running within a docker container, it requires `--cap-add=IPC_LOCK` option when running the container. Otherwise gnome-keyring-daemon will fail with: `gnome-keyring-daemon: Operation not permitted`
+~~Also, if you are running within a docker container, it requires `--cap-add=IPC_LOCK` option when running the container. Otherwise gnome-keyring-daemon will fail with: `gnome-keyring-daemon: Operation not permitted`~~
 
-An executable script is available to test: `contensis-cli-headless` you will need sudo access to install additional libraries with `apt-get`
+~~An executable script is available to test: `contensis-cli-headless` you will need sudo access to install additional libraries with `apt-get`~~
 
 # Contensis Shell
 
@@ -411,15 +434,17 @@ website t.durden@example-dev>
 
 ## Format output
 
-Results will usually default to JSON when saved with the `--output` flag.
-
 Override the output format with the `--format` or `-f` option.
 
-Availalabe options are: CSV and JSON (not yet implemented)
+Available options are: `json`, `xml` or `csv`
+
+The `--format` and `--output` options are available with most commands (check command `--help`)
+
+Output will normally default to JSON when saved with the `--output` flag.
 
 ## Manage API keys
 
-You can use a logged in cli or shell instance to manage API keys that are used to provide access to external application integrations
+You can use the cli or shell to manage API keys that are used to provide access to external application integrations
 
 ### List keys
 
