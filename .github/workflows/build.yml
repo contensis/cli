@@ -29,11 +29,11 @@ jobs:
 
       - name: Build and package
         run: |
-          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
           yarn cache clean --mirror
           yarn run bootstrap:ci
           yarn run build
           cd packages/contensis-cli
+          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
           npm pack
           npm i -g contensis-cli-$APP_VERSION.tgz
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
