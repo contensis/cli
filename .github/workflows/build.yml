@@ -11,19 +11,26 @@ jobs:
     # runs-on: self-hosted
     env:
       REGISTRY: ghcr.io
-      APP_IMAGE: $REGISTRY/$GITHUB_REPOSITORY/$GITHUB_REF_NAME/app
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set env variables
+        run: |
+          APP_IMAGE=$REGISTRY/$GITHUB_REPOSITORY/$GITHUB_REF_NAME/app
+          echo "APP_IMAGE=${APP_IMAGE}" >> $GITHUB_ENV
+
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: '18.x'
+
       - name: Get npm version
         id: npm-version
         uses: martinbeentjes/npm-get-version-action@main
         with:
           path: packages/contensis-cli
+
       - name: Build and package
         run: |
           yarn cache clean --mirror
@@ -32,12 +39,14 @@ jobs:
           cd packages/contensis-cli
           npm pack
           npm i -g contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+
       - name: Test running the cli
         run: |
           contensis-cli push block cli-test-block gitlab.zengenti.com:4567/internal-projects/migratortron-1000/master/app:latest master -r -cid 9ee20333 -cmsg "test message" -cdt 2022-11-03T22:34 -author n.flatley@zengenti.com -committer n.flatley@zengenti.com -repo https://gitlab.zengenti.com/Internal-Projects/migratortron-1000.git -pr GitlabSelfHosted -a zenhub-dev -p contensis -id 03c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 -s 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd46
           # contensis-cli get entries -q "externalURL EXISTS" -a trial-006 -p leif2 -id e4376db2-ed3e-49d3-a799-a6ec733a3611 -s a8590f6b4630404186b72fea198d3c12-c6f1f565eb86428ea0170e1b4b8a4b7f-de88eb42e46c4d548a8c36f490f34866
           contensis-cli connect trial-006
           contensis-cli login zengenti 123456
+
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -49,15 +58,17 @@ jobs:
             packages/contensis-cli/package.json
             packages/contensis-cli/README.md
             packages/contensis-cli/contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
-      - name: Log into registry $REGISTRY
+      - name: Log into container registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Docker image and push to container registry
         run: |
           docker pull $APP_IMAGE:latest || true
