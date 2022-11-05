@@ -16,7 +16,7 @@ export const makePushCommand = () => {
       '<image uri:tag>',
       'the uri and tag of the container image to push as a block (tag default: latest)'
     )
-    .argument('[branch]', 'the branch we are pushing to', 'main')
+    .argument('[branch]', 'the branch we are pushing to')
     .option(
       '-r, --release',
       'whether to release the pushed block version',
