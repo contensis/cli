@@ -11,14 +11,10 @@ jobs:
     # runs-on: self-hosted
     env:
       REGISTRY: ghcr.io
+      APP_IMAGE: ${{ env.REGISTRY }}/${{ github.repository }}/${{ github.ref_name }}/app
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set env variables
-        run: |
-          APP_IMAGE=$REGISTRY/$GITHUB_REPOSITORY/$GITHUB_REF_NAME/app
-          echo "APP_IMAGE=${APP_IMAGE}" >> $GITHUB_ENV
 
       - name: Use Node.js
         uses: actions/setup-node@v1
@@ -33,8 +29,6 @@ jobs:
 
       - name: Build and package
         run: |
-          pwd
-          ls
           yarn cache clean --mirror
           yarn run bootstrap:ci
           yarn run build
@@ -73,9 +67,7 @@ jobs:
 
       - name: Build Docker image and push to container registry
         run: |
-          pwd
-          ls
           docker pull ${{ env.APP_IMAGE }}:latest || true
           echo "{\"commitRef\":\"${{ github.sha }}\",\"pipelineIID\":\"null\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}\",\"buildNo\":\"${{ github.run_id }}\",\"branchName\":\"${{ github.ref_name }}\",\"registryImage\":\"${{ env.APP_IMAGE }}\"}" > version.json
-          docker build --force-rm --cache-from ${{ env.APP_IMAGE }}:latest -t ${{ env.APP_IMAGE }}:latest -f DockerFile .
+          docker build --force-rm --cache-from ${{ env.APP_IMAGE }}:latest -t ${{ env.APP_IMAGE }}:latest -f Dockerfile .
           docker push ${{ env.APP_IMAGE }}:latest
