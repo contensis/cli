@@ -866,6 +866,16 @@ class ContensisCli {
 
   PushBlock = async (block: PushBlockParams) => {
     const { currentEnv, env, log, messages } = this;
+
+    // Output request to console
+    messages.blocks.tryPush(
+      block.id,
+      block.source.branch,
+      currentEnv,
+      env.currentProject
+    );
+    console.log(jsonFormatter(block));
+
     if (!this.contensis) await this.ConnectContensis();
     if (this.contensis) {
       // Push new block version
@@ -874,7 +884,12 @@ class ContensisCli {
       );
       if (!err) {
         log.success(
-          messages.blocks.pushed(block.id, currentEnv, env.currentProject)
+          messages.blocks.pushed(
+            block.id,
+            block.source.branch,
+            currentEnv,
+            env.currentProject
+          )
         );
       }
       if (blockVersion) {

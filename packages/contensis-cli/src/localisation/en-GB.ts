@@ -149,10 +149,12 @@ export const LogMessages = {
       `[${env}] Blocks in project ${projectId}:`,
     noList: (env: string, projectId?: string) =>
       `[${env}] Cannot retrieve blocks in project ${projectId}`,
-    pushed: (id: string, env: string, projectId?: string) =>
-      `[${env}] Created block "${id}" in project ${projectId}`,
+    tryPush: (id: string, branch: string, env: string, projectId?: string) =>
+      `[${env}] Request to push block "${id}" in branch ${branch} in project ${projectId}`,
+    pushed: (id: string, branch: string, env: string, projectId?: string) =>
+      `[${env}] Pushed block "${id}" in branch ${branch} in project ${projectId}`,
     failedPush: (id: string, env: string, projectId?: string) =>
-      `[${env}] Unable to create block "${id}" in project ${projectId}`,
+      `[${env}] Unable to push block "${id}" in project ${projectId}`,
     deleted: (id: string, env: string, projectId?: string) =>
       `[${env}] Deleted block "${id}" in project ${projectId}`,
     failedDelete: (id: string, env: string, projectId?: string) =>
