@@ -6,9 +6,8 @@
   "homepage": "https://github.com/contensis/node-cli/tree/main/packages/contensis-cli#readme",
   "main": "dist/index.js",
   "bin": {
-    "contensis": "./shell.js",
-    "contensis-cli": "./cli.js",
-    "contensis-cli-headless": "./headless-setup.sh"
+    "contensis": "./cli.js",
+    "contensis-cli": "./cli.js"
   },
   "scripts": {
     "prestart": "npm run build",

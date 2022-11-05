@@ -1,6 +1,7 @@
 import commands from './commands';
 import { logError } from './util/logger';
 import ContensisCli from './services/ContensisCliService';
+import { jsonFormatter } from './util/json.formatter';
 // new ContensisCli(process.argv).DoCommandTasksAsync();
 
 // This is the CLI part of the app
@@ -11,7 +12,7 @@ program
     ContensisCli.quit();
   })
   .catch((err: any) => {
-    logError(err);
+    if (!err.name?.includes('CommanderError')) logError(err);
     ContensisCli.quit(err);
   });
 //.exitOverride(() => console.log('exit override!!!'));

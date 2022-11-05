@@ -1,19 +1,11 @@
 import { Argument, Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { addGlobalOptions } from './globalOptions';
 
 export const makeGetCommand = () => {
   const program = new Command()
     .command('get')
     .showHelpAfterError(true)
     .exitOverride();
-
-  program.command('tea').action(() => {
-    console.log('get tea');
-  });
-  program.command('coffee').action(() => {
-    console.log('get coffee');
-  });
 
   program
     .command('contenttype')
@@ -102,7 +94,7 @@ Example call:
       'get a specific version of the block pushed to the specified branch'
     )
     .action(async (blockId: string, branch: string, version: string, opts) => {
-      await cliCommand(['get', 'block', 'version'], opts).PrintBlockVersions(
+      await cliCommand(['get', 'block'], opts).PrintBlockVersions(
         blockId,
         branch,
         version
@@ -111,7 +103,7 @@ Example call:
 
   const dataCenter = new Argument(
     '[dataCenter]',
-    'the datacentre of the block to get logs for (default: hq)'
+    'the datacentre of the block to get logs for'
   )
     .choices(['hq', 'london', 'manchester'])
     .default('hq');
@@ -126,10 +118,11 @@ Example call:
     )
     .argument(
       '[version]',
-      'the version of the block pushed to the branch to get logs for (default: latest)',
+      'the version of the block pushed to the branch to get logs for',
       'latest'
     )
     .addArgument(dataCenter)
+    .usage('get block logs [blockId] [branch] [version] [dataCenter]')
     .action(
       async (
         blockId: string,

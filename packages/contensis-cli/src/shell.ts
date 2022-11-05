@@ -4,7 +4,7 @@ import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-command-prompt';
 import commands from './commands';
 import { LogMessages } from './localisation/en-GB';
-import { Logger } from './util/logger';
+import { logError, Logger } from './util/logger';
 import CredentialProvider from './providers/CredentialProvider';
 import ContensisCli, { cliCommand } from './services/ContensisCliService';
 import { Logging } from './util';
@@ -185,7 +185,7 @@ class ContensisShell {
           } catch (ex: any) {
             const str = ex.toString();
             if (!str.includes('CommanderError'))
-              log.error(`shell error: ${ex.toString()}`, ex.stack);
+              logError(ex, `shell error: ${ex.toString()}`);
           } finally {
             return this.contensisPrompt();
           }

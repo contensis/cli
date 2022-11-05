@@ -867,7 +867,6 @@ class ContensisCli {
   PushBlock = async (block: PushBlockParams) => {
     const { currentEnv, env, log, messages } = this;
     if (!this.contensis) await this.ConnectContensis();
-    console.log(process.env);
     if (this.contensis) {
       // Push new block version
       const [err, blockVersion] = await this.contensis.blocks.PushBlockVersion(
@@ -891,6 +890,7 @@ class ContensisCli {
         );
       }
     }
+    console.log(process.env);
   };
 
   PrintBlockLogs = async (

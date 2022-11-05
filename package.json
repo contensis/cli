@@ -13,7 +13,7 @@
   },
   "main": "packages/contensis-cli/dist/index.js",
   "bin": {
-    "contensis": "./packages/contensis-cli/shell.js",
+    "contensis": "./packages/contensis-cli/cli.js",
     "contensis-cli": "./packages/contensis-cli/cli.js"
   },
   "scripts": {
