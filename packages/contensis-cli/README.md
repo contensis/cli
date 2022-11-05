@@ -163,7 +163,7 @@ contensis t.durden@example-dev> list projects
 Or if you are not logged in you should be given useful tips
 
 ```shell
-contensis zenhub-dev> list projects
+contensis example-dev> list projects
 [cli]  ℹ  Introduce yourself with "login {username}" or "login {clientId} -s {secret}"
 ```
 
@@ -532,6 +532,24 @@ website t.durden@example-dev> get block simple-block master
       committed: [03/11/2022 16:57] b.macka@zengenti.com
       pushed: [03/11/2022 16:58] Gitlab CI block push
       https://gitlab.example-org.com/product-dev/simple-block/-/commit/fbad8514
+
+website t.durden@example-dev>
+```
+
+### Get block logs
+
+```shell
+website t.durden@example-dev> get block logs contensis-website master
+
+[cli] ✅ [example-dev] Blocks in project website:
+
+  - contensis-website master latest [hq]
+  -------------------------------------
+2022-11-04T14:36:28.137625120Z [launcher] startup file: ./start.website.example-dev.js - exists?: true
+2022-11-04T14:36:28.138080818Z [launcher set default] /usr/src/app/dist/server/start.website.example-dev.js
+2022-11-04T14:36:28.725514880Z
+2022-11-04T14:36:28.725610953Z Serving static assets from: "/dist/static/"
+2022-11-04T14:36:28.732830052Z HTTP server is listening @ port 3001
 
 website t.durden@example-dev>
 ```
