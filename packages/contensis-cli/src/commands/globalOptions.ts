@@ -16,7 +16,7 @@ const alias = new Option(
 );
 
 export const project = new Option(
-  '-p --projectId <projectId>',
+  '-p --project <projectId>',
   'the projectId to make your request with'
 );
 
@@ -29,11 +29,11 @@ const password = new Option(
   'the password to use to login with (optional/insecure)'
 );
 const clientId = new Option(
-  '-id --clientId <clientId>',
+  '-id --client-id <clientId>',
   'the clientId to authenticate your request with'
 );
 const sharedSecret = new Option(
-  '-s --sharedSecret <sharedSecret>',
+  '-s --shared-secret <sharedSecret>',
   'the shared secret to use when logging in with a client id'
 );
 

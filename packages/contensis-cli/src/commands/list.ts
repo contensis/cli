@@ -10,11 +10,6 @@ import { cliCommand } from '~/services/ContensisCliService';
 export const makeListCommand = () => {
   const list = new Command()
     .command('list')
-    // .hook('preAction', (t, a) => {
-    //   console.log('preAction list command');
-    //   console.log('args: ', a.args);
-    //   console.log('opts: ', a.opts());
-    // })
     .showHelpAfterError(true)
     .exitOverride();
 
@@ -84,7 +79,7 @@ Example call:
   list
     .command('webhooks')
     .argument('[name]', 'find webhooks matching the supplied name')
-    .option('-id --id <id...>', 'the subscription id(s) to get')
+    .option('-i --id <id...>', 'the subscription id(s) to get')
     .action(async (name?: string, { id, format, output }: any = {}) => {
       await cliCommand(['list', 'webhooks'], {
         format,

@@ -10,7 +10,7 @@ export const makeCreateCommand = () => {
 
   create
     .command('project')
-    .argument('<projectId>', 'the project id to create')
+    .argument('<projectId>', 'the id of the project to create')
     .usage('<projectId>')
     .action(async (projectId, opts) => {
       const project = await cliCommand(

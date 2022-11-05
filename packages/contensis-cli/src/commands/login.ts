@@ -11,7 +11,7 @@ export const makeLoginCommand = () => {
       'the password to use to login with (optional/insecure)'
     )
     .option(
-      '-s --sharedSecret <sharedSecret>',
+      '-s --shared-secret <sharedSecret>',
       'the shared secret to use when logging in with a client id'
     )
     .usage('<user/clientId> [password] [-s <sharedSecret>]')
