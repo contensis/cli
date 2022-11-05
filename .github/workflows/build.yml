@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # runs-on: self-hosted
+    env:
+      REGISTRY: ghcr.io
+      APP_IMAGE: $REGISTRY/$GITHUB_REPOSITORY/$GITHUB_REF_NAME/app
 
     steps:
       - uses: actions/checkout@v2
@@ -16,17 +19,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '18.x'
-      # - name: Install apt packages for build
-      #   # The app uses keytar package which requires libsecret and
-      #   # an unlocked keyring to be able to store passwords and login.
-      #   run:
-      #     ${PWD}/packages/contensis-cli/headless-setup.sh
-      #     # sudo apt-get update
-      #     # sudo apt-get install -y libsecret-1-0 dbus-x11 gnome-keyring
-      #     # export $(dbus-launch)
-      #     # dbus-launch
-      #     # gnome-keyring-daemon --start --daemonize --components=secrets
-      #     # echo 'random' | gnome-keyring-daemon -r -d --unlock
       - name: Get npm version
         id: npm-version
         uses: martinbeentjes/npm-get-version-action@main
@@ -57,3 +49,18 @@ jobs:
             packages/contensis-cli/package.json
             packages/contensis-cli/README.md
             packages/contensis-cli/contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry $REGISTRY
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: $REGISTRY
+          username: $GITHUB_TRIGGERING_ACTOR
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker image and push to container registry
+        run: |
+          docker pull $APP_IMAGE:latest || true
+          echo "{\"commitRef\":\"$GITHUB_SHA\",\"pipelineIID\":\"null\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/$GITHUB_RUN_ID\",\"buildNo\":\"$GITHUB_RUN_ID\",\"branchName\":\"$GITHUB_REF_NAME\",\"registryImage\":\"$APP_IMAGE\"}" > version.json
+          docker build --force-rm --cache-from $APP_IMAGE:latest -t $APP_IMAGE:latest -f DockerFile .
+          docker push ${{ env.APP_IMAGE }}:latest
