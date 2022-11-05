@@ -33,6 +33,7 @@ jobs:
 
       - name: Build and package
         run: |
+          pwd
           yarn cache clean --mirror
           yarn run bootstrap:ci
           yarn run build
@@ -71,6 +72,7 @@ jobs:
 
       - name: Build Docker image and push to container registry
         run: |
+          pwd
           docker pull ${{ env.APP_IMAGE }}:latest || true
           echo "{\"commitRef\":\"${{ github.sha }}\",\"pipelineIID\":\"null\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}\",\"buildNo\":\"${{ github.run_id }}\",\"branchName\":\"${{ github.ref_name }}\",\"registryImage\":\"${{ env.APP_IMAGE }}\"}" > version.json
           docker build --force-rm --cache-from ${{ env.APP_IMAGE }}:latest -t ${{ env.APP_IMAGE }}:latest -f DockerFile .
