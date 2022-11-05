@@ -38,4 +38,4 @@ RUN npx link .; exit 0
 # add our ./node_modules/.bin folder to PATH
 ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 # call the executable
-ENTRYPOINT [ "contensis" ]
+CMD [ "/usr/src/app/node_modules/.bin/contensis" ]
