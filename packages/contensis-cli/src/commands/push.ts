@@ -1,4 +1,6 @@
 import { Command } from 'commander';
+import mapJson from 'jsonpath-mapper';
+import { PushBlockParams } from 'migratortron/dist/models/Contensis';
 import { cliCommand } from '~/services/ContensisCliService';
 
 export const makePushCommand = () => {
@@ -57,28 +59,59 @@ Example call:
     )
     .action(async (blockId: string, imageUri: string, branch: string, opts) => {
       const cli = cliCommand(['push', 'block', blockId], opts);
-      const lastIndexOfColon = imageUri.lastIndexOf(':');
-      await cli.PushBlock({
-        autoRelease: opts.release,
-        id: blockId,
-        image: {
-          uri: imageUri.slice(0, lastIndexOfColon),
-          tag: imageUri.slice(lastIndexOfColon + 1) || 'latest',
+      const mapSourceVars = {
+        blockId,
+        imageUri,
+        branch,
+        ...opts,
+        ...process.env,
+      };
+
+      const blockRequest = mapJson(mapSourceVars, {
+        autoRelease: ['release'],
+        id: ['blockId'],
+        image: () => {
+          const lastIndexOfColon = imageUri.lastIndexOf(':');
+          return {
+            uri: imageUri.slice(0, lastIndexOfColon),
+            tag: imageUri.slice(lastIndexOfColon + 1) || 'latest',
+          };
         },
-        projectId: cli.env.currentProject || '',
+        projectId: () => cli.env.currentProject || '',
         source: {
-          provider: opts.provider,
-          repositoryUrl: opts.repositoryUrl,
-          branch,
+          provider: {
+            $path: ['provider'],
+            $return: (provider: string, { GITHUB_ACTIONS, GITLAB_CI }) => {
+              if (provider) return provider;
+              if (GITHUB_ACTIONS) return 'Github';
+              else if (GITLAB_CI) return 'GitlabSelfHosted';
+            },
+          },
+          repositoryUrl: {
+            $path: ['repositoryUrl', 'CI_PROJECT_URL', 'GITHUB_REPOSITORY'],
+            $formatting: (url: string, { GITHUB_ACTIONS }) => {
+              if (GITHUB_ACTIONS) url = `https://github.com/${url}`;
+
+              if (url && !url.endsWith('.git')) return `${url}.git`;
+              return url;
+            },
+          },
+          branch: ['branch', 'CI_COMMIT_REF_NAME', 'GITHUB_REF_NAME'],
           commit: {
-            id: opts.commitId,
-            message: opts.commitMessage,
-            dateTime: opts.commitDatetime,
-            authorEmail: opts.authorEmail,
-            committerEmail: opts.committerEmail,
+            id: ['commitId', 'CI_COMMIT_SHORT_SHA', 'GITHUB_SHA'],
+            message: ['commitMessage', 'CI_COMMIT_MESSAGE'], // ${{ github.event.head_commit.message }}
+            dateTime: ['commitDatetime', 'CI_COMMIT_TIMESTAMP'], // ${{ github.event.head_commit.timestamp }}
+            authorEmail: ['authorEmail', 'GITLAB_USER_EMAIL', 'GITHUB_ACTOR'], // ${{ github.event.head_commit.author.email }}
+            committerEmail: [
+              'committerEmail',
+              'GITLAB_USER_EMAIL',
+              'GITHUB_TRIGGERING_ACTOR',
+            ], // ${{ github.event.head_commit.committer.email }}
           },
         },
-      });
+      }) as PushBlockParams;
+
+      await cli.PushBlock(blockRequest);
     });
 
   return push;
