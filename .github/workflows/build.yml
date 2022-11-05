@@ -11,7 +11,7 @@ jobs:
     # runs-on: self-hosted
     env:
       REGISTRY: ghcr.io
-      APP_IMAGE: ${{ env.REGISTRY }}/${{ github.repository }}/${{ github.ref_name }}/app
+      APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
 
     steps:
       - uses: actions/checkout@v2
