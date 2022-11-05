@@ -890,7 +890,6 @@ class ContensisCli {
         );
       }
     }
-    console.log(process.env);
   };
 
   PrintBlockLogs = async (

@@ -112,6 +112,8 @@ Example call:
       }) as PushBlockParams;
 
       await cli.PushBlock(blockRequest);
+
+      // console.log(process.env);
     });
 
   return push;
