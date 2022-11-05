@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # runs-on: self-hosted
+
     env:
       REGISTRY: ghcr.io
       APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
@@ -20,12 +21,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '18.x'
-
-      - name: Get npm version
-        id: npm-version
-        uses: martinbeentjes/npm-get-version-action@main
-        with:
-          path: packages/contensis-cli
 
       - name: Build and package
         run: |
@@ -48,26 +43,19 @@ jobs:
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: contensis-cli-${{ steps.npm-version.outputs.current-version}}
+          name: contensis-cli-${{ env.APP_VERSION }}
           path: |
-            packages/contensis-cli/dist
-            packages/contensis-cli/cli.js
-            packages/contensis-cli/shell.js
-            packages/contensis-cli/package.json
-            packages/contensis-cli/README.md
-            packages/contensis-cli/contensis-cli-${{ steps.npm-version.outputs.current-version}}.tgz
+            packages/contensis-cli/contensis-cli-${{ env.APP_VERSION }}.tgz
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
-      - name: Log into container registry
+      - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        uses: docker/login-action@2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Docker image and push to container registry
+      - name: Build Docker image and push to ${{ env.APP_IMAGE }}:latest
         run: |
           docker pull ${{ env.APP_IMAGE }}:latest || true
           echo "{\"commitRef\":\"${{ github.sha }}\",\"pipelineIID\":\"null\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}\",\"buildNo\":\"${{ github.run_id }}\",\"branchName\":\"${{ github.ref_name }}\",\"registryImage\":\"${{ env.APP_IMAGE }}\"}" > version.json
