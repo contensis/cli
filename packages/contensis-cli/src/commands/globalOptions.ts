@@ -16,7 +16,7 @@ const alias = new Option(
 );
 
 export const project = new Option(
-  '-p --project <projectId>',
+  '-p --project-id <projectId>',
   'the projectId to make your request with'
 );
 
