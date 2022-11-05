@@ -7,7 +7,6 @@ COPY lerna.json .
 COPY .yarn .yarn
 COPY .yarnrc .
 COPY yarn.lock .
-COPY patches patches
 COPY packages/contensis-cli/esbuild.config.js .
 COPY packages/contensis-cli/package.json .
 COPY packages/contensis-cli/package-lock.json .
@@ -27,12 +26,12 @@ WORKDIR /usr/src/app
 COPY packages/contensis-cli/package.json .
 COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/cli.js .
-COPY packages/contensis-cli/shell.js .
-# copy ./dist folder from builder container
-COPY --from=builder /usr/src/app/dist dist
+COPY packages/contensis-cli/patches patches
 # adds almost 100MB to the container
 RUN npm install --production --loglevel error
 RUN npm run postinstall
+# copy ./dist folder from builder container
+COPY --from=builder /usr/src/app/dist dist
 # npx link will create the npm binaries in /node_modules/.bin
 # exit 0 allows the script to bypass errors with creating symlinks
 RUN npx link .; exit 0
