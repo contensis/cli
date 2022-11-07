@@ -63,7 +63,7 @@ jobs:
           docker push ${{ env.APP_IMAGE }}:latest
 
       - name: Push block to Contensis
-        uses: ./.github/actions/contensis-cli.yml
+        uses: ./.github/actions/contensis-cli
         # uses: contensis/cli-action@v1
         with:
           block-id: node-cli-ci-block
