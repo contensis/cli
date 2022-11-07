@@ -30,13 +30,15 @@ inputs:
     required: false
     default: false
 runs:
-  using: 'docker'
-  image: ghcr.io/contensis/node-cli/main/app:latest
-  pre-entrypoint: contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
-  entrypoint: |
-    if [ -z ${{ inputs.block-id }} ]
-    then
-      contensis push block ${{ inputs.block-id }} ${{ inputs.image-uri }} --branch ${{ github.ref_name }} ${{ inputs.auto-release && ' --release' }} --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
-    else
-      contensis ${{ inputs.command }}
-    fi
+  using: 'composite'
+  steps:
+    run: |
+      docker pull ghcr.io/contensis/node-cli/main/app:latest
+      touch environments.json
+      docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
+      if [ -z ${{ inputs.block-id }} ]
+      then
+        docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest contensis push block ${{ inputs.block-id }} ${{ inputs.image-uri }} --branch ${{ github.ref_name }} ${{ inputs.auto-release && ' --release' }} --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
+      else
+        docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest contensis ${{ inputs.command }}
+      fi
