@@ -37,12 +37,10 @@ runs:
       run: touch environments.json
     - name: Pull Contensis CLI docker image and run commands
       uses: docker://ghcr.io/contensis/node-cli/main/app:latest
-    - name: Connect to Contensis run commands
-      shell: bash
-      run: docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json ghcr.io/contensis/node-cli/main/app:latest contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
-    - name: Run Contensis commands
+    - name: Connect to Contensis and run command
       shell: bash
       run: |
+        docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json ghcr.io/contensis/node-cli/main/app:latest contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
         if [ -n ${{ inputs.block-id }} ]
         then
           docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json ghcr.io/contensis/node-cli/main/app:latest contensis push block ${{ inputs.block-id }} ${{ inputs.image-uri }} ${{ github.ref_name }}${{ inputs.auto-release && ' --release' }} --provider Github --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
