@@ -23,12 +23,12 @@ If you need to, you can supply all the necessary options to connect to a Contens
 You can supply the following options with any command - although they don't appear in help text:
 
 ```
- --alias
- --projectId
- --user
- --password
- --clientId
- --sharedSecret
+ -a  --alias
+ -p  --project-id
+ -u  --user
+ -pw --password
+ -id --client-id
+ -s  --shared-secret
 ```
 
 ### Running headless?
@@ -561,4 +561,71 @@ website t.durden@example-dev> push block cli-test-block ghcr.io/contensis/conten
 [cli] ✅ [example-dev] Created block "cli-test-block" in project website
 
 website t.durden@example-dev>
+```
+
+## Use in Docker
+
+Running the container with the `-it` docker options will launch a shell session
+
+```bash
+docker pull ghcr.io/contensis/node-cli/main/app:latest
+docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest
+```
+
+### Run cli commands
+
+Add the cli command and any options after the container image in the `docker run` command e.g.
+
+```bash
+docker run --rm ghcr.io/contensis/node-cli/main/app:latest get entries "test"
+```
+
+### Persist connections to a local file
+
+To use the cli container for multiple commands or to save connections for future sessions, map a volume to the docker container
+
+<aside>
+⚠️ Ensure a file called `environments.json` exists before mapping the volume to the docker container. If it doesn’t exist, create this empty file first.
+
+</aside>
+
+Linux
+
+```bash
+touch environments.json
+docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+```
+
+Windows
+
+```powershell
+echo {} > environments.json
+docker run --rm -v ${PWD}/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+```
+
+## Use in GitLab CI
+
+```yaml
+push-to-contensis-block:
+  stage: push-to-contensis
+  only:
+    - master
+  image: ghcr.io/contensis/node-cli/main/app:latest
+  script:
+    # - contensis connect zenhub-dev --project-id migratortron --client-id 02c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 --shared-secret 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd26
+    - contensis push block example-website-block $APP_IMAGE:latest --release -a example-dev -p website -id 02c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 -s 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd26
+```
+
+## Use in GitHub CI
+
+```yaml
+- name: Push block to Contensis
+  uses: contensis/cli-action@v1
+  with:
+    block-id: example-website-block
+    # auto-release: true
+    alias: zenhub-dev
+    project-id: contensis
+    client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
+    shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
 ```
