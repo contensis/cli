@@ -74,3 +74,13 @@ jobs:
           project-id: contensis
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
+
+      - name: Get entries from Contensis
+        uses: ./.github/actions/contensis-cli
+        # uses: contensis/cli-action@v1
+        with:
+          command: get entries
+          alias: zenhub-dev
+          project-id: migratortron
+          client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
+          shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
