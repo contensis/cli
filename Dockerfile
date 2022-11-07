@@ -1,6 +1,7 @@
 FROM mhart/alpine-node:latest as builder
 
 RUN apk add --no-cache libsecret-dev
+RUN npm install -g npm
 WORKDIR /usr/src/app
 COPY package.json .
 COPY lerna.json .
@@ -21,6 +22,7 @@ FROM mhart/alpine-node:latest
 # needs this to install keytar npm package
 # adds almost 80MB to the container 
 RUN apk add --no-cache libsecret-dev 
+RUN npm install -g npm
 WORKDIR /usr/src/app
 # copy assets from source folder
 COPY packages/contensis-cli/package.json .
