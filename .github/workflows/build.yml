@@ -35,7 +35,7 @@ jobs:
 
       - name: Test running the cli
         run: |
-          contensis-cli push block node-cli-ci-block ${{ env.APP_IMAGE }}:latest -r -cmsg "${{ github.event.head_commit.message }}" -cdt ${{ github.event.head_commit.timestamp }} -author ${{ github.event.head_commit.author.email }} -committer ${{ github.event.head_commit.committer.email }} -a zenhub-dev -p contensis -id 03c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 -s 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd46
+          # contensis-cli push block node-cli-ci-block ${{ env.APP_IMAGE }}:latest -r -cmsg "${{ github.event.head_commit.message }}" -cdt ${{ github.event.head_commit.timestamp }} -author ${{ github.event.head_commit.author.email }} -committer ${{ github.event.head_commit.committer.email }} -a zenhub-dev -p contensis -id 03c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 -s 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd46
           # contensis-cli get entries -q "externalURL EXISTS" -a trial-006 -p leif2 -id e4376db2-ed3e-49d3-a799-a6ec733a3611 -s a8590f6b4630404186b72fea198d3c12-c6f1f565eb86428ea0170e1b4b8a4b7f-de88eb42e46c4d548a8c36f490f34866
           contensis-cli connect trial-006
           contensis-cli login zengenti 123456
@@ -61,3 +61,20 @@ jobs:
           echo "{\"commitRef\":\"${{ github.sha }}\",\"pipelineIID\":\"null\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}\",\"buildNo\":\"${{ github.run_id }}\",\"branchName\":\"${{ github.ref_name }}\",\"registryImage\":\"${{ env.APP_IMAGE }}\"}" > version.json
           docker build --force-rm --cache-from ${{ env.APP_IMAGE }}:latest -t ${{ env.APP_IMAGE }}:latest -f Dockerfile .
           docker push ${{ env.APP_IMAGE }}:latest
+
+      - name: Push block to Contensis
+        uses: ../actions/contensis-cli
+        # uses: contensis/cli-action@v1
+        with:
+          block-id: node-cli-ci-block
+          auto-release: true
+          alias: zenhub-dev
+          project-id: contensis
+          client-id: 03c8fae0-1aa6-46d3-a0a4-9674fa7f10f1
+          shared-scret: 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd46
+          # command: push block
+          # image-uri: ${{ env.APP_IMAGE }}:latest
+          # commit-message: '${{ github.event.head_commit.message }}'
+          # commit-datetime: ${{ github.event.head_commit.timestamp }}
+          # author-email: ${{ github.event.head_commit.author.email }}
+          # committer-email: ${{ github.event.head_commit.committer.email }}
