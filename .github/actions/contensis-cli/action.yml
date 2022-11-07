@@ -29,6 +29,10 @@ inputs:
     description: 'Whether to release the block upon successful push'
     required: false
     default: false
+  command:
+    description: 'Optional: which cli command to run'
+    required: false
+
 runs:
   using: 'composite'
   steps:
