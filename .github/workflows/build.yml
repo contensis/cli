@@ -71,7 +71,7 @@ jobs:
           alias: zenhub-dev
           project-id: contensis
           client-id: 03c8fae0-1aa6-46d3-a0a4-9674fa7f10f1
-          shared-scret: 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd46
+          shared-secret: 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd46
           # command: push block
           # image-uri: ${{ env.APP_IMAGE }}:latest
           # commit-message: '${{ github.event.head_commit.message }}'
