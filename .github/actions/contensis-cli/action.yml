@@ -35,10 +35,12 @@ runs:
     - name: Pull Contensis CLI docker image and run commands
       uses: docker://ghcr.io/contensis/node-cli/main/app:latest
     - name: Connect to Contensis run commands
+      shell: bash
       run: |
         touch environments.json
         docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
     - name: Run Contensis commands
+      shell: bash
       run: |
         if [ -z ${{ inputs.block-id }} ]
         then
