@@ -8,15 +8,23 @@ import { isPassword, isSharedSecret, isUuid, url } from '~/util';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import ContensisAuthService from './ContensisAuthService';
 import CredentialProvider from '~/providers/CredentialProvider';
-import { Logger } from '~/util/logger';
+import { logError, Logger } from '~/util/logger';
 import { LogMessages } from '~/localisation/en-GB';
-import { ContensisMigrationService, MigrateRequest } from 'migratortron';
+import {
+  ContensisMigrationService,
+  MigrateRequest,
+  MigrateStatus,
+  SourceCms,
+} from 'migratortron';
 import { logEntriesTable } from 'migratortron/dist/transformations/logging';
+import { Entry } from 'contensis-management-api/lib/models';
+
 import { csvFormatter } from '~/util/csv.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
 import { jsonFormatter } from '~/util/json.formatter';
 import { PushBlockParams } from 'migratortron/dist/models/Contensis';
-import { printBlockVersion } from '~/util/console.printer';
+import { printBlockVersion, printMigrateResult } from '~/util/console.printer';
+import { readJsonFile } from '~/providers/file-provider';
 
 type OutputFormat = 'json' | 'csv' | 'xml';
 
@@ -37,6 +45,11 @@ interface IAuthOptions {
   sharedSecret?: string;
 }
 
+interface IImportOptions {
+  sourceEnv?: string;
+  sourceProjectId?: string;
+}
+
 class ContensisCli {
   static quit = (error?: Error) => {
     process.removeAllListeners('exit');
@@ -45,12 +58,14 @@ class ContensisCli {
 
   cache: SessionCache;
   contensis?: ContensisMigrationService;
-  contensisOpts: Partial<MigrateRequest> | { id: string } = {};
+  contensisOpts: Partial<MigrateRequest>;
   contentTypes?: ContentType[];
   components?: Component[];
   currentEnv: string;
   currentProject: string;
   env: EnvironmentCache;
+  sourceEnv?: string;
+  targetEnv?: string;
   urls:
     | {
         api: string;
@@ -74,8 +89,8 @@ class ContensisCli {
 
   constructor(
     args: string[],
-    outputOpts?: OutputOptions & IConnectOptions,
-    contensisOpts: Partial<MigrateRequest> | { id: string } = {}
+    outputOpts?: OutputOptions & IConnectOptions & IImportOptions,
+    contensisOpts: Partial<MigrateRequest> = {}
   ) {
     // console.log('args: ', JSON.stringify(args, null, 2));
 
@@ -122,6 +137,7 @@ class ContensisCli {
 
     this.currentEnv = currentEnvironment;
     this.currentProject = env?.currentProject || 'null';
+    this.sourceEnv = outputOpts?.sourceEnv || currentEnvironment;
 
     if (currentEnvironment) {
       this.urls = url(currentEnvironment, env?.currentProject || 'website');
@@ -214,7 +230,7 @@ class ContensisCli {
     }
   };
 
-  ConnectContensis = async () => {
+  ConnectContensis = async ({ commit = false } = {}) => {
     const { contensisOpts, currentEnv, env, log, messages } = this;
     const userId = env?.lastUserId;
     const isGuidId = userId && isUuid(userId);
@@ -236,24 +252,151 @@ class ContensisCli {
       const cachedPassword = credentials?.current?.password;
 
       if (cachedPassword) {
-        this.contensis = new ContensisMigrationService({
-          source: {
-            url: this.urls?.cms || '',
-            username: !isGuidId ? userId : undefined,
-            password: !isGuidId ? cachedPassword : undefined,
-            clientId: isGuidId ? userId : undefined,
-            sharedSecret: isGuidId ? cachedPassword : undefined,
-            project: env?.currentProject || '',
-            assetHostname: this.urls?.previewWeb,
+        this.contensis = new ContensisMigrationService(
+          {
+            ...contensisOpts,
+            source: {
+              url: this.urls?.cms || '',
+              username: !isGuidId ? userId : undefined,
+              password: !isGuidId ? cachedPassword : undefined,
+              clientId: isGuidId ? userId : undefined,
+              sharedSecret: isGuidId ? cachedPassword : undefined,
+              project: env?.currentProject || '',
+              assetHostname: this.urls?.previewWeb,
+            },
+            concurrency:
+              typeof contensisOpts.concurrency !== 'undefined'
+                ? contensisOpts.concurrency
+                : 3,
+            outputProgress: true,
           },
-          concurrency: 3,
-          outputProgress: true,
-          ...contensisOpts,
-        });
+          !commit
+        );
       }
     } else {
       if (!currentEnv) log.help(messages.connect.help());
       if (!userId) log.help(messages.connect.tip());
+    }
+  };
+
+  ConnectContensisImport = async ({
+    commit,
+    source,
+    fileData,
+    fileDataType,
+  }: {
+    commit: boolean;
+    source: 'contensis' | 'file' | 'input';
+    fileData?: any[] | string;
+    fileDataType?: 'entries' | 'contentTypes' | 'components';
+  }) => {
+    const { contensisOpts, currentEnv, env, log, messages, sourceEnv } = this;
+    const environments = this.cache.environments || {};
+    const sourceEnvironment = environments[sourceEnv || ''] || {};
+    const sourceCms =
+      ('source' in contensisOpts && contensisOpts.source) ||
+      ({} as Partial<SourceCms>);
+    const sourceUserId =
+      sourceCms.clientId || sourceCms.username || sourceEnvironment.lastUserId;
+    const sourceProjectId =
+      sourceCms.project || sourceEnvironment.currentProject || 'website';
+    const isSourceGuidId = sourceUserId && isUuid(sourceUserId);
+    const sourceUrls = url(sourceEnv || '', sourceProjectId);
+
+    const sourcePassword =
+      sourceCms.sharedSecret ||
+      sourceCms.password ||
+      sourceEnvironment.passwordFallback;
+
+    const targetUserId = env?.lastUserId;
+    const isTargetGuidId = targetUserId && isUuid(targetUserId);
+
+    if (sourceUserId && currentEnv && targetUserId) {
+      const [sourceCredentialError, sourceCredentials] =
+        await new CredentialProvider(
+          {
+            userId: sourceUserId,
+            alias: currentEnv,
+          },
+          sourcePassword
+        ).Init();
+
+      if (sourceCredentialError && !sourceCredentials.current) {
+        // Log problem with Credential Provider
+        logError(sourceCredentialError);
+        return;
+      }
+      const cachedSourcePassword = sourceCredentials?.current?.password;
+
+      const [targetCredentialError, targetCredentials] =
+        await new CredentialProvider(
+          {
+            userId: targetUserId,
+            alias: currentEnv,
+          },
+          env.passwordFallback
+        ).Init();
+
+      if (targetCredentialError && !targetCredentials.current) {
+        // Log problem with Credential Provider
+        log.error(targetCredentialError as any);
+        return;
+      }
+      const cachedTargetPassword = targetCredentials?.current?.password;
+
+      if (cachedSourcePassword && cachedTargetPassword) {
+        if (source === 'file' || source === 'input') {
+          this.contensis = new ContensisMigrationService(
+            {
+              concurrency: 3,
+              outputProgress: true,
+              ...contensisOpts,
+              target: {
+                url: this.urls?.cms || '',
+                username: !isTargetGuidId ? targetUserId : undefined,
+                password: !isTargetGuidId ? cachedTargetPassword : undefined,
+                clientId: isTargetGuidId ? targetUserId : undefined,
+                sharedSecret: isTargetGuidId ? cachedTargetPassword : undefined,
+                targetProjects: [env.currentProject || ''],
+                assetHostname: this.urls?.previewWeb,
+              },
+              ...(fileDataType ? { [fileDataType]: fileData } : {}),
+            },
+            !commit
+          );
+        }
+        if (source === 'contensis') {
+          this.contensis = new ContensisMigrationService(
+            {
+              concurrency: 3,
+              outputProgress: true,
+              ...contensisOpts,
+              source: {
+                url: sourceUrls.cms || '',
+                username: !isSourceGuidId ? sourceUserId : undefined,
+                password: !isSourceGuidId ? cachedSourcePassword : undefined,
+                clientId: isSourceGuidId ? sourceUserId : undefined,
+                sharedSecret: isSourceGuidId ? cachedSourcePassword : undefined,
+                project: sourceProjectId,
+                assetHostname: sourceUrls.previewWeb,
+              },
+              target: {
+                url: this.urls?.cms || '',
+                username: !isTargetGuidId ? targetUserId : undefined,
+                password: !isTargetGuidId ? cachedTargetPassword : undefined,
+                clientId: isTargetGuidId ? targetUserId : undefined,
+                sharedSecret: isTargetGuidId ? cachedTargetPassword : undefined,
+                targetProjects: [env.currentProject || ''],
+                assetHostname: this.urls?.previewWeb,
+              },
+            },
+            !commit
+          );
+        }
+      }
+    } else {
+      if (!currentEnv) log.help(messages.connect.help());
+      if (!targetUserId) log.help(messages.connect.tip());
     }
   };
 
@@ -572,7 +715,7 @@ class ContensisCli {
 
   RemoveApiKey = async (id: string) => {
     const { currentEnv, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
+    if (!this.contensis) await this.ConnectContensis({ commit: true });
 
     if (this.contensis) {
       const [err, key] = await this.contensis.apiKeys.RemoveKey(id);
@@ -650,6 +793,93 @@ class ContensisCli {
     }
   };
 
+  RemoveContentTypes = async (contentTypeIds: string[], commit = false) => {
+    const { currentProject, log, messages } = this;
+    if (!this.contensis)
+      await this.ConnectContensisImport({
+        source: 'input',
+        commit,
+      });
+    if (this.contensis) {
+      const [err, result] = await this.contensis.DeleteContentTypes(
+        contentTypeIds
+      );
+
+      if (err) {
+        log.error(
+          messages.contenttypes.failedRemove(
+            currentProject,
+            contentTypeIds.join('", "')
+          ),
+          err
+        );
+      } else {
+        log.success(
+          messages.contenttypes.removed(
+            currentProject,
+            contentTypeIds.join('", "'),
+            !this.contensis.isPreview
+          )
+        );
+        // print the results to console
+        this.HandleFormattingAndOutput(result, () =>
+          log.object(jsonFormatter(result))
+        );
+      }
+    }
+  };
+
+  ImportContentTypes = async (
+    {
+      commit,
+      fromFile,
+    }: {
+      commit: boolean;
+      fromFile: string;
+    },
+    contentTypeIds: string[] = []
+  ) => {
+    const { currentProject, log, messages } = this;
+
+    let fileData = fromFile ? readJsonFile<ContentType[]>(fromFile) || [] : [];
+    if (typeof fileData === 'string')
+      throw new Error(`Import file format must be of type JSON`);
+
+    if (!Array.isArray(fileData)) fileData = [fileData];
+
+    await this.ConnectContensisImport({
+      commit,
+      source: fromFile ? 'file' : 'contensis',
+    });
+
+    if (this.contensis) {
+      // Pass each content type to the target repo
+      for (const contentType of fileData) {
+        // Fix invalid data
+        contentType.projectId = currentProject;
+        delete contentType.uuid;
+
+        const [err, created, createStatus] =
+          await this.contensis.models.targetRepos[
+            currentProject
+          ].repo.UpsertContentType(false, contentType);
+
+        if (err) log.error(err.message, err);
+        if (createStatus) {
+          log.success(
+            messages.contenttypes.created(
+              currentProject,
+              contentType.id,
+              createStatus
+            )
+          );
+          // print the content type to console
+          this.HandleFormattingAndOutput(contentType, () => {});
+        }
+      }
+    }
+  };
+
   PrintComponents = async () => {
     const { currentProject, log, messages } = this;
     await this.GetContentTypes();
@@ -697,6 +927,130 @@ class ContensisCli {
     }
   };
 
+  RemoveComponents = async (componentIds: string[], commit = false) => {
+    const { currentProject, log, messages } = this;
+    if (!this.contensis)
+      await this.ConnectContensisImport({
+        source: 'input',
+        commit,
+      });
+    if (this.contensis) {
+      const [err, result] = await this.contensis.DeleteContentTypes(
+        undefined,
+        componentIds
+      );
+
+      if (err) {
+        log.error(
+          messages.components.failedRemove(
+            currentProject,
+            componentIds.join('", "')
+          ),
+          err
+        );
+      } else {
+        log.success(
+          messages.components.removed(
+            currentProject,
+            componentIds.join('", "'),
+            !this.contensis.isPreview
+          )
+        );
+        // print the results to console
+        this.HandleFormattingAndOutput(result, () =>
+          log.info(jsonFormatter(result))
+        );
+      }
+    }
+  };
+
+  ImportComponents = async (
+    {
+      commit,
+      fromFile,
+    }: {
+      commit: boolean;
+      fromFile: string;
+    },
+    componentIds: string[] = []
+  ) => {
+    const { currentProject, log, messages } = this;
+
+    let fileData = fromFile ? readJsonFile<Component[]>(fromFile) || [] : [];
+    if (typeof fileData === 'string')
+      throw new Error(`Import file format must be of type JSON`);
+
+    if (!Array.isArray(fileData)) fileData = [fileData];
+
+    await this.ConnectContensisImport({
+      commit,
+      source: fromFile ? 'file' : 'contensis',
+    });
+
+    if (this.contensis) {
+      // Pass each component to the target repo
+      for (const component of fileData) {
+        // Fix invalid data
+        component.projectId = currentProject;
+        delete component.uuid;
+
+        const [err, created, createStatus] =
+          await this.contensis.models.targetRepos[
+            currentProject
+          ].repo.UpsertComponent(false, component);
+
+        if (err) log.error(err.message, err);
+        if (createStatus) {
+          log.success(
+            messages.components.created(
+              currentProject,
+              component.id,
+              createStatus
+            )
+          );
+          // print the component to console
+          this.HandleFormattingAndOutput(component, () => {});
+        }
+      }
+    }
+  };
+
+  RemoveEntry = async (id: string, commit = false) => {
+    const { currentEnv, log, messages } = this;
+    if (!this.contensis)
+      await this.ConnectContensisImport({
+        source: 'input',
+        commit,
+      });
+
+    if (this.contensis) {
+      if (this.contensis.isPreview) {
+        console.log(log.successText(` -- PREVIEW -- `));
+      } else {
+        console.log(log.warningText(` *** COMMITTING DELETE *** `));
+      }
+      const [err, result] = await this.contensis.DeleteEntries();
+      if (result)
+        this.HandleFormattingAndOutput(result, () => {
+          // print the migrateResult to console
+          printMigrateResult(this, result, { action: 'delete' });
+        });
+      if (
+        !err &&
+        ((!commit &&
+          Object.values(result.entriesToMigrate)?.[0].totalCount > 0) ||
+          (commit && result.migrateResult?.deleted))
+      ) {
+        log.success(messages.entries.removed(currentEnv, id, commit));
+        if (!commit) log.help(messages.entries.commitTip());
+      } else {
+        log.error(messages.entries.failedRemove(currentEnv, id), err);
+        if (!Object.values(result.entriesToMigrate)?.[0].totalCount)
+          log.help(messages.entries.notFound(id));
+      }
+    }
+  };
+
   GetEntries = async ({
     withDependents = false,
   }: {
@@ -716,6 +1070,48 @@ class ContensisCli {
           this.contensis?.payload.query?.fields
         )
       );
+    } else {
+      log.warning(messages.contenttypes.noList(currentProject));
+      log.help(messages.connect.tip());
+    }
+  };
+
+  ImportEntries = async ({
+    commit,
+    fromFile,
+  }: {
+    commit: boolean;
+    fromFile: string;
+  }) => {
+    const { currentProject, log, messages } = this;
+
+    const fileData = fromFile ? readJsonFile<Entry[]>(fromFile) || [] : [];
+    if (typeof fileData === 'string')
+      throw new Error(`Import file format must be of type JSON`);
+
+    await this.ConnectContensisImport({
+      commit,
+      source: fromFile ? 'file' : 'contensis',
+      fileData,
+      fileDataType: 'entries',
+    });
+
+    if (this.contensis) {
+      log.line();
+      if (this.contensis.isPreview) {
+        console.log(log.successText(` -- IMPORT PREVIEW -- `));
+      } else {
+        console.log(log.warningText(` *** COMMITTING IMPORT *** `));
+      }
+
+      const [migrateErr, migrateResult] = await this.contensis.MigrateEntries();
+
+      if (migrateErr) logError(migrateErr);
+      else
+        this.HandleFormattingAndOutput(migrateResult, () => {
+          // print the migrateResult to console
+          printMigrateResult(this, migrateResult);
+        });
     } else {
       log.warning(messages.contenttypes.noList(currentProject));
       log.help(messages.connect.tip());
@@ -891,6 +1287,7 @@ class ContensisCli {
             env.currentProject
           )
         );
+        console.log(jsonFormatter(blockVersion));
       }
       if (blockVersion) {
         this.HandleFormattingAndOutput(blockVersion, () => {
@@ -984,7 +1381,7 @@ class ContensisCli {
 export const cliCommand = (
   commandArgs: string[],
   outputOpts: OutputOptions & IConnectOptions = {},
-  contensisOpts: Partial<MigrateRequest> | { id: string } = {}
+  contensisOpts: Partial<MigrateRequest> = {}
 ) => {
   return new ContensisCli(['', '', ...commandArgs], outputOpts, contensisOpts);
 };

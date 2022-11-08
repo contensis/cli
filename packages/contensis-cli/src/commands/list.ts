@@ -80,11 +80,11 @@ Example call:
     .command('webhooks')
     .argument('[name]', 'find webhooks matching the supplied name')
     .option('-i --id <id...>', 'the subscription id(s) to get')
-    .action(async (name?: string, { id, format, output }: any = {}) => {
-      await cliCommand(['list', 'webhooks'], {
-        format,
-        output,
-      }).PrintWebhookSubscriptions(id, name);
+    .action(async (name?: string, { id, ...opts }: any = {}) => {
+      await cliCommand(['list', 'webhooks'], opts).PrintWebhookSubscriptions(
+        id,
+        name
+      );
     });
   return list;
 };

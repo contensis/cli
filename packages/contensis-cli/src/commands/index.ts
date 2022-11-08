@@ -7,8 +7,11 @@ import { makeGetCommand } from './get';
 import {
   addAuthenticationOptions,
   addConnectOptions,
+  addGetEntryOptions,
   addGlobalOptions,
+  addImportOptions,
 } from './globalOptions';
+import { makeImportCommand } from './import';
 import { makeListCommand } from './list';
 import { makeLoginCommand } from './login';
 import { makePushCommand } from './push';
@@ -35,10 +38,17 @@ const commands = () => {
     )
   );
   program.addCommand(
-    addGlobalOptions(makeCreateCommand()).copyInheritedSettings(program)
+    addGlobalOptions(
+      addImportOptions(makeCreateCommand())
+    ).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(makeGetCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addGlobalOptions(
+      addGetEntryOptions(addImportOptions(makeImportCommand()))
+    ).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(makeListCommand()).copyInheritedSettings(program)
@@ -50,9 +60,7 @@ const commands = () => {
     addGlobalOptions(makePushCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
-    addConnectOptions(
-      addAuthenticationOptions(makeRemoveCommand())
-    ).copyInheritedSettings(program)
+    addGlobalOptions(makeRemoveCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
     addConnectOptions(makeSetCommand()).copyInheritedSettings(program)

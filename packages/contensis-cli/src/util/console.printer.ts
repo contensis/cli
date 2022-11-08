@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { MigrateStatus } from 'migratortron';
 import { BlockVersion } from 'migratortron/dist/models/Contensis';
 import ContensisCli from '~/services/ContensisCliService';
 
@@ -101,4 +102,103 @@ export const printBlockVersion = (
   if (block.stagingUrl)
     console.log(`    staging url: ${log.infoText(block.stagingUrl)}`);
   console.log('');
+};
+
+export const printMigrateResult = (
+  { log, messages, contensis, currentProject }: ContensisCli,
+  migrateResult: any,
+  { action = 'import' }: { action?: 'import' | 'delete' } = {}
+) => {
+  console.log(``);
+
+  if (action === 'import') {
+    for (const [projectId, contentTypeCounts] of Object.entries(
+      migrateResult.entries || {}
+    ) as [string, any][]) {
+      console.log(
+        `import from project ${log.highlightText(projectId)} to ${log.boldText(
+          log.successText(currentProject)
+        )}`
+      );
+      for (const [contentTypeId, count] of Object.entries(
+        contentTypeCounts
+      ) as [string, number][]) {
+        const entriesToMigrate =
+          migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
+
+        console.log(
+          `  - ${
+            contentTypeId === 'totalCount'
+              ? log.warningText(`${contentTypeId}: ${count}`)
+              : log.helpText(`${contentTypeId}: ${count}`)
+          } ${log.infoText`[existing: ${(
+            ((migrateResult.existing?.[projectId]?.[contentTypeId] || 0) /
+              count) *
+            100
+          ).toFixed(0)}%]`} [${
+            typeof entriesToMigrate !== 'number' ? `unchanged` : `to update`
+          }: ${(
+            ((typeof entriesToMigrate !== 'number'
+              ? entriesToMigrate?.['no change'] || 0
+              : entriesToMigrate) /
+              count) *
+            100
+          ).toFixed(0)}%]`
+        );
+      }
+      console.log(``);
+    }
+  }
+  if (
+    contensis?.isPreview &&
+    migrateResult.entriesToMigrate?.[currentProject]?.totalCount > 0 &&
+    !migrateResult.errors
+  ) {
+    log.help(messages.entries.commitTip());
+  }
+  for (const [contentTypeId, entryRes] of Object.entries(
+    migrateResult.entriesToMigrate.entryIds
+  ) as [string, any]) {
+    for (const [originalId, entryStatus] of Object.entries(entryRes) as [
+      string,
+      any
+    ][]) {
+      console.log(
+        log.infoText(
+          `${originalId} [${Object.entries(entryStatus || {})
+            .filter(x => x[0] !== 'entryTitle')
+            .map(([projectId, projectStatus]) => {
+              const [targetGuid, { status }] = (Object.entries(
+                projectStatus || {}
+              )?.[0] as [string, { status: MigrateStatus }]) || [
+                '',
+                { x: { status: undefined } },
+              ];
+              return `${messages.entries.migrateStatus(status)(
+                `${projectId}: ${status}`
+              )}${targetGuid !== originalId ? `-> ${targetGuid}` : ''}`;
+            })}]`
+        )
+      );
+      console.log(`  ${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`);
+
+      for (const [projectId, projectStatus] of Object.entries(
+        entryStatus
+      ).filter(([key]) => key !== 'entryTitle') as [string, any][]) {
+        const [targetGuid, { error, diff, status }] = Object.entries(
+          projectStatus
+        )[0] as [string, any];
+        if (error) log.error(error);
+        if (diff) {
+          console.log(
+            `  ${messages.entries.migrateStatus(status)(status)} ${log.infoText(
+              targetGuid
+            )} ${log.infoText(contentTypeId)} ${log.infoText(projectId)}`
+          );
+          console.log(``);
+          console.log(log.highlightText(diff));
+        }
+      }
+    }
+  }
 };

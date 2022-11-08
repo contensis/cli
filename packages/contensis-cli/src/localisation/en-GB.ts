@@ -1,3 +1,4 @@
+import { MigrateStatus } from 'migratortron';
 import { BlockRunningStatus } from 'migratortron/dist/models/Contensis';
 import { Logger } from '~/util/logger';
 
@@ -98,6 +99,12 @@ export const LogMessages = {
       `[${projectId}] Content type "${contentTypeId}"`,
     failedGet: (projectId: string, contentTypeId: string) =>
       `[${projectId}] Unable to get content type "${contentTypeId}"`,
+    created: (projectId: string, componentId: string, status?: string) =>
+      `[${projectId}] Content type ${status}d "${componentId}"`,
+    removed: (env: string, id: string, commit: boolean) =>
+      `[${env}] ${commit ? `Deleted` : `Will delete`} content type "${id}"`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete content type "${id}"`,
   },
   components: {
     list: (projectId: string) => `Components in "${projectId}":`,
@@ -107,6 +114,12 @@ export const LogMessages = {
       `[${projectId}] Component "${componentId}"`,
     failedGet: (projectId: string, componentId: string) =>
       `[${projectId}] Unable to get component "${componentId}"`,
+    created: (projectId: string, componentId: string, status?: string) =>
+      `[${projectId}] Component ${status}d "${componentId}"`,
+    removed: (env: string, id: string, commit: boolean) =>
+      `[${env}] ${commit ? `Deleted` : `Will delete`} component "${id}"`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete component "${id}"`,
   },
   version: {
     set: (env: string, versionStatus: string) =>
@@ -115,6 +128,30 @@ export const LogMessages = {
       `Content version status "${versionStatus}" is not valid, allowed values are "published" or "latest".`,
     noEnv: () =>
       `No Contensis environment set, connect to your Contensis cloud instance using "contensis connect {cms alias}"`,
+  },
+  entries: {
+    migrateStatus: (status: MigrateStatus) => {
+      switch (status) {
+        case 'no change':
+          return Logger.successText;
+        case 'create':
+        case 'two-pass':
+        case 'update':
+        case 'delete':
+          return Logger.warningText;
+        case 'error':
+        case 'not found':
+          return Logger.errorText;
+        default:
+          return Logger.infoText;
+      }
+    },
+    removed: (env: string, id: string, commit: boolean) =>
+      `[${env}] ${commit ? `Deleted` : `Will delete`} entry "${id}"`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete entry "${id}"`,
+    notFound: (id: string) => `Entry "${id}" not found`,
+    commitTip: () => `  Add --commit flag to commit the previewed changes`,
   },
   keys: {
     list: (env: string) => `[${env}] API keys:`,

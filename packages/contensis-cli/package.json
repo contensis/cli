@@ -12,19 +12,18 @@
   "scripts": {
     "prestart": "npm run build",
     "start": "npm run cli",
-    "start:shell": "npm run prestart && npm run shell",
     "dev:shell": "npm run prestart && nodemon --watch dist --inspect=9229 ./dist/shell.js",
     "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "build": "node esbuild.config.js",
     "build:watch": "node esbuild.config.js --watch",
-    "cli": "node ./dist/index.js",
-    "shell": "node ./shell.js",
+    "cli": "node --inspect=9229 ./cli.js",
     "postinstall": "npx patch-package",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Zengenti",
   "license": "ISC",
   "dependencies": {
+    "app-root-path": "^3.1.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
     "csv": "^6.1.0",
@@ -36,7 +35,7 @@
     "jsonpath-mapper": "^1.1.0",
     "keytar": "^7.9.0",
     "lodash": "^4.17.21",
-    "migratortron": "^1.0.0-beta.12",
+    "migratortron": "^1.0.0-beta.13",
     "node-fetch": "^2.6.7",
     "patch-package": "^6.4.7",
     "xml2js": "^0.4.23"

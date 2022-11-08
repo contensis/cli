@@ -132,6 +132,9 @@ class ContensisShell {
         'get contenttype',
         'get component',
         'get entries',
+        'import contenttypes',
+        'import components',
+        'import entries',
         'list blocks',
         'list contenttypes',
         'list components',
@@ -140,7 +143,10 @@ class ContensisShell {
         'list webhooks',
         'create key',
         'push block',
-        'remove key'
+        'remove key',
+        'remove entry',
+        'remove contenttypes',
+        'remove components'
       );
 
     const prompt = inquirer.createPromptModule();

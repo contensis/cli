@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
+import { commit, mapContensisOpts } from './globalOptions';
 
 export const makeRemoveCommand = () => {
   const remove = new Command()
@@ -33,5 +34,44 @@ Example call:
     .action(async (id, opts) => {
       await cliCommand(['remove', 'key', id], opts).RemoveApiKey(id);
     });
+
+  remove
+    .command('components')
+    .argument('<id...>', 'the id(s) of the components to delete')
+    .addOption(commit)
+    .usage('<id> [--commit]')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > remove components addressComponent
+`
+    )
+    .action(async (id: string[], opts) => {
+      await cliCommand(
+        ['remove', 'components', id.join(', ')],
+        opts
+      ).RemoveComponents(id, opts.commit);
+    });
+
+  remove
+    .command('contenttypes')
+    .argument('<id...>', 'the id(s) of the content types to delete')
+    .addOption(commit)
+    .usage('<id> [--commit]')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > remove contenttypes blogPost
+`
+    )
+    .action(async (id: string[], opts) => {
+      await cliCommand(
+        ['remove', 'contenttypes', id.join(', ')],
+        opts
+      ).RemoveContentTypes(id, opts.commit);
+    });
+
   return remove;
 };

@@ -12,7 +12,7 @@ export const makeCreateCommand = () => {
     .command('project')
     .argument('<projectId>', 'the id of the project to create')
     .usage('<projectId>')
-    .action(async (projectId, opts) => {
+    .action(async (projectId: string, opts: any) => {
       const project = await cliCommand(
         ['create', 'project', projectId],
         opts
@@ -30,11 +30,12 @@ export const makeCreateCommand = () => {
 Example call:
   > create key "my new key" "Created key for demonstration"\n`
     )
-    .action(async (name, description, opts) => {
+    .action(async (name: string, description: string, opts: any) => {
       await cliCommand(['create', 'key', name], opts).CreateApiKey(
         name,
         description
       );
     });
+
   return create;
 };

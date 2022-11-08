@@ -26,8 +26,10 @@ export class Logger {
   static warningText = chalk.keyword('orange');
   static successText = chalk.keyword('green');
   static helpText = chalk.blue;
+  static highlightText = chalk.yellow;
   static infoText = chalk.keyword('grey');
   static standardText = chalk.keyword('white');
+  static boldText = chalk.bold;
   static critical: LogMethod = content => {
     const message = `${Logger.getPrefix()}  ${Logger.errorText(
       '[CRITICAL]'

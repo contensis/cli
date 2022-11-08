@@ -1,5 +1,6 @@
 import { Argument, Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
+import { mapContensisOpts } from './globalOptions';
 
 export const makeGetCommand = () => {
   const program = new Command()
@@ -33,9 +34,7 @@ Example call:
 `
     )
     .action(async (componentId: string, opts) => {
-      await cliCommand(['get', 'contenttype'], opts).PrintComponent(
-        componentId
-      );
+      await cliCommand(['get', 'component'], opts).PrintComponent(componentId);
     });
   program
     .command('entries')
@@ -66,17 +65,11 @@ Example call:
     .action(async (phrase: string, opts, cmd) => {
       // console.log('phrase: ', phrase, '\nopts:', JSON.stringify(opts, null, 2));
       // console.log('opts:', JSON.stringify(opts, null, 2));
-      await cliCommand(['get', 'entries'], opts, {
-        query:
-          opts.id || phrase || opts.fields
-            ? {
-                fields: opts.fields,
-                includeIds: opts.id,
-                searchTerm: phrase,
-              }
-            : undefined,
-        zenQL: opts.zenql,
-      }).GetEntries({
+      await cliCommand(
+        ['get', 'entries'],
+        opts,
+        mapContensisOpts({ phrase, ...opts })
+      ).GetEntries({
         withDependents: opts.dependents,
       });
     });
