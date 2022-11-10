@@ -66,7 +66,7 @@ jobs:
 
       - name: Push block to Contensis
         # uses: ./.github/actions/contensis-cli
-        uses: contensis/cli-action@v1.0.0
+        uses: contensis/cli-action@v1
         with:
           block-id: node-cli-ci-block
           # auto-release: true
@@ -77,7 +77,7 @@ jobs:
 
       - name: Get entries from Contensis
         # uses: ./.github/actions/contensis-cli
-        uses: contensis/cli-action@v1.0.0
+        uses: contensis/cli-action@v1
         with:
           command: get entries
           alias: zenhub-dev
