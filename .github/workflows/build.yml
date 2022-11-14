@@ -5,14 +5,13 @@ on:
     branches:
       - main
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    # runs-on: self-hosted
+env:
+  REGISTRY: ghcr.io
+  APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
 
-    env:
-      REGISTRY: ghcr.io
-      APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
+jobs:
+  build-node:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -27,8 +26,6 @@ jobs:
           yarn cache clean --mirror
           yarn run bootstrap:ci
           yarn run build
-          APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
       - name: Test installing and running the cli
         run: |
@@ -42,12 +39,47 @@ jobs:
           contensis-cli connect trial-006
           # contensis-cli login zengenti 123456
 
+      - name: Increment package version
+        # cp is a hack to allow patch-package to find the required package to patch
+        run: |
+          cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
+          cd packages/contensis-cli
+          npm version prerelease --preid=beta --no-git-tag-version
+          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+
+      # Likely redundant now
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
           name: contensis-cli-${{ env.APP_VERSION }}
           path: |
             packages/contensis-cli/contensis-cli-${{ env.APP_VERSION }}.tgz
+
+      - name: Push version increment to GIT
+        run: |
+          git config user.email "github@zengenti.com"
+          git config user.name "$GITHUB_ACTOR"
+          git add packages/contensis-cli/.
+          git commit -m "ci: bumps version to ${{ env.APP_VERSION }} [skip ci]"
+          git push
+        env:
+          # The secret is passed automatically. Nothing to configure.
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish prerelease package
+        run: |
+          cd packages/contensis-cli
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --tag prerelease --ignore-scripts
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  build-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
 
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -86,29 +118,3 @@ jobs:
           project-id: migratortron
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
-
-      - name: Increment package version
-        # cp is a hack to allow patch-package to find the required package to patch
-        run: |
-          cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
-          cd packages/contensis-cli
-          npm version prerelease --preid=beta --no-git-tag-version
-
-      - name: Push version increment to GIT
-        run: |
-          git config user.email "github@zengenti.com"
-          git config user.name "$GITHUB_ACTOR"
-          git add packages/contensis-cli/.
-          git commit -m "ci: bumps version [skip ci]"
-          git push
-        env:
-          # The secret is passed automatically. Nothing to configure.
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish prerelease package
-        run: |
-          cd packages/contensis-cli
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-          npm publish --tag prerelease --ignore-scripts
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
