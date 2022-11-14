@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Contensis CLI Node and Docker CI
 
 on:
   push:
@@ -26,6 +26,8 @@ jobs:
           yarn cache clean --mirror
           yarn run bootstrap:ci
           yarn run build
+          APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
       - name: Test installing and running the cli
         run: |
@@ -45,6 +47,7 @@ jobs:
           cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
           cd packages/contensis-cli
           npm version prerelease --preid=beta --no-git-tag-version
+          npm run build
           APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
@@ -77,6 +80,7 @@ jobs:
 
   build-docker:
     runs-on: ubuntu-latest
+    needs: build-node
 
     steps:
       - uses: actions/checkout@v2
