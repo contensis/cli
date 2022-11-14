@@ -40,7 +40,7 @@ jobs:
           contensis get entries
           # contensis-cli get entries -q "externalURL EXISTS" -a trial-006 -p leif2 -id e4376db2-ed3e-49d3-a799-a6ec733a3611 -s a8590f6b4630404186b72fea198d3c12-c6f1f565eb86428ea0170e1b4b8a4b7f-de88eb42e46c4d548a8c36f490f34866
           contensis-cli connect trial-006
-          contensis-cli login zengenti 123456
+          # contensis-cli login zengenti 123456
 
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
