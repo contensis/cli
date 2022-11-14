@@ -6,9 +6,11 @@ on:
       - main
 
 jobs:
-  build-node:
+  node:
     uses: ./.github/workflows/build-node.yml
+    secrets: inherit
 
-  build-docker:
-    needs: build-node
+  docker:
+    needs: node
     uses: ./.github/workflows/build-docker.yml
+    secrets: inherit

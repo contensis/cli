@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  build-docker:
+  build:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
