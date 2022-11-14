@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:latest as builder
+FROM node:18-alpine as builder
 
 RUN apk add --no-cache libsecret-dev
 RUN npm install -g npm
@@ -18,7 +18,7 @@ RUN npm run postinstall
 COPY packages/contensis-cli/src src
 RUN npm run build
 
-FROM mhart/alpine-node:latest
+FROM node:18-alpine
 # needs this to install keytar npm package
 # adds almost 80MB to the container 
 RUN apk add --no-cache libsecret-dev 
