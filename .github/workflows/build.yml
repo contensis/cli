@@ -67,10 +67,11 @@ jobs:
       - name: Push block to Contensis
         # uses: ./.github/actions/contensis-cli
         # uses: contensis/cli-action@v1
-        uses: ./.github/actions/push-block
+        # uses: ./.github/actions/push-block
+        uses: contensis/block-push@v1
         with:
           block-id: node-cli-ci-block
-          # auto-release: true
+          auto-release: true
           alias: zenhub-dev
           project-id: contensis
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
