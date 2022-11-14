@@ -73,6 +73,7 @@ jobs:
           block-id: node-cli-ci-block
           auto-release: true
           alias: zenhub-dev
+          project-id: contensis
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
 
