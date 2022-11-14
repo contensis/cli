@@ -25,7 +25,7 @@ const commands = () => {
     .configureOutput({
       writeErr: str => {
         return str.toLowerCase().includes('error')
-          ? Logger.error(`commands.writeErr ${str}`)
+          ? Logger.error(`command ${str}`)
           : str.trim() && Logger.help(str);
       },
     })

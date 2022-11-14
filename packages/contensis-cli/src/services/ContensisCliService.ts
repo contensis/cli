@@ -503,6 +503,8 @@ class ContensisCli {
               // Remove any bad stored credential and trigger login prompt again
               await credentials.Delete();
               return await this.Login(userId, { password, sharedSecret });
+            } else {
+              throw new Error(messages.login.failed(currentEnv, userId));
             }
           }
 

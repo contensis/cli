@@ -12,7 +12,8 @@ program
     ContensisCli.quit();
   })
   .catch((err: any) => {
-    if (!err.name?.includes('CommanderError')) logError(err);
+    if (!err.name?.includes('CommanderError'))
+      logError(err, `CLI ${err.toString()}`);
     ContensisCli.quit(err);
   });
 //.exitOverride(() => console.log('exit override!!!'));
