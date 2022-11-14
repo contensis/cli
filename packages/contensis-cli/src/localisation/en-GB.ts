@@ -73,8 +73,10 @@ export const LogMessages = {
           'the shared secret to use when logging in with a client id',
       },
     },
-    passwordPrompt: (env: string, userId: string) =>
-      `Enter password for ${userId}@${env}:`,
+    passwordPrompt: (env?: string, userId?: string) =>
+      userId
+        ? `Enter password for ${userId}@${env}:`
+        : `Please enter a password`,
     failed: (env: string, userId: string) =>
       `Unable to login to ${env} as ${userId}`,
     success: (env: string, userId: string) =>

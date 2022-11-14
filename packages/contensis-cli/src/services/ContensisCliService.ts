@@ -208,7 +208,7 @@ class ContensisCli {
         session.UpdateEnv(this.env, environment);
 
         if (this.env?.lastUserId) {
-          await this.ConnectContensis();
+          // await this.ConnectContensis();
           await this.PrintProjects();
         } else {
           log.warning(messages.projects.noList());
@@ -232,19 +232,11 @@ class ContensisCli {
     const isGuidId = userId && isUuid(userId);
 
     if (currentEnv && userId) {
-      const [credentialError, credentials] = await new CredentialProvider(
-        {
-          userId,
-          alias: currentEnv,
-        },
+      const credentials = await this.GetCredentials(
+        userId,
         env.passwordFallback
-      ).Init();
+      );
 
-      if (credentialError && !credentials.current) {
-        // Log problem with Credential Provider
-        log.error(credentialError as any);
-        return;
-      }
       const cachedPassword = credentials?.current?.password;
 
       if (cachedPassword) {
@@ -308,36 +300,19 @@ class ContensisCli {
     const isTargetGuidId = targetUserId && isUuid(targetUserId);
 
     if (sourceUserId && currentEnv && targetUserId) {
-      const [sourceCredentialError, sourceCredentials] =
-        await new CredentialProvider(
-          {
-            userId: sourceUserId,
-            alias: currentEnv,
-          },
-          sourcePassword
-        ).Init();
+      const sourceCredentials = await this.GetCredentials(
+        sourceUserId,
+        sourcePassword,
+        sourceEnv
+      );
 
-      if (sourceCredentialError && !sourceCredentials.current) {
-        // Log problem with Credential Provider
-        logError(sourceCredentialError);
-        return;
-      }
       const cachedSourcePassword = sourceCredentials?.current?.password;
 
-      const [targetCredentialError, targetCredentials] =
-        await new CredentialProvider(
-          {
-            userId: targetUserId,
-            alias: currentEnv,
-          },
-          env.passwordFallback
-        ).Init();
+      const targetCredentials = await this.GetCredentials(
+        targetUserId,
+        env.passwordFallback
+      );
 
-      if (targetCredentialError && !targetCredentials.current) {
-        // Log problem with Credential Provider
-        log.error(targetCredentialError as any);
-        return;
-      }
       const cachedTargetPassword = targetCredentials?.current?.password;
 
       if (cachedSourcePassword && cachedTargetPassword) {
@@ -396,6 +371,34 @@ class ContensisCli {
     }
   };
 
+  GetCredentials = async (
+    userId: string,
+    password?: string,
+    currentEnv = this.currentEnv
+  ): Promise<CredentialProvider | undefined> => {
+    const { env, log, messages } = this;
+    if (userId) {
+      const [credentialError, credentials] = await new CredentialProvider(
+        { userId, alias: currentEnv },
+        password
+      ).Init();
+
+      if (credentialError && !credentials.current) {
+        // Log problem with Credential Provider
+        log.error(credentialError as any);
+        return;
+      }
+
+      if (credentials.remarks.secure !== true) {
+        log.warning(messages.login.insecurePassword());
+      } else {
+        env.passwordFallback = undefined;
+        this.session.UpdateEnv(env, currentEnv);
+      }
+      return credentials;
+    }
+  };
+
   Login = async (
     userId: string,
     {
@@ -403,115 +406,101 @@ class ContensisCli {
       promptPassword = true,
       sharedSecret = isSharedSecret(this.env.passwordFallback),
       silent = false,
+      attempt = 1,
     }: {
       password?: string;
       promptPassword?: boolean;
       sharedSecret?: string;
       silent?: boolean;
-    }
+      attempt?: number;
+    } = {}
   ): Promise<string | undefined> => {
-    let inputPassword = password;
+    let inputPassword = password || sharedSecret;
     const { log, messages } = this;
 
     if (userId) {
       const { currentEnv, env } = this;
 
       if (currentEnv) {
-        const [credentialError, credentials] = await new CredentialProvider(
-          { userId, alias: currentEnv },
-          inputPassword || sharedSecret
-        ).Init();
+        const credentials = await this.GetCredentials(userId, inputPassword);
 
-        if (credentialError && !credentials.current) {
-          // Log problem with Credential Provider
-          log.error(credentialError as any);
-          return;
-        }
+        if (credentials) {
+          const cachedPassword = isPassword(credentials.current?.password);
+          const cachedSecret = isSharedSecret(credentials.current?.password);
 
-        if (credentials.remarks.secure !== true) {
-          log.warning(messages.login.insecurePassword());
-        } else {
-          delete env.passwordFallback;
-          this.session.UpdateEnv(env);
-        }
-
-        const cachedPassword = isPassword(credentials?.current?.password);
-        const cachedSecret = isSharedSecret(credentials?.current?.password);
-
-        if (
-          !sharedSecret &&
-          !inputPassword &&
-          !cachedPassword &&
-          !cachedSecret &&
-          promptPassword
-        ) {
-          // Password prompt
-          ({ inputPassword } = await inquirer.prompt([
-            {
-              type: 'password',
-              message: messages.login.passwordPrompt(currentEnv, userId),
-              name: 'inputPassword',
-              mask: '*',
-              prefix: undefined,
-            },
-          ]));
-        }
-
-        if (sharedSecret || cachedSecret || inputPassword || cachedPassword) {
-          const authService = new ContensisAuthService({
-            username: userId,
-            password: inputPassword || cachedPassword,
-            projectId: env?.currentProject || 'website',
-            rootUrl: this.urls?.cms || '',
-            clientId: userId,
-            clientSecret: sharedSecret || cachedSecret,
-          });
-
-          const [authError, bearerToken] = await to(authService.BearerToken());
-
-          // Login successful
-          if (bearerToken) {
-            // Set env vars
-            env.authToken = bearerToken;
-            env.lastUserId = userId;
-            env.passwordFallback =
-              credentials.remarks.secure !== true
-                ? credentials.current?.password
-                : undefined;
-            // Persist env before finding projects or doing anything else
-            this.session.UpdateEnv(env);
-
-            if (!silent) {
-              Logger.success(messages.login.success(currentEnv, userId));
-              await this.PrintProjects();
-            }
-            if (inputPassword) await credentials.Save(inputPassword);
-            if (sharedSecret) await credentials.Save(sharedSecret);
-          } else if (authError) {
-            Logger.error(authError.toString());
-            // Clear env vars
-            env.authToken = '';
-            env.lastUserId = '';
-            env.passwordFallback = undefined;
-            // Persist env to remove cleared values
-            this.session.UpdateEnv(env);
-
-            // If the auth error was raised using a cached password
-            if (
-              (cachedPassword || cachedSecret) &&
-              credentials.remarks.secure
-            ) {
-              // Remove any bad stored credential and trigger login prompt again
-              await credentials.Delete();
-              return await this.Login(userId, { password, sharedSecret });
-            } else {
-              throw new Error(messages.login.failed(currentEnv, userId));
-            }
+          if (!cachedPassword && !cachedSecret && promptPassword) {
+            // Password prompt
+            ({ inputPassword } = await inquirer.prompt([
+              {
+                type: 'password',
+                message: messages.login.passwordPrompt(currentEnv, userId),
+                name: 'inputPassword',
+                mask: '*',
+                prefix: undefined,
+              },
+            ]));
           }
 
-          return env.authToken;
-        } else {
-          Logger.error(messages.login.passwordPrompt(currentEnv, userId));
+          if (inputPassword || cachedPassword || cachedSecret) {
+            const authService = new ContensisAuthService({
+              username: userId,
+              password: inputPassword || cachedPassword,
+              projectId: env?.currentProject || 'website',
+              rootUrl: this.urls?.cms || '',
+              clientId: userId,
+              clientSecret: sharedSecret || cachedSecret,
+            });
+
+            const [authError, bearerToken] = await to(
+              authService.BearerToken()
+            );
+
+            // Login successful
+            if (bearerToken) {
+              // Set env vars
+              env.authToken = bearerToken;
+              env.lastUserId = userId;
+              env.passwordFallback =
+                credentials.remarks.secure !== true
+                  ? credentials.current?.password
+                  : undefined;
+              // Persist env before finding projects or doing anything else
+              this.session.UpdateEnv(env);
+
+              if (!silent) {
+                Logger.success(messages.login.success(currentEnv, userId));
+                await this.PrintProjects();
+              }
+              if (inputPassword) await credentials.Save(inputPassword);
+              if (sharedSecret) await credentials.Save(sharedSecret);
+            } else if (authError) {
+              Logger.error(authError.toString());
+              // Clear env vars
+              env.authToken = '';
+              env.lastUserId = '';
+              env.passwordFallback = undefined;
+              // Persist env to remove cleared values
+              this.session.UpdateEnv(env);
+
+              // If the auth error was raised using a cached password
+              if (
+                (cachedPassword || cachedSecret) &&
+                credentials.remarks.secure
+              ) {
+                // Remove any bad stored credential and trigger login prompt again
+                await credentials.Delete();
+                return await this.Login(userId, { password, sharedSecret });
+              } else {
+                throw new Error(messages.login.failed(currentEnv, userId));
+              }
+            }
+
+            return env.authToken;
+          } else {
+            Logger.error(messages.login.passwordPrompt());
+            if (attempt < 2)
+              return await this.Login(userId, { attempt: attempt + 1 });
+          }
         }
       } else {
         // No environment set, use `contensis connect {alias}` first
