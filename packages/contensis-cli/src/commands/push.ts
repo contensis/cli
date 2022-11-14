@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import mapJson from 'jsonpath-mapper';
-import { PushBlockParams } from 'migratortron/dist/models/Contensis';
+import { PushBlockParams } from 'migratortron';
 import { cliCommand } from '~/services/ContensisCliService';
 
 export const makePushCommand = () => {

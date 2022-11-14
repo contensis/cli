@@ -1,5 +1,4 @@
-import { MigrateStatus } from 'migratortron';
-import { BlockRunningStatus } from 'migratortron/dist/models/Contensis';
+import { BlockRunningStatus, MigrateStatus } from 'migratortron';
 import { Logger } from '~/util/logger';
 
 export const LogMessages = {

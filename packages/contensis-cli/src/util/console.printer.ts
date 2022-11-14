@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
-import { MigrateStatus } from 'migratortron';
-import { BlockVersion } from 'migratortron/dist/models/Contensis';
+import { BlockVersion, MigrateStatus } from 'migratortron';
 import ContensisCli from '~/services/ContensisCliService';
 
 const formatDate = (date: Date | string, format = 'DD/MM/YYYY HH:mm') =>

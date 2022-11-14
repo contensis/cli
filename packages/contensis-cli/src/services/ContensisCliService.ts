@@ -13,16 +13,15 @@ import { LogMessages } from '~/localisation/en-GB';
 import {
   ContensisMigrationService,
   MigrateRequest,
-  MigrateStatus,
+  PushBlockParams,
   SourceCms,
+  logEntriesTable,
 } from 'migratortron';
-import { logEntriesTable } from 'migratortron/dist/transformations/logging';
 import { Entry } from 'contensis-management-api/lib/models';
 
 import { csvFormatter } from '~/util/csv.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
 import { jsonFormatter } from '~/util/json.formatter';
-import { PushBlockParams } from 'migratortron/dist/models/Contensis';
 import { printBlockVersion, printMigrateResult } from '~/util/console.printer';
 import { readJsonFile } from '~/providers/file-provider';
 
@@ -55,7 +54,7 @@ class ContensisCli {
     process.removeAllListeners('exit');
     const exitCode = error ? 1 : 0;
 
-    console.info(`Exiting contensis-cli with exit code: ${exitCode}`);
+    console.info(`\nExiting contensis-cli with exit code: ${exitCode}\n`);
     process.exit(exitCode);
   };
 
@@ -1300,12 +1299,10 @@ class ContensisCli {
           printBlockVersion(this, blockVersion);
         });
       }
-      if (err) {
-        logError(err);
+      if (err)
         throw new Error(
           messages.blocks.failedPush(block.id, currentEnv, env.currentProject)
         );
-      }
     }
   };
 
