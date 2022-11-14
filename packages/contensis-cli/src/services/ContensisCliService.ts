@@ -1301,9 +1301,9 @@ class ContensisCli {
         });
       }
       if (err) {
-        log.error(
-          messages.blocks.failedPush(block.id, currentEnv, env.currentProject),
-          err
+        logError(err);
+        throw new Error(
+          messages.blocks.failedPush(block.id, currentEnv, env.currentProject)
         );
       }
     }

@@ -142,7 +142,7 @@ export const logError: LogErrorFunc = (
   msg,
   level = 'error'
 ) => {
-  Logger[level](msg || err.message || err?.data?.message);
+  Logger[level](msg || err.message || err?.data?.message || err.Message);
   (Array.isArray(err) ? err : [err]).map((error: AppError) => {
     if ('stack' in error) Logger.raw(`  ${Logger.infoText(error.stack)}`);
     if ('data' in error)
