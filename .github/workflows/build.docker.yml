@@ -10,7 +10,7 @@ jobs:
       REGISTRY: ghcr.io
       APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
