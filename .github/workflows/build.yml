@@ -66,7 +66,8 @@ jobs:
 
       - name: Push block to Contensis
         # uses: ./.github/actions/contensis-cli
-        uses: contensis/cli-action@v1
+        # uses: contensis/cli-action@v1
+        uses: ./.github/actions/push-block
         with:
           block-id: node-cli-ci-block
           # auto-release: true
