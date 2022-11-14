@@ -98,7 +98,7 @@ jobs:
         run: |
           git config user.email "github@zengenti.com"
           git config user.name "$GITHUB_ACTOR"
-          git add -A
+          git add packages/contensis-cli/.
           git commit -m "ci: bumps version [skip ci]"
           git push
         env:
@@ -107,6 +107,7 @@ jobs:
 
       - name: Publish prerelease package
         run: |
+          cd packages/contensis-cli
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag prerelease --ignore-scripts
         env:
