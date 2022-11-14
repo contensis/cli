@@ -58,7 +58,7 @@ class CredentialProvider {
       keytar.setPassword(this.serviceId, this.userId, password)
     );
 
-    if (!err) Logger.info(`${this.serviceId} - credentials saved`);
+    // if (!err) Logger.info(`${this.serviceId} - credentials saved`);
     return err && !this.passwordFallback ? err : true;
   };
 

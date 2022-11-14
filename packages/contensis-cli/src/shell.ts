@@ -72,8 +72,13 @@ class ContensisShell {
     );
   }
 
+  restart = async () => {
+    this.firstStart = false;
+    this.log.line(); // add a line so we can see where the shell has been restarted
+    await this.start();
+  };
+
   start = async () => {
-    this.log.line();
     this.refreshEnvironment();
     this.userId = '';
     const { currentEnvironment, env, log, messages } = this;
@@ -98,7 +103,10 @@ class ContensisShell {
               silent: true,
             }
           );
-          if (token) this.userId = env.lastUserId;
+          if (token) {
+            this.userId = env.lastUserId;
+            if (!env.currentProject) log.warning(messages.projects.tip());
+          }
           this.firstStart = false;
           this.refreshEnvironment();
         } else {
@@ -221,7 +229,10 @@ class ContensisShell {
 let globalShell: ContensisShell;
 
 export const shell = () => {
-  if (typeof process.argv?.[2] !== 'undefined') return { start() {} } as any;
+  // Return a benign function for shell().restart() when used in cli context
+  // as some commands need to restart the shell to show an updated prompt
+  // after successful connect / login / set project
+  if (typeof process.argv?.[2] !== 'undefined') return { restart() {} } as any;
   if (!globalShell) globalShell = new ContensisShell();
   return globalShell;
 };

@@ -53,7 +53,8 @@
       "when": "$(basename).tsx"
     }
   },
-  "workbench.editor.highlightModifiedTabs": true
+  "workbench.editor.highlightModifiedTabs": true,
+  "git.autofetch": true
 
   // "workbench.colorCustomizations": {
   //   "tab.activeBorderTop": "#e9654c",

@@ -17,7 +17,7 @@ export const makeCreateCommand = () => {
         ['create', 'project', projectId],
         opts
       ).SetProject(projectId);
-      if (project) await shell().start();
+      if (project) await shell().restart();
     });
   create
     .command('key')

@@ -15,7 +15,7 @@ export const makeSetCommand = () => {
       const project = cliCommand(['set', 'project', projectId]).SetProject(
         projectId
       );
-      if (project) await shell().start();
+      if (project) await shell().restart();
     });
   set
     .command('version')
@@ -29,7 +29,7 @@ export const makeSetCommand = () => {
       const success = cliCommand(['set', 'version', versionStatus]).SetVersion(
         versionStatus
       );
-      if (success) await shell().start();
+      if (success) await shell().restart();
     });
 
   return set;

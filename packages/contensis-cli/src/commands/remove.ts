@@ -18,7 +18,7 @@ export const makeRemoveCommand = () => {
         ['remove', 'project', projectId],
         opts
       ).SetProject(projectId);
-      if (project) await shell().start();
+      if (project) await shell().restart();
     });
   remove
     .command('key')

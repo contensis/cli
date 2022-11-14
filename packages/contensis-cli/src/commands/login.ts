@@ -27,7 +27,7 @@ Example call:
         password,
         sharedSecret: opts.sharedSecret,
       });
-      if (token) await shell().start();
+      if (token) await shell().restart();
     });
   return login;
 };
