@@ -53,7 +53,10 @@ interface IImportOptions {
 class ContensisCli {
   static quit = (error?: Error) => {
     process.removeAllListeners('exit');
-    process.exit(error ? 1 : 0);
+    const exitCode = error ? 1 : 0;
+
+    console.info(`Exiting contensis-cli with exit code: ${exitCode}`);
+    process.exit(exitCode);
   };
 
   cache: SessionCache;
