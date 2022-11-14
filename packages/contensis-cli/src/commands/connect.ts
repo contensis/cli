@@ -16,7 +16,7 @@ Example call:
   > connect example-dev`
     )
     .action(async (alias, opts) => {
-      await cliCommand(['connect', alias], opts).Connect(alias);
+      await cliCommand(['connect', alias], { ...opts, alias }).Connect(alias);
       await shell().start();
     });
   return connect;
