@@ -7,11 +7,11 @@ on:
 
 jobs:
   node:
-    uses: ./.github/workflows/build/node.yml
+    uses: ./.github/workflows/build.node.yml
     secrets: inherit
 
   docker:
     # technically does not require node/build and could run in parallel
     needs: node
-    uses: ./.github/workflows/build/docker.yml
+    uses: ./.github/workflows/build.docker.yml
     secrets: inherit
