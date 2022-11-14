@@ -27,14 +27,14 @@ jobs:
           yarn cache clean --mirror
           yarn run bootstrap:ci
           yarn run build
-          cd packages/contensis-cli
-          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
-          npm pack
-          npm i -g contensis-cli-$APP_VERSION.tgz
+          APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
-      - name: Test running the cli
+      - name: Test installing and running the cli
         run: |
+          cd packages/contensis-cli
+          npm pack
+          npm i -g contensis-cli-${{ env.APP_VERSION }}.tgz
           # contensis-cli push block node-cli-ci-block ${{ env.APP_IMAGE }}:latest -r -cmsg "${{ github.event.head_commit.message }}" -cdt ${{ github.event.head_commit.timestamp }} -author ${{ github.event.head_commit.author.email }} -committer ${{ github.event.head_commit.committer.email }} -a zenhub-dev -p contensis -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           contensis connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           contensis get entries
@@ -64,7 +64,7 @@ jobs:
           docker build --force-rm --cache-from ${{ env.APP_IMAGE }}:latest -t ${{ env.APP_IMAGE }}:latest -f Dockerfile .
           docker push ${{ env.APP_IMAGE }}:latest
 
-      - name: Push block to Contensis
+      - name: Push block to Contensis (Test `contensis/block-push` Action)
         # uses: ./.github/actions/contensis-cli
         # uses: contensis/cli-action@v1
         # uses: ./.github/actions/push-block
@@ -76,7 +76,7 @@ jobs:
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
 
-      - name: Get entries from Contensis
+      - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/contensis-cli
         uses: contensis/cli-action@v1
         with:
@@ -85,3 +85,26 @@ jobs:
           project-id: migratortron
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
+
+      - name: Increment package version
+        run: |
+          cd packages/contensis-cli
+          npm version prerelease --preid=beta --no-git-tag-version
+
+      - name: Push version increment to GIT
+        run: |
+          git config user.email "github@zengenti.com"
+          git config user.name "$GITHUB_ACTOR"
+          git add -A
+          git commit -m "ci: bumps version [skip ci]"
+          git push
+        env:
+          # The secret is passed automatically. Nothing to configure.
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish prerelease package
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --tag prerelease --ignore-scripts
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
