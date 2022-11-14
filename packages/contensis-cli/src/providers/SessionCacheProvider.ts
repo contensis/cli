@@ -3,7 +3,7 @@ import path from 'path';
 import clone from 'lodash/cloneDeep';
 import mergeWith from 'lodash/mergeWith';
 import unionBy from 'lodash/unionBy';
-import { isJson, tryParse, tryStringify } from '~/util';
+import { isJson, tryParse } from '~/util';
 import { Logger } from '~/util/logger';
 
 class SessionCacheProvider {
@@ -65,6 +65,31 @@ class SessionCacheProvider {
     } catch (ex: any) {
       // Problem merging cache data for update
       Logger.error(`Problem updating environments.json`);
+      Logger.error(ex);
+    }
+    return this.Get();
+  };
+
+  UpdateEnv = (
+    updateContent: Partial<EnvironmentCache>,
+    env = this.cache.currentEnvironment
+  ) => {
+    try {
+      const environment = this.cache.environments[env || ''];
+
+      this.cache.environments[env || ''] = {
+        ...environment,
+        ...updateContent,
+      };
+      this.Update({
+        currentEnvironment: env,
+        environments: this.cache.environments,
+      });
+    } catch (ex: any) {
+      // Problem merging cache data for update
+      Logger.error(
+        `Problem updating environment "${env}" in environments.json`
+      );
       Logger.error(ex);
     }
     return this.Get();

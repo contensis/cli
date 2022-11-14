@@ -12,11 +12,9 @@ export const makeSetCommand = () => {
     .argument('<projectId>', 'the project id to work with')
     .usage('<projectId>')
     .action(async projectId => {
-      const project = await cliCommand([
-        'set',
-        'project',
-        projectId,
-      ]).SetProject(projectId);
+      const project = cliCommand(['set', 'project', projectId]).SetProject(
+        projectId
+      );
       if (project) await shell().start();
     });
   set
@@ -28,11 +26,9 @@ export const makeSetCommand = () => {
     )
     .usage('<latest/published>')
     .action(async versionStatus => {
-      const success = await cliCommand([
-        'set',
-        'version',
-        versionStatus,
-      ]).SetVersion(versionStatus);
+      const success = cliCommand(['set', 'version', versionStatus]).SetVersion(
+        versionStatus
+      );
       if (success) await shell().start();
     });
 
