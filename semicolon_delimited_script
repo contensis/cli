@@ -1,0 +1,9 @@
+contensis
+contensis connect zenhub-dev -id 03c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 -s 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd46 -p migratortron
+if [ -n "" ]
+then
+  contensis push block  ghcr.io/contensis/node-cli/main/app:latest main --provider Github --repository-url https://github.com/contensis/node-cli.git --commit-id 46762006790b44d0d3398044ccbcb75c1afd0f03 --commit-message "build: fix error `Patch file found for package inquirer-command-prompt which is not present at node_modules/inquirer-command-prompt`" --commit-datetime 2022-11-14T18:16:35Z --author-email n.flatley@zengenti.com --committer-email n.flatley@zengenti.com
+else
+  contensis get entries
+fi
+
