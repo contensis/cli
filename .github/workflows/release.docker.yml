@@ -5,6 +5,7 @@ on:
     inputs:
       APP_VERSION:
         required: true
+        type: string
   workflow_dispatch:
     inputs:
       APP_VERSION:
