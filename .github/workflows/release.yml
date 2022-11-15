@@ -57,12 +57,13 @@ jobs:
           git config user.email "github@zengenti.com"
           git config user.name "$GITHUB_ACTOR"
           git add packages/contensis-cli/.
-          git push --follow-tags
+          git commit -m "ci: release version ${{ env.APP_VERSION }} [skip ci]"
+          git push
         env:
           # The secret is passed automatically. Nothing to configure.
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish release package "${{ github.event.inputs.version }}" with tag "${{ github.event.inputs.tag }}"
+      - name: Publish release package "${{ env.APP_VERSION }}" with tag "${{ github.event.inputs.tag }}"
         run: |
           cd packages/contensis-cli
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
