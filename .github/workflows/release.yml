@@ -1,4 +1,4 @@
-name: Release version to NPM (manual trigger)
+name: Release version (manual trigger)
 
 on:
   workflow_dispatch:
@@ -13,67 +13,16 @@ on:
         default: 'latest'
 
 jobs:
-  release-node:
-    runs-on: ubuntu-latest
-    outputs:
-      APP_VERSION: ${{ steps.variables.outputs.APP_VERSION }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-
-      - name: Install dependencies
-        run: |
-          yarn cache clean --mirror
-          yarn run bootstrap:ci
-          cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
-
-      - name: Increment version (if prerelease)
-        if: contains(github.event.inputs.version, 'prerelease')
-        run: |
-          cd packages/contensis-cli
-          npm version prerelease --preid=beta --no-git-tag-version
-          npm run build
-
-      - name: Increment version (if other release)
-        if: contains(github.event.inputs.version, 'prerelease') == false
-        run: |
-          cd packages/contensis-cli
-          npm version ${{ github.event.inputs.version }}
-          npm run build
-
-      - id: variables
-        name: Set APP_VERSION output variable
-        run: |
-          APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Push version increment to GIT
-        run: |
-          git config user.email "github@zengenti.com"
-          git config user.name "$GITHUB_ACTOR"
-          git add packages/contensis-cli/.
-          git commit -m "ci: release version ${{ env.APP_VERSION }} [skip ci]"
-          git push
-        env:
-          # The secret is passed automatically. Nothing to configure.
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish release package "${{ env.APP_VERSION }}" with tag "${{ github.event.inputs.tag }}"
-        run: |
-          cd packages/contensis-cli
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-          npm publish --tag ${{ github.event.inputs.tag }} --ignore-scripts
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  node:
+    uses: ./.github/workflows/release.node.yml
+    with:
+      version: ${{ inputs.version }}
+      tag: ${{ inputs.tag }}
+    secrets: inherit
 
   docker:
-    needs: release-node
+    needs: node
     uses: ./.github/workflows/release.docker.yml
     with:
-      APP_VERSION: ${{ needs.release-node.outputs.APP_VERSION }}
+      APP_VERSION: ${{ needs.node.outputs.APP_VERSION }}
     secrets: inherit
