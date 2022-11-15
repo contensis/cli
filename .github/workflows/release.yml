@@ -71,28 +71,9 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  release-docker:
-    runs-on: ubuntu-latest
+  docker:
     needs: release-node
-    env:
-      REGISTRY: ghcr.io
-      APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
+    uses: ./.github/workflows/release.docker.yml
+    with:
       APP_VERSION: ${{ needs.release-node.outputs.APP_VERSION }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Log into container registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2.1.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull latest Docker image and push to ${{ env.APP_IMAGE }}:release
-        run: |
-          docker pull ${{ env.APP_IMAGE }}:latest
-          docker tag ${{ env.APP_IMAGE }}:latest ${{ env.APP_IMAGE }}:release
-          docker push ${{ env.APP_IMAGE }}:release
-          docker tag ${{ env.APP_IMAGE }}:latest ${{ env.APP_IMAGE }}:${{ env.APP_VERSION }}
-          docker push ${{ env.APP_IMAGE }}:${{ env.APP_VERSION }}
+    secrets: inherit
