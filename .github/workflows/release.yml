@@ -15,7 +15,8 @@ on:
 jobs:
   release-node:
     runs-on: ubuntu-latest
-
+    outputs:
+      APP_VERSION: ${{ steps.variables.outputs.APP_VERSION }}
     steps:
       - uses: actions/checkout@v3
 
@@ -44,6 +45,13 @@ jobs:
           npm version ${{ github.event.inputs.version }}
           npm run build
 
+      - id: variables
+        name: Set APP_VERSION output variable
+        run: |
+          APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_OUTPUT
+
       - name: Push version increment to GIT
         run: |
           git config user.email "github@zengenti.com"
@@ -68,17 +76,9 @@ jobs:
     env:
       REGISTRY: ghcr.io
       APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
+      APP_VERSION: ${{ needs.release-node.outputs.APP_VERSION }}
     steps:
       - uses: actions/checkout@v3
-
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-        run: |
-          cd packages/contensis-cli
-          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
