@@ -2,6 +2,9 @@ name: Release version to docker registry
 
 on:
   workflow_call:
+    inputs:
+      APP_VERSION:
+        required: true
   workflow_dispatch:
     inputs:
       APP_VERSION:

@@ -2,6 +2,16 @@ name: Release version to NPM
 
 on:
   workflow_call:
+    inputs:
+      version:
+        required: true
+      tag:
+        required: true
+    outputs:
+      APP_VERSION:
+        description: 'The latest app version in `package.json`'
+        value: ${{ jobs.release.outputs.APP_VERSION }}
+
   workflow_dispatch:
     inputs:
       version:
@@ -12,10 +22,6 @@ on:
         description: 'The NPM version tag to use, "latest" will become the default package version, or "prerelease"'
         required: true
         default: 'latest'
-    outputs:
-      APP_VERSION:
-        description: 'The latest app version in `package.json`'
-        value: ${{ jobs.release.outputs.APP_VERSION }}
 
 jobs:
   release:
