@@ -28,6 +28,7 @@ jobs:
         run: |
           yarn cache clean --mirror
           yarn run bootstrap:ci
+          cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
 
       - name: Increment version (if prerelease)
         if: contains(github.event.inputs.version, 'prerelease')
