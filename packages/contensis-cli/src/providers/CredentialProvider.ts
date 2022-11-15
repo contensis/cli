@@ -40,8 +40,10 @@ class CredentialProvider {
       }[]
     ];
     if (err && this.passwordFallback) {
-      this.current = { account: this.userId, password: this.passwordFallback };
-      // this.remarks = { secure: false };
+      this.current = {
+        account: this.userId,
+        password: this.passwordFallback,
+      };
     }
     if (!err) {
       this.remarks = { secure: true };
@@ -49,6 +51,11 @@ class CredentialProvider {
         stored?.find(
           u => u?.account?.toLowerCase() === this.userId.toLowerCase()
         ) || null;
+
+      if (!this.current && this.passwordFallback) {
+        await this.Save(this.passwordFallback);
+        return await this.Init();
+      }
     }
     return [err, this];
   };
