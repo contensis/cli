@@ -15,6 +15,7 @@ import { makeImportCommand } from './import';
 import { makeListCommand } from './list';
 import { makeLoginCommand } from './login';
 import { makePushCommand } from './push';
+import { makeReleaseCommand } from './release';
 import { makeRemoveCommand } from './remove';
 import { makeSetCommand } from './set';
 
@@ -58,6 +59,9 @@ const commands = () => {
   );
   program.addCommand(
     addGlobalOptions(makePushCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addGlobalOptions(makeReleaseCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(makeRemoveCommand()).copyInheritedSettings(program)

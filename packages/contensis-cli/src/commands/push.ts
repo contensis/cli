@@ -55,7 +55,7 @@ export const makePushCommand = () => {
       'after',
       `
 Example call:
-  > push block contensis-app ghcr.io/contensis/contensis-app/build-4359 master --release\n`
+  > push block contensis-app ghcr.io/contensis/contensis-app/app:build-4359 master --release\n`
     )
     .action(async (blockId: string, imageUri: string, branch: string, opts) => {
       const cli = cliCommand(['push', 'block', blockId], opts);

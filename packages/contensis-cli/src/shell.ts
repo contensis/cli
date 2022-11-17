@@ -151,6 +151,7 @@ class ContensisShell {
         'list webhooks',
         'create key',
         'push block',
+        'release block',
         'remove key',
         'remove entry',
         'remove contenttypes',
@@ -176,7 +177,7 @@ class ContensisShell {
             return true;
           }
         },
-        prefix: `${env?.currentProject || 'contensis'}`,
+        prefix: `${env?.currentProject || log.infoText('contensis')}`,
         short: true,
       },
     ])

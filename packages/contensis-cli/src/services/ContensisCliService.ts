@@ -1147,7 +1147,7 @@ class ContensisCli {
   };
 
   PrintBlocks = async () => {
-    const { currentEnv, log, messages } = this;
+    const { currentEnv, env, log, messages } = this;
     if (!this.contensis) await this.ConnectContensis();
     if (this.contensis) {
       // Retrieve blocks list for env
@@ -1156,7 +1156,7 @@ class ContensisCli {
       if (Array.isArray(blocks)) {
         this.HandleFormattingAndOutput(blocks, () => {
           // print the blocks to console
-          log.success(messages.blocks.list(currentEnv));
+          log.success(messages.blocks.list(currentEnv, env.currentProject));
           for (const {
             id,
             description,
@@ -1210,7 +1210,7 @@ class ContensisCli {
         this.HandleFormattingAndOutput(blocks, () => {
           // print the version detail to console
           log.success(
-            messages.blocks.get(`${currentEnv}:${env.currentProject}`)
+            messages.blocks.get(blockId, currentEnv, env.currentProject)
           );
           for (const block of blocks)
             printBlockVersion(
@@ -1277,16 +1277,50 @@ class ContensisCli {
     }
   };
 
+  ReleaseBlock = async (blockId: string, version: string) => {
+    const { currentEnv, env, log, messages } = this;
+    if (!this.contensis) await this.ConnectContensis();
+    if (this.contensis) {
+      // Retrieve block version
+      const [err, blockVersion] = await this.contensis.blocks.BlockAction(
+        blockId,
+        'release',
+        version
+      );
+
+      if (blockVersion) {
+        this.HandleFormattingAndOutput(blockVersion, () => {
+          // print the version detail to console
+          log.success(
+            messages.blocks.released(blockId, currentEnv, env.currentProject)
+          );
+          printBlockVersion(this, blockVersion);
+        });
+      }
+
+      if (err) {
+        log.error(
+          messages.blocks.failedRelease(blockId, currentEnv, env.currentProject)
+        );
+        log.error(jsonFormatter(err));
+      }
+    }
+  };
+
   PrintBlockLogs = async (
     blockId: string,
     branch: string,
     version: string,
     dataCenter: 'hq' | 'manchester' | 'london'
   ) => {
-    const { currentEnv, log, messages } = this;
+    const { currentEnv, env, log, messages } = this;
     if (!this.contensis) await this.ConnectContensis();
     if (this.contensis) {
       // Retrieve block logs
+      log.success(
+        messages.blocks.getLogs(blockId, branch, currentEnv, env.currentProject)
+      );
+
       const [err, blockLogs] = await this.contensis.blocks.GetBlockLogs({
         blockId,
         branchId: branch,
@@ -1296,8 +1330,7 @@ class ContensisCli {
 
       if (blockLogs) {
         this.HandleFormattingAndOutput(blockLogs, () => {
-          // print the  logs to console
-          log.success(messages.blocks.list(currentEnv));
+          // print the logs to console
           console.log(
             `  - ${blockId} ${branch} ${
               Number(version) ? `v${version}` : version
@@ -1310,7 +1343,9 @@ class ContensisCli {
       }
 
       if (err) {
-        log.error(messages.blocks.noList(currentEnv));
+        log.error(
+          messages.blocks.failedGetLogs(blockId, currentEnv, env.currentProject)
+        );
         log.error(jsonFormatter(err));
       }
     }
