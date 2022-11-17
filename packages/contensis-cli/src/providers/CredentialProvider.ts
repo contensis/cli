@@ -10,6 +10,7 @@ interface Remarks {
 
 class CredentialProvider {
   private serviceId: string;
+  private keytar!: typeof keytar;
   private userId: string = '';
   private passwordFallback?: string;
 
@@ -29,9 +30,24 @@ class CredentialProvider {
     this.passwordFallback = passwordFallback;
   }
 
+  Import = async () => {
+    try {
+      this.keytar = await import('keytar');
+    } catch (ex) {
+      this.keytar = {
+        findCredentials: async () => { throw ex; },
+        getPassword: async () => { throw ex; },
+        findPassword: async () => { throw ex; },
+        setPassword: async () => { throw ex; },
+        deletePassword: async () => { throw ex; },
+      }
+    }
+  }
+
   Init = async (): Promise<[Error, CredentialProvider]> => {
+    await this.Import();
     const [err, stored] = (await to(
-      keytar.findCredentials(this.serviceId)
+      this.keytar.findCredentials(this.serviceId)
     )) as [
       Error,
       {
@@ -62,7 +78,7 @@ class CredentialProvider {
 
   Save = async (password: string) => {
     const [err] = await to(
-      keytar.setPassword(this.serviceId, this.userId, password)
+      this.keytar.setPassword(this.serviceId, this.userId, password)
     );
 
     // if (!err) Logger.info(`${this.serviceId} - credentials saved`);
@@ -75,7 +91,7 @@ class CredentialProvider {
       return true;
     } else {
       const [err] = await to(
-        keytar.deletePassword(this.serviceId, this.userId)
+        this.keytar.deletePassword(this.serviceId, this.userId)
       );
 
       Logger.warning(`${this.serviceId} - invalid credentials removed`);
