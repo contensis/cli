@@ -1262,7 +1262,6 @@ class ContensisCli {
             env.currentProject
           )
         );
-        console.log(jsonFormatter(blockVersion));
       }
       if (blockVersion) {
         this.HandleFormattingAndOutput(blockVersion, () => {
