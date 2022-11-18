@@ -64,7 +64,7 @@ jobs:
       - id: variables
         name: Set APP_VERSION output variable
         run: |
-          GIT_BRANCH=$(git branch --contains a175260 | sed 's/[^a-zA-Z0-9]//g')
+          GIT_BRANCH=$(git branch --contains ${{ github.sha }} | grep -v detached | sed 's/[^a-zA-Z0-9]//g')
           APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
           echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
@@ -72,7 +72,7 @@ jobs:
 
       - name: Workaround for detached HEAD
         run: |
-          git checkout ${env.GIT_BRANCH#refs/heads/} || git checkout -b ${env.GIT_BRANCH#refs/heads/} && git pull
+          git checkout ${env.GIT_BRANCH#refs/heads/}
 
       - name: Push version increment to GIT
         run: |
