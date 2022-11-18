@@ -32,7 +32,8 @@ jobs:
       APP_VERSION: ${{ steps.variables.outputs.APP_VERSION }}
     steps:
       - uses: actions/checkout@v3
-        ref: $GITHUB_REF
+        with:
+          ref: $GITHUB_REF
 
       - name: Use Node.js
         uses: actions/setup-node@v3
