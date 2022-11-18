@@ -5,6 +5,7 @@ on:
 
 jobs:
   build:
+    name: Build and tag latest image
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io

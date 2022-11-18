@@ -5,7 +5,9 @@ on:
 
 jobs:
   build:
+    name: Build, test and publish next beta version to npm
     runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'chore:') && !startsWith(github.event.head_commit.message, 'docs:') && !contains(github.ref_name, github.event.head_commit.message)"
 
     steps:
       - uses: actions/checkout@v3
