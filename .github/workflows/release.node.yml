@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "v0.0.0-alpha.0")'
+        description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "3.11.1-alpha.0")'
         required: true
         default: 'patch'
       tag:
@@ -32,6 +32,7 @@ jobs:
       APP_VERSION: ${{ steps.variables.outputs.APP_VERSION }}
     steps:
       - uses: actions/checkout@v3
+        ref: $GITHUB_REF
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -45,7 +46,7 @@ jobs:
           cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
 
       - name: Increment version (if prerelease)
-        if: contains(github.event.inputs.version, 'prerelease')
+        if: contains(github.event.inputs.tag, 'prerelease')
         run: |
           cd packages/contensis-cli
           npm version prerelease --preid=beta --no-git-tag-version

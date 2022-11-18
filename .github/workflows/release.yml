@@ -1,10 +1,13 @@
 name: Release version (manual trigger)
 
 on:
+  release:
+    types:
+      - published
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "v0.0.0-alpha.0")'
+        description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "3.11.1-alpha.0")'
         required: true
         default: 'patch'
       tag:
@@ -16,8 +19,8 @@ jobs:
   node:
     uses: ./.github/workflows/release.node.yml
     with:
-      version: ${{ inputs.version }}
-      tag: ${{ inputs.tag }}
+      version: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version }}
+      tag: ${{ (github.event_name == 'release' && github.event.release.prerelease == true && 'prerelease' || 'latest') || inputs.tag }}
     secrets: inherit
 
   docker:
