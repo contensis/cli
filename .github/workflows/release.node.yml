@@ -3,9 +3,9 @@ name: Publish npm package
 on:
   workflow_call:
     inputs:
-      version:
-        required: true
-        type: string
+      # version:
+      #   required: true
+      #   type: string
       tag:
         required: true
         type: string
@@ -16,10 +16,10 @@ on:
 
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "3.11.1-alpha.0")'
-        required: true
-        default: 'patch'
+      # version:
+      #   description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "3.11.1-alpha.0")'
+      #   required: true
+      #   default: 'patch'
       tag:
         description: 'The NPM version tag to use, "latest" will become the default package version, or "prerelease"'
         required: true

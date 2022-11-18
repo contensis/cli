@@ -2,22 +2,22 @@ name: Tag release container
 on:
   workflow_call:
     inputs:
-      APP_VERSION:
+      version:
         required: true
         type: string
   workflow_dispatch:
     inputs:
-      APP_VERSION:
+      version:
         description: 'Release version to tag (e.g. "1.0.0-beta.0" or "2.1.0")'
         required: true
 
 jobs:
   release:
-    name: Pull latest image and tag release
+    name: Pull latest and tag release
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name == inputs.APP_VERSION && github.event.repository.default_branch || github.ref_name }}/app
+      APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name == inputs.version && github.event.repository.default_branch || github.ref_name }}/app
     steps:
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -32,5 +32,5 @@ jobs:
           docker pull ${{ env.APP_IMAGE }}:latest
           docker tag ${{ env.APP_IMAGE }}:latest ${{ env.APP_IMAGE }}:release
           docker push ${{ env.APP_IMAGE }}:release
-          docker tag ${{ env.APP_IMAGE }}:latest ${{ env.APP_IMAGE }}:${{ inputs.APP_VERSION }}
-          docker push ${{ env.APP_IMAGE }}:${{ inputs.APP_VERSION }}
+          docker tag ${{ env.APP_IMAGE }}:latest ${{ env.APP_IMAGE }}:${{ inputs.version }}
+          docker push ${{ env.APP_IMAGE }}:${{ inputs.version }}

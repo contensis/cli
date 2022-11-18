@@ -6,10 +6,10 @@ on:
       - published
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "3.11.1-alpha.0")'
-        required: true
-        default: 'patch'
+      # version:
+      #   description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "3.11.1-alpha.0")'
+      #   required: true
+      #   default: 'patch'
       tag:
         description: 'The NPM version tag to use, "latest" will become the default package version, or "prerelease"'
         required: true
@@ -20,7 +20,7 @@ jobs:
     name: npm@latest
     uses: ./.github/workflows/release.node.yml
     with:
-      version: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version }}
+      # version: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version }}
       tag: ${{ (github.event_name == 'release' && github.event.release.prerelease == true && 'prerelease' || 'latest') || inputs.tag }}
     secrets: inherit
 
