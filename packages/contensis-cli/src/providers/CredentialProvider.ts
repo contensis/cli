@@ -32,17 +32,27 @@ class CredentialProvider {
 
   Import = async () => {
     try {
-      this.keytar = await import('keytar');
+      this.keytar = (await import('keytar')).default;
     } catch (ex) {
       this.keytar = {
-        findCredentials: async () => { throw ex; },
-        getPassword: async () => { throw ex; },
-        findPassword: async () => { throw ex; },
-        setPassword: async () => { throw ex; },
-        deletePassword: async () => { throw ex; },
-      }
+        findCredentials: async () => {
+          throw ex;
+        },
+        getPassword: async () => {
+          throw ex;
+        },
+        findPassword: async () => {
+          throw ex;
+        },
+        setPassword: async () => {
+          throw ex;
+        },
+        deletePassword: async () => {
+          throw ex;
+        },
+      };
     }
-  }
+  };
 
   Init = async (): Promise<[Error, CredentialProvider]> => {
     await this.Import();
