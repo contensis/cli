@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    name: Build and tag latest image
+    name: Build image and push
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io

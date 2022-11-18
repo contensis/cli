@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    name: Build, test and publish next beta version to npm
+    name: Build, test and publish
     runs-on: ubuntu-latest
     if: "!startsWith(github.event.head_commit.message, 'chore:') && !startsWith(github.event.head_commit.message, 'docs:') && !contains(github.ref_name, github.event.head_commit.message)"
 

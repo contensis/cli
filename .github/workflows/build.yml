@@ -12,7 +12,7 @@ jobs:
     secrets: inherit
 
   docker:
-    name: docker:latest
+    name: ghcr.io:latest
     # technically does not require node/build and could run in parallel
     needs: node
     uses: ./.github/workflows/build.docker.yml
