@@ -70,7 +70,7 @@ jobs:
 
       - name: Workaround for detached HEAD
         run: |
-          git checkout ${GITHUB_REF#refs/heads/}
+          git checkout ${GITHUB_REF#refs/heads/} || git checkout -b ${GITHUB_REF#refs/heads/} && git pull
 
       - name: Push version increment to GIT
         run: |
