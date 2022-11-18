@@ -1,4 +1,4 @@
-name: Contensis CLI Node and Docker CI
+name: Build and deploy
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Release version (manual trigger)
+name: Release version
 
 on:
   release:

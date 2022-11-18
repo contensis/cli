@@ -1,4 +1,4 @@
-name: Contensis CLI Docker CI
+name: Docker CI
 
 on:
   workflow_call:

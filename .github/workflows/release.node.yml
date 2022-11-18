@@ -1,4 +1,4 @@
-name: Release version to NPM
+name: Publish npm package
 
 on:
   workflow_call:

@@ -1,5 +1,4 @@
-name: Release version to docker registry
-
+name: Tag container release
 on:
   workflow_call:
     inputs:
