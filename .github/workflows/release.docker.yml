@@ -27,7 +27,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull latest Docker image and push to ${{ env.APP_IMAGE }}:release
+      - name: Pull latest image
         run: docker pull ${{ env.APP_IMAGE }}:latest
 
       - name: Tag release and push
