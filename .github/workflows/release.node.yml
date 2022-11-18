@@ -32,8 +32,6 @@ jobs:
       APP_VERSION: ${{ steps.variables.outputs.APP_VERSION }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.sha }}
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -47,14 +45,14 @@ jobs:
           cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
 
       - name: Increment version (if prerelease)
-        if: contains(github.event.inputs.tag, 'prerelease')
+        if: github.event.inputs.tag == 'prerelease'
         run: |
           cd packages/contensis-cli
           npm version prerelease --preid=beta --no-git-tag-version
           npm run build
 
       - name: Increment version (if other release)
-        if: contains(github.event.inputs.version, 'prerelease') == false
+        if: github.event.inputs.tag != 'prerelease'
         run: |
           cd packages/contensis-cli
           npm version ${{ github.event.inputs.version }}
