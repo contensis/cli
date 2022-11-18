@@ -69,7 +69,7 @@ jobs:
         run: |
           git config user.email "github@zengenti.com"
           git config user.name "$GITHUB_ACTOR"
-          git add packages/contensis-cli/.
+          git add .
           git commit -m "ci: release version ${{ env.APP_VERSION }} [skip ci]"
           git push
         env:
