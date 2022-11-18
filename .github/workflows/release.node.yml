@@ -68,9 +68,16 @@ jobs:
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_OUTPUT
 
+      - name: Git branch name
+        id: git-branch-name
+        uses: EthanSK/git-branch-name-action@v1
+
+      - name: Echo the branch name
+        run: echo "Branch name ${GIT_BRANCH_NAME}"
+
       - name: Workaround for detached HEAD
         run: |
-          git checkout ${GITHUB_REF#refs/heads/} || git checkout -b ${GITHUB_REF#refs/heads/} && git pull
+          git checkout ${env.GIT_BRANCH_NAME#refs/heads/} || git checkout -b ${env.GIT_BRANCH_NAME#refs/heads/} && git pull
 
       - name: Push version increment to GIT
         run: |
