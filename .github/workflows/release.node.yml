@@ -87,6 +87,7 @@ jobs:
       #     github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish release package "${{ env.APP_VERSION }}" with tag "${{ inputs.tag }}"
+        if: inputs.tag != 'prerelease'
         run: |
           cd packages/contensis-cli
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
