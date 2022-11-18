@@ -1,4 +1,4 @@
-name: Tag container release
+name: Tag release container
 on:
   workflow_call:
     inputs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
+      APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name == inputs.APP_VERSION && github.event.repository.default_branch || github.ref_name }}/app
     steps:
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
