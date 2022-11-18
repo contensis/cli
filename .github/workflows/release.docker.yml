@@ -28,9 +28,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull latest Docker image and push to ${{ env.APP_IMAGE }}:release
+        run: docker pull ${{ env.APP_IMAGE }}:latest
+
+      - name: Tag release and push
         run: |
-          docker pull ${{ env.APP_IMAGE }}:latest
           docker tag ${{ env.APP_IMAGE }}:latest ${{ env.APP_IMAGE }}:release
           docker push ${{ env.APP_IMAGE }}:release
+
+      - name: Tag version and push
+        if: inputs.version != 'release'
+        run: |
           docker tag ${{ env.APP_IMAGE }}:latest ${{ env.APP_IMAGE }}:${{ inputs.version }}
           docker push ${{ env.APP_IMAGE }}:${{ inputs.version }}
