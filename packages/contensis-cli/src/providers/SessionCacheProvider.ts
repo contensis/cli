@@ -11,7 +11,7 @@ class SessionCacheProvider {
   private cache = {} as SessionCache;
 
   constructor() {
-    this.localFilePath = path.join(__dirname, '../../environments.json');
+    this.localFilePath = path.join(process.cwd(), 'environments.json');
     this.cache = {
       currentTimestamp: new Date().toISOString(),
       environments: {},

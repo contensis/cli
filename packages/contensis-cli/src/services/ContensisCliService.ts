@@ -54,7 +54,7 @@ class ContensisCli {
     process.removeAllListeners('exit');
     const exitCode = error ? 1 : 0;
 
-    console.info(`\nExiting contensis-cli with exit code: ${exitCode}\n`);
+    // console.info(`\nExiting contensis-cli with exit code: ${exitCode}\n`);
     process.exit(exitCode);
   };
 

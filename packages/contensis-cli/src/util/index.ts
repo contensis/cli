@@ -1,5 +1,6 @@
 import mergeWith from 'lodash/mergeWith';
 import { Logger } from './logger';
+import { LogMessages as enGB } from '../localisation/en-GB.js';
 
 export const isSharedSecret = (str = '') =>
   str.length > 80 && str.split('-').length === 3 ? str : undefined;
@@ -50,12 +51,17 @@ export const url = (alias: string, project: string) => {
 };
 
 export const Logging = async (language = 'en-GB') => {
-  const { LogMessages: defaultMessages } = await import(
-    `../localisation/en-GB.js`
-  );
-  const { LogMessages: localisedMessages } = await import(
-    `../localisation/${language}.js`
-  );
+  const defaultMessages = enGB;
+  // const { LogMessages: defaultMessages } = await import(
+  //   `../localisation/en-GB.js`
+  // );
+  let localisedMessages = defaultMessages;
+
+  if (language === 'en-GB') {
+    // Using a variable import e.g. `import(`../localisation/${language}.js`);`
+    // does not play well with packaged executables
+    // So we have to hard code the import for each language individually
+  }
   return {
     messages: mergeWith(
       localisedMessages,

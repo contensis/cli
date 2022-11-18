@@ -39,7 +39,7 @@ class ContensisShell {
     inquirerPrompt.setConfig({
       history: {
         save: true,
-        folder: path.join(__dirname, '../'),
+        folder: path.join(process.cwd(), '../'),
         limit: 100,
         blacklist: ['quit'],
       },
