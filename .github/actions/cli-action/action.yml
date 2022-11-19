@@ -38,6 +38,7 @@ runs:
       with:
         image: ghcr.io/contensis/node-cli/main/app:${{ inputs.cli-version }}
         run: |
+          touch output.json
           contensis
           contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
           contensis ${{ inputs.command || '--help' }} --output output.json
