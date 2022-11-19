@@ -1,0 +1,38 @@
+name: 'Contensis cli action'
+description: 'A GitHub Action for interacting with a Contensis CMS via the cli'
+author: 'Zengenti'
+branding:
+  icon: 'terminal'
+  color: 'blue'
+inputs:
+  alias:
+    description: 'The Contensis cloud alias to connect to'
+    required: true
+  project-id:
+    description: 'The id of the project to connect to'
+    required: false
+    default: website
+  client-id:
+    description: 'Client id to connect to the supplied alias'
+    required: true
+  shared-secret:
+    description: 'Shared secret to use with the supplied client id'
+    required: true
+  command:
+    description: 'Optional: which cli command to run'
+    required: false
+  cli-version:
+    description: 'Optional: pull cli from specified tag. Default: release'
+    default: release
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Pull Contensis CLI docker image and run commands
+      uses: addnab/docker-run-action@v3
+      with:
+        image: ghcr.io/contensis/node-cli/main/app:${{ inputs.cli-version }}
+        run: |
+          contensis
+          contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
+          contensis ${{ inputs.command || '--help' }}
