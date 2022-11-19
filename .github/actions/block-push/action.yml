@@ -31,6 +31,10 @@ inputs:
     description: 'Whether to release the block upon successful push'
     required: false
     default: false
+  tag-repo:
+    description: 'Whether to push a tag to the git repo upon successful block push'
+    required: false
+    default: false
 
 outputs:
   block-version:
@@ -66,3 +70,14 @@ runs:
         echo "Setting block-version: $VERSION_NO"
         echo "block-version=$VERSION_NO" >> $GITHUB_OUTPUT
         echo "set GITHUB_OUTPUT.block-version OK"
+
+    - uses: actions/checkout@v3
+      if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
+    - name: Tag repo with block version
+      if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
+      run: |
+        TAG=block-${{ inputs.project-id }}-${{ steps.set.outputs.block-version }}
+        VERSION=${{ steps.set.outputs.block-version }}
+        echo "Tagging commit with block version: $VERSION"
+        git tag $TAG
+        git push origin $TAG

@@ -34,22 +34,24 @@ jobs:
         # uses: contensis/cli-action@v1
         uses: ./.github/actions/block-push
         # uses: contensis/block-push@v1
+        secrets: inherit
         with:
           block-id: node-cli-ci-block
-          auto-release: true
+          auto-release: false
           alias: zenhub-dev
           project-id: contensis
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
+          tag-repo: true
 
-      - name: Tag repo with block version
-        if: (github.ref_name == 'master' || github.ref_name == 'main') && steps.push-block.outputs.block-version != ''
-        run: |
-          TAG=${{ steps.push-block.outputs.git-tag }}
-          VERSION=${{ steps.push-block.outputs.block-version }}
-          echo "Tagging commit with block version: $VERSION"
-          git tag $TAG
-          git push origin $TAG
+      # - name: Tag repo with block version
+      #   if: (github.ref_name == 'master' || github.ref_name == 'main') && steps.push-block.outputs.block-version != ''
+      #   run: |
+      #     TAG=${{ steps.push-block.outputs.git-tag }}
+      #     VERSION=${{ steps.push-block.outputs.block-version }}
+      #     echo "Tagging commit with block version: $VERSION"
+      #     git tag $TAG
+      #     git push origin $TAG
 
       - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/contensis-cli
