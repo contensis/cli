@@ -22,15 +22,13 @@
     ],
     "targets": [
       "node16-linux-x64",
-      "node16-win-x64",
-      "node16-linux-arm64",
-      "node16-win-arm64"
+      "node16-win-x64"
     ]
   },
   "scripts": {
     "prepare": "lerna run prepare",
     "build": "lerna run build --stream",
-    "build:exe": "pkg  --compress GZip --output contensis-cli-$(node -p \"require('./packages/contensis-cli/package.json').version\") .",
+    "build:exe": "pkg  --compress GZip --output contensis-cli .",
     "bootstrap": "npx lerna bootstrap --force-local && lerna link --force-local",
     "bootstrap:ci": "npx lerna bootstrap --force-local -- --ignore-scripts && lerna link --force-local",
     "clean": "lerna clean",
