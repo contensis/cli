@@ -59,5 +59,9 @@ runs:
       shell: bash
       run: |
         OUTPUT=${{ steps.cli.outputs.command-output }}
-        echo "command-output is:"
-        echo $OUTPUT
+        VERSION_NO=$(node -e \
+        "let argv=process.argv; let obj=argv.slice(1,argv.length).join(''); let json = JSON.parse(obj); Array.isArray(json) && json.length && console.log(json[0]['version']['versionNo']);" \
+        $OUTPUT )
+        echo "Setting block-version: $VERSION_NO"
+        echo "block-version=$VERSION_NO" >> $GITHUB_OUTPUT
+        echo "set GITHUB_OUTPUT.block-version OK"
