@@ -58,8 +58,8 @@ runs:
       id: set
       shell: bash
       run: |
-        echo "${{ steps.cli.outputs.command-output }}" | jq .version.versionNo
-        VERSION_NO=$("${{ steps.cli.outputs.command-output }}" | jq .version.versionNo)
+        echo ${{ steps.cli.outputs.command-output }} | jq .version.versionNo
+        VERSION_NO=$(${{ steps.cli.outputs.command-output }} | jq .version.versionNo)
         echo "Setting block-version: $VERSION_NO"
         echo "block-version=$VERSION_NO" >> $GITHUB_OUTPUT
         echo "set GITHUB_OUTPUT.block-version OK"
