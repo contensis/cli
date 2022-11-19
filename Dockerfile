@@ -9,7 +9,7 @@ COPY .yarnrc .
 COPY yarn.lock .
 COPY packages/contensis-cli/esbuild.config.js .
 COPY packages/contensis-cli/package.json .
-COPY packages/contensis-cli/package-lock.json .
+# COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/tsconfig.json .
 COPY packages/contensis-cli/patches patches
 RUN npm ci --prefer-offline --no-audit --loglevel error
