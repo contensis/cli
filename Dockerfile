@@ -24,7 +24,6 @@ COPY packages/contensis-cli/package.json .
 # COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/cli.js .
 COPY packages/contensis-cli/patches patches
-COPY --from=builder /usr/src/app/packages/contensis-cli/package-lock.json .
 # adds almost 100MB to the container
 RUN npm install --prefer-offline --no-audit --production --loglevel error
 RUN npm run postinstall
