@@ -61,7 +61,6 @@ runs:
       run: |
         OUTPUT=`cat output.json`
         echo "Setting command-output: $OUTPUT"
-        echo 'command-output<<EOF' >> $GITHUB_OUTPUT
-        echo "$OUTPUT" >> $GITHUB_OUTPUT
-        echo 'EOF' >> $GITHUB_OUTPUT
+        STRINGIFIED=$(echo "$OUTPUT" | jq -sR .)
+        echo "command-output=$STRINGIFIED" >> $GITHUB_OUTPUT
         echo "set GITHUB_OUTPUT.command-output OK"
