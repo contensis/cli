@@ -30,8 +30,8 @@ jobs:
 
       - name: Push block to Contensis (Test `contensis/block-push` Action)
         id: push-block
-        uses: ./.github/actions/block-push
-        # uses: contensis/block-push@v1
+        # uses: ./.github/actions/block-push
+        uses: contensis/block-push@v1
         with:
           block-id: node-cli-ci-block
           auto-release: false
@@ -48,8 +48,8 @@ jobs:
           echo git-tag: ${{ steps.push-block.outputs.git-tag }}
 
       - name: Get entries from Contensis (Test `contensis/cli-action`)
-        uses: ./.github/actions/cli-action
-        # uses: contensis/cli-action@v1
+        # uses: ./.github/actions/cli-action
+        uses: contensis/cli-action@v1
         with:
           command: get entries
           alias: zenhub-dev

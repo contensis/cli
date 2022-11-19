@@ -52,15 +52,44 @@ The pushed tag name if `tag-repo` input is `true`
 
 ## Example usage
 
+### Simple block push
+
 ```yml
 uses: contensis/block-push@v1
 with:
   block-id: name-of-block
-  auto-release: true
   alias: example-dev
   project-id: website
   client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
   shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
-  tag-repo: true
-  git-token: ${{ github.token }}
+```
+
+### Push, release and tag block version
+
+Push a block called `name-of-block`, set it to release automatically, and push a git tag containing the block version number
+
+```yml
+- name: Push block to Contensis
+  id: push-block
+  uses: contensis/block-push@v1
+  with:
+    block-id: name-of-block
+    auto-release: true
+    alias: example-dev
+    project-id: website
+    client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
+    shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
+    tag-repo: true
+    git-token: ${{ github.token }}
+```
+
+- Include `id: push-block` attribute to reference the job step later (e.g. to access outputs in `steps.push-block.outputs.*`)
+
+### Outputs
+
+```yml
+- name: Echo push-block outputs
+  run: |
+    echo block-version: ${{ steps.push-block.outputs.block-version }}
+    echo git-tag: ${{ steps.push-block.outputs.git-tag }}
 ```
