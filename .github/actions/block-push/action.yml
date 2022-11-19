@@ -81,6 +81,7 @@ runs:
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
     - name: Tag repo with block version
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
+      shell: bash
       run: |
         TAG=block-${{ inputs.project-id }}-${{ steps.set.outputs.block-version }}
         VERSION=${{ steps.set.outputs.block-version }}
