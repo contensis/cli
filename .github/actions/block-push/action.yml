@@ -55,6 +55,7 @@ runs:
 
     - name: Set output variables
       id: set
+      shell: bash
       run: |
         VERSION_NO=${{ fromJSON(steps.cli.outputs.command-output)[0].version.versionNo }}
         echo "Setting block-version: $VERSION_NO"
