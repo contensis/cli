@@ -45,7 +45,7 @@ outputs:
     description: 'The version number of the pushed block'
     value: ${{ steps.set.outputs.block-version }}
   git-tag:
-    description: 'The suggested tag name to tag the commit after the block is pushed'
+    description: 'The pushed tag name if tag-repo input is true'
     value: ${{ steps.tag.outputs.git-tag }}
 
 runs:

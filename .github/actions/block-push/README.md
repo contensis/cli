@@ -32,9 +32,23 @@ The uri of the container image to build the block from. Default: `"ghcr.io/${{ g
 
 Whether to release the block upon successful push. Default: `false`
 
+## `tag-repo`
+
+Whether to push a tag to the git repo upon successful block push. Default: `false`
+
+## `git-token`
+
+The git token from secrets to use when pushing to the git repo upon successful block push. Default: ${{ github.token }}
+
 ## Outputs
 
-No outputs are implemented as yet.
+## `block-version`
+
+The version number of the pushed block
+
+## `git-tag`
+
+The pushed tag name if `tag-repo` input is `true`
 
 ## Example usage
 
@@ -47,4 +61,6 @@ with:
   project-id: website
   client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
   shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
+  tag-repo: true
+  git-token: ${{ github.token }}
 ```
