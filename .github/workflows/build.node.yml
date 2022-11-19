@@ -18,6 +18,7 @@ jobs:
           node-version: '18.x'
 
       - name: Install dependencies, build and package
+        if: "!contains(github.event.head_commit.message, '[nobuild]')"
         run: |
           yarn cache clean --mirror
           yarn run bootstrap:ci
@@ -26,6 +27,7 @@ jobs:
           npm pack
 
       - name: Test install and run some cli commands
+        if: "!contains(github.event.head_commit.message, '[nobuild]')"
         run: |
           cd packages/contensis-cli
           APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
