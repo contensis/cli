@@ -24,6 +24,10 @@ inputs:
   cli-version:
     description: 'Optional: pull cli from specified tag. Default: release'
     default: release
+  cli-splash:
+    description: 'Optional: show welcome splash screen. Default: true'
+    default: true
+
 outputs:
   command-output:
     description: 'The cli command output'
@@ -41,16 +45,11 @@ runs:
       uses: addnab/docker-run-action@v3
       with:
         image: ghcr.io/contensis/node-cli/main/app:${{ inputs.cli-version }}
-        options: -v ./output.json:/usr/src/app/output.json
+        options: -v output.json:/usr/src/app/output.json
         run: |
-          touch output.json
-          contensis
+          ${{ inputs.cli-splash }} && contensis
           contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
           contensis ${{ inputs.command || '--help' }} --output output.json
-          # OUTPUT=`cat output.json`
-          # echo "Setting command-output: $OUTPUT"
-          # echo "command-output=$OUTPUT" >> $GITHUB_OUTPUT
-          # echo "set GITHUB_OUTPUT.command-output OK"
 
     - name: Set output variables
       id: set

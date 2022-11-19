@@ -46,12 +46,13 @@ runs:
       # uses: contensis/cli-action@v1
       uses: ./.github/actions/cli-action
       with:
-        cli-version: latest
         alias: ${{ inputs.alias }}
         project-id: ${{ inputs.project-id}}
         client-id: ${{ inputs.client-id }}
         shared-secret: ${{ inputs.shared-secret }}
         command: push block ${{ inputs.block-id }} ${{ inputs.image-uri }} ${{ github.ref_name }}${{ inputs.auto-release && ' --release' || '' }} --provider Github --repository-url ${{ github.server_url }}/${{ github.repository }}.git --commit-id ${{ github.sha }} --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
+        cli-version: latest
+        cli-splash: false
 
     - name: Set output variables
       id: set
