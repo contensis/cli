@@ -7,7 +7,6 @@ jobs:
   build:
     name: Build image and push
     runs-on: ubuntu-latest
-    secrets: inherit
     env:
       REGISTRY: ghcr.io
       APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
@@ -43,6 +42,7 @@ jobs:
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
           tag-repo: true
+        secrets: inherit
 
       # - name: Tag repo with block version
       #   if: (github.ref_name == 'master' || github.ref_name == 'main') && steps.push-block.outputs.block-version != ''
