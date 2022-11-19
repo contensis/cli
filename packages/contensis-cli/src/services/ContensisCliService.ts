@@ -49,6 +49,8 @@ interface IImportOptions {
   sourceProjectId?: string;
 }
 
+let insecurePasswordWarningShown = false;
+
 class ContensisCli {
   static quit = (error?: Error) => {
     process.removeAllListeners('exit');
@@ -390,7 +392,10 @@ class ContensisCli {
       }
 
       if (credentials.remarks.secure !== true) {
-        log.warning(messages.login.insecurePassword());
+        if (!insecurePasswordWarningShown) {
+          log.warning(messages.login.insecurePassword());
+          insecurePasswordWarningShown = true;
+        }
       } else {
         env.passwordFallback = undefined;
         this.session.UpdateEnv(env, currentEnv);
@@ -1239,11 +1244,13 @@ class ContensisCli {
     const { currentEnv, env, log, messages } = this;
 
     // Output request to console
-    messages.blocks.tryPush(
-      block.id,
-      block.source.branch,
-      currentEnv,
-      env.currentProject
+    log.info(
+      messages.blocks.tryPush(
+        block.id,
+        block.source.branch,
+        currentEnv,
+        env.currentProject
+      )
     );
     console.log(jsonFormatter(block));
 
@@ -1352,6 +1359,21 @@ class ContensisCli {
 
   HandleFormattingAndOutput = <T>(obj: T, logFn: (obj: T) => void) => {
     const { format, log, messages, output } = this;
+    if (!format) {
+      // print the object to console
+      logFn(obj);
+    } else if (format === 'csv') {
+      log.raw('');
+      log.raw(log.infoText(csvFormatter(obj)));
+    } else if (format === 'xml') {
+      log.raw('');
+      log.raw(log.infoText(xmlFormatter(obj)));
+    } else if (format === 'json') {
+      log.raw('');
+      log.raw(log.infoText(jsonFormatter(obj)));
+    }
+    log.raw('');
+
     if (output) {
       let writeString = '';
       if (format === 'csv') {
@@ -1366,21 +1388,6 @@ class ContensisCli {
       } else {
         log.info(messages.app.noFileOutput());
       }
-    } else {
-      if (!format) {
-        // print the object to console
-        logFn(obj);
-      } else if (format === 'csv') {
-        log.raw('');
-        log.raw(log.infoText(csvFormatter(obj)));
-      } else if (format === 'xml') {
-        log.raw('');
-        log.raw(log.infoText(xmlFormatter(obj)));
-      } else if (format === 'json') {
-        log.raw('');
-        log.raw(log.infoText(jsonFormatter(obj)));
-      }
-      log.raw('');
     }
   };
 }
