@@ -229,44 +229,47 @@ class ContensisCli {
   };
 
   ConnectContensis = async ({ commit = false } = {}) => {
-    const { contensisOpts, currentEnv, env, log, messages } = this;
-    const userId = env?.lastUserId;
-    const isGuidId = userId && isUuid(userId);
+    if (!this.contensis) {
+      const { contensisOpts, currentEnv, env, log, messages } = this;
+      const userId = env?.lastUserId;
+      const isGuidId = userId && isUuid(userId);
 
-    if (currentEnv && userId) {
-      const credentials = await this.GetCredentials(
-        userId,
-        env.passwordFallback
-      );
-
-      const cachedPassword = credentials?.current?.password;
-
-      if (cachedPassword) {
-        this.contensis = new ContensisMigrationService(
-          {
-            ...contensisOpts,
-            source: {
-              url: this.urls?.cms || '',
-              username: !isGuidId ? userId : undefined,
-              password: !isGuidId ? cachedPassword : undefined,
-              clientId: isGuidId ? userId : undefined,
-              sharedSecret: isGuidId ? cachedPassword : undefined,
-              project: env?.currentProject || '',
-              assetHostname: this.urls?.previewWeb,
-            },
-            concurrency:
-              typeof contensisOpts.concurrency !== 'undefined'
-                ? contensisOpts.concurrency
-                : 3,
-            outputProgress: true,
-          },
-          !commit
+      if (currentEnv && userId) {
+        const credentials = await this.GetCredentials(
+          userId,
+          env.passwordFallback
         );
+
+        const cachedPassword = credentials?.current?.password;
+
+        if (cachedPassword) {
+          this.contensis = new ContensisMigrationService(
+            {
+              ...contensisOpts,
+              source: {
+                url: this.urls?.cms || '',
+                username: !isGuidId ? userId : undefined,
+                password: !isGuidId ? cachedPassword : undefined,
+                clientId: isGuidId ? userId : undefined,
+                sharedSecret: isGuidId ? cachedPassword : undefined,
+                project: env?.currentProject || '',
+                assetHostname: this.urls?.previewWeb,
+              },
+              concurrency:
+                typeof contensisOpts.concurrency !== 'undefined'
+                  ? contensisOpts.concurrency
+                  : 3,
+              outputProgress: true,
+            },
+            !commit
+          );
+        }
+      } else {
+        if (!currentEnv) log.help(messages.connect.help());
+        if (!userId) log.help(messages.connect.tip());
       }
-    } else {
-      if (!currentEnv) log.help(messages.connect.help());
-      if (!userId) log.help(messages.connect.tip());
     }
+    return this.contensis;
   };
 
   ConnectContensisImport = async ({
@@ -517,14 +520,38 @@ class ContensisCli {
     }
   };
 
-  PrintProjects = async () => {
-    const { currentProject, log, messages, session } = this;
-    if (!this.contensis) await this.ConnectContensis();
+  PrintContensisVersion = async () => {
+    const { log, messages } = this;
+    const contensis = await this.ConnectContensis();
 
-    if (this.contensis) {
+    if (contensis) {
       // Retrieve projects list for env
       const [projectsErr, projects] = await to(
-        this.contensis.projects.GetSourceProjects()
+        contensis.projects.GetSourceProjects()
+      );
+
+      if (Array.isArray(projects)) {
+        // Print contensis version to console
+        this.HandleFormattingAndOutput(contensis.contensisVersion, () =>
+          log.raw(log.highlightText(contensis.contensisVersion))
+        );
+      }
+
+      if (projectsErr) {
+        log.error(messages.projects.noList());
+        log.error(projectsErr.message);
+      }
+    }
+  };
+
+  PrintProjects = async () => {
+    const { currentProject, log, messages, session } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve projects list for env
+      const [projectsErr, projects] = await to(
+        contensis.projects.GetSourceProjects()
       );
 
       if (Array.isArray(projects)) {
@@ -610,12 +637,12 @@ class ContensisCli {
 
   HydrateContensis = async () => {
     const { log } = this;
-    if (!this.contensis) await this.ConnectContensis();
+    const contensis = await this.ConnectContensis();
 
-    if (this.contensis) {
+    if (contensis) {
       // Retrieve content types list for env
       const [contensisErr, models] = await to(
-        this.contensis.models.HydrateContensisRepositories()
+        contensis.models.HydrateContensisRepositories()
       );
 
       if (contensisErr) {
@@ -627,11 +654,11 @@ class ContensisCli {
 
   PrintApiKeys = async () => {
     const { currentEnv, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
+    const contensis = await this.ConnectContensis();
 
-    if (this.contensis) {
+    if (contensis) {
       // Retrieve keys list for env
-      const [keysErr, apiKeys] = await this.contensis.apiKeys.GetKeys();
+      const [keysErr, apiKeys] = await contensis.apiKeys.GetKeys();
 
       if (Array.isArray(apiKeys)) {
         log.success(messages.keys.list(currentEnv));
@@ -665,13 +692,10 @@ class ContensisCli {
 
   CreateApiKey = async (name: string, description?: string) => {
     const { currentEnv, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
+    const contensis = await this.ConnectContensis();
 
-    if (this.contensis) {
-      const [err, key] = await this.contensis.apiKeys.CreateKey(
-        name,
-        description
-      );
+    if (contensis) {
+      const [err, key] = await contensis.apiKeys.CreateKey(name, description);
 
       if (key) {
         log.success(messages.keys.created(currentEnv, name));
@@ -695,10 +719,10 @@ class ContensisCli {
 
   RemoveApiKey = async (id: string) => {
     const { currentEnv, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis({ commit: true });
+    const contensis = await this.ConnectContensis({ commit: true });
 
-    if (this.contensis) {
-      const [err, key] = await this.contensis.apiKeys.RemoveKey(id);
+    if (contensis) {
+      const [err, key] = await contensis.apiKeys.RemoveKey(id);
 
       if (!err) {
         log.success(messages.keys.removed(currentEnv, id));
@@ -1103,11 +1127,11 @@ class ContensisCli {
     name?: string
   ) => {
     const { currentEnv, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve webhooks list for env
       const [webhooksErr, webhooks] =
-        await this.contensis.subscriptions.webhooks.GetSubscriptions();
+        await contensis.subscriptions.webhooks.GetSubscriptions();
 
       const filteredResults =
         typeof name === 'string'
@@ -1153,10 +1177,10 @@ class ContensisCli {
 
   PrintBlocks = async () => {
     const { currentEnv, env, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve blocks list for env
-      const [err, blocks] = await this.contensis.blocks.GetBlocks();
+      const [err, blocks] = await contensis.blocks.GetBlocks();
 
       if (Array.isArray(blocks)) {
         this.HandleFormattingAndOutput(blocks, () => {
@@ -1202,10 +1226,10 @@ class ContensisCli {
     version: string
   ) => {
     const { currentEnv, env, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve block version
-      const [err, blocks] = await this.contensis.blocks.GetBlockVersions(
+      const [err, blocks] = await contensis.blocks.GetBlockVersions(
         blockId,
         branch,
         version
@@ -1254,10 +1278,10 @@ class ContensisCli {
     );
     console.log(jsonFormatter(block));
 
-    if (!this.contensis) await this.ConnectContensis();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Push new block version
-      const [err, blockVersion] = await this.contensis.blocks.PushBlockVersion(
+      const [err, blockVersion] = await contensis.blocks.PushBlockVersion(
         block
       );
       if (!err) {
@@ -1285,10 +1309,10 @@ class ContensisCli {
 
   ReleaseBlock = async (blockId: string, version: string) => {
     const { currentEnv, env, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve block version
-      const [err, blockVersion] = await this.contensis.blocks.BlockAction(
+      const [err, blockVersion] = await contensis.blocks.BlockAction(
         blockId,
         'release',
         version
@@ -1320,14 +1344,14 @@ class ContensisCli {
     dataCenter: 'hq' | 'manchester' | 'london'
   ) => {
     const { currentEnv, env, log, messages } = this;
-    if (!this.contensis) await this.ConnectContensis();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve block logs
       log.success(
         messages.blocks.getLogs(blockId, branch, currentEnv, env.currentProject)
       );
 
-      const [err, blockLogs] = await this.contensis.blocks.GetBlockLogs({
+      const [err, blockLogs] = await contensis.blocks.GetBlockLogs({
         blockId,
         branchId: branch,
         version,

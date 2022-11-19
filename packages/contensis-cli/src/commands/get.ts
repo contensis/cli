@@ -9,6 +9,20 @@ export const makeGetCommand = () => {
     .exitOverride();
 
   program
+    .command('version')
+    .description('Get current Contensis version')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > version
+`
+    )
+    .action(async opts => {
+      await cliCommand(['get', 'version'], opts).PrintContensisVersion();
+    });
+
+  program
     .command('contenttype')
     .argument('<contentTypeId>', 'the API id of the content type to get')
     .addHelpText(
