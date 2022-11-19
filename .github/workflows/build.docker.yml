@@ -30,8 +30,6 @@ jobs:
 
       - name: Push block to Contensis (Test `contensis/block-push` Action)
         id: push-block
-        # uses: ./.github/actions/cli-action
-        # uses: contensis/cli-action@v1
         uses: ./.github/actions/block-push
         # uses: contensis/block-push@v1
         with:
@@ -49,18 +47,9 @@ jobs:
           echo block-version: ${{ steps.push-block.outputs.block-version }}
           echo git-tag: ${{ steps.push-block.outputs.git-tag }}
 
-      # - name: Tag repo with block version
-      #   if: (github.ref_name == 'master' || github.ref_name == 'main') && steps.push-block.outputs.block-version != ''
-      #   run: |
-      #     TAG=${{ steps.push-block.outputs.git-tag }}
-      #     VERSION=${{ steps.push-block.outputs.block-version }}
-      #     echo "Tagging commit with block version: $VERSION"
-      #     git tag $TAG
-      #     git push origin $TAG
-
       - name: Get entries from Contensis (Test `contensis/cli-action`)
-        # uses: ./.github/actions/contensis-cli
-        uses: contensis/cli-action@v1
+        uses: ./.github/actions/cli-action
+        # uses: contensis/cli-action@v1
         with:
           command: get entries
           alias: zenhub-dev
