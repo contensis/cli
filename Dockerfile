@@ -12,7 +12,7 @@ COPY packages/contensis-cli/package.json .
 # COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/tsconfig.json .
 COPY packages/contensis-cli/patches patches
-RUN npm ci --prefer-offline --no-audit --loglevel error
+RUN npm install --prefer-offline --no-audit --loglevel error
 RUN npm run postinstall
 COPY packages/contensis-cli/src src
 RUN npm run build
@@ -24,6 +24,7 @@ COPY packages/contensis-cli/package.json .
 # COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/cli.js .
 COPY packages/contensis-cli/patches patches
+COPY --from=builder /usr/src/app/packages/contensis-cli/package-lock.json .
 # adds almost 100MB to the container
 RUN npm install --prefer-offline --no-audit --production --loglevel error
 RUN npm run postinstall
