@@ -46,7 +46,7 @@ outputs:
     value: ${{ steps.set.outputs.block-version }}
   git-tag:
     description: 'The suggested tag name to tag the commit after the block is pushed'
-    value: ${{ steps.set.outputs.git-tag }}
+    value: ${{ steps.tag.outputs.git-tag }}
 
 runs:
   using: 'composite'
@@ -78,13 +78,13 @@ runs:
         token: ${{ inputs.git-token }}
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
     - name: Tag repo with block version
+      id: tag
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
       shell: bash
       run: |
         PROJECT=${{ inputs.project-id }}
         TAG=block-${PROJECT,,}-${{ steps.set.outputs.block-version }}
         echo "git-tag=$TAG" >> $GITHUB_OUTPUT
-        VERSION=${{ steps.set.outputs.block-version }}
-        echo "Tagging commit with block version: $VERSION"
+        echo "Tagging commit with: $TAG"
         git tag $TAG
         git push origin $TAG
