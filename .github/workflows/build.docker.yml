@@ -42,6 +42,12 @@ jobs:
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
 
+      - name: Tag repo with block version
+        if: needs.push-block.outputs.block-version != '' && (github.ref_name == 'master' || github.ref_name == 'main')
+        run: |
+          git tag block-contensis-${{ steps.push.outputs.block-version }}
+          git push origin block-contensis-${{ steps.push.outputs.block-version }}
+
       - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/contensis-cli
         uses: contensis/cli-action@v1
