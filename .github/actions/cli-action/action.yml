@@ -36,6 +36,13 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Touch output file
+      id: pwd
+      shell: bash
+      run: |
+        touch ./output.json
+        echo "pwd=$(pwd)" >> $GITHUB_OUTPUT
+
     - name: Pull Contensis CLI docker image and run commands
       id: cli-command
       uses: addnab/docker-run-action@v3
@@ -55,4 +62,3 @@ runs:
         OUTPUT=`cat output.json`
         STRINGIFIED=$(echo "$OUTPUT" | jq -sR .)
         echo "command-output=$STRINGIFIED" >> $GITHUB_OUTPUT
-        echo "set GITHUB_OUTPUT.command-output OK"

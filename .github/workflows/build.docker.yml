@@ -44,6 +44,11 @@ jobs:
           tag-repo: true
           git-token: ${{ github.token }}
 
+      - name: Echo push-block outputs
+        run: |
+          echo block-version: ${{ steps.push-block.outputs.block-version }}
+          echo git-tag: ${{ steps.push-block.outputs.git-tag }}
+
       # - name: Tag repo with block version
       #   if: (github.ref_name == 'master' || github.ref_name == 'main') && steps.push-block.outputs.block-version != ''
       #   run: |

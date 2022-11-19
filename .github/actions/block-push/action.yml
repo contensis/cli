@@ -46,7 +46,7 @@ outputs:
     value: ${{ steps.set.outputs.block-version }}
   git-tag:
     description: 'The suggested tag name to tag the commit after the block is pushed'
-    value: block-${{ inputs.project-id }}-${{ steps.set.outputs.block-version }}
+    value: ${{ steps.set.outputs.git-tag }}
 
 runs:
   using: 'composite'
@@ -63,17 +63,15 @@ runs:
         shared-secret: ${{ inputs.shared-secret }}
         command: push block ${{ inputs.block-id }} ${{ inputs.image-uri }} ${{ github.ref_name }}${{ inputs.auto-release && ' --release' || '' }} --provider Github --repository-url ${{ github.server_url }}/${{ github.repository }}.git --commit-id ${{ github.sha }} --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
         cli-version: latest
-        cli-splash: false
+        cli-splash: true
 
     - name: Set output variables
       id: set
       shell: bash
       run: |
-        OUTPUT=$(echo ${{ steps.cli.outputs.command-output }})
-        VERSION_NO=$(echo -e $OUTPUT | jq .version.versionNo)
+        VERSION_NO=$(echo -e ${{ steps.cli.outputs.command-output }} | jq .version.versionNo)
         echo "Setting block-version: $VERSION_NO"
         echo "block-version=$VERSION_NO" >> $GITHUB_OUTPUT
-        echo "set GITHUB_OUTPUT.block-version OK"
 
     - uses: actions/checkout@v3
       with:
@@ -83,7 +81,9 @@ runs:
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
       shell: bash
       run: |
-        TAG=block-${{ inputs.project-id }}-${{ steps.set.outputs.block-version }}
+        PROJECT=${{ inputs.project-id }}
+        TAG=block-${PROJECT,,}-${{ steps.set.outputs.block-version }}
+        echo "git-tag=$TAG" >> $GITHUB_OUTPUT
         VERSION=${{ steps.set.outputs.block-version }}
         echo "Tagging commit with block version: $VERSION"
         git tag $TAG
