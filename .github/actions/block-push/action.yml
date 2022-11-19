@@ -51,7 +51,7 @@ runs:
         project-id: ${{ inputs.project-id}}
         client-id: ${{ inputs.client-id }}
         shared-secret: ${{ inputs.shared-secret }}
-        command: push block ${{ inputs.block-id }} ${{ inputs.image-uri }} ${{ github.ref_name }}${{ (inputs.auto-release == true && ' --release') || '' }} --provider Github --repository-url ${{ github.server_url }}/${{ github.repository }}.git --commit-id ${{ github.sha }} --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
+        command: push block ${{ inputs.block-id }} ${{ inputs.image-uri }} ${{ github.ref_name }}${{ inputs.auto-release == true && ' --release' || '' }} --provider Github --repository-url ${{ github.server_url }}/${{ github.repository }}.git --commit-id ${{ github.sha }} --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
 
     - name: Set output variables
       id: set
@@ -60,3 +60,4 @@ runs:
         VERSION_NO=${{ fromJSON(steps.cli.outputs.command-output)[0].version.versionNo }}
         echo "Setting block-version: $VERSION_NO"
         echo "block-version=$VERSION_NO" >> $GITHUB_OUTPUT
+        echo "set GITHUB_OUTPUT.block-version OK"

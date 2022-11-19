@@ -37,6 +37,7 @@ runs:
       uses: addnab/docker-run-action@v3
       with:
         image: ghcr.io/contensis/node-cli/main/app:${{ inputs.cli-version }}
+        shell: bash
         run: |
           contensis
           contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
