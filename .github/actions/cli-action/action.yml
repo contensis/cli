@@ -37,15 +37,18 @@ runs:
   using: 'composite'
   steps:
     - name: Touch output file
+      id: pwd
       shell: bash
-      run: touch ./output.json
+      run: |
+        touch ./output.json
+        echo "pwd=$(pwd)" >> $GITHUB_OUTPUT
 
     - name: Pull Contensis CLI docker image and run commands
       id: cli-command
       uses: addnab/docker-run-action@v3
       with:
         image: ghcr.io/contensis/node-cli/main/app:${{ inputs.cli-version }}
-        options: -v $(pwd)/output.json:/usr/src/app/output.json
+        options: -v ${{ steps.pwd.outputs.pwd }}/output.json:/usr/src/app/output.json
         run: |
           ${{ inputs.cli-splash }} && contensis
           contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
