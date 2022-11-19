@@ -7,6 +7,7 @@ jobs:
   build:
     name: Build image and push
     runs-on: ubuntu-latest
+    secrets: inherit
     env:
       REGISTRY: ghcr.io
       APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
@@ -34,7 +35,6 @@ jobs:
         # uses: contensis/cli-action@v1
         uses: ./.github/actions/block-push
         # uses: contensis/block-push@v1
-        secrets: inherit
         with:
           block-id: node-cli-ci-block
           auto-release: false
