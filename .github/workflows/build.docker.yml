@@ -70,7 +70,7 @@ jobs:
     secrets: inherit
     # uses: ./.github/actions/cli-action
     # uses: contensis/cli-action@v1
-    uses: ./.github/actions/block-push@${{ github.ref_name }}
+    uses: ./.github/actions/block-push@main
     # uses: contensis/block-push@v1
     with:
       block-id: node-cli-ci-block
