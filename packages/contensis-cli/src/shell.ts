@@ -8,6 +8,7 @@ import { logError, Logger } from './util/logger';
 import CredentialProvider from './providers/CredentialProvider';
 import ContensisCli, { cliCommand } from './services/ContensisCliService';
 import { Logging } from './util';
+import { LIB_VERSION } from './version';
 
 class ContensisShell {
   private currentEnvironment!: string;
@@ -64,7 +65,7 @@ class ContensisShell {
           return;
         }
         console.log(log.successText(data));
-        console.log(log.infoText(messages.app.startup()));
+        console.log(log.infoText(messages.app.startup(LIB_VERSION)));
         console.log(log.helpText(messages.app.help()));
 
         this.start().catch(ex => log.error(ex));

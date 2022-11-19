@@ -5,8 +5,8 @@ export const LogMessages = {
   app: {
     contensis: () => 'Contensis',
     quit: () => `Goodbye 👋\n`,
-    startup: () =>
-      `© 2001-${new Date().getFullYear()} Zengenti 🇬🇧. \n - Creators of Contensis and purveyors of other fine software\n\n👋 Welcome to the contensis-cli\n`,
+    startup: (version: string) =>
+      `v${version} © 2001-${new Date().getFullYear()} Zengenti 🇬🇧. \n - Creators of Contensis and purveyors of other fine software\n\n👋 Welcome to the contensis-cli\n`,
     help: () =>
       'Press [CTRL]+[C] or type "quit" to return to your system shell\nPress [TAB] for suggestions\n',
     suggestions: () =>
