@@ -29,10 +29,10 @@ jobs:
           docker push ${{ env.APP_IMAGE }}:latest
 
       - name: Push block to Contensis (Test `contensis/block-push` Action)
-        # uses: ./.github/actions/contensis-cli
+        # uses: ./.github/actions/cli-action
         # uses: contensis/cli-action@v1
-        # uses: ./.github/actions/push-block
-        uses: contensis/block-push@v1
+        uses: ./.github/actions/block-push
+        # uses: contensis/block-push@v1
         with:
           block-id: node-cli-ci-block
           auto-release: true

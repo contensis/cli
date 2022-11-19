@@ -24,15 +24,23 @@ inputs:
   cli-version:
     description: 'Optional: pull cli from specified tag. Default: release'
     default: release
+outputs:
+  command-output:
+    description: 'The cli command output'
+    value: ${{ steps.cli-command.outputs.command-output }}
 
 runs:
   using: 'composite'
   steps:
     - name: Pull Contensis CLI docker image and run commands
+      id: cli-command
       uses: addnab/docker-run-action@v3
       with:
         image: ghcr.io/contensis/node-cli/main/app:${{ inputs.cli-version }}
         run: |
           contensis
           contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
-          contensis ${{ inputs.command || '--help' }}
+          contensis ${{ inputs.command || '--help' }} --output output.json
+          OUTPUT=`cat output.json`
+          echo "Setting command-output: $OUTPUT"
+          echo "command-output=$OUTPUT" >> $GITHUB_OUTPUT

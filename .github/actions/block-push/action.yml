@@ -1,43 +1,61 @@
-name: "Contensis block push action"
-description: "A GitHub Action for pushing a block to Contensis CMS"
-author: "Zengenti"
+name: 'Contensis block push action'
+description: 'A GitHub Action for pushing a block to Contensis CMS'
+author: 'Zengenti'
+
 branding:
-  icon: "package"
-  color: "green"
+  icon: 'package'
+  color: 'green'
+
 inputs:
   alias:
-    description: "The Contensis cloud alias to connect to"
+    description: 'The Contensis cloud alias to connect to'
     required: true
   project-id:
-    description: "The id of the project to connect to"
+    description: 'The id of the project to connect to'
     required: false
     default: website
   client-id:
-    description: "Client id to connect to the supplied alias"
+    description: 'Client id to connect to the supplied alias'
     required: true
   shared-secret:
-    description: "Shared secret to use with the supplied client id"
+    description: 'Shared secret to use with the supplied client id'
     required: true
   block-id:
-    description: "The id of the block to push to"
+    description: 'The id of the block to push to'
     required: true
   image-uri:
-    description: "The repository uri of the container image to build the block from"
+    description: 'The repository uri of the container image to build the block from'
     required: false
     default: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app:latest
   auto-release:
-    description: "Whether to release the block upon successful push"
+    description: 'Whether to release the block upon successful push'
     required: false
     default: false
 
+outputs:
+  block-version:
+    description: 'The version number of the pushed block'
+    value: ${{ steps.set.outputs.block-version }}
+
 runs:
-  using: "composite"
+  using: 'composite'
+
   steps:
     - name: Pull Contensis CLI docker image and run commands
-      uses: contensis/cli-action@v1
+      id: cli
+      # uses: contensis/cli-action@v1
+      uses: ./.github/actions/cli-action
       with:
+        cli-version: latest
         alias: ${{ inputs.alias }}
         project-id: ${{ inputs.project-id}}
         client-id: ${{ inputs.client-id }}
         shared-secret: ${{ inputs.shared-secret }}
         command: push block ${{ inputs.block-id }} ${{ inputs.image-uri }} ${{ github.ref_name }}${{ (inputs.auto-release == true && ' --release') || '' }} --provider Github --repository-url ${{ github.server_url }}/${{ github.repository }}.git --commit-id ${{ github.sha }} --commit-message "${{ github.event.head_commit.message }}" --commit-datetime ${{ github.event.head_commit.timestamp }} --author-email ${{ github.event.head_commit.author.email }} --committer-email ${{ github.event.head_commit.committer.email }}
+
+    - name: Set output variables
+      id: set
+      run: |
+        VERSION_NO=${{ fromJSON(steps.cli.outputs.command-output)[0].version.versionNo }}
+        echo "Setting block-version: $VERSION_NO"
+        echo "block-version=$VERSION_NO" >> $GITHUB_OUTPUT
