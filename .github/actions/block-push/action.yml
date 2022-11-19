@@ -58,7 +58,6 @@ runs:
       id: set
       shell: bash
       run: |
-        echo ${{ steps.cli.outputs.command-output }}
         echo ${{ steps.cli.outputs.command-output }} | jq '. | fromjson | .version.versionNo'
         VERSION_NO=$(echo ${{ steps.cli.outputs.command-output }} | jq '. | fromjson | .version.versionNo')
         echo "Setting block-version: $VERSION_NO"
