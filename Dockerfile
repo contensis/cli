@@ -18,13 +18,10 @@ COPY packages/contensis-cli/src src
 RUN npm run build
 
 FROM node:18-alpine
-# needs this to install keytar npm package
-# adds almost 80MB to the container 
-# RUN apk add --no-cache libsecret-dev 
 WORKDIR /usr/src/app
 # copy assets from source folder
 COPY packages/contensis-cli/package.json .
-COPY packages/contensis-cli/package-lock.json .
+# COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/cli.js .
 COPY packages/contensis-cli/patches patches
 # adds almost 100MB to the container

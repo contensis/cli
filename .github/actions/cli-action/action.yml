@@ -52,6 +52,7 @@ runs:
         run: |
           ${{ inputs.cli-splash }} && contensis
           contensis connect ${{ inputs.alias }} -id ${{ inputs.client-id }} -s ${{ inputs.shared-secret }} -p ${{ inputs.project-id }}
+          contensis get version
           contensis ${{ inputs.command || '--help' }} --output output.json
 
     - name: Set output variables
