@@ -35,6 +35,10 @@ inputs:
     description: 'Whether to push a tag to the git repo upon successful block push'
     required: false
     default: false
+  git-token:
+    description: 'The git token from secrets to use when pushing to the git repo upon successful block push'
+    required: false
+    default: ${{ github.token }}
 
 outputs:
   block-version:
@@ -72,6 +76,8 @@ runs:
         echo "set GITHUB_OUTPUT.block-version OK"
 
     - uses: actions/checkout@v3
+      with:
+        token: ${{ inputs.git-token }}
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
     - name: Tag repo with block version
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
