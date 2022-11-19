@@ -31,7 +31,7 @@ inputs:
 outputs:
   command-output:
     description: 'The cli command output'
-    value: ${{ steps.cli-command.outputs.command-output }}
+    value: ${{ steps.set.outputs.command-output }}
 
 runs:
   using: 'composite'
