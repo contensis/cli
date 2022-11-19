@@ -41,7 +41,7 @@ jobs:
           # contensis-cli login zengenti 123456
 
       - name: Increment package version
-        if: "!contains(github.event.head_commit.message, '[nopublish]')"
+        if: "!contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')"
         # cp is a hack to allow patch-package to find the required package to patch
         run: |
           cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
@@ -52,7 +52,7 @@ jobs:
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
       - name: Push version increment to GIT
-        if: "!contains(github.event.head_commit.message, '[nopublish]')"
+        if: "!contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')"
         run: |
           git config user.email "github@zengenti.com"
           git config user.name "$GITHUB_ACTOR"
@@ -64,7 +64,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish prerelease package
-        if: "!contains(github.event.head_commit.message, '[nopublish]')"
+        if: "!contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')"
         run: |
           cd packages/contensis-cli
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
