@@ -4485,10 +4485,10 @@ micromatch@^4.0.2, micromatch@^4.0.4:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
-migratortron@^1.0.0-beta.16:
-  version "1.0.0-beta.16"
-  resolved "https://registry.yarnpkg.com/migratortron/-/migratortron-1.0.0-beta.16.tgz#b6d02e16e174ec33120aefbf418c82300369b78b"
-  integrity sha512-cyB8XPTM9JUHi5HHYWYw/JmwSRLG4/vKKSMiv4QkGTxx6eO3ey9U6+LSLU8ZHEpGoWTnvjZoMxy4py8Xdde9Zw==
+migratortron@^1.0.0-beta.17:
+  version "1.0.0-beta.17"
+  resolved "https://registry.yarnpkg.com/migratortron/-/migratortron-1.0.0-beta.17.tgz#a3c05cc6d90e13d6fff02aad9dab59944c86c6e2"
+  integrity sha512-2/r8df8gJv2Jze4DUTXBdJhyP7TIduSEiuYnTj10mj4bt0cH0mgPbfUxztHVon2Ya7ktbPi6FktYnwtnoF0pXQ==
   dependencies:
     await-to-js "^2.1.1"
     byte-size "^8.1.0"
