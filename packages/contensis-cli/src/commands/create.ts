@@ -5,6 +5,7 @@ import { shell } from '~/shell';
 export const makeCreateCommand = () => {
   const create = new Command()
     .command('create')
+    .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
@@ -12,6 +13,7 @@ export const makeCreateCommand = () => {
     .command('project')
     .argument('<projectId>', 'the id of the project to create')
     .usage('<projectId>')
+    .addHelpText('after', `\n`)
     .action(async (projectId: string, opts: any) => {
       const project = await cliCommand(
         ['create', 'project', projectId],

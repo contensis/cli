@@ -5,6 +5,7 @@ import { mapContensisOpts } from './globalOptions';
 export const makeGetCommand = () => {
   const program = new Command()
     .command('get')
+    .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
@@ -23,7 +24,26 @@ Example call:
     });
 
   program
+    .command('model')
+    .description('Get a content model')
+    .argument('<contentTypeId...>', 'ids of the content models to get')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get model podcast podcastLinks
+`
+    )
+    .action(async (modelIds: string[], opts) => {
+      await cliCommand(
+        ['get', 'model', modelIds.join(' ')],
+        opts
+      ).PrintContentModels(modelIds);
+    });
+
+  program
     .command('contenttype')
+    .description('Get a content type')
     .argument('<contentTypeId>', 'the API id of the content type to get')
     .addHelpText(
       'after',
@@ -33,12 +53,15 @@ Example call:
 `
     )
     .action(async (contentTypeId: string, opts) => {
-      await cliCommand(['get', 'contenttype'], opts).PrintContentType(
-        contentTypeId
-      );
+      await cliCommand(
+        ['get', 'contenttype', contentTypeId],
+        opts
+      ).PrintContentType(contentTypeId);
     });
+
   program
     .command('component')
+    .description('Get a component')
     .argument('<componentId>', 'the API id of the component to get')
     .addHelpText(
       'after',
@@ -48,10 +71,14 @@ Example call:
 `
     )
     .action(async (componentId: string, opts) => {
-      await cliCommand(['get', 'component'], opts).PrintComponent(componentId);
+      await cliCommand(['get', 'component', componentId], opts).PrintComponent(
+        componentId
+      );
     });
+
   program
     .command('entries')
+    .description('Get entries')
     .argument(
       '[search phrase]',
       'get entries with the search phrase, use quotes for multiple words'
@@ -90,6 +117,7 @@ Example call:
 
   const block = program
     .command('block')
+    .description('Get a block or block version')
     .argument('[blockId]', 'the block to get version details for')
     .argument(
       '[branch]',
@@ -99,6 +127,13 @@ Example call:
     .argument(
       '[version]',
       'get a specific version of the block pushed to the specified branch'
+    )
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get block contensis-website master latest
+`
     )
     .action(async (blockId: string, branch: string, version: string, opts) => {
       await cliCommand(['get', 'block'], opts).PrintBlockVersions(
@@ -117,6 +152,7 @@ Example call:
 
   block
     .command('logs')
+    .description('Get logs for a block')
     .argument('[blockId]', 'the block to get version logs for')
     .argument(
       '[branch]',
@@ -130,6 +166,14 @@ Example call:
     )
     .addArgument(dataCenter)
     .usage('get block logs [blockId] [branch] [version] [dataCenter]')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get block logs contensis-website master
+  > get block logs contensis-website master latest london
+`
+    )
     .action(
       async (
         blockId: string,

@@ -3,6 +3,7 @@ import { Logger } from '~/util/logger';
 import { LIB_VERSION } from '~/version';
 import { makeConnectCommand } from './connect';
 import { makeCreateCommand } from './create';
+import { makeDiffCommand } from './diff';
 import { makeGetCommand } from './get';
 import {
   addAuthenticationOptions,
@@ -41,6 +42,11 @@ const commands = () => {
   program.addCommand(
     addGlobalOptions(
       addImportOptions(makeCreateCommand())
+    ).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addGlobalOptions(
+      addGetEntryOptions(addImportOptions(makeDiffCommand()))
     ).copyInheritedSettings(program)
   );
   program.addCommand(

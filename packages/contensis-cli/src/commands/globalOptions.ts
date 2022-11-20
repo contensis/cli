@@ -3,14 +3,15 @@ import { url } from '~/util';
 
 export const mapContensisOpts = (opts: any = {}) => ({
   source:
-    opts.sourceCms || opts.sourceProjectId
+    opts.sourceAlias || opts.sourceProjectId
       ? {
-          url: opts.sourceCms
-            ? url(opts.sourceCms, 'website').cms
+          url: opts.sourceAlias
+            ? url(opts.sourceAlias, 'website').cms
             : (undefined as any),
           project: opts.sourceProjectId || (undefined as any),
         }
       : undefined,
+  models: opts.modelIds,
   query:
     opts.id || opts.phrase || opts.fields
       ? {
@@ -88,7 +89,7 @@ export const fromProject = new Option(
 
 export const commit = new Option(
   '--commit',
-  'omit and only add this flag when you are happy with the preview of the import'
+  'add this flag only after you have run a preview of the import and agree with the analysis'
 ).default(false);
 
 export const addConnectOptions = (program: Command) =>

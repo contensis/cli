@@ -6,6 +6,7 @@ import { cliCommand } from '~/services/ContensisCliService';
 export const makePushCommand = () => {
   const push = new Command()
     .command('push')
+    .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 

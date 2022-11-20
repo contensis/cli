@@ -40,12 +40,11 @@ class ContensisShell {
     inquirerPrompt.setConfig({
       history: {
         save: true,
-        folder: path.join(process.cwd(), '../'),
+        folder: path.join(process.cwd()),
         limit: 100,
         blacklist: ['quit'],
       },
     });
-    // inquirer.registerPrompt('command', inquirerPrompt);
 
     const { log, messages } = this;
 
@@ -136,15 +135,18 @@ class ContensisShell {
       availableCommands.push('login', 'list projects', 'set project');
     if (userId)
       availableCommands.push(
+        'diff models',
         'get block',
         'get block logs',
         'get contenttype',
         'get component',
         'get entries',
+        'get model',
         'get version',
         'import contenttypes',
         'import components',
         'import entries',
+        'import models',
         'list blocks',
         'list contenttypes',
         'list components',

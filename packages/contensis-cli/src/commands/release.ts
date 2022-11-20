@@ -4,6 +4,7 @@ import { cliCommand } from '~/services/ContensisCliService';
 export const makeReleaseCommand = () => {
   const release = new Command()
     .command('release')
+    .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 

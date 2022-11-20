@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
-import { BlockVersion, MigrateStatus } from 'migratortron';
+import { BlockVersion, MigrateModelsResult, MigrateStatus } from 'migratortron';
 import ContensisCli from '~/services/ContensisCliService';
+import { Logger } from './logger';
 
 const formatDate = (date: Date | string, format = 'DD/MM/YYYY HH:mm') =>
   dayjs(date).format(format);
@@ -173,7 +174,7 @@ export const printMigrateResult = (
                 '',
                 { x: { status: undefined } },
               ];
-              return `${messages.entries.migrateStatus(status)(
+              return `${messages.migrate.status(status)(
                 `${projectId}: ${status}`
               )}${targetGuid !== originalId ? `-> ${targetGuid}` : ''}`;
             })}]`
@@ -190,7 +191,7 @@ export const printMigrateResult = (
         if (error) log.error(error);
         if (diff) {
           console.log(
-            `  ${messages.entries.migrateStatus(status)(status)} ${log.infoText(
+            `  ${messages.migrate.status(status)(status)} ${log.infoText(
               targetGuid
             )} ${log.infoText(contentTypeId)} ${log.infoText(projectId)}`
           );
@@ -199,5 +200,101 @@ export const printMigrateResult = (
         }
       }
     }
+  }
+};
+
+const highlightDiffText = (str: string) => {
+  const addedRegex = new RegExp(/<<\+>>(.*?)<<\/\+>>/, 'g');
+  const removedRegex = new RegExp(/<<->>(.*?)<<\/->>/, 'g');
+  return str
+    .replace(addedRegex, match => {
+      return Logger.successText(
+        match.replace(/<<\+>>/g, '<+>').replace(/<<\/\+>>/g, '</+>')
+      );
+    })
+    .replace(removedRegex, match => {
+      return Logger.errorText(
+        match.replace(/<<->>/g, '<->').replace(/<<\/->>/g, '</->')
+      );
+    });
+};
+
+export const printModelMigrationAnalysis = (
+  { log, messages }: ContensisCli,
+  result: any = {}
+) => {
+  for (const [contentTypeId, model] of Object.entries(result) as [
+    string,
+    any
+  ][]) {
+    let mainOutput = log.standardText(`  - ${contentTypeId}`);
+    let extraOutput = '';
+    let errorOutput = '';
+    let diffOutput = '';
+    for (const [key, details] of Object.entries(model) as [string, any][]) {
+      if (key === 'dependencies') {
+        extraOutput += log.infoText(
+          `      references: [${details?.join(', ')}]\n`
+        );
+      }
+      if (key === 'dependencyOf') {
+        extraOutput += log.infoText(
+          `      required by: [${details?.join(', ')}]\n`
+        );
+      }
+      if (key === 'projects') {
+        for (const [projectId, projectDetails] of Object.entries(details) as [
+          string,
+          any
+        ][]) {
+          mainOutput += log.infoText(
+            ` [${messages.migrate.status(projectDetails.status)(
+              `${projectId}: ${projectDetails.status}`
+            )}] v${projectDetails.versionNo}`
+          );
+          if (projectDetails.diff)
+            diffOutput += `    ${log.highlightText(`diff:`)} ${log.infoText(
+              highlightDiffText(projectDetails.diff)
+            )}\n`;
+          if (projectDetails.error)
+            errorOutput += `    ${log.highlightText(`error::`)} ${log.errorText(
+              projectDetails.error
+            )}`;
+        }
+      }
+    }
+    console.log(mainOutput);
+    if (extraOutput) {
+      const search = '\n';
+      const replace = '';
+      console.log(
+        extraOutput.replace(
+          new RegExp(search + '([^' + search + ']*)$'),
+          replace + '$1'
+        )
+      );
+    }
+    if (diffOutput) console.log(diffOutput);
+    if (errorOutput) console.log(errorOutput);
+  }
+};
+
+type MigrateResultSummary = MigrateModelsResult['']['contentTypes'];
+type MigrateResultStatus = keyof MigrateResultSummary;
+
+export const printModelMigrationResult = (
+  { log, messages }: ContensisCli,
+  result: MigrateResultSummary
+) => {
+  for (const [status, ids] of Object.entries(result) as [
+    MigrateResultStatus,
+    string[]
+  ][]) {
+    if (ids?.length)
+      log.raw(
+        `  - ${status}: [ ${messages.migrate.models.result(status)(
+          ids.join(', ')
+        )} ]`
+      );
   }
 };

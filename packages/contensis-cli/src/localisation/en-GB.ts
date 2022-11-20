@@ -1,4 +1,8 @@
-import { BlockRunningStatus, MigrateStatus } from 'migratortron';
+import {
+  BlockRunningStatus,
+  MigrateModelsResult,
+  MigrateStatus,
+} from 'migratortron';
 import { Logger } from '~/util/logger';
 
 export const LogMessages = {
@@ -94,46 +98,23 @@ export const LogMessages = {
     tip: () =>
       `You need to set your current working project with "set project {projectId}"`,
   },
-  contenttypes: {
-    list: (projectId: string) => `Content types in "${projectId}":`,
-    noList: (projectId: string) =>
-      `[${projectId}] Cannot retrieve content types list`,
-    get: (projectId: string, contentTypeId: string) =>
-      `[${projectId}] Content type "${contentTypeId}"`,
-    failedGet: (projectId: string, contentTypeId: string) =>
-      `[${projectId}] Unable to get content type "${contentTypeId}"`,
-    created: (projectId: string, componentId: string, status?: string) =>
-      `[${projectId}] Content type ${status}d "${componentId}"`,
-    removed: (env: string, id: string, commit: boolean) =>
-      `[${env}] ${commit ? `Deleted` : `Will delete`} content type "${id}"`,
-    failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete content type "${id}"`,
-  },
-  components: {
-    list: (projectId: string) => `Components in "${projectId}":`,
-    noList: (projectId: string) =>
-      `[${projectId}] Cannot retrieve components list`,
-    get: (projectId: string, componentId: string) =>
-      `[${projectId}] Component "${componentId}"`,
-    failedGet: (projectId: string, componentId: string) =>
-      `[${projectId}] Unable to get component "${componentId}"`,
-    created: (projectId: string, componentId: string, status?: string) =>
-      `[${projectId}] Component ${status}d "${componentId}"`,
-    removed: (env: string, id: string, commit: boolean) =>
-      `[${env}] ${commit ? `Deleted` : `Will delete`} component "${id}"`,
-    failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete component "${id}"`,
-  },
-  version: {
-    set: (env: string, versionStatus: string) =>
-      `[${env}] Content version status set to "${versionStatus}"`,
-    invalid: (versionStatus: string) =>
-      `Content version status "${versionStatus}" is not valid, allowed values are "published" or "latest".`,
-    noEnv: () =>
-      `No Contensis environment set, connect to your Contensis cloud instance using "contensis connect {cms alias}"`,
-  },
-  entries: {
-    migrateStatus: (status: MigrateStatus) => {
+  migrate: {
+    models: {
+      result: (
+        status: keyof MigrateModelsResult['project']['contentTypes']
+      ) => {
+        switch (status) {
+          case 'created':
+          case 'updated':
+            return Logger.successText;
+          case 'errors':
+            return Logger.errorText;
+          default:
+            return Logger.infoText;
+        }
+      },
+    },
+    status: (status: MigrateStatus) => {
       switch (status) {
         case 'no change':
           return Logger.successText;
@@ -149,6 +130,50 @@ export const LogMessages = {
           return Logger.infoText;
       }
     },
+  },
+  models: {
+    list: (projectId: string) => `Content models in "${projectId}":`,
+    noList: (projectId: string) =>
+      `[${projectId}] Cannot retrieve content models`,
+    get: (projectId: string, id: string) =>
+      `[${projectId}] Content models ${Logger.infoText(`[ ${id} ]`)}`,
+    failedGet: (projectId: string, id: string) =>
+      `[${projectId}] Unable to get content models "${id}"`,
+  },
+  contenttypes: {
+    list: (projectId: string) => `Content types in "${projectId}":`,
+    get: (projectId: string, id: string) =>
+      `[${projectId}] Content type "${id}"`,
+    failedGet: (projectId: string, id: string) =>
+      `[${projectId}] Unable to get content type "${id}"`,
+    created: (projectId: string, id: string, status?: string) =>
+      `[${projectId}] Content type ${status}d "${id}"`,
+    removed: (env: string, id: string, commit: boolean) =>
+      `[${env}] ${commit ? `Deleted` : `Will delete`} content type "${id}"`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete content type "${id}"`,
+  },
+  components: {
+    list: (projectId: string) => `Components in "${projectId}":`,
+    get: (projectId: string, id: string) => `[${projectId}] Component "${id}"`,
+    failedGet: (projectId: string, id: string) =>
+      `[${projectId}] Unable to get component "${id}"`,
+    created: (projectId: string, id: string, status?: string) =>
+      `[${projectId}] Component ${status}d "${id}"`,
+    removed: (env: string, id: string, commit: boolean) =>
+      `[${env}] ${commit ? `Deleted` : `Will delete`} component "${id}"`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete component "${id}"`,
+  },
+  version: {
+    set: (env: string, versionStatus: string) =>
+      `[${env}] Content version status set to "${versionStatus}"`,
+    invalid: (versionStatus: string) =>
+      `Content version status "${versionStatus}" is not valid, allowed values are "published" or "latest".`,
+    noEnv: () =>
+      `No Contensis environment set, connect to your Contensis cloud instance using "contensis connect {cms alias}"`,
+  },
+  entries: {
     removed: (env: string, id: string, commit: boolean) =>
       `[${env}] ${commit ? `Deleted` : `Will delete`} entry "${id}"`,
     failedRemove: (env: string, id: string) =>

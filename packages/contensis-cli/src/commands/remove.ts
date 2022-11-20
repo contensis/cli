@@ -6,6 +6,7 @@ import { commit, mapContensisOpts } from './globalOptions';
 export const makeRemoveCommand = () => {
   const remove = new Command()
     .command('remove')
+    .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
@@ -13,6 +14,7 @@ export const makeRemoveCommand = () => {
     .command('project')
     .argument('<projectId>', 'the project id to delete')
     .usage('<projectId>')
+    .addHelpText('after', `\n`)
     .action(async (projectId, opts) => {
       const project = await cliCommand(
         ['remove', 'project', projectId],
@@ -49,7 +51,7 @@ Example call:
     )
     .action(async (id: string[], opts) => {
       await cliCommand(
-        ['remove', 'components', id.join(', ')],
+        ['remove', 'components', id.join(' ')],
         opts
       ).RemoveComponents(id, opts.commit);
     });
@@ -68,7 +70,7 @@ Example call:
     )
     .action(async (id: string[], opts) => {
       await cliCommand(
-        ['remove', 'contenttypes', id.join(', ')],
+        ['remove', 'contenttypes', id.join(' ')],
         opts
       ).RemoveContentTypes(id, opts.commit);
     });

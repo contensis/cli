@@ -7,7 +7,8 @@ import { tryStringify } from '.';
 
 type LogMethod = (content: string) => void;
 type LogErrorMethod = (content: string, err?: any) => void;
-type LogJsonMethod = (content: any) => void;
+type LogJsonMethod = (content: any, depth?: number, indent?: string) => void;
+type LogJsonDepthMethod = (content: any, depth: number) => void;
 type LogArrayMethod = (contentArray: string[]) => void;
 type LogErrorFunc = (
   err: any,
@@ -83,7 +84,7 @@ export class Logger {
     else console.log(message);
     progress.current.interrupt(message);
   };
-  static json: LogJsonMethod = (content, depth = 9) =>
+  static json: LogJsonDepthMethod = (content, depth = 9) =>
     console.dir(deepCleaner(content), { colors: true, depth });
   static mixed: LogArrayMethod = contentArray =>
     console.log(`${Logger.getPrefix()} ${contentArray.join(' ')}`);
@@ -97,7 +98,38 @@ export class Logger {
         if (key === 'fields' && Array.isArray(value)) {
           for (const field of value || []) {
             Logger.raw(
-              `    ${chalk.bold(field.id)}: ${chalk.grey(field.dataType)}`
+              `    ${chalk.bold(field.id)}${
+                field.id === content.entryTitleField
+                  ? '**'
+                  : field.validations.minCount?.value ||
+                    typeof field.validations.required?.message !== 'undefined'
+                  ? '*'
+                  : ''
+              }: ${chalk.grey(
+                `${field.dataType}${
+                  field.dataFormat
+                    ? `<${
+                        Array.isArray(
+                          field.validations.allowedFieldTypes?.fields
+                        )
+                          ? `composer[${field.validations.allowedFieldTypes.fields
+                              .map((f: any) => f.id)
+                              .join(' | ')}]`
+                          : field.dataFormat
+                      }${
+                        field.dataFormat === 'entry'
+                          ? `, ${field.validations.allowedContentTypes.contentTypes.join(
+                              ' | '
+                            )}`
+                          : ''
+                      }>`
+                    : ''
+                }${
+                  field.validations.maxLength?.value
+                    ? `(${field.validations.maxLength.value})`
+                    : ''
+                }`
+              )}`
             );
           }
         } else if (key === 'groups' && Array.isArray(value)) {
@@ -114,22 +146,59 @@ export class Logger {
             );
           }
         } else {
-          for (const [innerkey, innervalue] of Object.entries(value)) {
-            if (innervalue && typeof innervalue === 'object') {
-              Logger.raw(`    ${chalk.bold.grey(innerkey)}:`);
-              console.table(innervalue);
-            } else if (
-              typeof innervalue !== 'undefined' ||
-              innervalue !== null
-            ) {
-              Logger.raw(`    ${chalk.bold.grey(innerkey)}: ${innervalue}`);
-            }
-          }
+          Logger.objectRecurse(value, 3, '    ');
+          // for (const [innerkey, innervalue] of Object.entries(value)) {
+          //   if (innervalue && typeof innervalue === 'object') {
+          //     Logger.raw(`    ${chalk.bold.grey(innerkey)}:`);
+          //     console.table(innervalue);
+          //   } else if (
+          //     typeof innervalue !== 'undefined' &&
+          //     innervalue !== null
+          //   ) {
+          //     Logger.raw(`    ${chalk.bold.grey(innerkey)}: ${innervalue}`);
+          //   }
+          // }
         }
-      } else if (typeof value !== 'undefined' || value !== null) {
-        Logger.raw(`  ${chalk.bold.grey(key)}: ${value}`);
+      } else if (typeof value !== 'undefined' && value !== null) {
+        const valueText =
+          key === 'id' && typeof value === 'string'
+            ? Logger.highlightText(value)
+            : value;
+        Logger.raw(`  ${chalk.bold.grey(key)}: ${valueText}`);
       }
     }
+  };
+
+  static objectRecurse: LogJsonMethod = (content, depth = 3, indent = '') => {
+    if (Array.isArray(content)) {
+      for (const item of content) {
+        if (item && typeof item === 'object') {
+          if (Array.isArray(item) && depth > 3)
+            Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
+          else Logger.objectRecurse(item, depth + 1, `${indent}  `);
+        } else Logger.raw(`${indent}${item}`);
+      }
+    } else
+      for (const [key, value] of Object.entries(content)) {
+        if (Array.isArray(value)) {
+          for (const item of value) {
+            if (item && typeof item === 'object') {
+              if (Array.isArray(item) && depth > 3)
+                Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
+              else Logger.objectRecurse(item, depth + 1, `${indent}`);
+            } else {
+              Logger.raw(`${indent}  ${item}`);
+            }
+          }
+        } else if (value && typeof value === 'object') {
+          Logger.raw(`${indent}${chalk.bold.grey(key)}:`);
+
+          Logger.objectRecurse(value, depth + 1, `${indent}  `);
+          // console.table(value);
+        } else if (typeof value !== 'undefined' && value !== null) {
+          Logger.raw(`${indent}${chalk.bold.grey(key)}: ${value}`);
+        }
+      }
   };
   static raw: LogMethod = (content: string) => {
     if (progress.active) progress.current.interrupt(content);

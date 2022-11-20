@@ -72,7 +72,8 @@ class SessionCacheProvider {
 
   UpdateEnv = (
     updateContent: Partial<EnvironmentCache>,
-    env = this.cache.currentEnvironment
+    env = this.cache.currentEnvironment,
+    setCurrentEnv = true
   ) => {
     try {
       const environment = this.cache.environments[env || ''];
@@ -82,7 +83,7 @@ class SessionCacheProvider {
         ...updateContent,
       };
       this.Update({
-        currentEnvironment: env,
+        currentEnvironment: setCurrentEnv ? env : this.cache.currentEnvironment,
         environments: this.cache.environments,
       });
     } catch (ex: any) {
