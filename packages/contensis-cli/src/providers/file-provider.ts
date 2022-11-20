@@ -69,4 +69,5 @@ export const checkDir = (filePath: string) => {
     fs.mkdirSync(directoryPath, { recursive: true });
 };
 
-export const localPath = (filePath: string) => path.join(appRoot, filePath);
+export const localPath = (filePath: string) =>
+  path.isAbsolute(filePath) ? filePath : path.join(appRoot, filePath);
