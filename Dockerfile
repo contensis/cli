@@ -19,6 +19,7 @@ RUN npm run build
 
 FROM node:18-alpine
 WORKDIR /usr/src/app
+RUN apk add jq
 # copy assets from source folder
 COPY packages/contensis-cli/package.json .
 # COPY packages/contensis-cli/package-lock.json .
