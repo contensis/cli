@@ -100,7 +100,11 @@ Example call:
           branch: ['branch', 'CI_COMMIT_REF_NAME', 'GITHUB_REF_NAME'],
           commit: {
             id: ['commitId', 'CI_COMMIT_SHORT_SHA', 'GITHUB_SHA'],
-            message: ['commitMessage', 'CI_COMMIT_MESSAGE'], // ${{ github.event.head_commit.message }}
+            message: {
+              $path: ['commitMessage', 'CI_COMMIT_MESSAGE'], // ${{ github.event.head_commit.message }}
+              $formatting: (msg?: string) =>
+                msg?.replace(/\\n/g, ' ').replace(/\\n/g, ' ').trim(),
+            },
             dateTime: ['commitDatetime', 'CI_COMMIT_TIMESTAMP'], // ${{ github.event.head_commit.timestamp }}
             authorEmail: ['authorEmail', 'GITLAB_USER_EMAIL', 'GITHUB_ACTOR'], // ${{ github.event.head_commit.author.email }}
             committerEmail: [
