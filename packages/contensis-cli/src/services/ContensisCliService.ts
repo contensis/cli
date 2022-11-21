@@ -371,8 +371,7 @@ class ContensisCli {
             },
             !commit
           );
-        }
-        if (source === 'contensis') {
+        } else if (source === 'contensis') {
           this.contensis = new ContensisMigrationService(
             {
               concurrency: 3,
@@ -414,7 +413,7 @@ class ContensisCli {
     currentEnv = this.currentEnv,
     saveCurrentEnv = true
   ): Promise<CredentialProvider | undefined> => {
-    const { env, log, messages } = this;
+    const { log, messages } = this;
     if (userId) {
       const [credentialError, credentials] = await new CredentialProvider(
         { userId, alias: currentEnv },
@@ -433,6 +432,7 @@ class ContensisCli {
           insecurePasswordWarningShown = true;
         }
       } else {
+        const env = this.cache.environments[currentEnv];
         env.passwordFallback = undefined;
         this.session.UpdateEnv(env, currentEnv, saveCurrentEnv);
       }
