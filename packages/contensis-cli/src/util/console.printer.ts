@@ -109,7 +109,8 @@ export const printMigrateResult = (
   migrateResult: any,
   { action = 'import' }: { action?: 'import' | 'delete' } = {}
 ) => {
-  console.log(``);
+  if (Object.keys(migrateResult.entriesToMigrate.entryIds).length)
+    console.log(``);
 
   for (const [contentTypeId, entryRes] of Object.entries(
     migrateResult.entriesToMigrate.entryIds
@@ -146,12 +147,10 @@ export const printMigrateResult = (
         if (error) log.error(error);
         if (diff) {
           console.log(
-            `  ${messages.migrate.status(status)(status)} ${log.infoText(
-              targetGuid
-            )} ${log.infoText(contentTypeId)} ${log.infoText(projectId)}`
+            `    ${log.highlightText(`diff:`)} ${log.infoText(
+              highlightDiffText(diff)
+            )}\n`
           );
-          console.log(``);
-          console.log(log.highlightText(diff));
         }
       }
     }
@@ -164,43 +163,45 @@ export const printMigrateResult = (
   ) {
     log.help(messages.entries.commitTip());
   }
-  if (action === 'import') {
-    for (const [projectId, contentTypeCounts] of Object.entries(
-      migrateResult.entries || {}
-    ) as [string, any][]) {
-      console.log(
-        `import from project ${log.highlightText(projectId)} to ${log.boldText(
-          log.warningText(currentProject)
-        )}`
-      );
-      for (const [contentTypeId, count] of Object.entries(
-        contentTypeCounts
-      ) as [string, number][]) {
-        const entriesToMigrate =
-          migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
 
-        console.log(
-          `  - ${
-            contentTypeId === 'totalCount'
-              ? log.warningText(`${contentTypeId}: ${count}`)
-              : `${contentTypeId}: ${log.helpText(count)}`
-          } ${log.infoText`[existing: ${(
-            ((migrateResult.existing?.[projectId]?.[contentTypeId] || 0) /
-              count) *
-            100
-          ).toFixed(0)}%]`} [${
-            typeof entriesToMigrate !== 'number' ? `unchanged` : `to update`
-          }: ${(
-            ((typeof entriesToMigrate !== 'number'
-              ? entriesToMigrate?.['no change'] || 0
-              : entriesToMigrate) /
-              count) *
-            100
-          ).toFixed(0)}%]`
-        );
-      }
-    }
-  }
+  // Needs work
+  // if (action === 'import') {
+  //   for (const [projectId, contentTypeCounts] of Object.entries(
+  //     migrateResult.entries || {}
+  //   ) as [string, any][]) {
+  //     console.log(
+  //       `import from project ${log.highlightText(projectId)} to ${log.boldText(
+  //         log.warningText(currentProject)
+  //       )}`
+  //     );
+  //     for (const [contentTypeId, count] of Object.entries(
+  //       contentTypeCounts
+  //     ) as [string, number][]) {
+  //       const entriesToMigrate =
+  //         migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
+
+  //       console.log(
+  //         `  - ${
+  //           contentTypeId === 'totalCount'
+  //             ? log.warningText(`${contentTypeId}: ${count}`)
+  //             : `${contentTypeId}: ${log.helpText(count)}`
+  //         } ${log.infoText`[existing: ${(
+  //           ((migrateResult.existing?.[projectId]?.[contentTypeId] || 0) /
+  //             count) *
+  //           100
+  //         ).toFixed(0)}%]`} [${
+  //           typeof entriesToMigrate !== 'number' ? `unchanged` : `to update`
+  //         }: ${(
+  //           ((typeof entriesToMigrate !== 'number'
+  //             ? entriesToMigrate?.['no change'] || 0
+  //             : entriesToMigrate) /
+  //             count) *
+  //           100
+  //         ).toFixed(0)}%]`
+  //       );
+  //     }
+  //   }
+  // }
 };
 
 const highlightDiffText = (str: string) => {
@@ -253,13 +254,13 @@ export const printModelMigrationAnalysis = (
             )}] v${projectDetails.versionNo}`
           );
           if (projectDetails.diff)
-            diffOutput += `    ${log.highlightText(`diff:`)} ${log.infoText(
+            diffOutput += `      ${log.highlightText(`diff:`)} ${log.infoText(
               highlightDiffText(projectDetails.diff)
             )}\n`;
           if (projectDetails.error)
-            errorOutput += `    ${log.highlightText(`error::`)} ${log.errorText(
-              projectDetails.error
-            )}`;
+            errorOutput += `      ${log.highlightText(
+              `error::`
+            )} ${log.errorText(projectDetails.error)}`;
         }
       }
     }

@@ -3,7 +3,8 @@ import path from 'path';
 import fetch from 'node-fetch';
 import inquirer from 'inquirer';
 import to from 'await-to-js';
-import { Component, ContentType } from 'contensis-core-api';
+import chalk from 'chalk';
+import { Component, ContentType, Project } from 'contensis-core-api';
 import { isPassword, isSharedSecret, isUuid, url } from '~/util';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import ContensisAuthService from './ContensisAuthService';
@@ -602,13 +603,31 @@ class ContensisCli {
         });
 
         log.success(messages.projects.list());
+        log.raw('');
+
         this.HandleFormattingAndOutput(projects, () => {
           // print the projects to console
-          for (const project of projects) {
+          for (const project of projects.sort((a, b) =>
+            a.id.localeCompare(b.id)
+          )) {
+            let color;
+            try {
+              color = chalk.keyword((project as any).color);
+            } catch (ex) {
+              color = chalk.white;
+            }
             console.log(
-              `  - ${nextCurrentProject === project.id ? '* ' : ''}[${
-                project.primaryLanguage
-              }] ${project.id}`
+              `${
+                nextCurrentProject === project.id
+                  ? `>> ${log.boldText(color(project.id))}`
+                  : `    ${color(project.id)}`
+              } ${log.infoText(
+                `[${project.supportedLanguages
+                  .map(l =>
+                    l === project.primaryLanguage ? `*${log.boldText(l)}` : l
+                  )
+                  .join(' ')}]`
+              )}`
             );
           }
         });
@@ -635,6 +654,7 @@ class ContensisCli {
         env.currentProject = nextProjectId;
         session.UpdateEnv(env);
         log.success(messages.projects.set(projectId));
+        log.raw('');
       } else {
         log.error(messages.projects.failedSet(projectId));
       }
@@ -766,6 +786,54 @@ class ContensisCli {
     }
   };
 
+  CreateProject = async (project: Project) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      const [err, created] = await contensis.projects.CreateProject(project);
+
+      if (created) {
+        log.success(messages.projects.created(currentEnv, project.id));
+
+        this.HandleFormattingAndOutput(created, () => {
+          // set the CLI project to the newly created project
+          this.SetProject(project.id);
+          // print all the projects to console
+          this.PrintProjects();
+        });
+        return project.id;
+      }
+
+      if (err) {
+        log.error(messages.projects.failedCreate(currentEnv, project.id), err);
+      }
+    }
+  };
+
+  UpdateProject = async (project: Project) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      const [err, updated] = await contensis.projects.UpdateProject(project);
+
+      if (updated) {
+        log.success(messages.projects.updated(currentEnv, project.id));
+
+        this.HandleFormattingAndOutput(updated, () => {
+          // print the projects to console
+          this.PrintProjects();
+        });
+        return project.id;
+      }
+
+      if (err) {
+        log.error(messages.projects.failedUpdate(currentEnv, project.id), err);
+      }
+    }
+  };
+
   GetContentTypes = async () => {
     const { currentProject, log, messages } = this;
     let err;
@@ -824,43 +892,47 @@ class ContensisCli {
             log.raw('');
             log.object(model);
           }
+          log.raw('');
         });
       } else {
         log.success(
           messages.models.get(currentProject, models?.length.toString() || '0')
         );
-        this.HandleFormattingAndOutput(contentModelBackup, () => {
-          // print the content models s#qto console
-          log.raw('');
-          for (const model of models || []) {
-            const components = model.components?.length || 0;
-            const contentTypes = model.contentTypes?.length || 0;
-            const dependencies =
-              (model.dependencies?.components?.length || 0) +
-              (model.dependencies?.contentTypes?.length || 0);
-            const dependencyOf =
-              (model.dependencyOf?.components?.length || 0) +
-              (model.dependencyOf?.contentTypes?.length || 0);
-
-            const hasAny =
-              components + contentTypes + dependencies + dependencyOf;
-            log.raw(
-              `  - ${log.highlightText(log.boldText(model.id))} ${
-                hasAny
-                  ? log.infoText(
-                      `{ ${components ? `components: ${components}, ` : ''}${
-                        contentTypes ? `contentTypes: ${contentTypes}, ` : ''
-                      }${dependencies ? `references: ${dependencies}, ` : ''}${
-                        dependencyOf ? `required by: ${dependencyOf}` : ''
-                      } }`
-                    )
-                  : ''
-              }`
-            );
-          }
-        });
-
         log.raw('');
+        if (models?.length) {
+          this.HandleFormattingAndOutput(contentModelBackup, () => {
+            // print the content models s#qto console
+            for (const model of models) {
+              const components = model.components?.length || 0;
+              const contentTypes = model.contentTypes?.length || 0;
+              const dependencies =
+                (model.dependencies?.components?.length || 0) +
+                (model.dependencies?.contentTypes?.length || 0);
+              const dependencyOf =
+                (model.dependencyOf?.components?.length || 0) +
+                (model.dependencyOf?.contentTypes?.length || 0);
+
+              const hasAny =
+                components + contentTypes + dependencies + dependencyOf;
+              log.raw(
+                `  - ${log.highlightText(log.boldText(model.id))} ${
+                  hasAny
+                    ? log.infoText(
+                        `{ ${components ? `components: ${components}, ` : ''}${
+                          contentTypes ? `contentTypes: ${contentTypes}, ` : ''
+                        }${
+                          dependencies ? `references: ${dependencies}, ` : ''
+                        }${
+                          dependencyOf ? `required by: ${dependencyOf}` : ''
+                        } }`
+                      )
+                    : ''
+                }`
+              );
+            }
+            log.raw('');
+          });
+        }
       }
     }
   };
@@ -1242,7 +1314,7 @@ class ContensisCli {
     }
   };
 
-  RemoveEntry = async (id: string, commit = false) => {
+  RemoveEntries = async (commit = false) => {
     const { currentEnv, log, messages } = this;
     const contensis = await this.ConnectContensisImport({
       commit,
@@ -1267,12 +1339,12 @@ class ContensisCli {
           Object.values(result.entriesToMigrate)?.[0].totalCount > 0) ||
           (commit && result.migrateResult?.deleted))
       ) {
-        log.success(messages.entries.removed(currentEnv, id, commit));
+        log.success(messages.entries.removed(currentEnv, commit));
         if (!commit) log.help(messages.entries.commitTip());
       } else {
-        log.error(messages.entries.failedRemove(currentEnv, id), err);
+        log.error(messages.entries.failedRemove(currentEnv), err);
         if (!Object.values(result.entriesToMigrate)?.[0].totalCount)
-          log.help(messages.entries.notFound(id));
+          log.help(messages.entries.notFound(currentEnv));
       }
     }
   };

@@ -13,10 +13,10 @@ export const mapContensisOpts = (opts: any = {}) => ({
       : undefined,
   models: opts.modelIds,
   query:
-    opts.id || opts.phrase || opts.fields
+    opts.id || opts.entryIds || opts.phrase || opts.fields
       ? {
           fields: opts.fields,
-          includeIds: opts.id,
+          includeIds: opts.id || opts.entryIds,
           searchTerm: opts.phrase,
         }
       : undefined,
@@ -37,53 +37,53 @@ const format = new Option(
 
 /* Connect options */
 const alias = new Option(
-  '-a --alias <alias>',
+  '-a, --alias <alias>',
   'the cloud CMS alias to connect your request with'
 );
 
 export const project = new Option(
-  '-p --project-id <projectId>',
+  '-p, --project-id <projectId>',
   'the projectId to make your request with'
 );
 
 /* Authentication options */
 const user = new Option(
-  '-u --user <user>',
+  '-u, --user <user>',
   'the username to authenticate your request with'
 );
 const password = new Option(
-  '-pw --password <password>',
+  '-pw, --password <password>',
   'the password to use to login with (optional/insecure)'
 );
 const clientId = new Option(
-  '-id --client-id <clientId>',
+  '-id, --client-id <clientId>',
   'the clientId to authenticate your request with'
 );
 const sharedSecret = new Option(
-  '-s --shared-secret <sharedSecret>',
+  '-s, --shared-secret <sharedSecret>',
   'the shared secret to use when logging in with a client id'
 );
 
 /* Entry get options */
-const zenql = new Option(
+export const zenql = new Option(
   '-q, --zenql <zenql>',
   'get entries with a supplied ZenQL statement'
 );
 
-const entryId = new Option('-i --id <id...>', 'the entry id to get');
+export const entryId = new Option('-i --id <id...>', 'the entry id(s) to get');
 
 /* Import options */
 export const fromFile = new Option(
-  '-file --from-file <fromFile>',
+  '-file, --from-file <fromFile>',
   'file path to import asset(s) from'
 );
 
 export const fromCms = new Option(
-  '-source --source-alias <fromCms>',
+  '-source, --source-alias <fromCms>',
   'the cloud CMS alias to import asset(s) from'
 );
 export const fromProject = new Option(
-  '-sp --source-project-id <fromProject>',
+  '-sp, --source-project-id <fromProject>',
   'the id of the Contensis project to import asset(s) from (Default: [last connected project])'
 );
 

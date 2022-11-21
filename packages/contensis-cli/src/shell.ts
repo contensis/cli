@@ -135,6 +135,7 @@ class ContensisShell {
       availableCommands.push('login', 'list projects', 'set project');
     if (userId)
       availableCommands.push(
+        'create project',
         'diff models',
         'get block',
         'get block logs',
@@ -157,9 +158,11 @@ class ContensisShell {
         'push block',
         'release block',
         'remove key',
-        'remove entry',
+        'remove entries',
         'remove contenttypes',
-        'remove components'
+        'remove components',
+        'set project name',
+        'set project description'
       );
 
     const prompt = inquirer.createPromptModule();

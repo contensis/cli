@@ -1,28 +1,55 @@
 import { Command } from 'commander';
+import { Project } from 'contensis-core-api';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
 
 export const makeCreateCommand = () => {
   const create = new Command()
     .command('create')
+    .description('create command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
   create
     .command('project')
+    .description('create a new project')
     .argument('<projectId>', 'the id of the project to create')
-    .usage('<projectId>')
+    .argument('<name>', 'the name of the project to create')
+    .argument('[description]', 'optional description of the project')
+    .option(
+      '-l, --language',
+      'the default language of the project to create',
+      'en-GB'
+    )
+    .option(
+      '-langs, --supported-languages <langs...>',
+      'space separated list of other supported languages'
+    )
+    .usage(
+      'projectId "Project name" ["Description of project"] --language en-GB --supported-languages es-ES de-DE nl-NL'
+    )
     .addHelpText('after', `\n`)
-    .action(async (projectId: string, opts: any) => {
-      const project = await cliCommand(
-        ['create', 'project', projectId],
-        opts
-      ).SetProject(projectId);
-      if (project) await shell().restart();
-    });
+    .action(
+      async (projectId: string, name: string, description = '', opts: any) => {
+        const createProject: Project = {
+          id: projectId,
+          name,
+          description,
+          primaryLanguage: opts.language,
+          supportedLanguages: opts.supportedLanguages || [],
+        };
+
+        const project = await cliCommand(
+          ['create', 'project', projectId],
+          opts
+        ).CreateProject(createProject);
+        if (project) await shell().restart();
+      }
+    );
   create
     .command('key')
+    .description('create a new api key')
     .argument('<"key name">', 'the name of the key to create')
     .argument('["description"]', 'provide a description for the key (optional)')
     .usage('<"key name"> ["description"] (both args in "double quotes")')

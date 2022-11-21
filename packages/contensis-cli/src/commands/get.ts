@@ -83,7 +83,7 @@ Example call:
       '[search phrase]',
       'get entries with the search phrase, use quotes for multiple words'
     )
-    .option('-i --id <id...>', 'the entry id to get')
+    .option('-i --id <id...>', 'the entry id(s) to get')
     .option(
       '-d, --dependents',
       'find and return any dependencies of all found entries'
