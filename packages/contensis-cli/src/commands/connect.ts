@@ -6,6 +6,7 @@ import { project } from './globalOptions';
 export const makeConnectCommand = () => {
   const connect = new Command()
     .command('connect')
+    .description('connect to a Contensis instance')
     .argument('<alias>', 'the Contensis Cloud alias to connect with')
     .addOption(project)
     .usage('<alias>')

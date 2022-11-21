@@ -93,10 +93,20 @@ export const LogMessages = {
   projects: {
     list: () => `Available projects:`,
     noList: () => `Cannot retrieve projects list`,
-    set: (projectId: string) => `Current project is set to "${projectId}"`,
-    failedSet: (projectId: string) => `Project "${projectId}" not found`,
+    set: (projectId: string) =>
+      `Current project is set to ${Logger.highlightText(projectId)}`,
+    failedSet: (projectId: string) =>
+      `Project ${Logger.highlightText(projectId)} not found`,
     tip: () =>
       `You need to set your current working project with "set project {projectId}"`,
+    created: (env: string, id: string) =>
+      `[${env}] Created project ${Logger.highlightText(id)}`,
+    failedCreate: (env: string, id: string) =>
+      `[${env}] Unable to create project ${Logger.highlightText(id)}`,
+    updated: (env: string, id: string) =>
+      `[${env}] Updated project ${Logger.highlightText(id)}`,
+    failedUpdate: (env: string, id: string) =>
+      `[${env}] Unable to update project ${Logger.highlightText(id)}`,
   },
   migrate: {
     models: {
@@ -132,38 +142,46 @@ export const LogMessages = {
     },
   },
   models: {
-    list: (projectId: string) => `Content models in "${projectId}":`,
+    list: (projectId: string) =>
+      `Content models in ${Logger.highlightText(projectId)}:`,
     noList: (projectId: string) =>
       `[${projectId}] Cannot retrieve content models`,
     get: (projectId: string, id: string) =>
       `[${projectId}] Content models ${Logger.infoText(`[ ${id} ]`)}`,
     failedGet: (projectId: string, id: string) =>
-      `[${projectId}] Unable to get content models "${id}"`,
+      `[${projectId}] Unable to get content models ${Logger.highlightText(id)}`,
   },
   contenttypes: {
-    list: (projectId: string) => `Content types in "${projectId}":`,
+    list: (projectId: string) =>
+      `Content types in ${Logger.highlightText(projectId)}:`,
     get: (projectId: string, id: string) =>
-      `[${projectId}] Content type "${id}"`,
+      `[${projectId}] Content type ${Logger.highlightText(id)}`,
     failedGet: (projectId: string, id: string) =>
-      `[${projectId}] Unable to get content type "${id}"`,
+      `[${projectId}] Unable to get content type ${Logger.highlightText(id)}`,
     created: (projectId: string, id: string, status?: string) =>
-      `[${projectId}] Content type ${status}d "${id}"`,
+      `[${projectId}] Content type ${status}d ${Logger.highlightText(id)}`,
     removed: (env: string, id: string, commit: boolean) =>
-      `[${env}] ${commit ? `Deleted` : `Will delete`} content type "${id}"`,
+      `[${env}] ${
+        commit ? `Deleted` : `Will delete`
+      } content type ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete content type "${id}"`,
+      `[${env}] Unable to delete content type ${Logger.highlightText(id)}`,
   },
   components: {
-    list: (projectId: string) => `Components in "${projectId}":`,
-    get: (projectId: string, id: string) => `[${projectId}] Component "${id}"`,
+    list: (projectId: string) =>
+      `Components in ${Logger.highlightText(projectId)}:`,
+    get: (projectId: string, id: string) =>
+      `[${projectId}] Component ${Logger.highlightText(id)}`,
     failedGet: (projectId: string, id: string) =>
-      `[${projectId}] Unable to get component "${id}"`,
+      `[${projectId}] Unable to get component ${Logger.highlightText(id)}`,
     created: (projectId: string, id: string, status?: string) =>
-      `[${projectId}] Component ${status}d "${id}"`,
+      `[${projectId}] Component ${status}d ${Logger.highlightText(id)}`,
     removed: (env: string, id: string, commit: boolean) =>
-      `[${env}] ${commit ? `Deleted` : `Will delete`} component "${id}"`,
+      `[${env}] ${
+        commit ? `Deleted` : `Will delete`
+      } component ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete component "${id}"`,
+      `[${env}] Unable to delete component ${Logger.highlightText(id)}`,
   },
   version: {
     set: (env: string, versionStatus: string) =>
@@ -175,22 +193,25 @@ export const LogMessages = {
   },
   entries: {
     removed: (env: string, id: string, commit: boolean) =>
-      `[${env}] ${commit ? `Deleted` : `Will delete`} entry "${id}"`,
+      `[${env}] ${
+        commit ? `Deleted` : `Will delete`
+      } entry ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete entry "${id}"`,
-    notFound: (id: string) => `Entry "${id}" not found`,
+      `[${env}] Unable to delete entry ${Logger.highlightText(id)}`,
+    notFound: (id: string) => `Entry ${Logger.highlightText(id)} not found`,
     commitTip: () => `  Add --commit flag to commit the previewed changes`,
   },
   keys: {
     list: (env: string) => `[${env}] API keys:`,
     noList: (env: string) => `[${env}] Cannot retrieve API`,
     created: (env: string, name: string) =>
-      `[${env}] Created API key "${name}"`,
+      `[${env}] Created API key ${Logger.highlightText(name)}`,
     failedCreate: (env: string, name: string) =>
-      `[${env}] Unable to create API key "${name}"`,
-    removed: (env: string, id: string) => `[${env}] Deleted API key "${id}"`,
+      `[${env}] Unable to create API key ${Logger.highlightText(name)}`,
+    removed: (env: string, id: string) =>
+      `[${env}] Deleted API key ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete API key "${id}"`,
+      `[${env}] Unable to delete API key ${Logger.highlightText(id)}`,
   },
   blocks: {
     runningStatus: (status: BlockRunningStatus | 'broken') => {
@@ -216,34 +237,56 @@ export const LogMessages = {
     noList: (env: string, projectId?: string) =>
       `[${env}] Cannot retrieve blocks in project ${projectId}`,
     getLogs: (id: string, branch: string, env: string, projectId?: string) =>
-      `[${env}] Requesting logs from block "${id}" in branch ${branch} in project ${projectId}`,
+      `[${env}] Requesting logs from block ${Logger.highlightText(
+        id
+      )} in branch ${branch} in project ${projectId}`,
     failedGetLogs: (id: string, env: string, projectId?: string) =>
-      `[${env}] Unable to fetch block logs for "${id}" in project ${projectId}`,
+      `[${env}] Unable to fetch block logs for ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
     tryPush: (id: string, branch: string, env: string, projectId?: string) =>
-      `[${env}] Request to push block "${id}" in branch ${branch} in project ${projectId}`,
+      `[${env}] Request to push block ${Logger.highlightText(
+        id
+      )} in branch ${branch} in project ${projectId}`,
     pushed: (id: string, branch: string, env: string, projectId?: string) =>
-      `[${env}] Pushed block "${id}" in branch ${branch} in project ${projectId}`,
+      `[${env}] Pushed block ${Logger.highlightText(
+        id
+      )} in branch ${branch} in project ${projectId}`,
     failedPush: (id: string, env: string, projectId?: string) =>
-      `[${env}] Unable to push block "${id}" in project ${projectId}`,
+      `[${env}] Unable to push block ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
     released: (id: string, env: string, projectId?: string) =>
-      `[${env}] Released block "${id}" in project ${projectId}`,
+      `[${env}] Released block ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
     failedRelease: (id: string, env: string, projectId?: string) =>
-      `[${env}] Unable to release block "${id}" in project ${projectId}`,
+      `[${env}] Unable to release block ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
     deleted: (id: string, env: string, projectId?: string) =>
-      `[${env}] Deleted block "${id}" in project ${projectId}`,
+      `[${env}] Deleted block ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
     failedDelete: (id: string, env: string, projectId?: string) =>
-      `[${env}] Unable to delete block "${id}" in project ${projectId}`,
+      `[${env}] Unable to delete block ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
   },
   webhooks: {
     list: (env: string) => `[${env}] Webhook subscriptions:`,
     noList: (env: string) => `[${env}] Cannot retrieve webhook subscriptions`,
     created: (env: string, name: string) =>
-      `[${env}] Created Webhook subscription "${name}"`,
+      `[${env}] Created Webhook subscription ${Logger.highlightText(name)}`,
     failedCreate: (env: string, name: string) =>
-      `[${env}] Unable to create Webhook subscription "${name}"`,
+      `[${env}] Unable to create Webhook subscription ${Logger.highlightText(
+        name
+      )}`,
     deleted: (env: string, id: string) =>
-      `[${env}] Deleted Webhook subscription "${id}"`,
+      `[${env}] Deleted Webhook subscription ${Logger.highlightText(id)}`,
     failedDelete: (env: string, id: string) =>
-      `[${env}] Unable to delete Webhook subscription "${id}"`,
+      `[${env}] Unable to delete Webhook subscription ${Logger.highlightText(
+        id
+      )}`,
   },
 };

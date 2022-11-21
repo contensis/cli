@@ -5,13 +5,14 @@ import { shell } from '~/shell';
 export const makeLoginCommand = () => {
   const login = new Command()
     .command('login')
+    .description('login to a connected Contensis instance')
     .argument('<user/clientId>', 'the username to login with')
     .argument(
       '[password]',
       'the password to use to login with (optional/insecure)'
     )
     .option(
-      '-s --shared-secret <sharedSecret>',
+      '-s, --shared-secret <sharedSecret>',
       'the shared secret to use when logging in with a client id'
     )
     .usage('<user/clientId> [password] [-s <sharedSecret>]')

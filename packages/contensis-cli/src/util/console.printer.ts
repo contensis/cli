@@ -111,51 +111,6 @@ export const printMigrateResult = (
 ) => {
   console.log(``);
 
-  if (action === 'import') {
-    for (const [projectId, contentTypeCounts] of Object.entries(
-      migrateResult.entries || {}
-    ) as [string, any][]) {
-      console.log(
-        `import from project ${log.highlightText(projectId)} to ${log.boldText(
-          log.successText(currentProject)
-        )}`
-      );
-      for (const [contentTypeId, count] of Object.entries(
-        contentTypeCounts
-      ) as [string, number][]) {
-        const entriesToMigrate =
-          migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
-
-        console.log(
-          `  - ${
-            contentTypeId === 'totalCount'
-              ? log.warningText(`${contentTypeId}: ${count}`)
-              : log.helpText(`${contentTypeId}: ${count}`)
-          } ${log.infoText`[existing: ${(
-            ((migrateResult.existing?.[projectId]?.[contentTypeId] || 0) /
-              count) *
-            100
-          ).toFixed(0)}%]`} [${
-            typeof entriesToMigrate !== 'number' ? `unchanged` : `to update`
-          }: ${(
-            ((typeof entriesToMigrate !== 'number'
-              ? entriesToMigrate?.['no change'] || 0
-              : entriesToMigrate) /
-              count) *
-            100
-          ).toFixed(0)}%]`
-        );
-      }
-      console.log(``);
-    }
-  }
-  if (
-    contensis?.isPreview &&
-    migrateResult.entriesToMigrate?.[currentProject]?.totalCount > 0 &&
-    !migrateResult.errors
-  ) {
-    log.help(messages.entries.commitTip());
-  }
   for (const [contentTypeId, entryRes] of Object.entries(
     migrateResult.entriesToMigrate.entryIds
   ) as [string, any]) {
@@ -163,9 +118,10 @@ export const printMigrateResult = (
       string,
       any
     ][]) {
+      console.log(`${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`);
       console.log(
         log.infoText(
-          `${originalId} [${Object.entries(entryStatus || {})
+          `  ${originalId} ${Object.entries(entryStatus || {})
             .filter(x => x[0] !== 'entryTitle')
             .map(([projectId, projectStatus]) => {
               const [targetGuid, { status }] = (Object.entries(
@@ -174,13 +130,12 @@ export const printMigrateResult = (
                 '',
                 { x: { status: undefined } },
               ];
-              return `${messages.migrate.status(status)(
-                `${projectId}: ${status}`
-              )}${targetGuid !== originalId ? `-> ${targetGuid}` : ''}`;
-            })}]`
+              return `${messages.migrate.status(status)(`${status}`)}${
+                targetGuid !== originalId ? `-> ${targetGuid}` : ''
+              }`;
+            })}`
         )
       );
-      console.log(`  ${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`);
 
       for (const [projectId, projectStatus] of Object.entries(
         entryStatus
@@ -198,6 +153,51 @@ export const printMigrateResult = (
           console.log(``);
           console.log(log.highlightText(diff));
         }
+      }
+    }
+    console.log(``);
+  }
+  if (
+    contensis?.isPreview &&
+    migrateResult.entriesToMigrate?.[currentProject]?.totalCount > 0 &&
+    !migrateResult.errors
+  ) {
+    log.help(messages.entries.commitTip());
+  }
+  if (action === 'import') {
+    for (const [projectId, contentTypeCounts] of Object.entries(
+      migrateResult.entries || {}
+    ) as [string, any][]) {
+      console.log(
+        `import from project ${log.highlightText(projectId)} to ${log.boldText(
+          log.warningText(currentProject)
+        )}`
+      );
+      for (const [contentTypeId, count] of Object.entries(
+        contentTypeCounts
+      ) as [string, number][]) {
+        const entriesToMigrate =
+          migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
+
+        console.log(
+          `  - ${
+            contentTypeId === 'totalCount'
+              ? log.warningText(`${contentTypeId}: ${count}`)
+              : `${contentTypeId}: ${log.helpText(count)}`
+          } ${log.infoText`[existing: ${(
+            ((migrateResult.existing?.[projectId]?.[contentTypeId] || 0) /
+              count) *
+            100
+          ).toFixed(0)}%]`} [${
+            typeof entriesToMigrate !== 'number' ? `unchanged` : `to update`
+          }: ${(
+            ((typeof entriesToMigrate !== 'number'
+              ? entriesToMigrate?.['no change'] || 0
+              : entriesToMigrate) /
+              count) *
+            100
+          ).toFixed(0)}%]`
+        );
       }
     }
   }
@@ -290,11 +290,25 @@ export const printModelMigrationResult = (
     MigrateResultStatus,
     string[]
   ][]) {
-    if (ids?.length)
-      log.raw(
-        `  - ${status}: [ ${messages.migrate.models.result(status)(
-          ids.join(', ')
-        )} ]`
-      );
+    if (ids?.length) {
+      if (status === 'errors') {
+        const errors: [string, MappedError][] = ids as any;
+        log.raw(
+          `  - ${status}: [ ${messages.migrate.models.result(status)(
+            ids.map(id => id[0]).join(', ')
+          )} ]\n`
+        );
+        for (const [contentTypeId, error] of errors)
+          log.error(
+            `${log.highlightText(contentTypeId)}: ${error.message}`,
+            error
+          );
+      } else
+        log.raw(
+          `  - ${status}: [ ${messages.migrate.models.result(status)(
+            ids.join(', ')
+          )} ]`
+        );
+    }
   }
 };

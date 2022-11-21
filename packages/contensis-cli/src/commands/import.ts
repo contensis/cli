@@ -6,12 +6,14 @@ import { commit, mapContensisOpts } from './globalOptions';
 export const makeImportCommand = () => {
   const program = new Command()
     .command('import')
+    .description('import command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
   program
     .command('models')
+    .description('import complete content models')
     .argument('[modelIds...]', 'ids of the content models to import (optional)')
     .addOption(commit)
     .addHelpText(
@@ -35,8 +37,9 @@ Example call:
 
   program
     .command('contenttypes')
+    .description('import content types')
     .argument(
-      '[contentTypeIds]',
+      '[contentTypeIds...]',
       'Optional list of API id(s) of the content type(s) to import'
     )
     .addOption(commit)
@@ -64,8 +67,9 @@ Example call:
 
   program
     .command('components')
+    .description('import components')
     .argument(
-      '[componentIds]',
+      '[componentIds...]',
       'Optional list of API id(s) of the component(s) to import'
     )
     .addOption(commit)
@@ -93,6 +97,7 @@ Example call:
 
   program
     .command('entries')
+    .description('import entries')
     .argument(
       '[search phrase]',
       'get entries with the search phrase, use quotes for multiple words'

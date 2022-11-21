@@ -40,9 +40,7 @@ const commands = () => {
     )
   );
   program.addCommand(
-    addGlobalOptions(
-      addImportOptions(makeCreateCommand())
-    ).copyInheritedSettings(program)
+    addGlobalOptions(makeCreateCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(
