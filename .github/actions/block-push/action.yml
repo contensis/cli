@@ -80,11 +80,11 @@ runs:
 
     - name: Tag repo with block version
       id: tag
-      if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
+      if: inputs.tag-repo == "true" && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
       shell: bash
       run: |
         TAG=v${{ steps.set.outputs.block-version }}
         echo "git-tag=$TAG" >> $GITHUB_OUTPUT
         echo "Tagging commit with: $TAG"
-        git tag $TAG
-        git push origin $TAG
+        git tag $TAG --force
+        git push origin $TAG --force
