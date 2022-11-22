@@ -143,6 +143,7 @@ class ContensisShell {
         'get component',
         'get entries',
         'get model',
+        'get project',
         'get version',
         'import contenttypes',
         'import components',

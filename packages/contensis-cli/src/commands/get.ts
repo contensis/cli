@@ -24,6 +24,23 @@ Example call:
     });
 
   program
+    .command('project')
+    .description('get a project')
+    .argument('[projectId]', 'id of the project to get (default: current)')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get project website
+`
+    )
+    .action(async (projectId: string, opts) => {
+      await cliCommand(['get', 'project', projectId], opts).PrintProject(
+        projectId
+      );
+    });
+
+  program
     .command('model')
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')

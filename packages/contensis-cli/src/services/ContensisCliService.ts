@@ -643,6 +643,32 @@ class ContensisCli {
     }
   };
 
+  PrintProject = async (projectId = this.currentProject) => {
+    const { log, messages, session } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve projects list for env
+      const [projectsErr, projects] = await to(
+        contensis.projects.GetSourceProjects()
+      );
+
+      const foundProject = projects?.find(
+        p => p.id.toLowerCase() === projectId.toLowerCase()
+      );
+
+      if (foundProject) {
+        log.raw('');
+        this.HandleFormattingAndOutput(foundProject, log.object);
+      }
+
+      if (projectsErr) {
+        log.error(messages.projects.noList());
+        log.error(projectsErr.message);
+      }
+    }
+  };
+
   SetProject = (projectId = 'website') => {
     const { env, log, messages, session } = this;
     let nextProjectId: string | undefined;
