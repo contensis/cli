@@ -36,7 +36,7 @@ inputs:
     required: false
     default: false
   git-token:
-    description: 'The git token from secrets to use when pushing to the git repo upon successful block push'
+    description: 'The git token from secrets to use when tagging the git repo upon successful block push'
     required: false
     default: ${{ github.token }}
 
@@ -77,13 +77,14 @@ runs:
       with:
         token: ${{ inputs.git-token }}
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
+
     - name: Tag repo with block version
       id: tag
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
       shell: bash
       run: |
         PROJECT=${{ inputs.project-id }}
-        TAG=block-${PROJECT,,}-${{ steps.set.outputs.block-version }}
+        TAG=v${{ steps.set.outputs.block-version }}
         echo "git-tag=$TAG" >> $GITHUB_OUTPUT
         echo "Tagging commit with: $TAG"
         git tag $TAG
