@@ -76,11 +76,11 @@ runs:
     - uses: actions/checkout@v3
       with:
         token: ${{ inputs.git-token }}
-      if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
+      if: inputs.tag-repo == 'true' && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
 
     - name: Tag repo with block version
       id: tag
-      if: inputs.tag-repo == "true" && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
+      if: inputs.tag-repo == 'true' && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
       shell: bash
       run: |
         TAG=v${{ steps.set.outputs.block-version }}
