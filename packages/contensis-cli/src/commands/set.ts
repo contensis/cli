@@ -8,17 +8,64 @@ export const makeSetCommand = () => {
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
-  set
+
+  const project = set
     .command('project')
     .argument('<projectId>', 'the project id to work with')
     .usage('<projectId>')
     .addHelpText('after', `\n`)
     .action(async projectId => {
-      const project = cliCommand(['set', 'project', projectId]).SetProject(
-        projectId
-      );
-      if (project) await shell().restart();
+      const nextProjectId = cliCommand([
+        'set',
+        'project',
+        projectId,
+      ]).SetProject(projectId);
+      if (nextProjectId) await shell().restart();
     });
+
+  project
+    .command('name')
+    .argument('<"Project name">', 'update the current project name')
+    .usage('<"Project name">')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > set project name "Project name"\n`
+    )
+    .action(async (name: string, opts) => {
+      const success = await cliCommand(
+        ['set', 'project', 'name'],
+        opts
+      ).UpdateProject({
+        name,
+      });
+      if (success) await shell().restart();
+    });
+
+  project
+    .command('description')
+    .argument(
+      '<"Project description">',
+      'update the current project description'
+    )
+    .usage('<"Project description">')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > set project description "Description of project"\n`
+    )
+    .action(async (description: string, opts) => {
+      const success = await cliCommand(
+        ['set', 'project', 'description'],
+        opts
+      ).UpdateProject({
+        description,
+      });
+      if (success) await shell().restart();
+    });
+
   set
     .command('version')
     .addArgument(

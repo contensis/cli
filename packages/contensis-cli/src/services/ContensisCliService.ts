@@ -811,25 +811,28 @@ class ContensisCli {
     }
   };
 
-  UpdateProject = async (project: Project) => {
-    const { currentEnv, log, messages } = this;
+  UpdateProject = async (project: Partial<Project>) => {
+    const { currentEnv, currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();
 
     if (contensis) {
-      const [err, updated] = await contensis.projects.UpdateProject(project);
+      const [err, updated] = await contensis.projects.UpdateProject({
+        id: currentProject,
+        ...project,
+      });
 
       if (updated) {
-        log.success(messages.projects.updated(currentEnv, project.id));
+        log.success(messages.projects.updated(currentEnv, currentProject));
 
-        this.HandleFormattingAndOutput(updated, () => {
-          // print the projects to console
-          this.PrintProjects();
-        });
-        return project.id;
+        this.HandleFormattingAndOutput(updated, log.object);
+        return updated.id;
       }
 
       if (err) {
-        log.error(messages.projects.failedUpdate(currentEnv, project.id), err);
+        log.error(
+          messages.projects.failedUpdate(currentEnv, currentProject),
+          err
+        );
       }
     }
   };
