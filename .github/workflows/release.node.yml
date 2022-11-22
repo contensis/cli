@@ -3,23 +3,16 @@ name: Publish npm package
 on:
   workflow_call:
     inputs:
-      # version:
-      #   required: true
-      #   type: string
       tag:
         required: true
         type: string
     outputs:
-      APP_VERSION:
+      version:
         description: 'The latest app version in `package.json`'
-        value: ${{ jobs.release.outputs.APP_VERSION }}
+        value: ${{ jobs.release.outputs.version }}
 
   workflow_dispatch:
     inputs:
-      # version:
-      #   description: 'Release version (e.g. patch, minor, prerelease, or a specific version like "3.11.1-alpha.0")'
-      #   required: true
-      #   default: 'patch'
       tag:
         description: 'The NPM version tag to use, "latest" will become the default package version, or "prerelease"'
         required: true
@@ -30,12 +23,9 @@ jobs:
     name: Build package and publish to npm
     runs-on: ubuntu-latest
     outputs:
-      APP_VERSION: ${{ steps.variables.outputs.APP_VERSION }}
+      version: ${{ steps.variables.outputs.version }}
     steps:
       - uses: actions/checkout@v3
-        # with:
-        #   ref: ${{ github.sha }}
-        #   fetch-depth: 0
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -48,45 +38,13 @@ jobs:
           yarn run bootstrap:ci
           cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
 
-      # - name: Increment version (if prerelease)
-      #   if: inputs.tag == 'prerelease'
-      #   run: |
-      #     cd packages/contensis-cli
-      #     npm version prerelease --preid=beta --no-git-tag-version
-      #     npm run build
-
-      # - name: Increment version (if other release)
-      #   if: inputs.tag != 'prerelease'
-      #   run: |
-      #     cd packages/contensis-cli
-      #     npm version ${{ inputs.version }}
-      #     npm run build
-
       - id: variables
         name: Set APP_VERSION output variable
         run: |
-          GIT_BRANCH=$(git branch --contains ${{ github.sha }} | grep -v detached | sed 's/[^a-zA-Z0-9]//g')
           APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
-          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
 
-      # - name: Workaround for detached HEAD
-      #   run: |
-      #     git checkout ${env.GIT_BRANCH#refs/heads/}
-
-      # - name: Push version increment to GIT
-      #   run: |
-      #     git config user.email "github@zengenti.com"
-      #     git config user.name "$GITHUB_ACTOR"
-      #     git add .
-      #     git commit -m "ci: release version ${{ env.APP_VERSION }} [skip ci]"
-      #     git push
-      #   env:
-      #     # The secret is passed automatically. Nothing to configure.
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish release package "${{ env.APP_VERSION }}" with tag "${{ inputs.tag }}"
+      - name: Publish release package "${{ steps.variables.outputs.version }}" with tag "${{ inputs.tag }}"
         if: inputs.tag != 'prerelease'
         run: |
           cd packages/contensis-cli
