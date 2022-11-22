@@ -4,6 +4,7 @@ import { cliCommand } from '~/services/ContensisCliService';
 export const makeListCommand = () => {
   const list = new Command()
     .command('list')
+    .description('list command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
@@ -24,14 +25,14 @@ Example call:
 
   list
     .command('projects')
-    .description('Print list of projects')
+    .description('print list of projects')
     .action(async opts => {
       await cliCommand(['list', 'projects'], opts).PrintProjects();
     });
 
   list
     .command('models')
-    .description('Print list of content models')
+    .description('print list of content models')
     .addHelpText(
       'after',
       `
@@ -45,7 +46,7 @@ Example call:
 
   list
     .command('contenttypes')
-    .description('Print list of content types')
+    .description('print list of content types')
     .addHelpText(
       'after',
       `
@@ -59,7 +60,7 @@ Example call:
 
   list
     .command('components')
-    .description('Print list of components')
+    .description('print list of components')
     .addHelpText(
       'after',
       `
@@ -73,7 +74,7 @@ Example call:
 
   list
     .command('blocks')
-    .description('Print list of content blocks')
+    .description('print list of content blocks')
     .addHelpText(
       'after',
       `
@@ -87,7 +88,7 @@ Example call:
 
   list
     .command('keys')
-    .description('Print list of API keys')
+    .description('print list of API keys')
     .addHelpText(
       'after',
       `
@@ -101,7 +102,7 @@ Example call:
 
   list
     .command('webhooks')
-    .description('Print list of webhooks')
+    .description('print list of webhooks')
     .argument('[name]', 'find webhooks matching the supplied name')
     .option('-i --id <id...>', 'the subscription id(s) to get')
     .addHelpText('after', `\n`)

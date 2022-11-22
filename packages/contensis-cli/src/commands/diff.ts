@@ -5,12 +5,14 @@ import { mapContensisOpts } from './globalOptions';
 export const makeDiffCommand = () => {
   const release = new Command()
     .command('diff')
+    .description('diff command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
   release
     .command('models')
+    .description('differences with content models')
     .argument(
       '[model-ids...]',
       'ids of any content types or components to diff (optional)'

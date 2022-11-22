@@ -1,17 +1,19 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
-import { commit, mapContensisOpts } from './globalOptions';
+import { commit, mapContensisOpts, zenql } from './globalOptions';
 
 export const makeRemoveCommand = () => {
   const remove = new Command()
     .command('remove')
+    .description('remove command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
   remove
     .command('project')
+    .description('remove an entire project')
     .argument('<projectId>', 'the project id to delete')
     .usage('<projectId>')
     .addHelpText('after', `\n`)
@@ -22,8 +24,10 @@ export const makeRemoveCommand = () => {
       ).SetProject(projectId);
       if (project) await shell().restart();
     });
+
   remove
     .command('key')
+    .description('remove api key')
     .argument('<id>', 'the id of the API key to delete')
     .usage('<id>')
     .addHelpText(
@@ -39,6 +43,7 @@ Example call:
 
   remove
     .command('components')
+    .description('delete components')
     .argument('<id...>', 'the id(s) of the components to delete')
     .addOption(commit)
     .usage('<id> [--commit]')
@@ -58,6 +63,7 @@ Example call:
 
   remove
     .command('contenttypes')
+    .description('delete content types')
     .argument('<id...>', 'the id(s) of the content types to delete')
     .addOption(commit)
     .usage('<id> [--commit]')

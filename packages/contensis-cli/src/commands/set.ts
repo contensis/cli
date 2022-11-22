@@ -5,15 +5,22 @@ import { shell } from '~/shell';
 export const makeSetCommand = () => {
   const set = new Command()
     .command('set')
+    .description('set command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
   const project = set
     .command('project')
+    .description('set current working project')
     .argument('<projectId>', 'the project id to work with')
     .usage('<projectId>')
-    .addHelpText('after', `\n`)
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > set project website\n`
+    )
     .action(async projectId => {
       const nextProjectId = cliCommand([
         'set',
@@ -25,6 +32,7 @@ export const makeSetCommand = () => {
 
   project
     .command('name')
+    .description('update project name')
     .argument('<"Project name">', 'update the current project name')
     .usage('<"Project name">')
     .addHelpText(
@@ -45,6 +53,7 @@ Example call:
 
   project
     .command('description')
+    .description('update project description')
     .argument(
       '<"Project description">',
       'update the current project description'
@@ -68,6 +77,7 @@ Example call:
 
   set
     .command('version')
+    .description('set content version')
     .addArgument(
       new Argument('<versionStatus>', 'content version status')
         .choices(['latest', 'published'])

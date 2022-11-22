@@ -11,7 +11,7 @@ export const makeGetCommand = () => {
 
   program
     .command('version')
-    .description('Get current Contensis version')
+    .description('get current Contensis version')
     .addHelpText(
       'after',
       `
@@ -25,7 +25,7 @@ Example call:
 
   program
     .command('model')
-    .description('Get a content model')
+    .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')
     .addHelpText(
       'after',
@@ -43,7 +43,7 @@ Example call:
 
   program
     .command('contenttype')
-    .description('Get a content type')
+    .description('get a content type')
     .argument('<contentTypeId>', 'the API id of the content type to get')
     .addHelpText(
       'after',
@@ -61,7 +61,7 @@ Example call:
 
   program
     .command('component')
-    .description('Get a component')
+    .description('get a component')
     .argument('<componentId>', 'the API id of the component to get')
     .addHelpText(
       'after',
@@ -78,7 +78,7 @@ Example call:
 
   program
     .command('entries')
-    .description('Get entries')
+    .description('get entries')
     .argument(
       '[search phrase]',
       'get entries with the search phrase, use quotes for multiple words'
@@ -117,7 +117,7 @@ Example call:
 
   const block = program
     .command('block')
-    .description('Get a block or block version')
+    .description('get a block or block version')
     .argument('[blockId]', 'the block to get version details for')
     .argument(
       '[branch]',
@@ -152,7 +152,7 @@ Example call:
 
   block
     .command('logs')
-    .description('Get logs for a block')
+    .description('get logs for a block')
     .argument('[blockId]', 'the block to get version logs for')
     .argument(
       '[branch]',

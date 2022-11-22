@@ -6,12 +6,14 @@ import { cliCommand } from '~/services/ContensisCliService';
 export const makePushCommand = () => {
   const push = new Command()
     .command('push')
+    .description('push command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
   push
     .command('block')
+    .description('push a block')
     .argument('<block-id>', 'the name of the block to push to')
     .argument(
       '<image uri:tag>',

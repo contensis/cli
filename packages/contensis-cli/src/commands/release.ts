@@ -4,12 +4,14 @@ import { cliCommand } from '~/services/ContensisCliService';
 export const makeReleaseCommand = () => {
   const release = new Command()
     .command('release')
+    .description('release command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
   release
     .command('block')
+    .description('release a block version')
     .argument('<block-id>', 'the name of the block to release')
     .argument('<version>', 'the block version to release')
     .usage('<block-id> <version>')
