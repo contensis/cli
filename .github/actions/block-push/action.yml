@@ -83,7 +83,6 @@ runs:
       if: inputs.tag-repo && (github.ref_name == 'master' || github.ref_name == 'main') && steps.set.outputs.block-version != ''
       shell: bash
       run: |
-        PROJECT=${{ inputs.project-id }}
         TAG=v${{ steps.set.outputs.block-version }}
         echo "git-tag=$TAG" >> $GITHUB_OUTPUT
         echo "Tagging commit with: $TAG"
