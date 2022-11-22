@@ -59,6 +59,5 @@ runs:
       id: set
       shell: bash
       run: |
-        OUTPUT=`cat output.json`
-        STRINGIFIED=$(echo "$OUTPUT" | tr "\n" " " | jq -sR .)
-        echo "command-output=$STRINGIFIED" >> $GITHUB_OUTPUT
+        OUTPUT=$(echo "`cat output.json`" | tr "\n" " " | jq -sR .)
+        echo "command-output=$OUTPUT" >> $GITHUB_OUTPUT
