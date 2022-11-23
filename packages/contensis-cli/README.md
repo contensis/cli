@@ -421,7 +421,7 @@ A `model` is a complete view of a content type that includes all of its dependen
 
 - `contentTypes` are the content types that have content linked to the model directly from this content type
 - `components` are the content types that have content linked to the model directly from this content type
-- `dependencies` is an exhaustive list of dependencies and inner dependents [the values in brackets are the models that require that dependency]
+- `dependencies` is an exhaustive list of dependencies and inner dependents [the values in brackets are the models that have required it to make it a dependency]
 - `dependencyOf` is a list of all the other content types (or components) that reference this content type directly, this model is a dependency of those
 
 ```shell

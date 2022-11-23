@@ -107,7 +107,17 @@ export const printBlockVersion = (
 export const printMigrateResult = (
   { log, messages, contensis, currentProject }: ContensisCli,
   migrateResult: any,
-  { action = 'import' }: { action?: 'import' | 'delete' } = {}
+  {
+    action = 'import',
+    showDiff = false,
+    showAllEntries = false,
+    showChangedEntries = false,
+  }: {
+    action?: 'import' | 'delete';
+    showDiff?: boolean;
+    showAllEntries?: boolean;
+    showChangedEntries?: boolean;
+  } = {}
 ) => {
   if (Object.keys(migrateResult.entriesToMigrate.entryIds).length)
     console.log(``);
@@ -119,43 +129,53 @@ export const printMigrateResult = (
       string,
       any
     ][]) {
-      console.log(`${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`);
-      console.log(
-        log.infoText(
-          `  ${originalId} ${Object.entries(entryStatus || {})
-            .filter(x => x[0] !== 'entryTitle')
-            .map(([projectId, projectStatus]) => {
-              const [targetGuid, { status }] = (Object.entries(
-                projectStatus || {}
-              )?.[0] as [string, { status: MigrateStatus }]) || [
-                '',
-                { x: { status: undefined } },
-              ];
-              return `${messages.migrate.status(status)(`${status}`)}${
-                targetGuid !== originalId ? `-> ${targetGuid}` : ''
-              }`;
-            })}`
-        )
-      );
+      // console.log(`${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`);
+      if (
+        showAllEntries ||
+        (showChangedEntries &&
+          (
+            Object.entries(
+              Object.entries(entryStatus[currentProject])[0]
+            )[1][1] as any
+          ).status !== 'no change')
+      ) {
+        console.log(
+          log.infoText(
+            `${originalId} ${Object.entries(entryStatus || {})
+              .filter(x => x[0] !== 'entryTitle')
+              .map(([projectId, projectStatus]) => {
+                const [targetGuid, { status }] = (Object.entries(
+                  projectStatus || {}
+                )?.[0] as [string, { status: MigrateStatus }]) || [
+                  '',
+                  { x: { status: undefined } },
+                ];
+                return `${messages.migrate.status(status)(`${status}`)}${
+                  targetGuid !== originalId ? `-> ${targetGuid}` : ''
+                }`;
+              })}`
+          ) + ` ${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`
+        );
 
-      for (const [projectId, projectStatus] of Object.entries(
-        entryStatus
-      ).filter(([key]) => key !== 'entryTitle') as [string, any][]) {
-        const [targetGuid, { error, diff, status }] = Object.entries(
-          projectStatus
-        )[0] as [string, any];
-        if (error) log.error(error);
-        if (diff) {
-          console.log(
-            `    ${log.highlightText(`diff:`)} ${log.infoText(
-              highlightDiffText(diff)
-            )}\n`
-          );
+        for (const [projectId, projectStatus] of Object.entries(
+          entryStatus
+        ).filter(([key]) => key !== 'entryTitle') as [string, any][]) {
+          const [targetGuid, { error, diff, status }] = Object.entries(
+            projectStatus
+          )[0] as [string, any];
+          if (error) log.error(error);
+          if (diff && showDiff) {
+            console.log(
+              `    ${log.highlightText(`diff:`)} ${log.infoText(
+                highlightDiffText(diff)
+              )}\n`
+            );
+          }
         }
       }
     }
-    console.log(``);
   }
+  console.log(``);
   if (
     contensis?.isPreview &&
     migrateResult.entriesToMigrate?.[currentProject]?.totalCount > 0 &&
@@ -164,44 +184,80 @@ export const printMigrateResult = (
     log.help(messages.entries.commitTip());
   }
 
-  // Needs work
-  // if (action === 'import') {
-  //   for (const [projectId, contentTypeCounts] of Object.entries(
-  //     migrateResult.entries || {}
-  //   ) as [string, any][]) {
-  //     console.log(
-  //       `import from project ${log.highlightText(projectId)} to ${log.boldText(
-  //         log.warningText(currentProject)
-  //       )}`
-  //     );
-  //     for (const [contentTypeId, count] of Object.entries(
-  //       contentTypeCounts
-  //     ) as [string, number][]) {
-  //       const entriesToMigrate =
-  //         migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
+  if (action === 'import') {
+    for (const [projectId, contentTypeCounts] of Object.entries(
+      migrateResult.entries || {}
+    ) as [string, any][]) {
+      log.help(
+        `import from project ${log.highlightText(projectId)} to ${log.boldText(
+          log.warningText(currentProject)
+        )}`
+      );
+      for (const [contentTypeId, count] of Object.entries(
+        contentTypeCounts
+      ) as [string, number][]) {
+        const entriesToMigrate =
+          migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
+        const existingCount =
+          migrateResult.existing?.[projectId]?.[contentTypeId] || 0;
+        const existingPercent = ((existingCount / count) * 100).toFixed(0);
+        const noChangeOrTotalEntriesCount =
+          typeof entriesToMigrate !== 'number'
+            ? entriesToMigrate?.['no change'] || 0
+            : entriesToMigrate;
 
-  //       console.log(
-  //         `  - ${
-  //           contentTypeId === 'totalCount'
-  //             ? log.warningText(`${contentTypeId}: ${count}`)
-  //             : `${contentTypeId}: ${log.helpText(count)}`
-  //         } ${log.infoText`[existing: ${(
-  //           ((migrateResult.existing?.[projectId]?.[contentTypeId] || 0) /
-  //             count) *
-  //           100
-  //         ).toFixed(0)}%]`} [${
-  //           typeof entriesToMigrate !== 'number' ? `unchanged` : `to update`
-  //         }: ${(
-  //           ((typeof entriesToMigrate !== 'number'
-  //             ? entriesToMigrate?.['no change'] || 0
-  //             : entriesToMigrate) /
-  //             count) *
-  //           100
-  //         ).toFixed(0)}%]`
-  //       );
-  //     }
-  //   }
-  // }
+        const isTotalCountRow = contentTypeId === 'totalCount';
+
+        const changedPercentage = (
+          (noChangeOrTotalEntriesCount / count) *
+          100
+        ).toFixed(0);
+
+        const existingColor =
+          existingPercent === '0' ? log.warningText : log.infoText;
+        const changedColor = isTotalCountRow
+          ? log.helpText
+          : changedPercentage === '100'
+          ? log.successText
+          : log.warningText;
+
+        console.log(
+          `  - ${
+            isTotalCountRow
+              ? log.highlightText(`${contentTypeId}: ${count}`)
+              : `${contentTypeId}: ${log.helpText(count)}`
+          }${
+            changedPercentage === '100'
+              ? ''
+              : existingColor(
+                  ` [existing: ${
+                    isTotalCountRow ? existingCount : `${existingPercent}%`
+                  }]`
+                )
+          }${
+            existingPercent === '0'
+              ? ''
+              : changedColor(
+                  ` ${
+                    isTotalCountRow
+                      ? `[to change: ${noChangeOrTotalEntriesCount}]`
+                      : changedPercentage === '100'
+                      ? 'up to date'
+                      : `[needs update: ${100 - Number(changedPercentage)}%]`
+                  }`
+                )
+          }`
+        );
+      }
+    }
+    if (migrateResult.errors?.length) {
+      console.log(
+        `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
+      );
+      for (const error of migrateResult.errors)
+        log.error(error.message || error);
+    }
+  }
 };
 
 const highlightDiffText = (str: string) => {
