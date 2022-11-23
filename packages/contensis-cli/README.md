@@ -1,20 +1,42 @@
 # Contensis CLI
 
-Use Contensis from your favourite terminal with NodeJS
+Use Contensis from your favourite terminal
 
-Install the package via `npm` as a global module
+Install the package via `npm` as a global module (requires NodeJS)
 
 ```shell
 npm i contensis-cli --global
 ```
 
-## CLI usage
+Alternatively, download the executable for your operating system from the [Releases page](https://github.com/contensis/node-cli/releases)
+
+## Skip to section
+
+- ### [Contensis Shell](#contensis-shell)
+- [Use in Terminal](#cli-usage)
+  - [Pass connection details anywhere](#pass-connection-details-anywhere)
+- [Use in Docker](#use-in-docker)
+  - [Run cli commands](#run-cli-commands)
+  - [Persist connections to a local file](#persist-connections-to-a-local-file)
+- [Use in GitLab CI](#use-in-gitlab-ci)
+- [Use in GitHub CI](#use-in-github-ci)
+- [Running headless?](#running-headless-)
+
+## Use in Terminal
+
+Try
 
 ```shell
-contensis-cli connect example-dev
+contensis connect example-dev
 ```
 
-The CLI uses the same commands and arguments as the shell. It is recommended you use and familiarise yourself with the cli via the shell and use the `contensis-cli` command to use the same cli commands in script-based context such as continuous integration.
+or
+
+```shell
+contensis help
+```
+
+The CLI uses exactly the same commands as the shell. It is recommended you use and familiarise yourself with the cli by using the shell and then use the same cli commands when you need to in script-based context such as continuous integration environments.
 
 ### Pass connection details anywhere
 
@@ -31,15 +53,90 @@ You can supply the following options with any command - although they don't appe
  -s  --shared-secret
 ```
 
-### Running headless?
+Using this approach in the cli or the shell will assume these credentials are for your current envioronment and will set the local environment cache for subsequent commands
+
+## Use in Docker
+
+Running the container with the `-it` docker options will launch a shell session
+
+```bash
+docker pull ghcr.io/contensis/node-cli/main/app:latest
+docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest
+```
+
+### Run cli commands
+
+Add the cli command and any options after the container image in the `docker run` command e.g.
+
+```bash
+docker run --rm ghcr.io/contensis/node-cli/main/app:latest get entries "test"
+```
+
+### Persist connections to a local file
+
+To use the cli container for multiple commands or to save connections for future sessions, map a volume to the docker container
+
+<aside>
+⚠️ Ensure a file called `environments.json` exists before mapping the volume to the docker container. If it doesn’t exist, create this empty file first.
+
+</aside>
+
+Linux
+
+```bash
+touch environments.json
+docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+```
+
+Windows
+
+```powershell
+echo {} > environments.json
+docker run --rm -v ${PWD}/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+```
+
+## Use in GitLab CI
+
+```yaml
+push-to-contensis-block:
+  stage: push-to-contensis
+  only:
+    - master
+  image: ghcr.io/contensis/node-cli/main/app:release
+  script:
+    # Create CI/CD Variables in repo settings called CONTENSIS_CLIENT_ID and CONTENSIS_SHARED_SECRET
+    - contensis connect example-dev --project-id website --client-id $CONTENSIS_CLIENT_ID --shared-secret $CONTENSIS_SHARED_SECRET
+    - contensis push block example-website-block $APP_IMAGE:latest --release
+```
+
+## Use in GitHub CI
+
+```yaml
+- name: Push block to Contensis
+  uses: contensis/cli-action@v1
+  with:
+    block-id: example-website-block
+    # auto-release: true # release the block straight away
+    alias: example-dev
+    project-id: website
+    client-id: ${{ secrets.CONTENSIS_CLIENT_ID }} # create secrets for actions
+    shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }} # in repo settings
+    tag-repo: true # tag commit with block version
+    git-token: ${{ github.token }} # to allow the git tag
+```
+
+## Running headless?
 
 Most lightweight CI environments will likely not ship with the ability to easily load and unlock an encrypted keychain.
 
-In these environments you will see a warning message when using the cli with any credentials
+In these environments you will see a warning message when using the cli with any credentials, in most cases this type of envioronment is normally disposed of after the command/session has completed and the warning can be safely ignored.
 
 ```shell
   [WARN] Could not connect to local keystore - your password could be stored unencrypted!
 ```
+
+> **Note**
+> There is a workaround for installing a secret store and launching an X11 session with an unlocked keyring which has been left in here below for anyone who wishes to try it
 
 ~~The required credentials to run commands are stored and read from a secret store `libsecret`. Without the secret store running and unlocked we receive an error `Cannot autolaunch D-Bus without X11 $DISPLAY`~~
 
@@ -82,6 +179,46 @@ Press [TAB] for suggestions
 contensis >
 ```
 
+## Skip to section
+
+- [Get started](#get-started)
+- [Connect to a Contensis Cloud environment](#connect-to-a-contensis-cloud-environment)
+- [Login to a connected Contensis environment](#login-to-a-connected-contensis-environment)
+- [Manage Projects](#manage-projects)
+  - [List projects](#list-projects)
+  - [Set current project](#set-current-project)
+  - [Get project metadata](#get-project-metadata)
+  - [Set project metadata](#set-project-metadata)
+- [Content Models](#content-models)
+  - [List content models](#list-content-models)
+  - [Examine a content model](#examine-a-content-model)
+  - [List content types, components](#list-content-types--components)
+  - [Examine a content type or component](#examine-a-content-type-or-component)
+- [Entries](#entries)
+  - [Get entries](#get-entries)
+  - [Get an entry by id](#get-an-entry-by-id)
+  - [Get an entry with all of its dependents](#get-an-entry-with-all-of-its-dependents)
+  - [Get entries with a ZenQL statement](#get-entries-with-a-zenql-statement)
+  - [Choose entry fields to output](#choose-entry-fields-to-output)
+  - [Output results to a file](#output-results-to-a-file)
+- [Format output](#format-output)
+- [Manage API keys](#manage-api-keys)
+  - [List keys](#list-keys)
+  - [Create key](#create-key)
+  - [Remove key](#remove-key)
+- [Manage content Blocks](#manage-content-blocks)
+  - [List blocks](#list-blocks)
+  - [Get block](#get-block)
+  - [Get block logs](#get-block-logs)
+  - [Push a block](#push-a-block)
+  - [Release a block version](#release-a-block-version)
+- [Import content models](#import-content-models)
+  - [Import from another Contensis environment](#import-from-another-contensis-environment)
+  - [From a file](#from-a-file)
+- [Import entries](#import-entries)
+  - [Import from another Contensis environment](#import-from-another-contensis-environment-1)
+  - [Import from a file](#import-from-a-file)
+
 ## Get started
 
 Press `[tab]` key at any time to show suggested commands or to attempt to auto-complete the command you are typign
@@ -107,6 +244,8 @@ Example call:
   > connect example-dev
 ```
 
+Just type `help` to show the cli command help
+
 ## Connect to a Contensis Cloud environment
 
 Use the connect command followed by the cloud alias of your environment
@@ -121,9 +260,9 @@ contensis > connect example-dev
 contensis example-dev>
 ```
 
-After connecting you will notice the shell prompt will now contain the current "connected" environment - `contensis example-dev> `
+After connecting you will notice the shell prompt will now contain the current "connected" environment e.g. `contensis example-dev> `
 
-The CMS must be online and available in order to connect to it
+Contensis must be online and available in order to connect to it
 
 ```shell
 contensis > connect exemple-dev
@@ -145,9 +284,13 @@ contensis example-dev> login t.durden
 contensis t.durden@example-dev>
 ```
 
-If you are logging in via a script or service you will likely be using an API key set up in Contensis, you would provide the full credentials with the command `login {clientId} -s {sharedSecret}`
+If you are logging in via a script or service you will likely be using an API key set up in Contensis, you would provide the full credentials with the command `login {clientId} -s {sharedSecret}`.
 
-## List projects
+If you need to skip this step for any reason you could [pass connection details anywhere](#pass-connection-details-anywhere)
+
+## Manage Projects
+
+### List projects
 
 Issuing the command `list projects` will fetch a list of projects from the connected Contensis environment
 
@@ -167,7 +310,7 @@ contensis example-dev> list projects
 [cli]  ℹ  Introduce yourself with "login {username}" or "login {clientId} -s {secret}"
 ```
 
-## Set current project
+### Set current project
 
 Set your current working project with the `set project {projectId}` command
 
@@ -187,7 +330,151 @@ intranet t.durden@example-dev>
 
 You will notice the `contensis` prompt has been updated to show your current connected project
 
-## List content types, components
+### Get project metadata
+
+```shell
+contensis t.durden@example-dev> get project
+
+  id: contensis
+  uuid: 4df681ef-f3bc-3d79-57b8-de3f0570b9b3
+  name: Contensis
+  description:
+  primaryLanguage: en-GB
+  supportedLanguages:
+    en-GB
+  color: cobalt
+
+contensis t.durden@example-dev>
+```
+
+### Set project metadata
+
+Update a project name
+
+```shell
+contensis t.durden@example-dev> set project name "Contensis website"
+[cli] ✅ [example-dev] Updated project contensis
+  id: contensis
+  uuid: 4df681ef-f3bc-3d79-57b8-de3f0570b9b3
+  name: Contensis website
+  description:
+  primaryLanguage: en-GB
+  supportedLanguages:
+    en-GB
+  color: cobalt
+
+contensis t.durden@example-dev>
+```
+
+Update a project's description
+
+```shell
+contensis t.durden@example-dev> set project description "Main product site"
+[cli] ✅ [example-dev] Updated project contensis
+  id: contensis
+  uuid: 4df681ef-f3bc-3d79-57b8-de3f0570b9b3
+  name: Contensis website
+  description: Main product site
+  primaryLanguage: en-GB
+  supportedLanguages:
+    en-GB
+  color: cobalt
+
+contensis t.durden@example-dev>
+```
+
+## Content Models
+
+Manage your content models like you are the chosen one
+
+### List content models
+
+```shell
+contensis t.durden@example-dev> list models
+[cli] ✅ [website] Content models [ 19 ]
+
+  - accessibleVideo { required by: 3 }
+  - blogListing { components: 1, contentTypes: 2, references: 33, required by: 4 }
+  - blogPost { components: 2, contentTypes: 6, references: 33, required by: 9 }
+  - callToAction { contentTypes: 9, references: 33, required by: 5 }
+  - category { required by: 1 }
+  - contentPage { components: 5, contentTypes: 6, references: 33, required by: 7 }
+  - externalLink { required by: 2 }
+  - growingConditions { components: 1, references: 1, required by: 1 }
+  - homepage { components: 4, contentTypes: 8, references: 33, required by: 3 }
+  - landingPage { components: 9, contentTypes: 12, references: 33, required by: 7 }
+  - person { required by: 2 }
+  - plant { components: 2, contentTypes: 3, references: 8, required by: 10 }
+  - plantType { required by: 2 }
+  - pot { components: 2, contentTypes: 1, references: 3, required by: 11 }
+  - productListing { components: 1, references: 1, required by: 4 }
+  - review { contentTypes: 3, references: 10, required by: 1 }
+  - siteSettings
+  - tag { required by: 5 }
+
+contensis t.durden@example-dev>
+```
+
+### Examine a content model
+
+A `model` is a complete view of a content type that includes all of its dependents - and the dependents of those dependents
+
+- `contentTypes` are the content types that have content linked to the model directly from this content type
+- `components` are the content types that have content linked to the model directly from this content type
+- `dependencies` is an exhaustive list of dependencies and inner dependents [the values in brackets are the models that require that dependency]
+- `dependencyOf` is a list of all the other content types (or components) that reference this content type directly, this model is a dependency of those
+
+```shell
+contensis t.durden@example-dev> get model plant
+[cli] ✅ Content models in contensis:
+
+  id: plant
+  dataFormat: model
+  name:
+    en-GB: Plant
+  description:
+    en-GB: Use this content type to store information about individual plants.
+  contentTypes:
+    growingConditions
+    plantType
+    tag
+  components:
+    externalPromotion
+    plantVariant
+  dependencyOf:
+      callToAction
+      homepage
+      landingPage
+      review
+      button
+      cardRow
+      curatedProductSlider
+      featuredBlogPosts
+      featuredProduct
+      promotedProduct
+  dependencies:
+    growingConditions
+      [plant]
+    plantType
+      [plant]
+    pot
+      [plantVariant]
+    tag
+      [plant, pot]
+    externalPromotion
+      [plant, pot]
+    icon
+      [growingConditions]
+    plantVariant
+      [plant]
+    potVariant
+      [pot]
+
+
+contensis t.durden@example-dev>
+```
+
+### List content types, components
 
 ```shell
 contensis t.durden@example-dev> list contenttypes
@@ -212,12 +499,12 @@ contensis t.durden@example-dev> list contenttypes
   - tag [1 field]
 ```
 
-## Examine a content type or component
+### Examine a content type or component
 
 ```shell
 contensis t.durden@example-dev> get contenttype pot
 [cli] ✅ [website] Content type "pot"
-  uuid: adc051ee-d584-4f2a-ba42-5e6190edadb8
+  uuid: 929a99d2-fe5c-4781-84fa-f5a3738aa96d
   id: pot
   projectId: website
   name:
@@ -226,19 +513,19 @@ contensis t.durden@example-dev> get contenttype pot
   entryTitleField: productName
   entryDescriptionField: description
   fields:
-    productName: string
+    productName**: string
     description: string
-    externalPromotion: object
+    externalPromotion: object<component.externalpromotion>
     colour: string
     material: string
-    potVariant: objectArray
-    primaryImage: object
-    photos: objectArray
-    externalCardImage: object
-    tags: objectArray
+    potVariant: objectArray<component.potvariant>
+    primaryImage: object<image>
+    photos: objectArray<image>
+    externalCardImage: object<image>
+    tags: objectArray<entry, tag>
   defaultLanguage: en-GB
   supportedLanguages:
-    0: en-GB
+    en-GB
   workflowId: contensisEntryBasic
   dataFormat: entry
   groups:
@@ -250,7 +537,9 @@ contensis t.durden@example-dev> get contenttype pot
 contensis t.durden@example-dev>
 ```
 
-## Get entries
+## Entries
+
+### Get entries
 
 Use the `get entries` command
 
@@ -280,7 +569,7 @@ Found 8 entries in [website]
 website t.durden@example-dev>
 ```
 
-## Get an entry by id
+### Get an entry by id
 
 ```shell
 website t.durden@example-dev> get entries --id 7cf921a0-ee4f-4bd6-a3f2-0fb0fe1a2ac8
@@ -299,7 +588,7 @@ Found 1 entries in [website]
 website t.durden@example-dev>
 ```
 
-## Get an entry with all of its dependents
+### Get an entry with all of its dependents
 
 Add the `--dependents` or `-d` flag to your `get entries` command to also find and fetch all dependent (linked) entries, recursively finding and including any dependent entries found inside those dependents.
 
@@ -333,7 +622,7 @@ Found 12 entries in [website]
 website t.durden@example-dev>
 ```
 
-## Get entries with a ZenQL statement
+### Get entries with a ZenQL statement
 
 Use a ZenQL statement to find entries with the `--zenql` or `-q` option, add your statement inside `"double quotes"`. Refer to [ZenQL documentation](https://www.contensis.com/help-and-docs/user-guides/zenql-search) and test your statement for the right results in the Contensis web UI.
 
@@ -374,7 +663,7 @@ Found 21 entries in [website]
 website t.durden@example-dev>
 ```
 
-## Choose entry fields to output
+### Choose entry fields to output
 
 Add the `--fields` or `-f` option to your `get entries` command to limit and order the entry fields that are returned, add the api key of each field to be returned separated by a space
 
@@ -406,7 +695,7 @@ Found 12 entries in [website]
 website t.durden@example-dev>
 ```
 
-## Output results to a file
+### Output results to a file
 
 Use the `--output` or `-o` option followed by the file name you wish for command output to be written to
 
@@ -489,7 +778,7 @@ website t.durden@example-dev>
 
 Run `list keys` again and you will see your new API key has been removed from the list of keys
 
-## Manage Content Blocks
+## Manage content Blocks
 
 You can manage blocks for any Contensis project using the following commands
 
@@ -554,7 +843,10 @@ website t.durden@example-dev> get block logs contensis-website master
 website t.durden@example-dev>
 ```
 
-### Push block
+### Push a block
+
+> **Note**
+> It is far simpler doing this in [GitLab CI](#use-in-gitlab-ci) or [GitHub CI Actions](#use-in-github-ci)
 
 ```shell
 website t.durden@example-dev> push block cli-test-block ghcr.io/contensis/contensis-app:build-4359 master --release --commit-id 9ee20333 --commit-message "chore: sample commit message" --commit-datetime 2022-11-03T22:34 --author-email b.macka@zengenti.com --committer-email b.macka@zengenti.com --repository-url https://github.com/contensis/contensis-app.git --provider GitlabSelfHosted
@@ -563,69 +855,354 @@ website t.durden@example-dev> push block cli-test-block ghcr.io/contensis/conten
 website t.durden@example-dev>
 ```
 
-## Use in Docker
+### Release a block version
 
-Running the container with the `-it` docker options will launch a shell session
+First get the latest block version number
 
-```bash
-docker pull ghcr.io/contensis/node-cli/main/app:latest
-docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest
+```shell
+website t.durden@example-dev>get block contensis-website master latest
+[cli] ✅ [example-dev] Block contensis-website in project website:
+  v78 contensis-website
+    state: available
+    released: no
+    status:
+      deployment: deployed
+      workflow: draft
+      running status: available
+      datacentres:
+        hq: available
+        london: available
+        manchester: faulted
+    source:
+      commit: b946c1029c1b35aefee2e1a6b5780ddaf205ee74
+      message: build: syntax [nobuild]
+      committed: [22/11/2022 06:50] t.durden@zengenti.com
+      pushed: [22/11/2022 06:52] Gitlab CI block push
+      https://github.com/contensis/contensis-website/commit/b946c1029c1b35aefee2e1a6b5780ddaf205ee74
+    image:
+      uri: ghcr.io/contensis/contensis-website/main/app
+      tag: latest
+    staging url: https://staging-example-dev.cloud.contensis.com?block-contensis-website-versionstatus=draft
+
+website t.durden@example-dev>
 ```
 
-### Run cli commands
+Add the block version number to the `release block` command
 
-Add the cli command and any options after the container image in the `docker run` command e.g.
+```shell
 
-```bash
-docker run --rm ghcr.io/contensis/node-cli/main/app:latest get entries "test"
+website t.durden@example-dev> release block contensis-website 78
+[cli] ✅ [example-dev] Released block contensis-website in project website
+  v78 contensis-website
+    state: available
+    released: [23/11/2022 01:42] n.flatley
+    status:
+      deployment: deployed
+      workflow: released
+      running status: available
+      datacentres:
+        hq: available
+        london: available
+        manchester: faulted
+    source:
+      commit: b946c1029c1b35aefee2e1a6b5780ddaf205ee74
+      message: build: syntax [nobuild]
+      committed: [22/11/2022 06:50] t.durden@zengenti.com
+      pushed: [22/11/2022 06:52] Gitlab CI block push
+      null
+    image:
+      uri: ghcr.io/contensis/contensis-website/main/app
+      tag: latest
+    staging url: https://staging-example-dev.cloud.contensis.com?block-contensis-website-versionstatus=released
+
+website t.durden@example-dev>
 ```
 
-### Persist connections to a local file
+## Import content models
 
-To use the cli container for multiple commands or to save connections for future sessions, map a volume to the docker container
+Connect to your "source" environment first, ensure you can fetch the models and these models contain the dependencies you plan on importing from here with the `get models` command. Add the `--dependents` option to fetch all of the entries that will eventually be imported.
 
-<aside>
-⚠️ Ensure a file called `environments.json` exists before mapping the volume to the docker container. If it doesn’t exist, create this empty file first.
+When you are happy your models contain the right dependencies for your import, connect to the "target" environment (and project) then use the same arguments as before except with the `import entries` command
 
-</aside>
+### Import from another Contensis environment
 
-Linux
+Specify a list of models to import
 
-```bash
-touch environments.json
-docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+```shell
+website t.durden@example-dev> import models plant --source-alias example-dev --source-project-id leif
+
+  -------------------------------------
+ -- IMPORT PREVIEW --
+
+Content types:
+  - growingConditions [website: no change] v1.0
+      required by: [plant]
+      references: [icon]
+  - plant [website: update] v2.0
+      references: [growingConditions, plantGenus, plantType, tag]
+      diff: ...{'id':'<+>genus','name':{'en-GB':'Genus'},'dataType':'object','dataFormat':'entry','description':{},'default':null,'validations':{'allowedContentTypes':{'contentTypes':['plantGenus'],'message':null}},'editor':null,'groupId':'main'},{'id':'</+>plantVariant','name':{'en-GB':'Plant variant'}...
+  - plantGenus [website: create] v0.1
+      required by: [plant]
+  - plantType [website: no change] v1.0
+      required by: [plant]
+  - pot [website: no change] v2.0
+      required by: [plantVariant]
+      references: [externalPromotion, potVariant, tag]
+  - tag [website: no change] v1.0
+      required by: [plant, pot]
+
+Components:
+  - externalPromotion [website: no change] v1.0
+      required by: [plant, pot]
+  - icon [website: no change] v1.0
+      required by: [growingConditions]
+  - plantVariant [website: no change] v2.0
+      required by: [plant]
+      references: [pot]
+  - potVariant [website: no change] v1.0
+      required by: [pot]
+
+website t.durden@example-dev>
 ```
 
-Windows
+Or import every model from the source
 
-```powershell
-echo {} > environments.json
-docker run --rm -v ${PWD}/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+```shell
+website t.durden@example-dev> import models --source-alias example-dev --source-project-id leif
+  -------------------------------------
+ -- IMPORT PREVIEW --
+
+Content types:
+  - accessibleVideo [website: no change] v1.0
+      required by: [blogPost, contentPage, landingPage]
+  - alert [website: create] v0.1
+  - blogListing [website: no change] v2.0
+      required by: [button, callToAction, homepage, landingPage]
+      references: [blogPost, callToAction, pageMetadata]
+  - blogPost [website: update] v3.0
+      required by: [blogListing, blogPost, button, callToAction, cardRow, contentPage, featuredBlogPosts, homepage, landingPage]
+      references: [accessibleVideo, blogPost, callToAction, category, externalPromotion, featuredProduct, person, tag]
+      diff: ...
+  - callToAction [website: no change] v2.0
+      required by: [blogListing, blogPost, contentPage, homepage, landingPage]
+      references: [blogListing, blogPost, contentPage, externalLink, homepage, landingPage, plant, pot, productListing]
+  - campus [website: create] v0.1
+  - category [website: no change] v1.0
+      required by: [blogPost, department, listing]
+  - contentPage [website: no change] v2.0
+      required by: [button, callToAction, cardRow, contentPage, featuredBlogPosts, homepage, landingPage]
+      references: [accessibleVideo, blogPost, callToAction, callout, cardRow, contentPage, featuredProduct, formPicker, landingPage, pageMetadata, tag]
+  - department [website: two-pass] v0.1
+      references: [category]
+  - event [website: create] v0.1
+  - externalLink [website: no change] v1.0
+      required by: [button, callToAction]
+  - form [website: create] v0.1
+  - growingConditions [website: no change] v1.0
+      required by: [listing, plant]
+      references: [icon]
+  - homepage [website: update] v2.0
+      required by: [button, callToAction, landingPage]
+      references: [blogListing, blogPost, callToAction, contentPage, curatedProductSlider, filteredProductSlider, landingPage, pageMetadata, plant, pot, productListing, promotedProduct]
+      diff: ...
+  - landingPage [website: update] v2.0
+      required by: [button, callToAction, cardRow, contentPage, featuredBlogPosts, homepage, landingPage]
+      references: [accessibleVideo, blogListing, blogPost, bodyCopy, callToAction, contentBlock, contentPage, curatedProductSlider, featuredBlogPosts, featuredProduct, filteredProductSlider, formPicker, homepage, landingPage, pageMetadata, plant, pot, productListing, promotedProduct, review, tag]
+      diff: ...
+  - listing [website: two-pass] v0.1
+      references: [category, growingConditions, plantType, tag]
+  - newsArticle [website: two-pass] v0.1
+      references: [person]
+  - newsTest [website: two-pass] v0.1
+      references: [person]
+  - person [website: no change] v1.0
+      required by: [blogPost, newsArticle, newsTest, review]
+  - plant [website: update] v2.0
+      required by: [button, callToAction, cardRow, curatedProductSlider, featuredBlogPosts, featuredProduct, homepage, landingPage, promotedProduct, review]
+      references: [externalPromotion, growingConditions, plantGenus, plantType, plantVariant, tag]
+      diff: ...
+  - plantFamily [website: two-pass] v0.1
+      required by: [plantOrder]
+      references: [plantGenus]
+  - plantGenus [website: create] v0.1
+      required by: [plant, plantFamily]
+  - plantOrder [website: two-pass] v0.1
+      references: [plantFamily]
+  - plantType [website: no change] v1.0
+      required by: [filteredProductSlider, listing, plant]
+  - pot [website: no change] v2.0
+      required by: [button, callToAction, cardRow, curatedProductSlider, featuredBlogPosts, featuredProduct, homepage, landingPage, plantVariant, promotedProduct, review]
+      references: [externalPromotion, potVariant, tag]
+  - productListing [website: no change] v1.0
+      required by: [button, callToAction, homepage, landingPage]
+      references: [pageMetadata]
+  - review [website: no change] v2.0
+      required by: [landingPage]
+      references: [person, plant, pot]
+  - siteSettings [website: no change] v1.0
+  - tag [website: no change] v1.0
+      required by: [blogPost, contentPage, landingPage, listing, plant, pot]
+  - testLang [website: create] v0.1
+
+Components:
+  - bodyCopy [website: no change] v1.0
+      required by: [landingPage]
+  - button [website: no change] v2.0
+      required by: [promotedProduct]
+      references: [blogListing, blogPost, contentPage, externalLink, homepage, landingPage, plant, pot, productListing]
+  - callout [website: no change] v1.0
+      required by: [contentPage, event]
+  - cardRow [website: no change] v2.0
+      required by: [contentPage]
+      references: [blogPost, contentPage, landingPage, plant, pot]
+  - contentBlock [website: no change] v1.0
+      required by: [landingPage]
+  - curatedProductSlider [website: no change] v2.0
+      required by: [homepage, landingPage]
+      references: [plant, pot]
+  - externalPromotion [website: no change] v1.0
+      required by: [blogPost, plant, pot]
+  - featuredBlogPosts [website: no change] v2.0
+      required by: [landingPage]
+      references: [blogPost, contentPage, landingPage, plant, pot]
+  - featuredProduct [website: no change] v2.0
+      required by: [blogPost, contentPage, landingPage]
+      references: [plant, pot]
+  - filteredProductSlider [website: no change] v2.0
+      required by: [homepage, landingPage]
+      references: [plantType]
+  - formPicker [website: no change] v1.0
+      required by: [contentPage, landingPage]
+  - icon [website: no change] v1.0
+      required by: [growingConditions]
+  - pageMetadata [website: no change] v1.0
+      required by: [blogListing, contentPage, homepage, landingPage, productListing]
+  - plantVariant [website: no change] v2.0
+      required by: [plant]
+      references: [pot]
+  - potVariant [website: no change] v1.0
+      required by: [pot]
+  - promotedProduct [website: update] v2.0
+      required by: [homepage, landingPage]
+      references: [button, plant, pot]
+      diff: ...
+
+website t.durden@example-dev>
 ```
 
-## Use in GitLab CI
+### Import from a file
 
-```yaml
-push-to-contensis-block:
-  stage: push-to-contensis
-  only:
-    - master
-  image: ghcr.io/contensis/node-cli/main/app:latest
-  script:
-    # - contensis connect zenhub-dev --project-id migratortron --client-id 02c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 --shared-secret 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd26
-    - contensis push block example-website-block $APP_IMAGE:latest --release -a example-dev -p website -id 02c8fae0-1aa6-46d3-a0a4-9674fa7f10f1 -s 47a52c7755324debbcc984865e87200b-35b17f3d39ae40ee9b118358c4dd1666-a516b7c30ebb449ca26e93157588cd26
+```shell
+website t.durden@example-dev> import models --from-file ./content-models.json
 ```
 
-## Use in GitHub CI
+The output will be the same as the previous command
 
-```yaml
-- name: Push block to Contensis
-  uses: contensis/cli-action@v1
-  with:
-    block-id: example-website-block
-    # auto-release: true
-    alias: zenhub-dev
-    project-id: contensis
-    client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
-    shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
+<sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
+
+## Import entries
+
+The import commands are made possible by using the `migratortron` library. There is further documentation here:
+
+- [`migratortron` on npmjs](https://www.npmjs.com/package/migratortron)
+- [`contensis-importer` on npmjs](https://www.npmjs.com/package/contensis-importer)
+
+### Import from another Contensis environment
+
+Connect to your "source" environment first, ensure you can fetch the entries you plan on importing from here and your query / filters are working to fetch exactly the data you are expecting with the `get entries` command. Add the `--dependents` option to fetch all of the entries that will eventually be imported.
+
+When you are happy you can fetch only the data you intend to import, connect to the "target" environment (and project) then use the same query as before except with the `import entries` command
+
+```shell
+website t.durden@example-dev> import entries --preserve-guids --zenql "sys.contentTypeId = plant" --source-alias example-dev --source-project-id leif
+  -------------------------------------
+ -- IMPORT PREVIEW --
+[23/11 02:10:48] [INFO] Fetching initial entries in project 'leif'
+[23/11 02:10:48] [INFO] Finding entries in project 'website'
+[23/11 02:10:49] [INFO] Building asset entries
+[23/11 02:10:49] [INFO] Building content entries
+--------------------------------------------
+
+                         1 errors
+
+ id  error
+-----------------------------------------------------------
+ 0   Content type 'plantGenus' does not exist in
+     project 'website'
+-----------------------------------------------------------
+[23/11 02:10:49] [OK] Done migrating entries
+
+growingConditions Likes high humidity
+  636b925b-a386-4c56-9f33-96cd99cc391c no change
+growingConditions Needs plenty of light
+  2d80e638-eb0d-4bc5-bc96-42b7b8f20678 no change
+growingConditions Partial shade
+  711251f9-f9c6-473b-8b62-0ec8a0d4978c no change
+growingConditions Prefers dry conditions
+  d815819d-61c6-4037-95d3-c503acf52153 no change
+
+plant Aloe vera
+  7cf921a0-ee4f-4bd6-a3f2-0fb0fe1a2ac8 no change
+plant Areca palm
+  0d94dbf2-89f8-45fb-96d5-175ae1f382ce no change
+plant Boston fern
+  43a60005-ea92-4b32-9af3-79560e48ecec no change
+plant Calathea orbifolia
+  f0cac96c-39a1-4b85-b14b-e8d7d3d08767 no change
+plant Canary Island Date Palm
+  d647012b-897e-4b6b-bfb5-b9844ef3d648 no change
+
+plantGenus Aglaonema
+  98347340-a11c-4ee5-b4e7-1ae3b75496a2 error
+[cli] ❌ Content type 'plantGenus' does not exist in project 'website'
+
+plantGenus Alocasia
+  fa464489-6476-4694-b3d4-e77d0c00a185 error
+[cli] ❌ Content type 'plantGenus' does not exist in project 'website'
+
+plantGenus Aloe
+  309d5fd7-a21f-45a8-8abb-f01f820b8f16 error
+[cli] ❌ Content type 'plantGenus' does not exist in project 'website'
+
+plantGenus Beaucarnea
+  4ebdcc63-929f-4b06-8848-fe046468a63d error
+[cli] ❌ Content type 'plantGenus' does not exist in project 'website'
+
+
+plantType Ferns
+  90e128f5-582c-4430-a232-72022271ec8b no change
+plantType Foliage
+  25f5a78b-9274-4cc9-9a58-03d8dcd4cd17 no change
+plantType Orchids
+  44abca5b-a49b-48a1-8823-811ab31983c0 no change
+plantType Palm
+  d66447c5-2198-4b19-bad3-c921e9ef0db0 no change
+plantType Succulents
+  70149568-9725-4c39-8ff5-ef69221a0899 no change
+
+pot Barro decorated terracotta pot
+  fa67e1c6-0637-4548-bd4f-c207ec62af0e no change
+pot Bianco white pot
+  e3b7907c-f524-45e4-ba5f-e62d1557b477 no change
+pot Canasta mid-sized pot
+  058b20ba-99f7-49ec-9017-a0df35b00dcc no change
+pot Geo mid-sized pot
+  dafc4810-a62e-43e5-a056-ab1248181eaf no change
+pot Grå small grey pot
+  f2022069-7a92-491d-b197-a3564ab9a8ca no change
+
+tag Promoted
+  3659a333-8d10-4325-9ea6-2f49ae47e7fe no change
+
+website t.durden@example-dev>
 ```
+
+### Import from a file
+
+```shell
+website t.durden@example-dev> import entries --preserve-guids --from-file ./content-entries.json
+```
+
+The output will be the same as the previous command
+
+<sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
