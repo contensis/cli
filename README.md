@@ -12,8 +12,8 @@ After cloning this project:
 
 To run commands in CLI
 
-- `npm run start -- {cli command}`
+- `npm start -- {cli command}`
 
 To start the Contensis shell to run commands
 
-- `npm run start:shell`
+- `npm start`
