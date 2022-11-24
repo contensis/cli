@@ -12,7 +12,7 @@ Alternatively, download the executable for your operating system from the [Relea
 
 ## Skip to section
 
-- ### [Contensis Shell](#contensis-shell)
+- [Contensis Shell](#contensis-shell)
 - [Use in Terminal](#cli-usage)
   - [Pass connection details anywhere](#pass-connection-details-anywhere)
 - [Use in Docker](#use-in-docker)
@@ -189,6 +189,7 @@ contensis >
   - [Set current project](#set-current-project)
   - [Get project metadata](#get-project-metadata)
   - [Set project metadata](#set-project-metadata)
+  - [Create a new project](#create-a-new-project)
 - [Content Models](#content-models)
   - [List content models](#list-content-models)
   - [Examine a content model](#examine-a-content-model)
@@ -381,6 +382,23 @@ contensis t.durden@example-dev> set project description "Main product site"
   color: cobalt
 
 contensis t.durden@example-dev>
+```
+
+### Create a new project
+
+```shell
+website t.durden@example-dev> create project testProject "Test project" --supported-languages cy
+[cli] ✅ [example-dev] Created project testProject
+
+[cli] ✅ Available projects:
+
+>> testProject [cy *en-GB]
+    website [*en-GB]
+    wordPressSite [*en-GB]
+
+[cli] ✅ Current project is set to testProject
+
+testProject t.durden@example-dev>
 ```
 
 ## Content Models
