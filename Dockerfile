@@ -2,17 +2,17 @@ FROM node:18-alpine as builder
 
 # RUN apk add --no-cache libsecret-dev
 WORKDIR /usr/src/app
+# COPY patches patches
 # COPY package.json .
 # COPY lerna.json .
 COPY .yarn .yarn
 COPY .yarnrc .
 COPY yarn.lock .
-COPY patches patches
 # RUN mkdir -p /usr/src/app/packages/contensis-cli
 COPY packages/contensis-cli/esbuild.config.js .
 COPY packages/contensis-cli/package.json .
 COPY packages/contensis-cli/tsconfig.json .
-# COPY packages/contensis-cli/patches packages/contensis-cli/patches
+COPY packages/contensis-cli/patches packages/contensis-cli/patches
 # RUN ls -lah; cd packages; cd contensis-cli; ls -lah; exit 1
 # RUN echo -e "`cat package.json`"; exit 1
 RUN yarn
