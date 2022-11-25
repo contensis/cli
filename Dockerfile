@@ -9,13 +9,12 @@ COPY .yarnrc .
 COPY yarn.lock .
 COPY packages/contensis-cli/esbuild.config.js .
 COPY packages/contensis-cli/package.json .
-# COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/tsconfig.json .
 COPY packages/contensis-cli/patches patches
-RUN npm install --prefer-offline --no-audit --loglevel error
-RUN npm run postinstall
+RUN yarn run bootstrap
+RUN yarn run postinstall
 COPY packages/contensis-cli/src src
-RUN npm run build
+RUN yarn run build
 
 FROM node:18-alpine
 WORKDIR /usr/src/app
