@@ -1623,6 +1623,10 @@ class ContensisCli {
         throw new Error(
           messages.blocks.failedPush(block.id, currentEnv, env.currentProject)
         );
+    } else {
+      throw new Error(
+        messages.blocks.failedPush(block.id, currentEnv, env.currentProject)
+      );
     }
   };
 
