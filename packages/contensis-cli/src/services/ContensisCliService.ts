@@ -1453,11 +1453,11 @@ class ContensisCli {
 
       const filteredResults =
         typeof name === 'string'
-          ? webhooks.filter(w =>
+          ? webhooks?.filter(w =>
               w.name?.toLowerCase().includes(name.toLowerCase())
             )
           : Array.isArray(subscriptionIds)
-          ? webhooks.filter(w => subscriptionIds?.some(id => id === w.id))
+          ? webhooks?.filter(w => subscriptionIds?.some(id => id === w.id))
           : webhooks;
 
       if (Array.isArray(filteredResults)) {

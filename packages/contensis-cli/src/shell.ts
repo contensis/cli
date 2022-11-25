@@ -1,13 +1,13 @@
-import path from 'path';
 import figlet from 'figlet';
 import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-command-prompt';
 import commands from './commands';
 import { LogMessages } from './localisation/en-GB';
-import { logError, Logger } from './util/logger';
 import CredentialProvider from './providers/CredentialProvider';
+import { appRootDir } from './providers/file-provider';
 import ContensisCli, { cliCommand } from './services/ContensisCliService';
 import { Logging } from './util';
+import { logError, Logger } from './util/logger';
 import { LIB_VERSION } from './version';
 
 class ContensisShell {
@@ -40,7 +40,7 @@ class ContensisShell {
     inquirerPrompt.setConfig({
       history: {
         save: true,
-        folder: path.join(process.cwd()),
+        folder: appRootDir,
         limit: 100,
         blacklist: ['quit'],
       },

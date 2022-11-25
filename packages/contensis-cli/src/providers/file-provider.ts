@@ -1,7 +1,10 @@
 import fs from 'fs';
+import { homedir } from 'os';
 import path from 'path';
-import { path as appRoot } from 'app-root-path';
 import { tryParse } from '~/util';
+
+const userHomeDir = homedir();
+export const appRootDir = path.join(userHomeDir, '.contensis/');
 
 export const readJsonFile = <T>(filePath: string) => {
   const file = readFile(filePath);
@@ -42,8 +45,8 @@ export const removeFile = (filePath: string) => {
 };
 
 export const moveFile = (file: string, fromPath: string, toPath: string) => {
-  const from = path.join(appRoot, `${fromPath}${file}`);
-  const to = path.join(appRoot, `${toPath}${file}`);
+  const from = path.join(appRootDir, `${fromPath}${file}`);
+  const to = path.join(appRootDir, `${toPath}${file}`);
   if (fs.existsSync(from)) {
     checkDir(toPath);
     // if (!fs.existsSync(toPath)) fs.mkdirSync(toPath, { recursive: true });
@@ -70,4 +73,4 @@ export const checkDir = (filePath: string) => {
 };
 
 export const localPath = (filePath: string) =>
-  path.isAbsolute(filePath) ? filePath : path.join(appRoot, filePath);
+  path.isAbsolute(filePath) ? filePath : path.join(appRootDir, filePath);

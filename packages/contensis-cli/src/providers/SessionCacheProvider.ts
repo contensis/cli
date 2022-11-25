@@ -3,6 +3,7 @@ import path from 'path';
 import clone from 'lodash/cloneDeep';
 import mergeWith from 'lodash/mergeWith';
 import unionBy from 'lodash/unionBy';
+import { appRootDir } from './file-provider';
 import { isJson, tryParse } from '~/util';
 import { Logger } from '~/util/logger';
 
@@ -11,7 +12,7 @@ class SessionCacheProvider {
   private cache = {} as SessionCache;
 
   constructor() {
-    this.localFilePath = path.join(process.cwd(), 'environments.json');
+    this.localFilePath = path.join(appRootDir, 'environments.json');
     this.cache = {
       currentTimestamp: new Date().toISOString(),
       environments: {},
