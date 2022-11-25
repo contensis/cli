@@ -196,15 +196,15 @@ export const printMigrateResult = (
       for (const [contentTypeId, count] of Object.entries(
         contentTypeCounts
       ) as [string, number][]) {
-        const entriesToMigrate =
-          migrateResult.entriesToMigrate?.[projectId]?.[contentTypeId];
+        const migrateStatusAndCount =
+          migrateResult.entriesToMigrate[currentProject][contentTypeId];
         const existingCount =
-          migrateResult.existing?.[projectId]?.[contentTypeId] || 0;
+          migrateResult.existing?.[currentProject]?.[contentTypeId] || 0;
         const existingPercent = ((existingCount / count) * 100).toFixed(0);
         const noChangeOrTotalEntriesCount =
-          typeof entriesToMigrate !== 'number'
-            ? entriesToMigrate?.['no change'] || 0
-            : entriesToMigrate;
+          typeof migrateStatusAndCount !== 'number'
+            ? migrateStatusAndCount?.['no change'] || 0
+            : migrateStatusAndCount;
 
         const isTotalCountRow = contentTypeId === 'totalCount';
 
