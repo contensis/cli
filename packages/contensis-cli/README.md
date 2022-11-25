@@ -5,7 +5,7 @@ Use Contensis from your favourite terminal
 Install the package via `npm` as a global module (requires NodeJS)
 
 ```shell
-npm i contensis-cli --global
+npm i contensis-cli@preprelease --global
 ```
 
 Alternatively, download the executable for your operating system from the [Releases page](https://github.com/contensis/node-cli/releases)
