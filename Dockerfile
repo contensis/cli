@@ -7,13 +7,17 @@ COPY lerna.json .
 COPY .yarn .yarn
 COPY .yarnrc .
 COPY yarn.lock .
-COPY packages/contensis-cli/esbuild.config.js .
-COPY packages/contensis-cli/package.json .
-COPY packages/contensis-cli/tsconfig.json .
-COPY packages/contensis-cli/patches patches
-RUN yarn
+COPY patches patches
+RUN mkdir -p /usr/src/app/packages/contensis-cli
+COPY packages/contensis-cli/esbuild.config.js packages/contensis-cli/.
+COPY packages/contensis-cli/package.json packages/contensis-cli/.
+COPY packages/contensis-cli/tsconfig.json packages/contensis-cli/.
+COPY packages/contensis-cli/patches packages/contensis-cli/patches
+# RUN ls -lah; cd packages; cd contensis-cli; ls -lah; exit 1
+# RUN echo -e "`cat package.json`"; exit 1
+RUN yarn run bootstrap
 RUN yarn run postinstall
-COPY packages/contensis-cli/src src
+COPY packages/contensis-cli/src packages/contensis-cli/src
 RUN yarn run build
 
 FROM node:18-alpine
@@ -27,7 +31,7 @@ COPY packages/contensis-cli/patches patches
 RUN npm install --prefer-offline --no-audit --production --loglevel error
 RUN npm run postinstall
 # copy ./dist folder from builder container
-COPY --from=builder /usr/src/app/dist dist
+COPY --from=builder /usr/src/app/packages/contensis-cli/dist dist
 # npx link will create the npm binaries in /node_modules/.bin
 # exit 0 allows the script to bypass errors with creating symlinks
 RUN npx link .; exit 0
