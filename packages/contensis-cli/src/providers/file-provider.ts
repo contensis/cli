@@ -4,7 +4,11 @@ import path from 'path';
 import { tryParse } from '~/util';
 
 const userHomeDir = homedir();
-export const appRootDir = path.join(userHomeDir, '.contensis/');
+
+export const appRootDir =
+  process.env.CONTAINER_CONTEXT === 'true'
+    ? process.cwd()
+    : path.join(userHomeDir, '.contensis/');
 
 export const readJsonFile = <T>(filePath: string) => {
   const file = readFile(filePath);

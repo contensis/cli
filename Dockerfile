@@ -21,7 +21,6 @@ WORKDIR /usr/src/app
 RUN apk add jq
 # copy assets from source folder
 COPY packages/contensis-cli/package.json .
-# COPY packages/contensis-cli/package-lock.json .
 COPY packages/contensis-cli/cli.js .
 COPY packages/contensis-cli/patches patches
 # adds almost 100MB to the container
@@ -34,5 +33,7 @@ COPY --from=builder /usr/src/app/dist dist
 RUN npx link .; exit 0
 # add our ./node_modules/.bin folder to PATH
 ENV PATH=/usr/src/app/node_modules/.bin:$PATH
+# set an env var so we can alter app behaviour when running inside the container
+ENV CONTAINER_CONTEXT=true
 # call the executable
 CMD [ "/usr/src/app/node_modules/.bin/contensis" ]
