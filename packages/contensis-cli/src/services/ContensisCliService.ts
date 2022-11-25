@@ -506,15 +506,16 @@ class ContensisCli {
                 credentials.remarks.secure !== true
                   ? credentials.current?.password
                   : undefined;
+
               // Persist env before finding projects or doing anything else
               this.session.UpdateEnv(env);
+              if (inputPassword) await credentials.Save(inputPassword);
+              if (sharedSecret) await credentials.Save(sharedSecret);
 
               if (!silent) {
                 Logger.success(messages.login.success(currentEnv, userId));
                 await this.PrintProjects();
               }
-              if (inputPassword) await credentials.Save(inputPassword);
-              if (sharedSecret) await credentials.Save(sharedSecret);
             } else if (authError) {
               Logger.error(authError.toString());
               // Clear env vars
