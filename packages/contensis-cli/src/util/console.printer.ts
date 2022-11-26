@@ -119,7 +119,6 @@ export const printMigrateResult = (
     showChangedEntries?: boolean;
   } = {}
 ) => {
-  // if (Object.keys(migrateResult.entriesToMigrate.entryIds).length)
   console.log(``);
 
   for (const [contentTypeId, entryRes] of Object.entries(
@@ -129,7 +128,6 @@ export const printMigrateResult = (
       string,
       any
     ][]) {
-      // console.log(`${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`);
       if (
         showAllEntries ||
         (showChangedEntries &&
@@ -176,13 +174,6 @@ export const printMigrateResult = (
     }
   }
   if (showAllEntries || showChangedEntries) console.log(``);
-  // if (
-  //   contensis?.isPreview &&
-  //   migrateResult.entriesToMigrate?.[currentProject]?.totalCount > 0 &&
-  //   !migrateResult.errors
-  // ) {
-  //   log.help(messages.entries.commitTip());
-  // }
 
   for (const [projectId, contentTypeCounts] of Object.entries(
     migrateResult.entries || {}
@@ -200,6 +191,7 @@ export const printMigrateResult = (
       string,
       number
     ][]) {
+      const isTotalCountRow = contentTypeId === 'totalCount';
       const migrateStatusAndCount =
         migrateResult.entriesToMigrate[currentProject][contentTypeId];
       const existingCount =
@@ -210,15 +202,16 @@ export const printMigrateResult = (
           ? migrateStatusAndCount?.['no change'] || 0
           : migrateStatusAndCount;
 
-      const isTotalCountRow = contentTypeId === 'totalCount';
-
       const changedPercentage = (
         (noChangeOrTotalEntriesCount / count) *
         100
       ).toFixed(0);
 
       const existingColor =
-        existingPercent === '0' ? log.warningText : log.infoText;
+        existingPercent === '0' || action === 'delete'
+          ? log.warningText
+          : log.infoText;
+
       const changedColor = isTotalCountRow
         ? log.helpText
         : changedPercentage === '100'
@@ -233,15 +226,11 @@ export const printMigrateResult = (
               )
             : `${contentTypeId}: ${log.helpText(count)}`
         }${
-          changedPercentage === '100' || action === 'delete'
+          changedPercentage === '100' || isTotalCountRow
             ? ''
-            : existingColor(
-                ` [existing: ${
-                  isTotalCountRow ? existingCount : `${existingPercent}%`
-                }]`
-              )
+            : existingColor(` [existing: ${`${existingPercent}%`}]`)
         }${
-          existingPercent === '0'
+          existingPercent === '0' || (action === 'import' && isTotalCountRow)
             ? ''
             : changedColor(
                 ` ${
@@ -260,7 +249,8 @@ export const printMigrateResult = (
     console.log(
       `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
     );
-    for (const error of migrateResult.errors) log.error(error.message || error);
+    for (const error of migrateResult.errors)
+      log.error(error.message || error, null, '');
   }
 };
 

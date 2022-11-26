@@ -6,7 +6,7 @@ import ProgressBar from 'progress';
 import { tryStringify } from '.';
 
 type LogMethod = (content: string) => void;
-type LogErrorMethod = (content: string, err?: any) => void;
+type LogErrorMethod = (content: string, err?: any, newline?: string) => void;
 type LogJsonMethod = (content: any, depth?: number, indent?: string) => void;
 type LogJsonDepthMethod = (content: any, depth: number) => void;
 type LogArrayMethod = (contentArray: string[]) => void;
@@ -37,12 +37,12 @@ export class Logger {
     )} ${content}`;
     console.log(message);
   };
-  static error: LogErrorMethod = (content, err) => {
+  static error: LogErrorMethod = (content, err, newline = '\n') => {
     const message = `${Logger.getPrefix()} ${Logger.errorText(
       `${Logger.isUserTerminal ? '❌' : '[ERROR]'} ${content}${
         err ? `\n\n${JSON.stringify(err, null, 2)}` : ''
       }`
-    )}\n`;
+    )}${newline}`;
     if (progress.active) progress.current.interrupt(message);
     else console.log(message);
   };

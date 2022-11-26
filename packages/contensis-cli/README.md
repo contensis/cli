@@ -219,6 +219,7 @@ contensis >
 - [Import entries](#import-entries)
   - [Import from another Contensis environment](#import-from-another-contensis-environment-1)
   - [Import from a file](#import-from-a-file)
+- [Remove entries](#remove-entries)
 
 ## Get started
 
@@ -1135,82 +1136,115 @@ When you are happy you can fetch only the data you intend to import, connect to 
 website t.durden@example-dev> import entries --preserve-guids --zenql "sys.contentTypeId = plant" --source-alias example-dev --source-project-id leif
   -------------------------------------
  -- IMPORT PREVIEW --
-[23/11 02:10:48] [INFO] Fetching initial entries in project 'leif'
-[23/11 02:10:48] [INFO] Finding entries in project 'website'
-[23/11 02:10:49] [INFO] Building asset entries
-[23/11 02:10:49] [INFO] Building content entries
+[26/11 02:16:29] [INFO] Fetching initial entries in project 'leif'
+ Fetch [leif]                                   >> 100% 21 0.0s/0.0s 100000p/s
+ Fetch [leif]                                 >> 100% 79 0.0s/0.0s Infinityp/s
+ Fetch [leif]                                 >> 100% 13 0.0s/0.0s Infinityp/s
+
+Found 113 entries in leif
 --------------------------------------------
 
-                         1 errors
+ id                                    contentTypeId      entryTitle                      entryDescrip
+------------------------------------------------------------------------------------------------------
+ 7cf921a0-ee4f-4bd6-a3f2-0fb0fe1a2ac8  plant              Aloe vera                       Every kitche
+ 0d94dbf2-89f8-45fb-96d5-175ae1f382ce  plant              Areca palm                      An easy-to-c
+ 43a60005-ea92-4b32-9af3-79560e48ecec  plant              Boston fern                     Brighten up
+ f0cac96c-39a1-4b85-b14b-e8d7d3d08767  plant              Calathea orbifolia              This beautif
+ d647012b-897e-4b6b-bfb5-b9844ef3d648  plant              Canary Island Date Palm         An easy-to-c
+ b7129080-692c-4550-9e2b-28f8ec978651  plant              Chinese evergreen               Easy to care
+ a3339124-4340-4f31-a209-5a6413a89f15  plant              Chinese money plant             The Chinese
+ 8c284599-b615-40a7-9d26-0ddd586fff51  plant              Dracaena fragrans               A great opti
+ 329e3104-332f-48a4-b43a-de852df796b3  plant              Elephant ear                    Elephant ear
+ 504f7b7f-af03-4711-94ca-07edb90fbe00  plant              Heartleaf philodendron          Native to Ce
+ a9a537e8-5508-4166-878c-d5fcd0d9a723  plant              Maidenhair fern                 Easily ident
+ 9a3cc767-8fc1-4ee5-83e1-63c14a508c69  plant              Parlour palm                    Add a bit of
+ ee488c3b-a3a3-4b9c-a3ad-c5a5bdc7e317  plant              Peace lily                      A classic ch
+ 6a71a864-6f61-471a-8cdd-f80237408666  plant              Pink moth orchid                Why buy cut
+ 50868245-3e53-4d9f-86ed-403593da67f6  plant              Ponytail palm                   Despite its
+ 4f05979f-d8cf-4568-9045-05731a33f243  plant              Spider plant                    Breate easy
+ 76a16c87-5e6d-465b-a343-3f14cf2fea0a  plant              String of nickels               A hanging pl
+ 61a2af3a-332c-453c-b9f6-1851d9b7d936  plant              Swiss cheese plant              Bring laid-b
+ 8174fb53-b955-4e36-8f87-646bf286e396  plant              Variegated snake plant          Snake plants
+ b8aa31da-f993-4d81-a361-94ecd5e42547  plant              White moth orchid               Why buy cut
+ 0d707ffe-f42d-44a6-b839-46156ee7f4f3  plant              Yellow moth orchid              Why buy cut
+ 51390024-f193-436f-8552-646cf77ccfdb  image              aloe-vera-closeup               null
+ c0d4ec16-6de2-4394-aaf4-03a56d343bff  image              aloe-vera-gold-pot              null
+ 3b830d97-e976-467c-a833-1b4abcab65d0  image              areca-palm-in-room              null
+ ed0300b0-e841-4c0f-bd1d-9ecd6bc2a354  image              areca-palm-leaf                 null
+ 00119ef1-c3c4-4a49-9076-27eee5605515  image              areca-palm-plant-collection     null
+ 248e2817-6241-4de7-ac5d-75411be4339d  image              boston-fern-close-up            null
 
- id  error
------------------------------------------------------------
- 0   Content type 'plantGenus' does not exist in
-     project 'website'
------------------------------------------------------------
-[23/11 02:10:49] [OK] Done migrating entries
+ - and 87 more...
 
-growingConditions Likes high humidity
-  636b925b-a386-4c56-9f33-96cd99cc391c no change
-growingConditions Needs plenty of light
-  2d80e638-eb0d-4bc5-bc96-42b7b8f20678 no change
-growingConditions Partial shade
-  711251f9-f9c6-473b-8b62-0ec8a0d4978c no change
-growingConditions Prefers dry conditions
-  d815819d-61c6-4037-95d3-c503acf52153 no change
+[26/11 02:16:29] [INFO] Finding 113 entries in project 'website'
+ Fetch [website]                                  >> 100% 113 0.2s/0.0s 897p/s
+ Fetch [website]                               >> 100% 4 0.0s/0.0s Infinityp/s
+[26/11 02:16:30] [INFO] Building 66 asset entries
+[26/11 02:16:30] [INFO] Building 47 content entries
 
-plant Aloe vera
-  7cf921a0-ee4f-4bd6-a3f2-0fb0fe1a2ac8 no change
-plant Areca palm
-  0d94dbf2-89f8-45fb-96d5-175ae1f382ce no change
-plant Boston fern
-  43a60005-ea92-4b32-9af3-79560e48ecec no change
-plant Calathea orbifolia
-  f0cac96c-39a1-4b85-b14b-e8d7d3d08767 no change
-plant Canary Island Date Palm
-  d647012b-897e-4b6b-bfb5-b9844ef3d648 no change
+37/113 entries to migrate into [website]
 
-plantGenus Aglaonema
-  98347340-a11c-4ee5-b4e7-1ae3b75496a2 error
+ contentTypeId         status     total
+----------------------------------------------
+ plantGenus            error      4
+ growingConditions     update     4
+ plant                 update     21
+ pot                   update     12
+ image                 no change  66
+ plantType             no change  5
+ tag                   no change  1
+----------------------------------------------
+
+ id                                    contentTypeId         status    updates  entryTitle
+------------------------------------------------------------------------------------------------------
+ 98347340-a11c-4ee5-b4e7-1ae3b75496a2  plantGenus            error              Aglaonema
+ fa464489-6476-4694-b3d4-e77d0c00a185  plantGenus            error              Alocasia
+ 309d5fd7-a21f-45a8-8abb-f01f820b8f16  plantGenus            error              Aloe
+ 4ebdcc63-929f-4b06-8848-fe046468a63d  plantGenus            error              Beaucarnea
+ 636b925b-a386-4c56-9f33-96cd99cc391c  growingConditions     update    -1,+0    Likes high humidity
+ 2d80e638-eb0d-4bc5-bc96-42b7b8f20678  growingConditions     update    -1,+0    Needs plenty of light
+ 711251f9-f9c6-473b-8b62-0ec8a0d4978c  growingConditions     update    -1,+0    Partial shade
+ d815819d-61c6-4037-95d3-c503acf52153  growingConditions     update    -1,+0    Prefers dry conditions
+ 7cf921a0-ee4f-4bd6-a3f2-0fb0fe1a2ac8  plant                 update    -1,+0    Aloe vera
+ 0d94dbf2-89f8-45fb-96d5-175ae1f382ce  plant                 update    -1,+0    Areca palm
+ 43a60005-ea92-4b32-9af3-79560e48ecec  plant                 update    -1,+0    Boston fern
+ f0cac96c-39a1-4b85-b14b-e8d7d3d08767  plant                 update    -1,+0    Calathea orbifolia
+ d647012b-897e-4b6b-bfb5-b9844ef3d648  plant                 update    -1,+0    Canary Island Date Pal
+ b7129080-692c-4550-9e2b-28f8ec978651  plant                 update    -1,+0    Chinese evergreen
+ a3339124-4340-4f31-a209-5a6413a89f15  plant                 update    -1,+0    Chinese money plant
+ 8c284599-b615-40a7-9d26-0ddd586fff51  plant                 update    -1,+0    Dracaena fragrans
+ 329e3104-332f-48a4-b43a-de852df796b3  plant                 update    -1,+0    Elephant ear
+ 504f7b7f-af03-4711-94ca-07edb90fbe00  plant                 update    -1,+0    Heartleaf philodendron
+ a9a537e8-5508-4166-878c-d5fcd0d9a723  plant                 update    -1,+0    Maidenhair fern
+ 9a3cc767-8fc1-4ee5-83e1-63c14a508c69  plant                 update    -1,+0    Parlour palm
+ ee488c3b-a3a3-4b9c-a3ad-c5a5bdc7e317  plant                 update    -1,+0    Peace lily
+ 6a71a864-6f61-471a-8cdd-f80237408666  plant                 update    -1,+0    Pink moth orchid
+ 50868245-3e53-4d9f-86ed-403593da67f6  plant                 update    -1,+0    Ponytail palm
+ 4f05979f-d8cf-4568-9045-05731a33f243  plant                 update    -1,+0    Spider plant
+ 76a16c87-5e6d-465b-a343-3f14cf2fea0a  plant                 update    -1,+0    String of nickels
+ 61a2af3a-332c-453c-b9f6-1851d9b7d936  plant                 update    -1,+0    Swiss cheese plant
+ 8174fb53-b955-4e36-8f87-646bf286e396  plant                 update    -1,+0    Variegated snake plant
+
+ - and 15 more...
+
+--------------------------------------------
+[26/11 02:16:30] [OK] Done migrating entries
+
+[cli] ⏩ import from project leif to website
+
+  - growingConditions: 4 [existing: 100%] [needs update: 100%]
+  - image: 66 up to date
+  - plant: 21 [existing: 100%] [needs update: 100%]
+  - plantGenus: 4 [existing: 0%]
+  - plantType: 5 up to date
+  - pot: 12 [existing: 100%] [needs update: 100%]
+  - tag: 1 up to date
+  - totalCount: 37
+  - errors: 1
+
 [cli] ❌ Content type 'plantGenus' does not exist in project 'website'
 
-plantGenus Alocasia
-  fa464489-6476-4694-b3d4-e77d0c00a185 error
-[cli] ❌ Content type 'plantGenus' does not exist in project 'website'
-
-plantGenus Aloe
-  309d5fd7-a21f-45a8-8abb-f01f820b8f16 error
-[cli] ❌ Content type 'plantGenus' does not exist in project 'website'
-
-plantGenus Beaucarnea
-  4ebdcc63-929f-4b06-8848-fe046468a63d error
-[cli] ❌ Content type 'plantGenus' does not exist in project 'website'
-
-
-plantType Ferns
-  90e128f5-582c-4430-a232-72022271ec8b no change
-plantType Foliage
-  25f5a78b-9274-4cc9-9a58-03d8dcd4cd17 no change
-plantType Orchids
-  44abca5b-a49b-48a1-8823-811ab31983c0 no change
-plantType Palm
-  d66447c5-2198-4b19-bad3-c921e9ef0db0 no change
-plantType Succulents
-  70149568-9725-4c39-8ff5-ef69221a0899 no change
-
-pot Barro decorated terracotta pot
-  fa67e1c6-0637-4548-bd4f-c207ec62af0e no change
-pot Bianco white pot
-  e3b7907c-f524-45e4-ba5f-e62d1557b477 no change
-pot Canasta mid-sized pot
-  058b20ba-99f7-49ec-9017-a0df35b00dcc no change
-pot Geo mid-sized pot
-  dafc4810-a62e-43e5-a056-ab1248181eaf no change
-pot Grå small grey pot
-  f2022069-7a92-491d-b197-a3564ab9a8ca no change
-
-tag Promoted
-  3659a333-8d10-4325-9ea6-2f49ae47e7fe no change
+[cli] ❌ [example-dev] Unable to import entries
 
 website t.durden@example-dev>
 ```
@@ -1222,5 +1256,61 @@ website t.durden@example-dev> import entries --preserve-guids --from-file ./cont
 ```
 
 The output will be the same as the previous command
+
+<sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
+
+## Remove entries
+
+Delete entries by id
+
+```shell
+website t.durden@example-dev> remove entries a1c25591-8c9b-50e2-96d8-f6c774fcf023 8df914cc-1da1-59d6-86e0-
+8ea4ebd99aaa
+ -- PREVIEW --
+[26/11 02:19:53] [INFO] Fetching initial entries in project 'website'
+ Fetch [website]                                 >> 100% 2 0.0s/0.0s Infinityp/s
+[26/11 02:19:53] [INFO] Done deleting entries
+
+a1c25591-8c9b-50e2-96d8-f6c774fcf023 delete homepage Find the perfect plant
+8df914cc-1da1-59d6-86e0-8ea4ebd99aaa delete pot Milano dipped pot
+
+[cli] ⏩ delete from project website
+
+  - totalCount: 2 [to delete: 2]
+
+[cli] ✅ [example-dev] Will delete entries
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
+
+Delete entries with a supplied zenql statement
+
+```shell
+website t.durden@example-dev> remove entries --zenql "sys.version.created > 2022-11-25 14:00"
+ -- PREVIEW --
+[26/11 02:20:52] [INFO] Fetching initial entries in project 'website'
+ Fetch [website]                                   >> 100% 7 0.0s/0.0s 100000p/s
+[26/11 02:20:53] [INFO] Done deleting entries
+
+a1c25591-8c9b-50e2-96d8-f6c774fcf023 delete homepage Find the perfect plant
+bb850178-c88c-50a6-8bac-844273cb19b8 delete image parlour-palm-white-room
+1553d1c8-7a99-5dcd-b1cb-9a90d4cf1985 delete landingPage New subscription service
+f0b0ef1b-fdd1-52d6-99fc-4439e0c186e6 delete plantGenus Aglaonema
+f8f6ee36-9cc4-5d1e-be62-01ac73590947 delete plantGenus Aloe
+8df914cc-1da1-59d6-86e0-8ea4ebd99aaa delete pot Milano dipped pot
+4efeb0e4-dc19-5f87-ab89-47892b9c4169 delete pot Terra large terracotta pot
+
+[cli] ⏩ delete from project website
+
+  - totalCount: 7 [to delete: 7]
+
+[cli] ✅ [example-dev] Will delete entries
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
 
 <sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>

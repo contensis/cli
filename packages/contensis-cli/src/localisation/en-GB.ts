@@ -194,7 +194,7 @@ export const LogMessages = {
   entries: {
     imported: (env: string, commit: boolean, count: number) =>
       `[${env}] ${commit ? `Imported` : `Will import`} ${count} entries`,
-    failedImport: (env: string) => `[${env}] Unable to delete entries`,
+    failedImport: (env: string) => `[${env}] Unable to import entries`,
     removed: (env: string, commit: boolean) =>
       `[${env}] ${commit ? `Deleted` : `Will delete`} entries`,
     failedRemove: (env: string) => `[${env}] Unable to delete entries`,

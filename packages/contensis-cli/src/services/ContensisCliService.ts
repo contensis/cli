@@ -1448,6 +1448,7 @@ class ContensisCli {
 
       if (
         !err &&
+        !result.errors?.length &&
         ((!commit && result.entriesToMigrate[currentProject].totalCount) ||
           (commit &&
             (result.migrateResult?.created || result.migrateResult?.updated)))
