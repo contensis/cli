@@ -1345,7 +1345,7 @@ class ContensisCli {
   };
 
   RemoveEntries = async (commit = false) => {
-    const { currentEnv, log, messages } = this;
+    const { currentEnv, currentProject, log, messages } = this;
     const contensis = await this.ConnectContensisImport({
       commit,
       importDataType: 'user-input',
@@ -1361,19 +1361,24 @@ class ContensisCli {
       if (result)
         this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
-          printMigrateResult(this, result, { action: 'delete' });
+          printMigrateResult(this, result, {
+            action: 'delete',
+            showAllEntries: true,
+          });
         });
       if (
         !err &&
-        ((!commit &&
-          Object.values(result.entriesToMigrate)?.[0].totalCount > 0) ||
+        ((!commit && result.entriesToMigrate[currentProject].totalCount) ||
           (commit && result.migrateResult?.deleted))
       ) {
         log.success(messages.entries.removed(currentEnv, commit));
-        if (!commit) log.help(messages.entries.commitTip());
+        if (!commit) {
+          log.raw(``);
+          log.help(messages.entries.commitTip());
+        }
       } else {
         log.error(messages.entries.failedRemove(currentEnv), err);
-        if (!Object.values(result.entriesToMigrate)?.[0].totalCount)
+        if (!result.entriesToMigrate[currentProject].totalCount)
           log.help(messages.entries.notFound(currentEnv));
       }
     }

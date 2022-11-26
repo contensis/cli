@@ -105,7 +105,7 @@ export const printBlockVersion = (
 };
 
 export const printMigrateResult = (
-  { log, messages, contensis, currentProject }: ContensisCli,
+  { log, messages, currentProject }: ContensisCli,
   migrateResult: any,
   {
     action = 'import',
@@ -119,8 +119,8 @@ export const printMigrateResult = (
     showChangedEntries?: boolean;
   } = {}
 ) => {
-  if (Object.keys(migrateResult.entriesToMigrate.entryIds).length)
-    console.log(``);
+  // if (Object.keys(migrateResult.entriesToMigrate.entryIds).length)
+  console.log(``);
 
   for (const [contentTypeId, entryRes] of Object.entries(
     migrateResult.entriesToMigrate.entryIds
@@ -175,88 +175,92 @@ export const printMigrateResult = (
       }
     }
   }
-  console.log(``);
-  if (
-    contensis?.isPreview &&
-    migrateResult.entriesToMigrate?.[currentProject]?.totalCount > 0 &&
-    !migrateResult.errors
-  ) {
-    log.help(messages.entries.commitTip());
-  }
+  if (showAllEntries || showChangedEntries) console.log(``);
+  // if (
+  //   contensis?.isPreview &&
+  //   migrateResult.entriesToMigrate?.[currentProject]?.totalCount > 0 &&
+  //   !migrateResult.errors
+  // ) {
+  //   log.help(messages.entries.commitTip());
+  // }
 
-  if (action === 'import') {
-    for (const [projectId, contentTypeCounts] of Object.entries(
-      migrateResult.entries || {}
-    ) as [string, any][]) {
-      log.help(
-        `import from project ${log.highlightText(projectId)} to ${log.boldText(
-          log.warningText(currentProject)
-        )}`
-      );
-      for (const [contentTypeId, count] of Object.entries(
-        contentTypeCounts
-      ) as [string, number][]) {
-        const migrateStatusAndCount =
-          migrateResult.entriesToMigrate[currentProject][contentTypeId];
-        const existingCount =
-          migrateResult.existing?.[currentProject]?.[contentTypeId] || 0;
-        const existingPercent = ((existingCount / count) * 100).toFixed(0);
-        const noChangeOrTotalEntriesCount =
-          typeof migrateStatusAndCount !== 'number'
-            ? migrateStatusAndCount?.['no change'] || 0
-            : migrateStatusAndCount;
+  for (const [projectId, contentTypeCounts] of Object.entries(
+    migrateResult.entries || {}
+  ) as [string, any][]) {
+    log.help(
+      `${action} from project ${
+        action === 'delete'
+          ? log.warningText(currentProject)
+          : `${log.highlightText(projectId)} to ${log.boldText(
+              log.warningText(currentProject)
+            )}`
+      }`
+    );
+    for (const [contentTypeId, count] of Object.entries(contentTypeCounts) as [
+      string,
+      number
+    ][]) {
+      const migrateStatusAndCount =
+        migrateResult.entriesToMigrate[currentProject][contentTypeId];
+      const existingCount =
+        migrateResult.existing?.[currentProject]?.[contentTypeId] || 0;
+      const existingPercent = ((existingCount / count) * 100).toFixed(0);
+      const noChangeOrTotalEntriesCount =
+        typeof migrateStatusAndCount !== 'number'
+          ? migrateStatusAndCount?.['no change'] || 0
+          : migrateStatusAndCount;
 
-        const isTotalCountRow = contentTypeId === 'totalCount';
+      const isTotalCountRow = contentTypeId === 'totalCount';
 
-        const changedPercentage = (
-          (noChangeOrTotalEntriesCount / count) *
-          100
-        ).toFixed(0);
+      const changedPercentage = (
+        (noChangeOrTotalEntriesCount / count) *
+        100
+      ).toFixed(0);
 
-        const existingColor =
-          existingPercent === '0' ? log.warningText : log.infoText;
-        const changedColor = isTotalCountRow
-          ? log.helpText
-          : changedPercentage === '100'
-          ? log.successText
-          : log.warningText;
+      const existingColor =
+        existingPercent === '0' ? log.warningText : log.infoText;
+      const changedColor = isTotalCountRow
+        ? log.helpText
+        : changedPercentage === '100'
+        ? log.successText
+        : log.warningText;
 
-        console.log(
-          `  - ${
-            isTotalCountRow
-              ? log.highlightText(`${contentTypeId}: ${count}`)
-              : `${contentTypeId}: ${log.helpText(count)}`
-          }${
-            changedPercentage === '100'
-              ? ''
-              : existingColor(
-                  ` [existing: ${
-                    isTotalCountRow ? existingCount : `${existingPercent}%`
-                  }]`
-                )
-          }${
-            existingPercent === '0'
-              ? ''
-              : changedColor(
-                  ` ${
-                    isTotalCountRow
-                      ? `[to change: ${noChangeOrTotalEntriesCount}]`
-                      : changedPercentage === '100'
-                      ? 'up to date'
-                      : `[needs update: ${100 - Number(changedPercentage)}%]`
-                  }`
-                )
-          }`
-        );
-      }
-    }
-    if (migrateResult.errors?.length) {
       console.log(
-        `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
+        `  - ${
+          isTotalCountRow
+            ? log.highlightText(
+                `${contentTypeId}: ${noChangeOrTotalEntriesCount}`
+              )
+            : `${contentTypeId}: ${log.helpText(count)}`
+        }${
+          changedPercentage === '100' || action === 'delete'
+            ? ''
+            : existingColor(
+                ` [existing: ${
+                  isTotalCountRow ? existingCount : `${existingPercent}%`
+                }]`
+              )
+        }${
+          existingPercent === '0'
+            ? ''
+            : changedColor(
+                ` ${
+                  isTotalCountRow
+                    ? `[to ${action}: ${noChangeOrTotalEntriesCount}]`
+                    : changedPercentage === '100'
+                    ? 'up to date'
+                    : `[needs update: ${100 - Number(changedPercentage)}%]`
+                }`
+              )
+        }`
       );
-      for (const error of migrateResult.errors)
-        log.error(error.message || error);
     }
+  }
+  if (migrateResult.errors?.length) {
+    console.log(
+      `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
+    );
+    for (const error of migrateResult.errors) log.error(error.message || error);
   }
 };
 

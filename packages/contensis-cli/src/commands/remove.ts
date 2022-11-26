@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
+import { Logger } from '~/util/logger';
 import { commit, mapContensisOpts, zenql } from './globalOptions';
 
 export const makeRemoveCommand = () => {
@@ -79,6 +80,43 @@ Example call:
         ['remove', 'contenttypes', id.join(' ')],
         opts
       ).RemoveContentTypes(id, opts.commit);
+    });
+
+  const removeEntries = remove
+    .command('entries')
+    .description('delete entries')
+    .argument(
+      '[ids...]',
+      'the entry id(s) to delete ...or add *** if you wish to delete all entries in all content types'
+    )
+    .addOption(zenql)
+    .addOption(commit)
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > remove entries a1c25591-8c9b-50e2-96d8-f6c774fcf023 8df914cc-1da1-59d6-86e0-8ea4ebd99aaa
+  > remove entries --zenql "sys.contentTypeId = test"
+`
+    )
+    .action(async (entryIds: string[], opts) => {
+      const removeAll = entryIds?.[0] === '***';
+
+      // Remove all asterisks from args
+      if (entryIds?.[0] && !entryIds[0].replace(/\*/g, '')) entryIds.pop();
+
+      const hasArgs = !!(entryIds?.length || opts.zenql || removeAll);
+      if (!hasArgs) {
+        Logger.help(
+          `Not enough arguments supplied\n\n${removeEntries.helpInformation()}`
+        );
+      } else {
+        await cliCommand(
+          ['remove', 'entries', entryIds.join(' ')],
+          opts,
+          mapContensisOpts({ entryIds, ...opts })
+        ).RemoveEntries(opts.commit);
+      }
     });
 
   return remove;
