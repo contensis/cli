@@ -30,8 +30,8 @@ jobs:
 
       - name: Push block to Contensis (Test `contensis/block-push` Action)
         id: push-block
-        uses: ./.github/actions/block-push
-        # uses: contensis/block-push@v1
+        # uses: ./.github/actions/block-push
+        uses: contensis/block-push@v1
         with:
           block-id: node-cli-ci-block
           auto-release: false
