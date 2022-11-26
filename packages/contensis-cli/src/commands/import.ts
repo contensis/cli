@@ -1,6 +1,5 @@
-import { Argument, Command } from 'commander';
+import { Command, Option } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { url } from '~/util';
 import { commit, mapContensisOpts } from './globalOptions';
 
 export const makeImportCommand = () => {
@@ -107,6 +106,14 @@ Example call:
       '-preserve, --preserve-guids',
       'include this flag when you are importing entries that you have previously exported and wish to update'
     )
+    .addOption(
+      new Option(
+        '-oe, --output-entries <outputEntries>',
+        'which details of the entries included in the import to output'
+      )
+        .choices(['errors', 'changes', 'all'])
+        .default('errors')
+    )
     .addHelpText(
       'after',
       `
@@ -119,7 +126,11 @@ Example call:
         ['import', 'entries'],
         opts,
         mapContensisOpts({ phrase, ...opts })
-      ).ImportEntries({ commit: opts.commit, fromFile: opts.fromFile });
+      ).ImportEntries({
+        commit: opts.commit,
+        fromFile: opts.fromFile,
+        logOutput: opts.outputEntries,
+      });
     });
 
   return program;

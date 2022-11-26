@@ -192,11 +192,14 @@ export const LogMessages = {
       `No Contensis environment set, connect to your Contensis cloud instance using "contensis connect {cms alias}"`,
   },
   entries: {
+    imported: (env: string, commit: boolean, count: number) =>
+      `[${env}] ${commit ? `Imported` : `Will import`} ${count} entries`,
+    failedImport: (env: string) => `[${env}] Unable to delete entries`,
     removed: (env: string, commit: boolean) =>
       `[${env}] ${commit ? `Deleted` : `Will delete`} entries`,
     failedRemove: (env: string) => `[${env}] Unable to delete entries`,
     notFound: (env: string) => `[${env}] Entries were not found`,
-    commitTip: () => `  Add --commit flag to commit the previewed changes`,
+    commitTip: () => `Add --commit flag to commit the previewed changes`,
   },
   keys: {
     list: (env: string) => `[${env}] API keys:`,
