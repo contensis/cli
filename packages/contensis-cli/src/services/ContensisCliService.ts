@@ -126,17 +126,6 @@ class ContensisCli {
     }
   }
 
-  get contentTypes() {
-    return this.contensis?.models.contentTypes();
-  }
-
-  get components() {
-    return this.contensis?.models.components();
-  }
-  get models(): Model[] | undefined {
-    return this.contensis?.models.contentModels();
-  }
-
   constructor(
     args: string[],
     outputOpts?: OutputOptions & IConnectOptions & IImportOptions,
@@ -715,23 +704,6 @@ class ContensisCli {
     }
   };
 
-  HydrateContensis = async () => {
-    const { log } = this;
-    const contensis = await this.ConnectContensis();
-
-    if (contensis) {
-      // Retrieve content types list for env
-      const [contensisErr, models] = await to(
-        contensis.models.HydrateContensisRepositories()
-      );
-
-      if (contensisErr) {
-        log.error(contensisErr.message);
-        return contensisErr;
-      }
-    }
-  };
-
   PrintApiKeys = async () => {
     const { currentEnv, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -864,23 +836,14 @@ class ContensisCli {
     }
   };
 
-  GetContentTypes = async () => {
-    const { currentProject, log, messages } = this;
-    let err;
-    if (!this.contensis) err = await this.HydrateContensis();
-
-    if (err) log.error(messages.models.noList(currentProject));
-    if (!this.contensis) log.warning(messages.models.noList(currentProject));
-
-    return this.contensis;
-  };
-
   PrintContentModels = async (modelIds: string[] = []) => {
     const { currentProject, log, messages } = this;
-    const contensis = await this.GetContentTypes();
+    const contensis = await this.ConnectContensis();
     if (contensis) {
       // Retrieve models list for env
-      const { models, contentTypes = [], components = [] } = this;
+      const models = await contensis.models.contentModels();
+      const contentTypes = await contensis.models.contentTypes();
+      const components = await contensis.models.components();
 
       // Models to output to console
       const returnModels = modelIds?.length
@@ -910,8 +873,12 @@ class ContensisCli {
       // Create an array of all the content types and component definitions
       // we will use this when outputting to a file
       const contentModelBackup = [
-        ...contentTypes.filter(c => contentTypeIds.includes(c.id)),
-        ...components.filter(c => componentIds.includes(c.id)),
+        ...contentTypes.filter(c =>
+          contentTypeIds.map(i => i.toLowerCase()).includes(c.id.toLowerCase())
+        ),
+        ...components.filter(c =>
+          componentIds.map(i => i.toLowerCase()).includes(c.id.toLowerCase())
+        ),
       ];
 
       if (Array.isArray(returnModels)) {
@@ -931,7 +898,7 @@ class ContensisCli {
         log.raw('');
         if (models?.length) {
           this.HandleFormattingAndOutput(contentModelBackup, () => {
-            // print the content models s#qto console
+            // print the content models to console
             for (const model of models) {
               const components = model.components?.length || 0;
               const contentTypes = model.contentTypes?.length || 0;
@@ -1033,10 +1000,10 @@ class ContensisCli {
 
   PrintContentTypes = async () => {
     const { currentProject, log, messages } = this;
-    await this.GetContentTypes();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve content types list for env
-      const { contentTypes } = this;
+      const contentTypes = await contensis.models.contentTypes();
 
       if (Array.isArray(contentTypes)) {
         log.success(messages.contenttypes.list(currentProject));
@@ -1057,10 +1024,10 @@ class ContensisCli {
 
   PrintContentType = async (contentTypeId: string) => {
     const { currentProject, log, messages } = this;
-    await this.GetContentTypes();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve content types list for env
-      const { contentTypes } = this;
+      const contentTypes = await contensis.models.contentTypes();
 
       if (Array.isArray(contentTypes)) {
         const contentType = contentTypes.find(
@@ -1213,10 +1180,10 @@ class ContensisCli {
 
   PrintComponents = async () => {
     const { currentProject, log, messages } = this;
-    await this.GetContentTypes();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve components list for env
-      const { components } = this;
+      const components = await contensis.models.components();
 
       if (Array.isArray(components)) {
         log.success(messages.components.list(currentProject));
@@ -1238,10 +1205,10 @@ class ContensisCli {
 
   PrintComponent = async (componentId: string) => {
     const { currentProject, log, messages } = this;
-    await this.GetContentTypes();
-    if (this.contensis) {
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
       // Retrieve content types list for env
-      const { components } = this;
+      const components = await contensis.models.components();
 
       if (Array.isArray(components)) {
         const component = components.find(
