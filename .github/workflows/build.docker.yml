@@ -26,8 +26,8 @@ jobs:
 
       - name: Build Docker image and push to ${{ env.APP_IMAGE }}:latest
         run: |
-          if [ $(docker pull ${{ env.BUILDER_IMAGE }}) == 0 ]; then
-            echo builder image already exists;
+          if [ "$(docker pull ${{ env.BUILDER_IMAGE }})" == 0 ]; then
+            echo builder image already exists
           else
             docker pull node:18-alpine
             docker tag node:18-alpine ${{ env.BUILDER_IMAGE }}
