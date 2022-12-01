@@ -5,7 +5,6 @@ FROM ${builder_image} AS prepare
 WORKDIR /usr/src/app
 COPY .yarn .yarn
 COPY .yarnrc .
-COPY yarn.lock .
 COPY packages/contensis-cli/package.json .
 COPY packages/contensis-cli/patches patches
 RUN yarn
