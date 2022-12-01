@@ -12,7 +12,7 @@ jobs:
     name: Build image and push
     runs-on: ubuntu-latest
     env:
-      BUILDER_IMAGE: ${{ env.APP_IMAGE }}:builder
+      BUILDER_IMAGE: $APP_IMAGE:builder
     steps:
       - uses: actions/checkout@v3
 
