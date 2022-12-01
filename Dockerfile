@@ -1,4 +1,3 @@
-ARG app_image
 ARG builder_image
 FROM ${builder_image} AS prepare
 
@@ -17,7 +16,7 @@ COPY packages/contensis-cli/tsconfig.json .
 COPY packages/contensis-cli/src src
 RUN yarn run build
 
-FROM ${app_image} AS final
+FROM node:18-alpine AS final
 WORKDIR /usr/src/app
 RUN apk add jq
 # copy assets from source folder

@@ -12,7 +12,7 @@ jobs:
     name: Build image and push
     runs-on: ubuntu-latest
     env:
-      BUILDER_BASE: node:18-alpine
+      # BUILDER_BASE: node:18-alpine
       APP_BASE: node:18-alpine
       BUILDER_IMAGE: $APP_IMAGE:builder
     steps:
@@ -28,26 +28,26 @@ jobs:
 
       - name: Build Docker image and push to ${{ env.APP_IMAGE }}:latest
         run: |
-          docker pull ${{ env.BUILDER_IMAGE }}
+          docker pull $BUILDER_IMAGE
           RESULT=$?
           if [ $RESULT -eq 0 ]; then echo builder image already exists
           else
             docker pull $BUILDER_BASE
-            docker tag $BUILDER_BASE ${{ env.BUILDER_IMAGE }}
-            docker push ${{ env.BUILDER_IMAGE }}
+            docker tag $BUILDER_BASE $BUILDER_IMAGE
+            docker push $BUILDER_IMAGE
           fi
-          docker pull ${{ env.APP_IMAGE }}:latest
-          RESULT=$?
-          if [ $RESULT -eq 0 ]; then echo app image already exists
-          else
-            docker pull $APP_BASE
-            docker tag $APP_BASE ${{ env.APP_IMAGE }}:latest
-            docker push ${{ env.APP_IMAGE }}:latest
-          fi
-          docker build -t ${{ env.BUILDER_IMAGE }} --build-arg builder_image=${{ env.BUILDER_IMAGE }} --target prepare -f Dockerfile .
-          docker push ${{ env.BUILDER_IMAGE }}
-          docker build -t ${{ env.APP_IMAGE }}:latest --build-arg builder_image=${{ env.BUILDER_IMAGE }} --build-arg app_image=${{ env.APP_IMAGE }}:latest -f Dockerfile .
-          docker push ${{ env.APP_IMAGE }}:latest
+          # docker pull $APP_IMAGE:latest
+          # RESULT=$?
+          # if [ $RESULT -eq 0 ]; then echo app image already exists
+          # else
+          #   docker pull $APP_BASE
+          #   docker tag $APP_BASE $APP_IMAGE:latest
+          #   docker push $APP_IMAGE:latest
+          # fi
+          docker build -t $BUILDER_IMAGE --build-arg builder_image=$BUILDER_IMAGE --target prepare -f Dockerfile .
+          docker push $BUILDER_IMAGE
+          docker build -t $APP_IMAGE:latest --build-arg builder_image=$BUILDER_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from=$APP_IMAGE:latest -f Dockerfile .
+          docker push $APP_IMAGE:latest
 
       - name: Push block to Contensis (Test `contensis/block-push` Action)
         id: push-block
