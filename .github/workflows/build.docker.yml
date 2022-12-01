@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BUILDER_BASE: node:18-alpine
-      # APP_BASE: node:18-alpine
+      # # APP_BASE: node:18-alpine
       BUILDER_IMAGE: $APP_IMAGE:builder
     steps:
       - uses: actions/checkout@v3
