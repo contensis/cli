@@ -15,6 +15,8 @@ jobs:
       BUILDER_BASE: node:18-alpine
       APP_BASE: node:18-alpine
       BUILDER_IMAGE: $APP_IMAGE:builder
+      BUILD_IMAGE: $APP_IMAGE:build-${{ github.run_number }}
+      LATEST_IMAGE: $APP_IMAGE:latest
     steps:
       - uses: actions/checkout@v3
 
@@ -28,26 +30,13 @@ jobs:
 
       - name: Build Docker image and push to ${{ env.APP_IMAGE }}:latest
         run: |
-          docker pull ${{ env.BUILDER_IMAGE }}
-          RESULT=$?
-          if [ $RESULT -eq 0 ]; then echo builder image already exists
-          else
-            docker pull $BUILDER_BASE
-            docker tag $BUILDER_BASE ${{ env.BUILDER_IMAGE }}
-            docker push ${{ env.BUILDER_IMAGE }}
-          fi
-          docker pull $APP_IMAGE:latest
-          RESULT=$?
-          if [ $RESULT -eq 0 ]; then echo app image already exists
-          else
-            docker pull $APP_BASE
-            docker tag $APP_BASE $APP_IMAGE:latest
-            docker push $APP_IMAGE:latest
-          fi
-          docker build -t ${{ env.BUILDER_IMAGE }} --build-arg builder_image=${{ env.BUILDER_IMAGE }} --target prepare -f Dockerfile .
-          docker push ${{ env.BUILDER_IMAGE }}
-          docker build -t $APP_IMAGE:latest --build-arg builder_image=${{ env.BUILDER_IMAGE }} --build-arg app_image=$APP_IMAGE:latest -f Dockerfile .
-          docker push $APP_IMAGE:latest
+          echo "Pulling images to use for build caches: $BUILDER_IMAGE $LATEST_IMAGE"
+          echo "{\"commitRef\":\"${{ github.sha }}\",\"pipelineIID\":\"${{ github.run_id }}\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}\",\"buildNo\":\"${{ github.run_number }}\",\"branchName\":\"${{ github.ref_name }}\",\"registryImage\":\"${{ env.APP_IMAGE }}\"}" > version.json
+          if [ $(docker pull $BUILDER_IMAGE && echo $? || echo $?) -eq 0 ]; then BUILDER_IMAGE_ARG=$BUILDER_IMAGE; echo "Builder image exists: $BUILDER_IMAGE_ARG"; fi
+          if [[ "$BUILDER_IMAGE_ARG" != "" && $(docker pull $LATEST_IMAGE && echo $? || echo $?) -eq 0 ]]; then APP_IMAGE_ARG=$LATEST_IMAGE; echo "App image exists: $APP_IMAGE_ARG"; fi
+          docker build -t $BUILDER_IMAGE --cache-from $BUILDER_IMAGE --build-arg builder_image=${BUILDER_IMAGE_ARG:=$BUILDER_BASE} --target prepare -f docker/build.Dockerfile .
+          docker build -t $LATEST_IMAGE -t $BUILD_IMAGE --cache-from $LATEST_IMAGE --build-arg app_image=${APP_IMAGE_ARG:=$APP_BASE} --build-arg builder_image=$BUILDER_IMAGE -f docker/build.Dockerfile .
+          docker push --all-tags ${{ env.APP_IMAGE }}
 
       - name: Push block to Contensis (Test `contensis/block-push` Action)
         id: push-block
@@ -56,6 +45,7 @@ jobs:
         with:
           block-id: node-cli-ci-block
           auto-release: false
+          image-uri: ${{ env.BUILD_IMAGE }}
           alias: zenhub-dev
           project-id: contensis
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
@@ -63,11 +53,6 @@ jobs:
           tag-repo: true
           git-token: ${{ github.token }}
           cli-version: latest
-
-      - name: Echo push-block outputs
-        run: |
-          echo block-version: ${{ steps.push-block.outputs.block-version }}
-          echo git-tag: ${{ steps.push-block.outputs.git-tag }}
 
       - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/cli-action
