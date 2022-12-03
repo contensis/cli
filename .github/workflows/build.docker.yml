@@ -14,9 +14,9 @@ jobs:
     env:
       BUILDER_BASE: node:18-alpine
       APP_BASE: node:18-alpine
-      BUILDER_IMAGE: $APP_IMAGE:builder
-      BUILD_IMAGE: $APP_IMAGE:build-${{ github.run_number }}
-      LATEST_IMAGE: $APP_IMAGE:latest
+      BUILDER_IMAGE: ${{ env.APP_IMAGE }}:builder
+      BUILD_IMAGE: ${{ env.APP_IMAGE }}:build-${{ github.run_number }}
+      LATEST_IMAGE: ${{ env.APP_IMAGE }}:latest
     steps:
       - uses: actions/checkout@v3
 
