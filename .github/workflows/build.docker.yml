@@ -36,6 +36,7 @@ jobs:
           echo "{\"commitRef\":\"${{ github.sha }}\",\"pipelineIID\":\"${{ github.run_id }}\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}\",\"buildNo\":\"${{ github.run_number }}\",\"branchName\":\"${{ github.ref_name }}\",\"registryImage\":\"${{ env.APP_IMAGE }}\"}" > version.json
           if [ "$(docker pull $BUILDER_IMAGE && echo $? || echo $?)" == "0" ]; then BUILDER_IMAGE_ARG=$BUILDER_IMAGE; echo "Builder image exists: $BUILDER_IMAGE_ARG"; fi
           if [[ "$BUILDER_IMAGE_ARG" != "" && "$(docker pull $LATEST_IMAGE && echo $? || echo $?)" == "0" ]]; then APP_IMAGE_ARG=$LATEST_IMAGE; echo "App image exists: $APP_IMAGE_ARG"; fi
+          echo "Using build args: \$BUILDER_IMAGE_ARG ${BUILDER_IMAGE_ARG:=$BUILDER_BASE} \$APP_IMAGE_ARG ${APP_IMAGE_ARG:=$APP_BASE}"
           docker build -t $BUILDER_IMAGE --cache-from $BUILDER_IMAGE --build-arg builder_image=${BUILDER_IMAGE_ARG:=$BUILDER_BASE} --target prepare -f Dockerfile .
           docker build -t $LATEST_IMAGE -t $BUILD_IMAGE --cache-from $LATEST_IMAGE --build-arg app_image=${APP_IMAGE_ARG:=$APP_BASE} --build-arg builder_image=$BUILDER_IMAGE -f Dockerfile .
           docker push --all-tags ${{ env.APP_IMAGE }}
