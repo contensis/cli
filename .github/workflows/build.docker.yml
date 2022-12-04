@@ -6,17 +6,13 @@ on:
 env:
   REGISTRY: ghcr.io
   APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
+  BUILD_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app:build-${{ github.run_number }}
 
 jobs:
   build:
     name: Build image and push
     runs-on: ubuntu-latest
-    env:
-      BUILDER_BASE: node:18-alpine
-      APP_BASE: node:18-alpine
-      BUILDER_IMAGE: ${{ env.APP_IMAGE }}:builder
-      BUILD_IMAGE: ${{ env.APP_IMAGE }}:build-${{ github.run_number }}
-      LATEST_IMAGE: ${{ env.APP_IMAGE }}:latest
+
     steps:
       - uses: actions/checkout@v3
 
@@ -29,6 +25,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker image and push to ${{ env.APP_IMAGE }}:latest
+        env:
+          BUILDER_BASE: node:18-alpine
+          APP_BASE: node:18-alpine
+          BUILDER_IMAGE: ${{ env.APP_IMAGE }}:builder
+          LATEST_IMAGE: ${{ env.APP_IMAGE }}:latest
         run: |
           echo "Pulling images to use for build cache: $BUILDER_IMAGE $LATEST_IMAGE"
           echo "{\"commitRef\":\"${{ github.sha }}\",\"pipelineIID\":\"${{ github.run_id }}\",\"pipelineUrl\":\"${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}\",\"buildNo\":\"${{ github.run_number }}\",\"branchName\":\"${{ github.ref_name }}\",\"registryImage\":\"${{ env.APP_IMAGE }}\"}" > version.json
