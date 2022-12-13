@@ -136,6 +136,7 @@ class ContensisShell {
     if (userId)
       availableCommands.push(
         'create project',
+        'create role',
         'diff models',
         'get block',
         'get block logs',
@@ -144,6 +145,7 @@ class ContensisShell {
         'get entries',
         'get model',
         'get project',
+        'get role',
         'get version',
         'import contenttypes',
         'import components',
@@ -152,8 +154,9 @@ class ContensisShell {
         'list blocks',
         'list contenttypes',
         'list components',
-        'list models',
         'list keys',
+        'list models',
+        'list roles',
         'list webhooks',
         'create key',
         'push block',
@@ -163,7 +166,9 @@ class ContensisShell {
         'remove contenttypes',
         'remove components',
         'set project name',
-        'set project description'
+        'set project description',
+        'set role assignments',
+        'set role permissions'
       );
 
     const prompt = inquirer.createPromptModule();

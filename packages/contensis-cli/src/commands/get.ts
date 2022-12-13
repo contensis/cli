@@ -41,6 +41,23 @@ Example call:
     });
 
   program
+    .command('role')
+    .description('get a role')
+    .argument('<roleNameOrId>', 'id or name of the role to get')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get role "entry admin"
+`
+    )
+    .action(async (roleNameOrId: string, opts) => {
+      await cliCommand(['get', 'role', roleNameOrId], opts).PrintRole(
+        roleNameOrId
+      );
+    });
+
+  program
     .command('model')
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')

@@ -203,7 +203,7 @@ export const LogMessages = {
   },
   keys: {
     list: (env: string) => `[${env}] API keys:`,
-    noList: (env: string) => `[${env}] Cannot retrieve API`,
+    noList: (env: string) => `[${env}] Cannot retrieve API keys`,
     created: (env: string, name: string) =>
       `[${env}] Created API key ${Logger.highlightText(name)}`,
     failedCreate: (env: string, name: string) =>
@@ -212,6 +212,20 @@ export const LogMessages = {
       `[${env}] Deleted API key ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
       `[${env}] Unable to delete API key ${Logger.highlightText(id)}`,
+  },
+  roles: {
+    list: (env: string) => `[${env}] Retrieved roles:`,
+    noList: (env: string) => `[${env}] Cannot retrieve roles`,
+    failedGet: (env: string, name: string) =>
+      `[${env}] Unable to find role ${Logger.highlightText(name)}`,
+    created: (env: string, name: string) =>
+      `[${env}] Created role ${Logger.highlightText(name)}`,
+    failedCreate: (env: string, name: string) =>
+      `[${env}] Unable to create role ${Logger.highlightText(name)}`,
+    removed: (env: string, id: string) =>
+      `[${env}] Deleted role ${Logger.highlightText(id)}`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete role ${Logger.highlightText(id)}`,
   },
   blocks: {
     runningStatus: (status: BlockRunningStatus | 'broken') => {

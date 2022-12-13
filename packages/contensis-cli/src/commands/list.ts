@@ -26,6 +26,13 @@ Example call:
   list
     .command('projects')
     .description('print list of projects')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > list projects
+`
+    )
     .action(async opts => {
       await cliCommand(['list', 'projects'], opts).PrintProjects();
     });
@@ -98,6 +105,20 @@ Example call:
     )
     .action(async opts => {
       await cliCommand(['list', 'keys'], opts).PrintApiKeys();
+    });
+
+  list
+    .command('roles')
+    .description('print list of roles')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > list roles
+`
+    )
+    .action(async opts => {
+      await cliCommand(['list', 'roles'], opts).PrintRoles();
     });
 
   list

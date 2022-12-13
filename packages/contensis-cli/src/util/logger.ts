@@ -92,7 +92,7 @@ export class Logger {
     Logger.raw(`  ${Logger.infoText(`-------------------------------------`)}`);
 
   static object: LogJsonMethod = content => {
-    for (const [key, value] of Object.entries(content)) {
+    for (const [key, value] of Object.entries(content || {})) {
       if (value && typeof value === 'object') {
         Logger.raw(`  ${chalk.bold.grey(key)}:`);
         if (key === 'fields' && Array.isArray(value)) {

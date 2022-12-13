@@ -21,7 +21,7 @@ import {
   Model,
   MigrateModelsResult,
 } from 'migratortron';
-import { Entry } from 'contensis-management-api/lib/models';
+import { Entry, Role } from 'contensis-management-api/lib/models';
 
 import { csvFormatter } from '~/util/csv.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
@@ -781,6 +781,150 @@ class ContensisCli {
         console.log('');
       } else {
         log.error(messages.keys.failedRemove(currentEnv, id), err);
+      }
+    }
+  };
+
+  PrintRoles = async () => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve roles list for env
+      const [rolesErr, roles] = await to(contensis.roles.GetRoles());
+
+      if (Array.isArray(roles)) {
+        log.success(messages.roles.list(currentEnv));
+        this.HandleFormattingAndOutput(roles, () => {
+          // print the roles to console
+          for (const {
+            id,
+            name,
+            description,
+            enabled,
+            assignments,
+            permissions,
+          } of roles) {
+            const color = enabled ? (s: string) => s : log.infoText;
+
+            console.log(color(`  - ${name} ${log.infoText(id)}`));
+            if (description) console.log(log.infoText(`    ${description}`));
+
+            if (assignments.groups?.length)
+              console.log(
+                `      ${chalk.bold.grey('groups')}: ${assignments.groups.join(
+                  ', '
+                )}`
+              );
+            if (assignments.users?.length)
+              console.log(
+                `      ${chalk.bold.grey('users')}: ${assignments.users.join(
+                  ', '
+                )}`
+              );
+            if (assignments.apiKeys?.length)
+              console.log(
+                `      ${chalk.bold.grey('keys')}: ${assignments.apiKeys.join(
+                  ', '
+                )}`
+              );
+
+            if (permissions.entries?.length) {
+              console.log(`      ${chalk.bold.grey('entries')}:`);
+              for (const p of permissions.entries)
+                console.log(
+                  `        ${p.id}: ${log.infoText(
+                    p.actions.length > 2
+                      ? p.actions.length
+                      : p.actions.join(', ')
+                  )}`
+                );
+            }
+            if (permissions.contentTypes?.length)
+              console.log(
+                `      ${chalk.bold.grey(
+                  'contentTypes'
+                )}: ${permissions.contentTypes
+                  .map(
+                    p =>
+                      `${p.id} [${p.actions.join(',')}] ${p.languages.join(
+                        ' '
+                      )}`
+                  )
+                  .join(', ')}`
+              );
+          }
+        });
+      }
+
+      if (rolesErr) {
+        log.error(messages.roles.noList(currentEnv));
+        log.error(jsonFormatter(rolesErr));
+      }
+    }
+  };
+
+  PrintRole = async (roleNameOrId: string) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve roles list for env
+      const [rolesErr, roles] = await to(contensis.roles.GetRoles());
+
+      if (Array.isArray(roles)) {
+        log.success(messages.roles.list(currentEnv));
+
+        const role =
+          roles.find(
+            r =>
+              r.id === roleNameOrId ||
+              r.name.toLowerCase() === roleNameOrId.toLowerCase()
+          ) ||
+          roles.find(r =>
+            r.name.toLowerCase().includes(roleNameOrId.toLowerCase())
+          );
+
+        if (role) this.HandleFormattingAndOutput(role, log.object);
+        else log.error(messages.roles.failedGet(currentEnv, roleNameOrId));
+      }
+
+      if (rolesErr) {
+        log.error(messages.roles.noList(currentEnv));
+        log.error(jsonFormatter(rolesErr));
+      }
+    }
+  };
+
+  UpdateRole = async (roleNameOrId: string, role: Partial<Role>) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve roles list for env
+      const [rolesErr, roles] = await to(contensis.roles.GetRoles());
+
+      if (Array.isArray(roles)) {
+        log.success(messages.roles.list(currentEnv));
+
+        const existingRole = roles.find(
+          r =>
+            r.id === roleNameOrId ||
+            r.name.toLowerCase() === roleNameOrId.toLowerCase()
+        );
+        if (existingRole) {
+          const rolesService = contensis.roles.sourceRepo.roles;
+
+          await rolesService.UpdateRole(existingRole.id, role);
+        } else {
+          //Role not exist
+        }
+        this.HandleFormattingAndOutput(role, log.object);
+      }
+
+      if (rolesErr) {
+        log.error(messages.roles.noList(currentEnv));
+        log.error(jsonFormatter(rolesErr));
       }
     }
   };
