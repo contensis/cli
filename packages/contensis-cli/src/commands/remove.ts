@@ -43,6 +43,22 @@ Example call:
     });
 
   remove
+    .command('role')
+    .description('remove a role')
+    .argument('<"Role name" or id>', 'the existing role name or id to delete')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > remove role "My role"\n`
+    )
+    .action(async (roleNameOrId: string, opts) => {
+      await cliCommand(['remove', 'role', roleNameOrId], opts).RemoveRole(
+        roleNameOrId
+      );
+    });
+
+  remove
     .command('components')
     .description('delete components')
     .argument('<id...>', 'the id(s) of the components to delete')

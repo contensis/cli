@@ -27,6 +27,9 @@ export const tryStringify = (obj: any) => {
   }
 };
 
+export const isSysError = (error: any): error is Error =>
+  error?.message !== undefined && error.stack;
+
 export const isUuid = (str: string) => {
   // Regular expression to check if string is a valid UUID
   const regexExp =

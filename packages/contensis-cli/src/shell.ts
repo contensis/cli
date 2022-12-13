@@ -135,6 +135,7 @@ class ContensisShell {
       availableCommands.push('login', 'list projects', 'set project');
     if (userId)
       availableCommands.push(
+        'create key',
         'create project',
         'create role',
         'diff models',
@@ -158,16 +159,19 @@ class ContensisShell {
         'list models',
         'list roles',
         'list webhooks',
-        'create key',
         'push block',
         'release block',
+        'remove components',
+        'remove contenttypes',
         'remove key',
         'remove entries',
-        'remove contenttypes',
-        'remove components',
+        'remove role',
         'set project name',
         'set project description',
+        'set role name',
+        'set role description',
         'set role assignments',
+        'set role enabled',
         'set role permissions'
       );
 

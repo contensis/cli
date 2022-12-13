@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { Project } from 'contensis-core-api';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
+import { isUuid } from '~/util';
 
 export const makeCreateCommand = () => {
   const create = new Command()
@@ -47,6 +48,7 @@ export const makeCreateCommand = () => {
         if (project) await shell().restart();
       }
     );
+
   create
     .command('key')
     .description('create a new api key')
@@ -64,6 +66,28 @@ Example call:
         name,
         description
       );
+    });
+
+  create
+    .command('role')
+    .description('create a new role')
+    .argument('<"Role name">', 'the name of the role to create')
+    .argument('["Role description">', 'the description of the role')
+    .option('--disabled', 'do not enable the created role', false)
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > create role "My role" "This role is for testing" --disabled \n`
+    )
+    .action(async (roleName: string, description: string, opts) => {
+      await cliCommand(['create', 'role', roleName], opts).CreateRole({
+        name: roleName,
+        description,
+        enabled: !opts.disabled,
+        assignments: { apiKeys: [], groups: [], users: [] },
+        permissions: { contentTypes: [], entries: [] },
+      });
     });
 
   return create;

@@ -2,8 +2,8 @@
 import chalk from 'chalk';
 import dateFormat from 'dateformat';
 import deepCleaner from 'deep-cleaner';
-import ProgressBar from 'progress';
-import { tryStringify } from '.';
+// import ProgressBar from 'progress';
+import { isSysError, tryStringify } from '.';
 
 type LogMethod = (content: string) => void;
 type LogErrorMethod = (content: string, err?: any, newline?: string) => void;
@@ -40,7 +40,11 @@ export class Logger {
   static error: LogErrorMethod = (content, err, newline = '\n') => {
     const message = `${Logger.getPrefix()} ${Logger.errorText(
       `${Logger.isUserTerminal ? '❌' : '[ERROR]'} ${content}${
-        err ? `\n\n${JSON.stringify(err, null, 2)}` : ''
+        err
+          ? `\n\n${
+              isSysError(err) ? err.toString() : JSON.stringify(err, null, 2)
+            }`
+          : ''
       }`
     )}${newline}`;
     if (progress.active) progress.current.interrupt(message);
@@ -178,14 +182,20 @@ export class Logger {
           else Logger.objectRecurse(item, depth + 1, `${indent}  `);
         } else Logger.raw(`${indent}${item}`);
       }
-    } else
+    } else {
+      let pos = 0;
       for (const [key, value] of Object.entries(content)) {
         if (Array.isArray(value)) {
+          const thisIndent =
+            pos++ === 0
+              ? `${indent.substring(0, indent.length - 2)}- `
+              : indent;
+          if (value.length) Logger.raw(`${thisIndent}${chalk.bold.grey(key)}:`);
           for (const item of value) {
             if (item && typeof item === 'object') {
               if (Array.isArray(item) && depth > 3)
                 Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
-              else Logger.objectRecurse(item, depth + 1, `${indent}`);
+              else Logger.objectRecurse(item, depth + 1, `${indent}  `);
             } else {
               Logger.raw(`${indent}  ${item}`);
             }
@@ -199,6 +209,7 @@ export class Logger {
           Logger.raw(`${indent}${chalk.bold.grey(key)}: ${value}`);
         }
       }
+    }
   };
   static raw: LogMethod = (content: string) => {
     if (progress.active) progress.current.interrupt(content);
@@ -222,13 +233,14 @@ export const logError: LogErrorFunc = (
 };
 
 export const progress = {
+  current: { interrupt: (x: string) => {} },
   active: false,
-  done: () => new ProgressBar('', 0),
-  colours: { green: '\u001b[42m \u001b[0m', red: '\u001b[41m \u001b[0m' },
-  current: new ProgressBar(`:bar`, {
-    complete: '=',
-    incomplete: ' ',
-    width: 20,
-    total: 100,
-  }),
+  // done: () => new ProgressBar('', 0),
+  // colours: { green: '\u001b[42m \u001b[0m', red: '\u001b[41m \u001b[0m' },
+  // current: new ProgressBar(`:bar`, {
+  //   complete: '=',
+  //   incomplete: ' ',
+  //   width: 20,
+  //   total: 100,
+  // }),
 };

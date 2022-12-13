@@ -68,6 +68,7 @@ Example call:
     });
 
   const role = set.command('role').description('update a role');
+
   role
     .command('name')
     .description('update role name')
@@ -87,8 +88,51 @@ Example call:
     });
 
   role
+    .command('description')
+    .description('update role description')
+    .argument('<"Role name" or id>', 'the existing role name or id to update')
+    .argument('<"New description">', 'the new description for the role')
+    .usage('<"Role name"> <"New description">')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > set role description "Existing role" "New role description"\n`
+    )
+    .action(async (roleNameOrId: string, description: string, opts) => {
+      await cliCommand(['set', 'role', 'description'], opts).UpdateRole(
+        roleNameOrId,
+        {
+          description,
+        }
+      );
+    });
+
+  role
+    .command('enabled')
+    .description('enable or disable a role')
+    .argument('<"Role name" or id>', 'the existing role name or id to update')
+    .usage('<"Role name"> --disabled')
+    .option('--disabled', 'disable the role', false)
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > set role enabled "Existing role"\n
+  > set role enabled "Other role" --disabled\n`
+    )
+    .action(async (roleNameOrId: string, opts) => {
+      await cliCommand(
+        ['set', 'role', opts.disabled ? 'disabled' : 'enabled'],
+        opts
+      ).UpdateRole(roleNameOrId, {
+        enabled: !opts.disabled,
+      });
+    });
+
+  role
     .command('assignments')
-    .description('update role assignments')
+    .description('assign users, groups or keys to a role')
     .argument('<"Role name" or id>', 'the role name or id to update')
     .option(
       '-users --assign-users [assign-users...]',
@@ -120,21 +164,19 @@ Example call:
 
   role
     .command('permissions')
-    .description('update role permissions')
+    .description('add entry permissions to a role')
     .argument('<"Role name" or id>', 'the role name or id to update')
     .option(
-      '-contenttype --content-type-id [content-type-id...]',
-      'the content type id to add permissions for'
+      '-contenttypes, --content-type-ids [content-type-id...]',
+      'any content type ids to add permissions for'
     )
     .option(
-      '-actions --entry-actions [entry-actions...]',
-      'the entry actions to add to the role permissions',
-      '*'
+      '--entry-actions [entry-actions...]',
+      'the entry actions to add to the role permissions'
     )
     .option(
-      '-languages --entry-languages [entry-languages...]',
-      'the entry languages to add to the role permissions',
-      '*'
+      '--entry-languages [entry-languages...]',
+      'the entry languages to add to the role permissions'
     )
     .addHelpText(
       'after',
@@ -147,10 +189,10 @@ Example call:
         roleNameOrId,
         {
           permissions: {
-            entries: opts.contentTypeId?.map((id: string) => ({
+            entries: opts.contentTypeIds?.map((id: string) => ({
               id,
-              actions: opts.entryActions,
-              languages: opts.entryLanguages,
+              actions: opts.entryActions || [],
+              languages: opts.entryLanguages || [],
             })),
           },
         }

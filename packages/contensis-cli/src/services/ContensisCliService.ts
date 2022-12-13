@@ -754,14 +754,19 @@ class ContensisCli {
 
         // print the key details to console
         console.log(
-          `  - ${key.name}${
-            key.description ? ` (${key.description})` : ''
-          } [${key.dateModified.toString().substring(0, 10)} ${key.modifiedBy}]`
+          `  - ${chalk.bold(key.name)} [${key.dateModified
+            .toString()
+            .substring(0, 10)} ${key.modifiedBy}]`
         );
-        console.log(`  - id: ${key.id}`);
-        console.log(`  - sharedSecret: ${key.sharedSecret}`);
+        if (key.description)
+          console.log(`    ${log.infoText(key.description)}`);
+        console.log(`    ${chalk.bold.grey`id`}: ${key.id}`);
+        console.log(
+          `    ${chalk.bold.grey`sharedSecret`}: ${key.sharedSecret}`
+        );
+        console.log('');
+        log.help(messages.keys.tip());
       }
-      console.log('');
 
       if (err) {
         log.error(messages.keys.failedCreate(currentEnv, name), err);
@@ -807,9 +812,10 @@ class ContensisCli {
           } of roles) {
             const color = enabled ? (s: string) => s : log.infoText;
 
-            console.log(color(`  - ${name} ${log.infoText(id)}`));
+            console.log(color(`  - ${chalk.bold(name)} ${log.infoText(id)}`));
             if (description) console.log(log.infoText(`    ${description}`));
-
+            if (enabled === false)
+              console.log(`      ${chalk.bold.grey('enabled')}: false`);
             if (assignments.groups?.length)
               console.log(
                 `      ${chalk.bold.grey('groups')}: ${assignments.groups.join(
@@ -896,6 +902,33 @@ class ContensisCli {
     }
   };
 
+  CreateRole = async (role: Partial<Role>) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      const [err, created] = await contensis.roles.CreateRole(role as Role);
+
+      if (created) {
+        log.success(
+          messages.roles.created(currentEnv, role.id || role.name || '')
+        );
+
+        this.HandleFormattingAndOutput(created, log.object);
+
+        log.help(messages.roles.tip());
+        return role.id;
+      }
+
+      if (err) {
+        log.error(
+          messages.roles.failedCreate(currentEnv, role.id || role.name || ''),
+          err
+        );
+      }
+    }
+  };
+
   UpdateRole = async (roleNameOrId: string, role: Partial<Role>) => {
     const { currentEnv, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -913,13 +946,59 @@ class ContensisCli {
             r.name.toLowerCase() === roleNameOrId.toLowerCase()
         );
         if (existingRole) {
-          const rolesService = contensis.roles.sourceRepo.roles;
+          log.info(messages.roles.setPayload());
+          log.object(role);
+          log.raw(``);
+          const [updateErr, updated] = await contensis.roles.UpdateRole(
+            existingRole.id,
+            role
+          );
+          if (updateErr)
+            log.error(messages.roles.failedSet(currentEnv, roleNameOrId));
+          else {
+            log.success(messages.roles.set());
 
-          await rolesService.UpdateRole(existingRole.id, role);
+            this.HandleFormattingAndOutput(updated, log.object);
+          }
         } else {
-          //Role not exist
+          // Role does not exist
+          log.error(messages.roles.failedGet(currentEnv, roleNameOrId));
         }
-        this.HandleFormattingAndOutput(role, log.object);
+      }
+
+      if (rolesErr) {
+        log.error(messages.roles.noList(currentEnv));
+        log.error(jsonFormatter(rolesErr));
+      }
+    }
+  };
+
+  RemoveRole = async (roleNameOrId: string) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve roles list for env
+      const [rolesErr, roles] = await to(contensis.roles.GetRoles());
+
+      if (Array.isArray(roles)) {
+        log.success(messages.roles.list(currentEnv));
+
+        const existingRole = roles.find(
+          r =>
+            r.id === roleNameOrId ||
+            r.name.toLowerCase() === roleNameOrId.toLowerCase()
+        );
+        if (existingRole) {
+          const [deleteErr] = await contensis.roles.RemoveRole(existingRole.id);
+
+          if (deleteErr)
+            log.error(messages.roles.failedRemove(currentEnv, roleNameOrId));
+          else log.success(messages.roles.removed(currentEnv, roleNameOrId));
+        } else {
+          // Role does not exist
+          log.error(messages.roles.failedGet(currentEnv, roleNameOrId));
+        }
       }
 
       if (rolesErr) {

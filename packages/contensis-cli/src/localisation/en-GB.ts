@@ -206,6 +206,8 @@ export const LogMessages = {
     noList: (env: string) => `[${env}] Cannot retrieve API keys`,
     created: (env: string, name: string) =>
       `[${env}] Created API key ${Logger.highlightText(name)}`,
+    tip: () =>
+      `Assign your new key to a role with "set role assignments", or create a new role with "create role"`,
     failedCreate: (env: string, name: string) =>
       `[${env}] Unable to create API key ${Logger.highlightText(name)}`,
     removed: (env: string, id: string) =>
@@ -214,16 +216,22 @@ export const LogMessages = {
       `[${env}] Unable to delete API key ${Logger.highlightText(id)}`,
   },
   roles: {
-    list: (env: string) => `[${env}] Retrieved roles:`,
+    list: (env: string) => `[${env}] Retrieved roles`,
     noList: (env: string) => `[${env}] Cannot retrieve roles`,
     failedGet: (env: string, name: string) =>
       `[${env}] Unable to find role ${Logger.highlightText(name)}`,
     created: (env: string, name: string) =>
       `[${env}] Created role ${Logger.highlightText(name)}`,
+    tip: () =>
+      `Give access to your role with "set role assignments", allow your role to do things with "set role permissions"`,
     failedCreate: (env: string, name: string) =>
       `[${env}] Unable to create role ${Logger.highlightText(name)}`,
+    setPayload: () => `Updating role with details\n`,
+    set: () => `Succesfully updated role\n`,
+    failedSet: (env: string, name: string) =>
+      `[${env}] Unable to update role ${Logger.highlightText(name)}`,
     removed: (env: string, id: string) =>
-      `[${env}] Deleted role ${Logger.highlightText(id)}`,
+      `[${env}] Deleted role ${Logger.highlightText(id)}\n`,
     failedRemove: (env: string, id: string) =>
       `[${env}] Unable to delete role ${Logger.highlightText(id)}`,
   },
