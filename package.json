@@ -37,7 +37,7 @@
     "prestart": "kill-port --port 3000,3001,3002",
     "start": "lerna exec --parallel --stream -- yarn start",
     "start2": "lerna run start --stream",
-    "cli": "lerna run cli -- --"
+    "cli": "npm start --prefix ./packages/contensis-cli/"
   },
   "devDependencies": {
     "kill-port": "^1.6.1",
