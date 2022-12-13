@@ -148,6 +148,7 @@ class ContensisShell {
         'get project',
         'get role',
         'get version',
+        'get webhook',
         'import contenttypes',
         'import components',
         'import entries',

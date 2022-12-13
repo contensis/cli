@@ -38,6 +38,8 @@ contensis help
 
 The CLI uses exactly the same commands as the shell. It is recommended you use and familiarise yourself with the cli by using the shell and then use the same cli commands when you need to in script-based context such as continuous integration environments.
 
+Launch the [shell](#contensis-shell) by running just the command `contensis`
+
 ### Pass connection details anywhere
 
 If you need to, you can supply all the necessary options to connect to a Contensis project and perform an operation in a single command
@@ -207,12 +209,19 @@ contensis >
   - [List keys](#list-keys)
   - [Create key](#create-key)
   - [Remove key](#remove-key)
+- [Manage roles](#manage-roles)
+  - [List roles](#list-roles)
+  - [Create role](#create-role)
+  - [Set role details](#set-role-details)
+  - [Disable role](#disable-role)
+  - [Remove role](#remove-role)
 - [Manage content Blocks](#manage-content-blocks)
   - [List blocks](#list-blocks)
   - [Get block](#get-block)
   - [Get block logs](#get-block-logs)
   - [Push a block](#push-a-block)
   - [Release a block version](#release-a-block-version)
+- [View webhook subscriptions](#view-webhook-subscriptions)
 - [Import content models](#import-content-models)
   - [Import from another Contensis environment](#import-from-another-contensis-environment)
   - [From a file](#from-a-file)
@@ -777,9 +786,12 @@ website t.durden@example-dev>
 ```shell
 website t.durden@example-dev> create key "Test key" "Key to demonstrate cli"
 [cli] ✅ [example-dev] Created API key "Test key"
-  - Test key (Key to demonstrate cli) [2022-07-27 t.durden]
-  - id: af645b8b-fa3b-4196-a1b7-ac035f7598a3
-  - sharedSecret: 1ff8b259423c4be08589a63f180c1bdc-63bd3a4f421c44c2afd0ba61e837d671-6aa9532442f149e6a9a837326a9a98e9
+  - Test key [2022-12-13 t.durden]
+    Key to demonstrate cli
+    id: 05a0922f-53e7-4a19-a92c-c9567dbe3246
+    sharedSecret: 63d2828363f74fc1958f0d60c2306aae-02e8bc50271c479f82dba92a08d3ad16-64b93a3bb8eb4f428a1dddaecc9a84d3
+
+[cli] ⏩ Assign your new key to a role with "set role assignments", or create a new role with "create role"
 
 website t.durden@example-dev>
 ```
@@ -796,6 +808,252 @@ website t.durden@example-dev>
 ```
 
 Run `list keys` again and you will see your new API key has been removed from the list of keys
+
+## Manage roles
+
+You can use the cli or shell to manage roles that are used to provide access to resources in your Contensis project
+
+### List roles
+
+```shell
+website t.durden@example-dev> list roles
+[cli] ✅ [example-dev] Retrieved roles
+  - Webinar administrators 058ad55d-bf54-4eb2-b74d-2e8ebd93a400
+      groups: System Administrators, Zengenti Marketing Team
+      users: t.turner, j.smith, s.harris
+      keys: Webinar integration
+      entries:
+        webinar: *
+        formWebinarSignUp: *
+        person: *
+        accessibleVideo: *
+  - Entry Administrators 88babee8-9d65-4bd2-93f7-735e2c016911
+    Users assigned to this role can perform all actions on all entries.
+      groups: System Administrators
+      keys: companySync, Docs import, Development, Content administrator
+      entries:
+        *: *
+  - System content syncing 0eca0043-9b91-462a-3007-c5a5b6e6d15d
+    allows background processes to sync content
+      groups: User Administrators
+      keys: Docs import, companySync, User management
+      entries:
+        *: contensisEntryBasic.*
+  - Media service 16d8947c-7571-4c31-b906-d628de8963a8
+    Create and publish media asset entries
+      keys: block-contensis-media-service
+      entries:
+        mediaAsset: *
+
+website t.durden@example-dev>
+```
+
+### Create role
+
+```shell
+website t.durden@example-dev> create role "Test role" "Role to demonstrate cli"
+[cli] ✅ [example-dev] Created role "Test role"
+
+  id: 1329b3cc-0267-480e-a115-b0beaae8fe5b
+  projectId: website
+  name: Test role
+  description: Role to demonstrate cli
+  enabled: true
+  permissions:
+    webhookSubscriptions:
+    proxies:
+    eventStreams:
+    blocks:
+    renderers:
+    views:
+  assignments:
+
+[cli] ⏩ Give access to your role with "set role assignments", allow your role to do things with "set role permissions"
+
+website t.durden@example-dev>
+```
+
+Run `list roles` again and you will see your new role added to the returned list
+
+### Set role details
+
+#### Assignments
+
+Assign users, groups or keys to your role. We will make assignments using their name or user id for users.
+
+```shell
+website t.durden@example-dev> set role assignments "Test role" --assign-keys "Test key"
+[cli] ✅ [example-dev] Retrieved roles
+[cli]  ℹ  Updating role with details
+
+  assignments:
+  - apiKeys:
+      Test key
+
+[cli] ✅ Succesfully updated role
+
+  id: 1329b3cc-0267-480e-a115-b0beaae8fe5b
+  projectId: website
+  name: Test role
+  description: Role to demonstrate cli
+  enabled: true
+  permissions:
+    webhookSubscriptions:
+    proxies:
+    eventStreams:
+    blocks:
+    renderers:
+    views:
+  assignments:
+    apiKeys:
+      Test key
+
+website t.durden@example-dev>
+```
+
+#### Permissions
+
+Set permissions to give the assignees of your role access to your project resources.
+
+We can set permissions for entries.
+
+```shell
+website t.durden@example-dev> set role permissions "Test role" --content-type-ids simpleContent linkedContent
+[cli] ✅ [example-dev] Retrieved roles
+[cli]  ℹ  Updating role with details
+
+  permissions:
+  - entries:
+      id: simpleContent
+      id: linkedContent
+
+[cli] ✅ Succesfully updated role
+
+  id: 1329b3cc-0267-480e-a115-b0beaae8fe5b
+  projectId: website
+  name: Test role
+  description: Role to demonstrate cli
+  enabled: true
+  permissions:
+    entries:
+    - languages:
+        *
+      id: simpleContent
+      actions:
+        *
+    - languages:
+        *
+      id: linkedContent
+      actions:
+        *
+    webhookSubscriptions:
+    proxies:
+    eventStreams:
+    blocks:
+    renderers:
+    views:
+  assignments:
+    apiKeys:
+      Test key
+
+website t.durden@example-dev>
+```
+
+### Disable role
+
+Disable a role by using the command `set role enabled` with the `--disabled` flag
+
+```shell
+website t.durden@example-dev> set role enabled "Test role" --disabled
+[cli] ✅ [example-dev] Retrieved roles
+[cli]  ℹ  Updating role with details
+
+  enabled: false
+
+[cli] ✅ Succesfully updated role
+
+  id: 1329b3cc-0267-480e-a115-b0beaae8fe5b
+  projectId: website
+  name: Test role
+  description: Role to demonstrate cli
+  enabled: false
+
+website t.durden@example-dev>
+```
+
+Enable the role again by calling the same command without the `--disabled` flag
+
+```shell
+website t.durden@example-dev> set role enabled "Test role"
+[cli] ✅ [example-dev] Retrieved roles
+[cli]  ℹ  Updating role with details
+
+  enabled: true
+
+[cli] ✅ Succesfully updated role
+
+  id: 1329b3cc-0267-480e-a115-b0beaae8fe5b
+  projectId: migratortron
+  name: Test role
+  description: Role to demonstrate cli
+  enabled: true
+
+website t.durden@example-dev>
+```
+
+### Remove role
+
+```shell
+website t.durden@example-dev> remove role "Test role"
+[cli] ✅ [example-dev] Retrieved roles
+[cli] ✅ [example-dev] Deleted role Test role
+
+website t.durden@example-dev>
+```
+
+Run `list roles` again and you will see your new role has been removed from the list of role
+
+## View webhook subscriptions
+
+```shell
+website t.durden@example-dev> list webhooks
+[cli] ✅ [example-dev] Webhook subscriptions:
+  - Test webhook 43969978-f9c1-4ee6-a515-11e0ceaddfeb [2022-12-13 t.durden]
+    [POST] https://webhook.site/dede53b3-f044-4640-8634-5f0061ade5c7
+    headers:
+      test: true
+      credential: 🤐
+    topics: resourceType:entry event:[created updated]
+  - More Testing 52e6bac1-1d81-462e-b483-d22034173cb4 [2022-07-15 b.feaver]
+    [POST] https://webhook.site/cd0e99b5-d658-423c-acf5-47af7dfcaa06
+    topics: resourceType:entry event:[published] contentTypeId:[blogPost]
+
+website t.durden@example-dev>
+```
+
+```shell
+website t.durden@example-dev> get webhook "Slack"
+[cli] ✅ [example-dev] Webhook subscriptions:
+  - Slack 5a8dfee1-238f-44fe-b8aa-4b932099500c [2021-07-28 g.moore]
+    Send a notification to a channel
+    [POST] https://webhook.site/5ac0d1c4-8e2e-42c2-a055-66dc7e04843a
+    topics:
+    - resourceType: entry
+      event:
+        published
+        unpublished
+      contentTypeId:
+        article
+    - resourceType: entry
+      event:
+        workflowStateChanged
+      workflowState:
+        contensisEntryApproval.awaitingApproval
+        contensisEntryApproval.declined
+    templates: entry
+
+website t.durden@example-dev>
+```
 
 ## Manage content Blocks
 
