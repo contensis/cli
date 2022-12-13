@@ -185,11 +185,9 @@ export class Logger {
     } else {
       let pos = 0;
       for (const [key, value] of Object.entries(content)) {
+        const thisIndent =
+          pos === 0 ? `${indent.substring(0, indent.length - 2)}- ` : indent;
         if (Array.isArray(value)) {
-          const thisIndent =
-            pos++ === 0
-              ? `${indent.substring(0, indent.length - 2)}- `
-              : indent;
           if (value.length) Logger.raw(`${thisIndent}${chalk.bold.grey(key)}:`);
           for (const item of value) {
             if (item && typeof item === 'object') {
@@ -206,8 +204,9 @@ export class Logger {
           Logger.objectRecurse(value, depth + 1, `${indent}  `);
           // console.table(value);
         } else if (typeof value !== 'undefined' && value !== null) {
-          Logger.raw(`${indent}${chalk.bold.grey(key)}: ${value}`);
+          Logger.raw(`${thisIndent}${chalk.bold.grey(key)}: ${value}`);
         }
+        pos++;
       }
     }
   };

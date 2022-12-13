@@ -800,6 +800,9 @@ class ContensisCli {
 
       if (Array.isArray(roles)) {
         log.success(messages.roles.list(currentEnv));
+
+        if (!roles.length) log.help(messages.roles.noneExist());
+
         this.HandleFormattingAndOutput(roles, () => {
           // print the roles to console
           for (const {
@@ -1668,10 +1671,7 @@ class ContensisCli {
     }
   };
 
-  PrintWebhookSubscriptions = async (
-    subscriptionIds?: string[],
-    name?: string
-  ) => {
+  PrintWebhookSubscriptions = async (subscriptionIdsOrNames?: string[]) => {
     const { currentEnv, log, messages } = this;
     const contensis = await this.ConnectContensis();
     if (contensis) {
@@ -1679,39 +1679,83 @@ class ContensisCli {
       const [webhooksErr, webhooks] =
         await contensis.subscriptions.webhooks.GetSubscriptions();
 
-      const filteredResults =
-        typeof name === 'string'
-          ? webhooks?.filter(w =>
-              w.name?.toLowerCase().includes(name.toLowerCase())
-            )
-          : Array.isArray(subscriptionIds)
-          ? webhooks?.filter(w => subscriptionIds?.some(id => id === w.id))
-          : webhooks;
+      const filteredResults = subscriptionIdsOrNames?.length
+        ? webhooks?.filter(
+            w =>
+              subscriptionIdsOrNames?.some(idname =>
+                w.name?.toLowerCase().includes(idname.toLowerCase())
+              ) ||
+              subscriptionIdsOrNames?.some(
+                id => id.toLowerCase() === w.id.toLowerCase()
+              )
+          )
+        : webhooks;
 
       if (Array.isArray(filteredResults)) {
-        this.HandleFormattingAndOutput(filteredResults, () => {
-          // print the keys to console
-          log.success(messages.webhooks.list(currentEnv));
-          for (const {
-            id,
-            description,
-            method,
-            name,
-            version,
-            url,
-          } of filteredResults) {
-            console.log(
-              `  - ${name}${
-                description ? ` (${description})` : ''
-              } [${version.modified.toString().substring(0, 10)} ${
-                version.modifiedBy
-              }]`
-            );
-            console.log(`      ${id}`);
-            console.log(`      [${method}] ${url}`);
-          }
-          console.log('');
-        });
+        log.success(messages.webhooks.list(currentEnv));
+        if (!webhooks?.length) log.warning(messages.webhooks.noneExist());
+        else {
+          this.HandleFormattingAndOutput(filteredResults, () => {
+            // print the keys to console
+            for (const {
+              id,
+              description,
+              method,
+              name,
+              version,
+              url,
+              enabled,
+              topics,
+              templates,
+              headers,
+            } of filteredResults) {
+              console.log(
+                log.infoText(
+                  `  ${chalk.bold.white`- ${name}`} ${id} [${(
+                    version.modified || version.created
+                  )
+                    .toString()
+                    .substring(0, 10)} ${
+                    version.modifiedBy || version.createdBy
+                  }]`
+                )
+              );
+              if (description) console.log(log.infoText`    ${description}`);
+              console.log(`    ${log.infoText`[${method}]`} ${url}`);
+              if (headers && Object.keys(headers).length) {
+                console.log(`    ${log.infoText`headers`}:`);
+
+                for (const [key, { value, secret }] of Object.entries(headers))
+                  console.log(
+                    `      ${chalk.bold.gray(key)}: ${secret ? '🤐' : value}`
+                  );
+              }
+              if (topics?.length)
+                if (topics?.length === 1)
+                  console.log(
+                    `    ${log.infoText`topics`}: ${topics
+                      .map(t => JSON.stringify(t))
+                      .join(' ')
+                      .replaceAll('"', '')
+                      .replaceAll(',', ' ')
+                      .replaceAll('{', '')
+                      .replaceAll('}', '')}`
+                  );
+                else {
+                  console.log(`    ${log.infoText`topics`}:`);
+                  log.objectRecurse(topics, 1, '    ');
+                }
+              if (templates && Object.keys(templates).length)
+                console.log(
+                  `    ${log.infoText`templates`}: ${Object.keys(
+                    templates
+                  ).join(' ')}`
+                );
+              if (enabled === false)
+                console.log(`    ${log.infoText`enabled`}: ${enabled}`);
+            }
+          });
+        }
       }
 
       if (webhooksErr) {

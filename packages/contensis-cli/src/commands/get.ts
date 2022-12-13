@@ -58,6 +58,24 @@ Example call:
     });
 
   program
+    .command('webhook')
+    .description('get a webhook')
+    .argument('<webhookNameOrId...>', 'id or name of the webhook(s) to get')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get webhook "Slack notification"
+`
+    )
+    .action(async (webhookNameOrId: string[], opts) => {
+      await cliCommand(
+        ['get', 'webhook', webhookNameOrId.join(' ')],
+        opts
+      ).PrintWebhookSubscriptions(webhookNameOrId);
+    });
+
+  program
     .command('model')
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')

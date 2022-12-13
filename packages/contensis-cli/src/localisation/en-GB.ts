@@ -218,10 +218,11 @@ export const LogMessages = {
   roles: {
     list: (env: string) => `[${env}] Retrieved roles`,
     noList: (env: string) => `[${env}] Cannot retrieve roles`,
+    noneExist: () => `Create a role with "create role"`,
     failedGet: (env: string, name: string) =>
       `[${env}] Unable to find role ${Logger.highlightText(name)}`,
     created: (env: string, name: string) =>
-      `[${env}] Created role ${Logger.highlightText(name)}`,
+      `[${env}] Created role ${Logger.highlightText(name)}\n`,
     tip: () =>
       `Give access to your role with "set role assignments", allow your role to do things with "set role permissions"`,
     failedCreate: (env: string, name: string) =>
@@ -298,6 +299,7 @@ export const LogMessages = {
   webhooks: {
     list: (env: string) => `[${env}] Webhook subscriptions:`,
     noList: (env: string) => `[${env}] Cannot retrieve webhook subscriptions`,
+    noneExist: () => `No webhook subscriptions exist`,
     created: (env: string, name: string) =>
       `[${env}] Created Webhook subscription ${Logger.highlightText(name)}`,
     failedCreate: (env: string, name: string) =>

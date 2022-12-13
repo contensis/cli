@@ -129,8 +129,7 @@ Example call:
     .addHelpText('after', `\n`)
     .action(async (name?: string, { id, ...opts }: any = {}) => {
       await cliCommand(['list', 'webhooks'], opts).PrintWebhookSubscriptions(
-        id,
-        name
+        name ? [name] : id
       );
     });
   return list;
