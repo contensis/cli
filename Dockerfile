@@ -27,7 +27,7 @@ COPY packages/contensis-cli/cli.js .
 COPY packages/contensis-cli/patches patches
 # adds almost 100MB to the container
 RUN npm install patch-package --global --prefer-offline --no-audit
-RUN npm install --prefer-offline --no-audit --production --loglevel error
+RUN npm install --audit=false --production --loglevel error
 # RUN npm run postinstall
 # copy ./dist folder from build layer
 COPY --from=build /usr/src/app/dist dist
