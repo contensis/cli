@@ -17,3 +17,8 @@ jobs:
     needs: node
     uses: ./.github/workflows/build.docker.yml
     secrets: inherit
+
+  executables:
+    name: executables
+    uses: ./.github/workflows/build.exe.yml
+    secrets: inherit
