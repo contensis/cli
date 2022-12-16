@@ -75,13 +75,13 @@ jobs:
         name: Prepare system keyring (Linux)
 
       - name: Get app version (Windows)
-        shell: pwsh
         if: ${{ matrix.os == 'windows-2019' }}
         run: |
           cd bin
           dir 
           echo "APP_VERSION=$(.\contensis-cli --version)" >> $env:GITHUB_ENV
           .\contensis-cli --version
+          exit 0
 
       - name: Get app version and make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
