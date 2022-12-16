@@ -73,21 +73,18 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         name: Prepare system keyring (Linux)
 
-      - name: List builds (Windows)
+      - name: Get app version (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
-        run: |
-          cd bin
-          ls -h
-          echo "APP_VERSION=$(./contensis-cli --version)" >> $env:GITHUB_ENV
+        run: echo "APP_VERSION=$(./contensis-cli --version)" >> $env:GITHUB_ENV
 
-      - name: Make file executable (Linux/macOS)
+      - name: Get app version and make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
         run: |
           cd bin && ls -lah
           chmod +x contensis-cli
           echo "APP_VERSION=$(./contensis-cli --version)" >> $GITHUB_ENV
 
-      - name: Run tests with executable
+      - name: Run some tests with executable
         env:
           CONTAINER_CONTEXT: 'true'
         run: |
