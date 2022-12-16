@@ -79,10 +79,6 @@ jobs:
           # Not required, but speeds up builds
           githubToken: ${{ github.token }}
 
-          # Create an artifacts directory
-          setup: |
-            mkdir -p "${PWD}/artifacts"
-
           # Mount the artifacts directory as /artifacts in the container
           dockerRunArgs: |
             --volume "${PWD}/bin:/artifacts"
@@ -90,23 +86,21 @@ jobs:
           # Pass some environment variables to the container
           env: | # YAML, but pipe character is necessary
             CONTAINER_CONTEXT: 'true'
-            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
 
           # The shell to run commands with in the container
           shell: /bin/sh
 
           # Install some dependencies in the container. This speeds up builds if
           # you are also using githubToken. Any dependencies installed here will
-          # be part of the container image that gets cached, so subsequent
-          # builds don't have to re-install them. The image layer is cached
-          # publicly in your project's package repository, so it is vital that
-          # no secrets are present in the container state or logs.
+          # be part of the container image that gets cached.
           install: |
             apt-get update -qq -y
             apt-get install -qq -y gnome-keyring \
               libsecret-1-dev \
               dbus-x11 \
-              python3-dev
+              python3-dev \
+              nodejs \
+              npm
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
@@ -118,7 +112,7 @@ jobs:
             chmod +x contensis-cli
             ./contensis-cli --version
             cp contensis-cli "/artifacts/contensis-cli-arm64"
-            echo "Produced artifact at /artifacts/${artifact_name}"
+            echo "Produced artifact at /artifacts/contensis-cli-arm64"
 
       - name: Get app version (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
