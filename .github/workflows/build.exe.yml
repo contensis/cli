@@ -11,21 +11,15 @@ env:
 jobs:
   build:
     name: ${{ matrix.friendlyName }}
-    # env:
-    #   CC: "clang"
-    #   CXX: "clang++"
-    #   npm_config_clang: "1"
 
     strategy:
       matrix:
         node-version: [18.x]
         os: [ubuntu-20.04, windows-2019, macos-latest]
-        arch: [x64]
         include:
           - os: ubuntu-20.04
             friendlyName: Ubuntu
             fileName: linux
-            arch: aarch64
           - os: windows-2019
             friendlyName: Windows
             fileName: win
@@ -55,7 +49,6 @@ jobs:
       - name: Setup os specific environment
         run: |
           yarn run bootstrap
-          yarn run build
 
       - run: |
           yarn run build
@@ -75,6 +68,74 @@ jobs:
           python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         name: Prepare system keyring (Linux)
+
+      - uses: uraimo/run-on-arch-action@v2
+        name: Build arm64 version (Linux)
+        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        with:
+          arch: aarch64
+          distro: ${{ matrix.os }}
+
+          # Not required, but speeds up builds
+          githubToken: ${{ github.token }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/bin:/artifacts"
+
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            CONTAINER_CONTEXT: 'true'
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+
+          # The shell to run commands with in the container
+          shell: /bin/sh
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            case "${{ matrix.distro }}" in
+              ubuntu*|jessie|stretch|buster|bullseye)
+                apt-get update -q -y
+                apt-get install -q -y gnome-keyring \
+                               libsecret-1-dev \
+                               dbus-x11 \
+                               python3-dev
+                ;;
+              fedora*)
+                dnf -y update
+                dnf -y install git gnome-keyring \
+                               libsecret-1-dev \
+                               dbus-x11 \
+                               python3-dev
+                ;;
+              alpine*)
+                apk update
+                apk add gnome-keyring \
+                               libsecret-1-dev \
+                               dbus-x11 \
+                               python3-dev
+                ;;
+            esac
+
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            yarn run bootstrap
+            yarn run build
+            yarn run build:exe
+            cd bin && ls -lah
+            chmod +x contensis-cli
+            ./contensis-cli --version
+            cp contensis-cli "/artifacts/contensis-cli-arm64"
+            echo "Produced artifact at /artifacts/${artifact_name}"
 
       - name: Get app version (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
@@ -104,5 +165,5 @@ jobs:
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}${{ matrix.arch }}
+          name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
           path: bin/contensis-cli*
