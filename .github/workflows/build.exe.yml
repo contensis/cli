@@ -92,10 +92,10 @@ jobs:
           ./contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli get entries
-          echo "APP_VERSION=$(node --eval="process.stdout.write(require('../packages/contensis-cli/package.json').version)")" >> $GITHUB_ENV
+          echo "APP_VERSION=$(./contensis-cli --version)" >> $GITHUB_ENV
 
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
           name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
-          path: bin/*
+          path: bin/contensis-cli*
