@@ -52,7 +52,6 @@ jobs:
 
       - name: Setup os specific environment
         run: |
-          yarn cache clean --mirror
           yarn run bootstrap
           yarn run build
 
@@ -81,7 +80,7 @@ jobs:
           cd bin
           dir
           .\contensis-cli --version | Tee-Object -Variable APP_VERSION
-          echo "APP_VERSION=$APP_VERSION" >> $env:GITHUB_ENV
+          echo "APP_VERSION=$APP_VERSION"
 
       - name: Get app version and make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}

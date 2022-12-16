@@ -20,8 +20,7 @@ jobs:
       - name: Install dependencies, build and package
         if: "!contains(github.event.head_commit.message, '[nobuild]')"
         run: |
-          yarn cache clean --mirror
-          yarn run bootstrap:ci
+          yarn run bootstrap
           yarn run build
           cd packages/contensis-cli
           npm pack
