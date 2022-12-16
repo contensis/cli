@@ -38,7 +38,7 @@ jobs:
           if [[ "$BUILDER_IMAGE_ARG" != "" && -n "$(docker pull $LATEST_IMAGE || echo "")" ]]; then APP_IMAGE_ARG=$LATEST_IMAGE; echo "App image exists: $APP_IMAGE_ARG"; fi
           echo "Using build args: \$BUILDER_IMAGE_ARG ${BUILDER_IMAGE_ARG:=$BUILDER_BASE} \$APP_IMAGE_ARG ${APP_IMAGE_ARG:=$APP_BASE}"
           docker build -t $BUILDER_IMAGE --cache-from $BUILDER_IMAGE --build-arg builder_image=${BUILDER_IMAGE_ARG:=$BUILDER_BASE} --target prepare -f Dockerfile .
-          docker build -t $LATEST_IMAGE -t $BUILD_IMAGE --cache-from $LATEST_IMAGE --build-arg app_image=${APP_IMAGE_ARG:=$APP_BASE} --build-arg builder_image=$BUILDER_IMAGE -f Dockerfile .
+          docker build -t $LATEST_IMAGE -t $BUILD_IMAGE --cache-from ${APP_IMAGE_ARG:=$APP_BASE} --build-arg app_image=$APP_BASE --build-arg builder_image=$BUILDER_IMAGE -f Dockerfile .
           docker push --all-tags ${{ env.APP_IMAGE }}
           echo "image-uri=$BUILD_IMAGE" >> $GITHUB_OUTPUT
 
