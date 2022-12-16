@@ -84,7 +84,9 @@ jobs:
           cd bin && ls -lah
           chmod +x contensis-cli
 
-      - name: Run tests with executable (all OS)
+      - name: Run tests with executable
+        env:
+          CONTAINER_CONTEXT: 'true'
         run: |
           cd bin
           ./contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
