@@ -23,7 +23,9 @@ rimraf('./dist', () => {
       platform: 'node',
       format: 'cjs',
       sourcemap: true,
-      target: 'node16',
+      // needs to be node12 to transform dynamic imports into requires
+      // so the bundles are compatible with the pkg exe builds
+      target: 'node12',
       plugins: [globPlugin(), nodeExternalsPlugin()],
       watch: watch && {
         onRebuild(error) {
