@@ -17,3 +17,7 @@ To run commands in CLI
 To start the Contensis shell to run commands
 
 - `npm start`
+
+or do this from the root folder with
+
+- `yarn run cli`
