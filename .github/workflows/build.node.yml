@@ -41,9 +41,7 @@ jobs:
 
       - name: Increment package version
         if: "!contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')"
-        # cp is a hack to allow patch-package to find the required package to patch
         run: |
-          cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
           cd packages/contensis-cli
           npm version prerelease --preid=beta --no-git-tag-version
           npm run build

@@ -102,29 +102,11 @@ jobs:
           # publicly in your project's package repository, so it is vital that
           # no secrets are present in the container state or logs.
           install: |
-            case "${{ matrix.distro }}" in
-              ubuntu*|jessie|stretch|buster|bullseye)
-                apt-get update -q -y
-                apt-get install -q -y gnome-keyring \
-                               libsecret-1-dev \
-                               dbus-x11 \
-                               python3-dev
-                ;;
-              fedora*)
-                dnf -y update
-                dnf -y install git gnome-keyring \
-                               libsecret-1-dev \
-                               dbus-x11 \
-                               python3-dev
-                ;;
-              alpine*)
-                apk update
-                apk add gnome-keyring \
-                               libsecret-1-dev \
-                               dbus-x11 \
-                               python3-dev
-                ;;
-            esac
+            apt-get update -q -y
+            apt-get install -q -y gnome-keyring \
+              libsecret-1-dev \
+              dbus-x11 \
+              python3-dev
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
