@@ -67,7 +67,7 @@ jobs:
           pip3 install keyring
           echo "Prepare D-Bus session..."
           eval $(dbus-launch --sh-syntax);
-          eval $(echo 'somecredstorepass' | gnome-keyring-daemon --unlock)
+          eval $(echo 'somecredstorepass' | gnome-keyring-daemon -r -d --unlock)
           echo "Create a test key using script..."
           python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
         if: ${{ matrix.os == 'ubuntu-20.04' }}
