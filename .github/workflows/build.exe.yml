@@ -102,14 +102,15 @@ jobs:
           # publicly in your project's package repository, so it is vital that
           # no secrets are present in the container state or logs.
           install: |
-            apt-get update -q -y
-            apt-get install -q -y gnome-keyring \
+            apt-get update -qq -y
+            apt-get install -qq -y gnome-keyring \
               libsecret-1-dev \
               dbus-x11 \
               python3-dev
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
+            npm i -g yarn
             yarn run bootstrap
             yarn run build
             yarn run build:exe
