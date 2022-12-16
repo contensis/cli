@@ -20,10 +20,12 @@ jobs:
       matrix:
         node-version: [18.x]
         os: [ubuntu-20.04, windows-2019, macos-latest]
+        arch: [x64]
         include:
           - os: ubuntu-20.04
             friendlyName: Ubuntu
             fileName: linux
+            arch: aarch64
           - os: windows-2019
             friendlyName: Windows
             fileName: win
@@ -102,5 +104,5 @@ jobs:
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
+          name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}${{ matrix.arch }}
           path: bin/contensis-cli*

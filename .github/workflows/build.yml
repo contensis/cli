@@ -20,5 +20,6 @@ jobs:
 
   executables:
     name: executables
+    needs: node
     uses: ./.github/workflows/build.exe.yml
     secrets: inherit
