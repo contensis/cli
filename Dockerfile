@@ -1,5 +1,5 @@
-ARG app_image
-ARG builder_image
+ARG app_image=node:18-alpine
+ARG builder_image=node:18-alpine
 FROM ${builder_image} AS prepare
 
 # RUN apk add --no-cache libsecret-dev
@@ -29,6 +29,12 @@ COPY packages/contensis-cli/patches patches
 RUN npm install patch-package --global --prefer-offline --no-audit
 RUN npm install --audit=false --production --loglevel error
 # RUN npm run postinstall
+
+FROM ${app_image} AS app
+WORKDIR /usr/src/app
+RUN apk add jq -q
+# copy ./app folder from final layer
+COPY --from=final /usr/src/app .
 # copy ./dist folder from build layer
 COPY --from=build /usr/src/app/dist dist
 # npx link will create the npm binaries in /node_modules/.bin
