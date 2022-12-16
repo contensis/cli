@@ -77,12 +77,14 @@ jobs:
         if: ${{ matrix.os == 'windows-2019' }}
         run: |
           cd bin && ls -h
+          echo "APP_VERSION=$(./contensis-cli --version)" >> $env:GITHUB_ENV
 
       - name: Make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
         run: |
           cd bin && ls -lah
           chmod +x contensis-cli
+          echo "APP_VERSION=$(./contensis-cli --version)" >> $GITHUB_ENV
 
       - name: Run tests with executable
         env:
@@ -92,7 +94,6 @@ jobs:
           ./contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli get entries
-          echo "APP_VERSION=$(./contensis-cli --version)" >> $GITHUB_ENV
 
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
