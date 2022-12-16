@@ -66,8 +66,10 @@ jobs:
           pip3 install --upgrade pip
           pip3 install keyring
           echo "Prepare D-Bus session..."
-          eval $(dbus-launch --sh-syntax);
-          eval $(echo 'somecredstorepass' | gnome-keyring-daemon -r -d --unlock)
+          export $(dbus-launch)
+          dbus-launch
+          gnome-keyring-daemon --start --daemonize --components=secrets
+          echo 'neil' | gnome-keyring-daemon -r -d --unlock
           echo "Create a test key using script..."
           python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
         if: ${{ matrix.os == 'ubuntu-20.04' }}
@@ -76,8 +78,10 @@ jobs:
       - name: Get app version (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
         run: |
+          cd bin
+          dir
+          .\contensis-cli --version
           $APP_VERSION=.\bin\contensis-cli --version
-          echo "APP_VERSION=$APP_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Get app version and make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
