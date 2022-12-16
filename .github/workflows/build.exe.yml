@@ -81,7 +81,7 @@ jobs:
           cd bin
           dir
           .\contensis-cli --version
-          $APP_VERSION=.\bin\contensis-cli --version
+          $APP_VERSION=.\contensis-cli --version
 
       - name: Get app version and make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
