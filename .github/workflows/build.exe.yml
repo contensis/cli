@@ -53,7 +53,7 @@ jobs:
       - name: Setup os specific environment
         run: |
           yarn cache clean --mirror
-          yarn run bootstrap:ci
+          yarn run bootstrap
           yarn run build
 
       - run: |
