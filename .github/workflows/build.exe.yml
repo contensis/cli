@@ -76,7 +76,8 @@ jobs:
       - name: List builds (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
         run: |
-          cd bin && ls -h
+          cd bin
+          ls -h
           echo "APP_VERSION=$(./contensis-cli --version)" >> $env:GITHUB_ENV
 
       - name: Make file executable (Linux/macOS)
