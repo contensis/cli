@@ -80,8 +80,8 @@ jobs:
         run: |
           cd bin
           dir
-          .\contensis-cli --version
-          $APP_VERSION=.\contensis-cli --version
+          .\contensis-cli --version | Tee-Object -Variable APP_VERSION
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
       - name: Get app version and make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
