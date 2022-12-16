@@ -8,7 +8,7 @@
     ],
     "nohoist": [
       "**/app-root-path",
-      "**/app-root-path/**"
+      "**/inquirer-command-prompt"
     ]
   },
   "main": "packages/contensis-cli/dist/index.js",
