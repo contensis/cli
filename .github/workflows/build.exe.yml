@@ -23,18 +23,22 @@ jobs:
         include:
           - os: ubuntu-20.04
             friendlyName: Ubuntu
+            fileName: linux
           - os: windows-2019
             friendlyName: Windows
+            fileName: win
           - os: macos-latest
             friendlyName: macOS
+            fileName: mac
 
     runs-on: ${{ matrix.os }}
     continue-on-error: true
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -86,9 +90,10 @@ jobs:
           ./contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli get entries
+          echo "APP_VERSION=$(node --eval="process.stdout.write(require('../packages/contensis-cli/package.json').version)")" >> $GITHUB_ENV
 
-      - name: Upload prebuilds to GitHub
-        run: npm run upload
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-        env:
-          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Archive packaged artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
+          path: bin/*
