@@ -77,9 +77,9 @@ jobs:
       - name: Get app version (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
         run: |
-          cd bin
-          dir
-          .\contensis-cli --version | Tee-Object -Variable APP_VERSION
+          cd bin &&
+          dir &&
+          .\contensis-cli --version | Tee-Object -Variable APP_VERSION &&
           echo "APP_VERSION=$APP_VERSION"
 
       - name: Get app version and make file executable (Linux/macOS)
