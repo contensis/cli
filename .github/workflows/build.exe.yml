@@ -78,7 +78,7 @@ jobs:
         if: ${{ matrix.os != 'windows-2019' }}
         run: |
           cd bin && ls -lah
-          chmod +x bin/contensis-cli
+          chmod +x contensis-cli
 
       - name: Run tests with executable (all OS)
         run: |
