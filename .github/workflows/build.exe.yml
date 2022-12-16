@@ -76,8 +76,8 @@ jobs:
       - name: Get app version (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
         run: |
-          $env:APP_VERSION=./bin/contensis-cli --version
-          echo "APP_VERSION=$env:APP_VERSION" >> $env:GITHUB_ENV
+          $APP_VERSION=./bin/contensis-cli --version
+          echo "APP_VERSION=$APP_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Get app version and make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
