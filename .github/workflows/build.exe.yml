@@ -81,6 +81,7 @@ jobs:
 
     - name: Run tests (Windows/macOS)
       run: |
+        cd bin && ls -lah
         contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
         contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
         contensis-cli get entries
