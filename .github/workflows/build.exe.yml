@@ -69,21 +69,23 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         name: Prepare system keyring (Linux)
 
-      - name: List builds
+      - name: List builds (Windows)
+        if: ${{ matrix.os = 'windows-2019' }}
         run: |
-          cd bin && ls -lah
+          cd bin && ls -h
 
       - name: Make file executable (Linux/macOS)
         if: ${{ matrix.os != 'windows-2019' }}
         run: |
+          cd bin && ls -lah
           chmod +x bin/contensis-cli
 
       - name: Run tests with executable (all OS)
         run: |
-          cd bin && ls -lah
-          contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
-          contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
-          contensis-cli get entries
+          cd bin
+          ./contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
+          ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
+          ./contensis-cli get entries
 
       - name: Upload prebuilds to GitHub
         run: npm run upload
