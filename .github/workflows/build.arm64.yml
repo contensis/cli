@@ -55,7 +55,8 @@ jobs:
               libsecret-1-dev \
               dbus-x11 \
               python3-dev \
-              yarn
+              yarn \
+              npm
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
