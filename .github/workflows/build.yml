@@ -18,10 +18,10 @@ jobs:
     uses: ./.github/workflows/build.docker.yml
     secrets: inherit
 
-  executables:
-    name: executables
+  x64:
+    name: x64
     needs: node
-    uses: ./.github/workflows/build.exe.yml
+    uses: ./.github/workflows/build.amd64.yml
     secrets: inherit
 
   arm64:

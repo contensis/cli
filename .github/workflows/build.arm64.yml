@@ -47,10 +47,10 @@ jobs:
           # you are also using githubToken. Any dependencies installed here will
           # be part of the container image that gets cached.
           install: |
-            apt-get update -yq && apt-get install -qq -y curl
+            apt-get update -yq && apt-get -qq -y install gnupg curl
             curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-            apt-get update -qq -y
+            apt-get -qq -y update
             apt-get install -qq -y gnome-keyring \
               libsecret-1-dev \
               dbus-x11 \
