@@ -2,6 +2,14 @@
 # yarn lockfile v1
 
 
+"@angablue/exe@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@angablue/exe/-/exe-1.2.0.tgz#e705a1c0de528b5d8de2952364b91e6c596338bb"
+  integrity sha512-Aiug/3Cpbm5iORswb7/r/s1t3o2zfvBkaiPRqXV1wLLFOnG6GJrwCTRJQ7VWxd+PvbIbFGFzvJAX87AXlrN9sw==
+  dependencies:
+    pkg "^5.8.0"
+    resedit "^1.6.0"
+
 "@babel/code-frame@7.12.11":
   version "7.12.11"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.12.11.tgz#f4ad435aa263db935b8f10f2c552d23fb716a63f"
@@ -5399,6 +5407,11 @@ pause-stream@0.0.11:
   dependencies:
     through "~2.3"
 
+pe-library@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/pe-library/-/pe-library-0.3.0.tgz#7b29c024b83c701d6c5c3759664340255fec70bf"
+  integrity sha512-mMVGKfeI6VOLqMOCiLaU4KNd4cgk8YcQVvJ07YIA6iujM4uKOgmDsmIp1qsKWEHt8cMoizVGFniQUrtN6pjtJA==
+
 performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/performance-now/-/performance-now-2.1.0.tgz"
@@ -5898,6 +5911,13 @@ require-from-string@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/require-from-string/-/require-from-string-2.0.2.tgz#89a7fdd938261267318eafe14f9c32e598c36909"
   integrity sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==
+
+resedit@^1.6.0:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/resedit/-/resedit-1.6.1.tgz#bce8e608ee3997beb584488ae621e78a18b5d274"
+  integrity sha512-aS+1B01OtDgLHBeiR8pfJWt02LBfkceA1So1ODOaD651zcXP05yCsCe6YtgS8uSD4jnCXtptSjaRM7nd/gohtQ==
+  dependencies:
+    pe-library "^0.3.0"
 
 resolve-cwd@^3.0.0:
   version "3.0.0"

@@ -45,11 +45,7 @@ jobs:
       - name: Setup os specific environment
         run: |
           yarn run bootstrap
-
-      - run: |
           yarn run build
-          yarn run build:exe
-        name: Build module and executable from native sources
 
       - run: |
           echo "Install keyring..."
@@ -65,18 +61,20 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         name: Prepare system keyring (Linux)
 
-      - name: Get app version (Windows)
+      - name: Build Windows executable and get app version
         if: ${{ matrix.os == 'windows-2019' }}
         run: |
+          yarn run build:exe:win
           cd bin
           dir 
-          echo "APP_VERSION=$(.\contensis-cli --version)" >> $env:GITHUB_ENV
           .\contensis-cli --version
+          echo "APP_VERSION=$(.\contensis-cli --version)" >> $env:GITHUB_ENV
           exit 0
 
-      - name: Get app version and make file executable (Linux/macOS)
+      - name: Build Linux/macOS executable from os native sources and get app version
         if: ${{ matrix.os != 'windows-2019' }}
         run: |
+          yarn run build:exe
           cd bin && ls -lah
           chmod +x contensis-cli
           echo "APP_VERSION=$(./contensis-cli --version)" >> $GITHUB_ENV
