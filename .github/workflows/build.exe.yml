@@ -4,10 +4,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  APP_IMAGE: ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app
-
 jobs:
   build:
     name: ${{ matrix.friendlyName }}
@@ -68,51 +64,6 @@ jobs:
           python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         name: Prepare system keyring (Linux)
-
-      - uses: uraimo/run-on-arch-action@v2
-        name: Build arm64 version (Linux)
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
-        with:
-          arch: aarch64
-          distro: ubuntu20.04
-
-          # Not required, but speeds up builds
-          githubToken: ${{ github.token }}
-
-          # Mount the artifacts directory as /artifacts in the container
-          dockerRunArgs: |
-            --volume "${PWD}/bin:/artifacts"
-
-          # Pass some environment variables to the container
-          env: | # YAML, but pipe character is necessary
-            CONTAINER_CONTEXT: 'true'
-
-          # The shell to run commands with in the container
-          shell: /bin/sh
-
-          # Install some dependencies in the container. This speeds up builds if
-          # you are also using githubToken. Any dependencies installed here will
-          # be part of the container image that gets cached.
-          install: |
-            apt-get update -qq -y
-            apt-get install -qq -y gnome-keyring \
-              libsecret-1-dev \
-              dbus-x11 \
-              python3-dev \
-              nodejs \
-              npm
-
-          # Produce a binary artifact and place it in the mounted volume
-          run: |
-            npm i -g yarn
-            yarn run bootstrap
-            yarn run build
-            yarn run build:exe
-            cd bin && ls -lah
-            chmod +x contensis-cli
-            ./contensis-cli --version
-            cp contensis-cli "/artifacts/contensis-cli-arm64"
-            echo "Produced artifact at /artifacts/contensis-cli-arm64"
 
       - name: Get app version (Windows)
         if: ${{ matrix.os == 'windows-2019' }}
