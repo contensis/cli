@@ -1,0 +1,9 @@
+﻿VERIFICATION
+Verification is intended to assist the Chocolatey moderators and community
+in verifying that this package's contents are trustworthy.
+
+Go to https://github.com/contensis/node-cli/releases to download any release yourself
+
+LICENSE
+
+https://raw.githubusercontent.com/contensis/node-cli/main/LICENSE

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <!-- == PACKAGE SPECIFIC SECTION == -->
+    <id>contensis-cli</id>
+    <version>1.0.0-beta</version>
+    <packageSourceUrl>https://github.com/contensis/node-cli</packageSourceUrl>
+    <owners>Zengenti</owners>
+    <!-- == SOFTWARE SPECIFIC SECTION == -->
+    <title>contensis-cli (Install)</title>
+    <authors>Zengenti</authors>
+    <projectUrl>https://github.com/contensis/node-cli</projectUrl>
+    <iconUrl>https://github.com/contensis/node-cli/raw/main/assets/icon.ico</iconUrl>
+    <copyright>2022</copyright>
+    <projectSourceUrl>https://github.com/contensis/node-cli</projectSourceUrl>
+    <docsUrl>https://github.com/contensis/node-cli/blob/main/packages/contensis-cli/README.md</docsUrl>
+    <bugTrackerUrl>https://github.com/contensis/node-cli/issues</bugTrackerUrl>
+    <tags>contensis cli cms content management migration</tags>
+    <summary>A fully featured Contensis command line interface</summary>
+    <description>A fully featured Contensis command line interface with a shell UI provides simple and intuitive ways to manage or profile your content in your favourity terminal.</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
