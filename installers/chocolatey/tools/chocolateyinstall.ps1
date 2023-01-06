@@ -22,7 +22,10 @@ $packageArgs = @{
 }
 
 # Download release binary for embedded choco install from GitHub with script
-.\tools\install-cli.ps1 $fileLocation -preRelease $true
+Write-Host "Installing contensis-cli with script $toolsDir\install-cli.ps1"
+& $toolsDir\install-cli.ps1 $fileLocation -preRelease $true
+
+# Create aliases and install them to chocolatey\bin so they are in $PATH
 Install-BinFile -Name 'contensis' -Path $fileLocation
 Install-BinFile -Name 'contensis-cli' -Path $fileLocation
 

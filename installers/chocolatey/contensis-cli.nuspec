@@ -4,7 +4,7 @@
   <metadata>
     <!-- == PACKAGE SPECIFIC SECTION == -->
     <id>contensis-cli</id>
-    <version>1.0.0-beta</version>
+    <version>1.0.0-beta_65</version>
     <packageSourceUrl>https://github.com/contensis/node-cli</packageSourceUrl>
     <owners>Zengenti</owners>
     <!-- == SOFTWARE SPECIFIC SECTION == -->
