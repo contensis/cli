@@ -2,21 +2,54 @@
 
 Use Contensis from your favourite terminal
 
-Install the package via `npm` as a global module (requires NodeJS)
+Download the executable for your operating system from the [Releases page](https://github.com/contensis/node-cli/releases) and add it to a folder in your local `PATH`
+
+or use your preferred installation method below
+
+## Install with package manager
+
+### Windows ([Chocolatey](https://chocolatey.org/install))
+
+```shell
+choco install contensis-cli --pre
+```
+
+- [Choco package docs and source](https://github.com/contensis/node-cli/tree/main/installers/chocolatey)
+- [Contensis CLI on the Chocolatey Community Repository](https://community.chocolatey.org/packages/contensis-cli)
+
+### Mac ([Homebrew](https://docs.brew.sh/Installation))
+
+```shell
+brew tap contensis/cli
+brew install contensis-cli
+```
+
+- [Homebrew tap on GitHub](https://github.com/contensis/homebrew-cli)
+
+### Linux ([Homebrew](https://docs.brew.sh/Homebrew-on-Linux))
+
+```shell
+brew tap contensis/cli
+brew install contensis-cli-linux
+```
+
+- [Homebrew tap on GitHub](https://github.com/contensis/homebrew-cli)
+
+## Install as Node.js global module
+
+Install the package via [`npm`](https://www.npmjs.com/package/contensis-cli) as a global module (requires [Node.js](https://nodejs.org/en/download/))
 
 ```shell
 npm i contensis-cli@preprelease --global
 ```
 
-If you use `nvm` and are frequently switching your local `Node JS` version, use one of the pre-built binaries.
+If you use `nvm` and are frequently switching your local `node` version it will also switch your global `node_modules` each time, it is recommended use one of the binary installations instead.
 
-- Windows users: `choco install contensis-cli --pre`
-- Mac users: `brew tap contensis/cli` then `brew install contensis-cli`
-- Linux users: `brew tap contensis/cli` then `brew install contensis-cli-linux`
+## Install from source
 
-Alternatively, download the executable for your operating system from the [Releases page](https://github.com/contensis/node-cli/releases) and add it to a folder in your local `PATH`
+Clone the [repository](https://github.com/contensis/node-cli) and follow the instructions in the [`README`](https://github.com/contensis/node-cli#readme)
 
-## Skip to section
+# Skip to section
 
 - [Contensis Shell](#contensis-shell)
 - [Use in Terminal](#cli-usage)
@@ -226,14 +259,19 @@ contensis >
   - [Get block](#get-block)
   - [Get block logs](#get-block-logs)
   - [Push a block](#push-a-block)
-  - [Release a block version](#release-a-block-version)
+  - [Execute block actions](#execute-block-actions)
+    - [Release a block version](#release-a-block-version)
+    - [Make a block version live](#make-a-block-version-live)
+    - [Mark a block version as broken](#mark-a-block-version-as-broken)
+    - [Rollback a live block version](#rollback-a-live-block-version)
 - [View webhook subscriptions](#view-webhook-subscriptions)
 - [Import content models](#import-content-models)
   - [Import from another Contensis environment](#import-from-another-contensis-environment)
   - [From a file](#from-a-file)
 - [Import entries](#import-entries)
   - [Import from another Contensis environment](#import-from-another-contensis-environment-1)
-  - [Import from a file](#import-from-a-file)
+  - [Import from a file](#import-from-a-file-1)
+  - [Import entries further reading](#import-entries-further-reading)
 - [Remove entries](#remove-entries)
 
 ## Get started
@@ -1108,6 +1146,9 @@ website t.durden@example-dev> get block simple-block master
 website t.durden@example-dev>
 ```
 
+> **Tip**
+> Add a version number or `latest` to the end of your `get block {block-id} {branch} {version}` command to output a complete set of details for that block version
+
 ### Get block logs
 
 ```shell
@@ -1138,9 +1179,13 @@ website t.durden@example-dev> push block cli-test-block ghcr.io/contensis/conten
 website t.durden@example-dev>
 ```
 
-### Release a block version
+### Execute block actions
 
-First get the latest block version number
+We can perform certain actions on a specific version of a block with the `execute block action` command
+
+#### Release a block version
+
+To mark a block version as "released", first get the latest block version number
 
 ```shell
 website t.durden@example-dev>get block contensis-website master latest
@@ -1170,11 +1215,11 @@ website t.durden@example-dev>get block contensis-website master latest
 website t.durden@example-dev>
 ```
 
-Add the block version number to the `release block` command
+Add the block version number to the `execute block action release {block-id} {version}` command
 
 ```shell
 
-website t.durden@example-dev> release block contensis-website 78
+website t.durden@example-dev> execute block action release contensis-website 78
 [cli] ✅ [example-dev] Released block contensis-website in project website
   v78 contensis-website
     state: available
@@ -1201,15 +1246,41 @@ website t.durden@example-dev> release block contensis-website 78
 website t.durden@example-dev>
 ```
 
+#### Make a block version live
+
+Follow the examples for [releasing a block version](#release-a-block-version) except target your command to this action
+
+```shell
+execute block action makelive {block-id} {version}
+```
+
+#### Mark a block version as broken
+
+Follow the examples for [releasing a block version](#release-a-block-version) except target your command to this action
+
+```shell
+execute block action markasbroken {block-id} {version}
+```
+
+#### Rollback a live block version
+
+Follow the examples for [releasing a block version](#release-a-block-version) except target your command to this action
+
+```shell
+execute block action rollback {block-id} {version}
+```
+
 ## Import content models
-
-Connect to your "source" environment first, ensure you can fetch the models and these models contain the dependencies you plan on importing from here with the `get model` command. Add the `--dependents` option to fetch all of the entries that will eventually be imported.
-
-When you are happy your models contain the right dependencies for your import, connect to the "target" environment (and project) then use the same arguments as before except with the `import entries` command
 
 ### Import from another Contensis environment
 
-Specify a list of models to import
+Connect to your "source" environment, ensure you can fetch the models from this environment first and that these models contain the dependencies you plan on importing to your "target" environment.
+
+Check that the right assets will eventually be imported with the `list models` or `get model {modelIds...}` command
+
+When you are happy the expected models are being returned for your import, you should then `connect` to your "target" environment (and `set project`) and when we are successfully connected to our target project, call the `import models` command, ensuring you add any arguments you used with your `get model` check earlier.
+
+#### Specify a list of models to import
 
 ```shell
 website t.durden@example-dev> import models plant --source-alias example-dev --source-project-id leif
@@ -1248,7 +1319,7 @@ Components:
 website t.durden@example-dev>
 ```
 
-Or import every model from the source
+#### Import all models from the source project
 
 ```shell
 website t.durden@example-dev> import models --source-alias example-dev --source-project-id leif
@@ -1379,16 +1450,11 @@ website t.durden@example-dev>
 website t.durden@example-dev> import models --from-file ./content-models.json
 ```
 
-The output will be the same as the previous command
+The output will be the same as the `import models` examples above
 
 <sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
 
 ## Import entries
-
-The import commands are made possible by using the `migratortron` library. There is further documentation here:
-
-- [`migratortron` on npmjs](https://www.npmjs.com/package/migratortron)
-- [`contensis-importer` on npmjs](https://www.npmjs.com/package/contensis-importer)
 
 ### Import from another Contensis environment
 
@@ -1522,6 +1588,13 @@ website t.durden@example-dev> import entries --preserve-guids --from-file ./cont
 The output will be the same as the previous command
 
 <sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
+
+### Import entries further reading
+
+The import commands are made possible by using the `migratortron` library. There is further documentation here:
+
+- [`migratortron` on npmjs](https://www.npmjs.com/package/migratortron)
+- [`contensis-importer` on npmjs](https://www.npmjs.com/package/contensis-importer)
 
 ## Remove entries
 

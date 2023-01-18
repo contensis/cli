@@ -20,6 +20,7 @@ import {
   ContentTypesResult,
   Model,
   MigrateModelsResult,
+  BlockActionType,
 } from 'migratortron';
 import { Entry, Role } from 'contensis-management-api/lib/models';
 
@@ -1901,14 +1902,18 @@ class ContensisCli {
     }
   };
 
-  ReleaseBlock = async (blockId: string, version: string) => {
+  ExecuteBlockAction = async (
+    action: BlockActionType,
+    blockId: string,
+    version: string
+  ) => {
     const { currentEnv, env, log, messages } = this;
     const contensis = await this.ConnectContensis();
     if (contensis) {
-      // Retrieve block version
+      // Execute block action
       const [err, blockVersion] = await contensis.blocks.BlockAction(
         blockId,
-        'release',
+        action,
         version
       );
 
@@ -1916,7 +1921,12 @@ class ContensisCli {
         this.HandleFormattingAndOutput(blockVersion, () => {
           // print the version detail to console
           log.success(
-            messages.blocks.released(blockId, currentEnv, env.currentProject)
+            messages.blocks.actionComplete(
+              action,
+              blockId,
+              currentEnv,
+              env.currentProject
+            )
           );
           printBlockVersion(this, blockVersion);
         });
@@ -1924,7 +1934,12 @@ class ContensisCli {
 
       if (err) {
         log.error(
-          messages.blocks.failedRelease(blockId, currentEnv, env.currentProject)
+          messages.blocks.actionFailed(
+            action,
+            blockId,
+            currentEnv,
+            env.currentProject
+          )
         );
         log.error(jsonFormatter(err));
       }

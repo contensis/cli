@@ -54,7 +54,10 @@
     }
   },
   "workbench.editor.highlightModifiedTabs": true,
-  "git.autofetch": true
+  "git.autofetch": true,
+  "files.associations": {
+    "*.yaml": "home-assistant"
+  }
 
   // "workbench.colorCustomizations": {
   //   "tab.activeBorderTop": "#e9654c",

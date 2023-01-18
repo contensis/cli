@@ -4,6 +4,7 @@ import { LIB_VERSION } from '~/version';
 import { makeConnectCommand } from './connect';
 import { makeCreateCommand } from './create';
 import { makeDiffCommand } from './diff';
+import { makeExecuteCommand } from './execute';
 import { makeGetCommand } from './get';
 import {
   addAuthenticationOptions,
@@ -16,7 +17,6 @@ import { makeImportCommand } from './import';
 import { makeListCommand } from './list';
 import { makeLoginCommand } from './login';
 import { makePushCommand } from './push';
-import { makeReleaseCommand } from './release';
 import { makeRemoveCommand } from './remove';
 import { makeSetCommand } from './set';
 
@@ -31,6 +31,13 @@ const commands = () => {
           : str.trim() && Logger.help(str);
       },
     })
+    .addHelpText(
+      'after',
+      Logger.helpText`
+>> Each command has its own help - for example:
+  > login --help\n  > get --help
+`
+    )
     .exitOverride()
     .showHelpAfterError(true);
 
@@ -41,6 +48,9 @@ const commands = () => {
   );
   program.addCommand(
     addGlobalOptions(makeCreateCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addGlobalOptions(makeExecuteCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(
@@ -63,9 +73,6 @@ const commands = () => {
   );
   program.addCommand(
     addGlobalOptions(makePushCommand()).copyInheritedSettings(program)
-  );
-  program.addCommand(
-    addGlobalOptions(makeReleaseCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(makeRemoveCommand()).copyInheritedSettings(program)

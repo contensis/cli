@@ -5,6 +5,7 @@ import { mapContensisOpts } from './globalOptions';
 export const makeGetCommand = () => {
   const program = new Command()
     .command('get')
+    .description('get command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();

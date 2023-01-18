@@ -1,4 +1,5 @@
 import {
+  BlockActionType,
   BlockRunningStatus,
   MigrateModelsResult,
   MigrateStatus,
@@ -279,14 +280,26 @@ export const LogMessages = {
       `[${env}] Unable to push block ${Logger.highlightText(
         id
       )} in project ${projectId}`,
-    released: (id: string, env: string, projectId?: string) =>
-      `[${env}] Released block ${Logger.highlightText(
+    actionComplete: (
+      action: BlockActionType,
+      id: string,
+      env: string,
+      projectId?: string
+    ) =>
+      `[${env}] Block action ${Logger.highlightText(
+        action
+      )} on ${Logger.highlightText(
         id
-      )} in project ${projectId}`,
-    failedRelease: (id: string, env: string, projectId?: string) =>
-      `[${env}] Unable to release block ${Logger.highlightText(
-        id
-      )} in project ${projectId}`,
+      )} in project ${projectId} requested successfully`,
+    actionFailed: (
+      action: BlockActionType,
+      id: string,
+      env: string,
+      projectId?: string
+    ) =>
+      `[${env}] Problem executing action ${Logger.highlightText(
+        action
+      )} on block ${Logger.highlightText(id)} in project ${projectId}`,
     deleted: (id: string, env: string, projectId?: string) =>
       `[${env}] Deleted block ${Logger.highlightText(
         id
