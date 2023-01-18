@@ -1203,7 +1203,7 @@ website t.durden@example-dev>
 
 ## Import content models
 
-Connect to your "source" environment first, ensure you can fetch the models and these models contain the dependencies you plan on importing from here with the `get models` command. Add the `--dependents` option to fetch all of the entries that will eventually be imported.
+Connect to your "source" environment first, ensure you can fetch the models and these models contain the dependencies you plan on importing from here with the `get model` command. Add the `--dependents` option to fetch all of the entries that will eventually be imported.
 
 When you are happy your models contain the right dependencies for your import, connect to the "target" environment (and project) then use the same arguments as before except with the `import entries` command
 
