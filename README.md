@@ -21,3 +21,28 @@ To start the Contensis shell to run commands
 or do this from the root folder with
 
 - `yarn run cli`
+
+## Related repositories / packages
+
+A few other resources exist as ways to consume Contensis CLI - the source code is included in this repository unless that platform requires the respective assets to be hosted in a git repository of its own
+
+### NPM package
+
+https://www.npmjs.com/package/contensis-cli
+
+### Chocolatey package
+
+https://community.chocolatey.org/packages/contensis-cli
+
+### Homebrew tap & formula
+
+https://github.com/contensis/homebrew-cli
+
+### GitHub Actions
+
+https://github.com/marketplace/actions/contensis-cli-action
+https://github.com/marketplace/actions/contensis-block-push-action
+
+### GitLab reusable workflows
+
+https://gitlab.zengenti.com/ops/contensis-ci

@@ -8,7 +8,13 @@ Install the package via `npm` as a global module (requires NodeJS)
 npm i contensis-cli@preprelease --global
 ```
 
-Alternatively, download the executable for your operating system from the [Releases page](https://github.com/contensis/node-cli/releases)
+If you use `nvm` and are frequently switching your local `Node JS` version, use one of the pre-built binaries.
+
+- Windows users: `choco install contensis-cli --pre`
+- Mac users: `brew tap contensis/cli` then `brew install contensis-cli`
+- Linux users: `brew tap contensis/cli` then `brew install contensis-cli-linux`
+
+Alternatively, download the executable for your operating system from the [Releases page](https://github.com/contensis/node-cli/releases) and add it to a folder in your local `PATH`
 
 ## Skip to section
 
