@@ -32,15 +32,9 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: Install dependencies
+      - name: Install dependencies and set APP_VERSION output variable
         run: |
-          yarn cache clean --mirror
-          yarn run bootstrap:ci
-          cp -a node_modules/inquirer-command-prompt/. packages/contensis-cli/node_modules/inquirer-command-prompt/
-
-      - id: variables
-        name: Set APP_VERSION output variable
-        run: |
+          yarn run bootstrap
           APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
           echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
 
