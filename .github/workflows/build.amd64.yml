@@ -88,6 +88,18 @@ jobs:
           ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli get entries
 
+      - name: Rename executable to include platform (Linux/macOS)
+        if: ${{ matrix.os != 'windows-2019' }}
+        run: |
+          cd bin
+          mv contensis-cli contensis-cli-${{ matrix.fileName }}
+
+      - name: Rename executable to contensis-cli-win.exe
+        if: ${{ matrix.os == 'windows-2019' }}
+        run: |
+          cd bin
+          Rename-Item -Path "contensis-cli.exe" -NewName "contensis-cli-win.exe"
+
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
