@@ -24,8 +24,8 @@ jobs:
     uses: ./.github/workflows/build.amd64.yml
     secrets: inherit
 
-  arm64:
-    name: arm64
-    needs: node
-    uses: ./.github/workflows/build.arm64.yml
-    secrets: inherit
+  # arm64:
+  #   name: arm64
+  #   needs: node
+  #   uses: ./.github/workflows/build.arm64.yml
+  #   secrets: inherit
