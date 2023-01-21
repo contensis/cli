@@ -2,7 +2,7 @@
 
 If you are using this package you may want the [Contensis CLI package README](packages/contensis-cli/README.md)
 
-## Contensis CLI development
+## Development
 
 After cloning this project:
 
@@ -22,6 +22,8 @@ or do this from the root folder with
 
 - `yarn run cli`
 
+## Build
+
 To build the project from root folder
 
 - `yarn run build`
@@ -30,19 +32,37 @@ To build an executable for your operating system
 
 - `yarn run build:exe` \* outputting to `bin/` folder
 
-To create a new version
+## Release
+
+To create a new version (prerelease)
 
 - Simply make a commit or merge to the `main` branch and the GitHub Actions should take care of the rest
-- Binaries from each commit are uploaded to the job output as build assets
+- The package will be built and published to npm.js - available to install with `npm i -g contensis-cli@prerelease`
+- Binaries from each commit's build workflow are uploaded to the job summary as build assets
+
+To prepare the next release version
+
+- `cd packages/contensis-cli`
+- Update the package version with one of
+  - `npm version patch`
+  - `npm version minor`
+  - `npm version major`
+  - `npm version 1.0.1`
+- Build and check the version with
+  - `npm start`
+  - `--version` (in the shell prompt)
+- Commit changes. Add the phrase `[nobuild]` to the commit message and ensure this is the final commit before you push
 
 To create a release
 
-- This is currently manually triggered from the Releases page
-- Release notes are typed out and will be a summary of key changes since last release tag
-- Release assets are downloaded from build assets and uploaded to this new release
+- Create a new release from the repo Releases page
+- The release version will match the `package.json` version in `/packages/contensis-cli` (prefixed with "v" e.g. "v1.0.1")
 - A new git tag will be created matching the release version
-- Pre-releases are supported and are indicated with the pre release flag in the GitHub Release
-- Another GitHub Action triggered by the release will build and tag a release from the created git tag for other platforms such as [`Docker`](https://github.com/contensis/node-cli/pkgs/container/node-cli%2Fmain%2Fapp/53826128?tag=release)
+- Release notes are typed out and will be a summary of key changes since last release tag
+- Release assets are found in the summary page of the last GitHub build pipeline (stored as build artifacts). Download the artifact for each OS, unzip and then attach them (upload) the extracted files to this new release.
+- Pre-releases are supported and are indicated with the "Set as a pre-release" flag in the GitHub Release
+- A GitHub Action will be triggered by creating the release. The workflow will publish the release version to npm.js (if it does not currently exist). Also push a release tag to the latest [`Docker`](https://github.com/contensis/node-cli/pkgs/container/node-cli%2Fmain%2Fapp/53826128?tag=release) image.
+- If the release workflow fails, it can be manually run any time with a workflow trigger from the GitHub Action page - the input will be either "latest" or "prerelease"
 
 ## Related repositories / packages
 

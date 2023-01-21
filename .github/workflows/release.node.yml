@@ -40,12 +40,12 @@ jobs:
           yarn run build
           APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
           VERSION_EXISTS=$(npm view contensis-cli@$APP_VERSION version || false)
-          [ -z "$VERSION_EXISTS" ] && echo "v$APP_VERSION is not found in npm.js" || echo "v$APP_VERSION already published in npm.js"
           [ "$APP_VERSION" == "$VERSION_EXISTS" ] && npm view contensis-cli@$APP_VERSION
+          [ -z "$VERSION_EXISTS" ] && echo "v$APP_VERSION is not found in npm.js" || echo "v$APP_VERSION already published in npm.js"
           echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
           echo "exists=$VERSION_EXISTS" >> $GITHUB_OUTPUT
 
-      - name: Publish release package "${{ steps.build.outputs.version }}" with tag "${{ inputs.tag }}"
+      - name: Publish package version "${{ steps.build.outputs.version }}" to npm.js with tag "${{ inputs.tag }}"
         if: steps.build.outputs.exists != steps.build.outputs.version
         run: |
           cd packages/contensis-cli
