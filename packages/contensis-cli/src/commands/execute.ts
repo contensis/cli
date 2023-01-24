@@ -1,5 +1,6 @@
 import { Argument, Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
+import { addGlobalOptions } from './globalOptions';
 
 export const makeExecuteCommand = () => {
   const execute = new Command()
@@ -110,5 +111,7 @@ Note: block actions are executed on blocks deployed from a "main" or "master" br
       ).ExecuteBlockAction('markAsBroken', blockId, version);
     });
 
+  // Add global opts for inner sub-commands
+  addGlobalOptions(action);
   return execute;
 };

@@ -1,6 +1,6 @@
 import { Argument, Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { mapContensisOpts } from './globalOptions';
+import { addGlobalOptions, mapContensisOpts } from './globalOptions';
 
 export const makeGetCommand = () => {
   const program = new Command()
@@ -243,6 +243,9 @@ Example call:
         );
       }
     );
+
+  // Add global opts for inner sub-commands
+  addGlobalOptions(block);
 
   return program;
 };
