@@ -1933,7 +1933,8 @@ class ContensisCli {
       }
 
       if (err) {
-        log.error(
+        log.error(jsonFormatter(err));
+        throw new Error(
           messages.blocks.actionFailed(
             action,
             blockId,
@@ -1941,7 +1942,6 @@ class ContensisCli {
             env.currentProject
           )
         );
-        log.error(jsonFormatter(err));
       }
     }
   };
