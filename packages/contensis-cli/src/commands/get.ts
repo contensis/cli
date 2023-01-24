@@ -189,7 +189,7 @@ Example call:
 `
     )
     .action(async (blockId: string, branch: string, version: string, opts) => {
-      await cliCommand(['get', 'block'], opts).PrintBlockVersions(
+      await cliCommand(['get', 'block', blockId], opts).PrintBlockVersions(
         blockId,
         branch,
         version
