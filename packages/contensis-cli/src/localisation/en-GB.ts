@@ -280,13 +280,24 @@ export const LogMessages = {
       `[${env}] Unable to push block ${Logger.highlightText(
         id
       )} in project ${projectId}`,
+    latestVersion: (
+      version: string,
+      id: string,
+      env: string,
+      projectId?: string
+    ) =>
+      `[${env}] Found latest block version ${Logger.highlightText(
+        id
+      )} in project ${projectId} ${Logger.highlightText(version)}`,
+    failedParsingVersion: () =>
+      `Could not parse ".[0].version.versionNo" from response`,
     actionComplete: (
       action: BlockActionType,
       id: string,
       env: string,
       projectId?: string
     ) =>
-      `[${env}] Block action ${Logger.highlightText(
+      `[${env}] Action ${Logger.highlightText(
         action
       )} on ${Logger.highlightText(
         id
@@ -297,9 +308,9 @@ export const LogMessages = {
       env: string,
       projectId?: string
     ) =>
-      `[${env}] Problem executing action ${Logger.highlightText(
-        action
-      )} on block ${Logger.highlightText(id)} in project ${projectId}`,
+      `[${env}] Problem executing ${action} on block ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
     deleted: (id: string, env: string, projectId?: string) =>
       `[${env}] Deleted block ${Logger.highlightText(
         id

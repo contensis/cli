@@ -30,13 +30,15 @@ export const makeExecuteCommand = () => {
     .command('release')
     .description('release a block version')
     .addArgument(blockIdArg)
-    .addArgument(blockVersionArg)
-    .usage('<block-id> <version>')
+    .argument('[version]', blockVersionArg.description, 'latest')
+    .usage('[block-id> <version]')
     .addHelpText(
       'after',
       `
 Example call:
-  > execute block action release contensis-app 3\n`
+  > execute block action release contensis-app
+
+Note: block actions are executed on blocks deployed from a "main" or "master" branch\n`
     )
     .action(async (blockId: string, version: string, opts) => {
       await cliCommand(
@@ -55,7 +57,9 @@ Example call:
       'after',
       `
 Example call:
-  > execute block action makelive contensis-app 3\n`
+  > execute block action makelive contensis-app 3
+
+Note: block actions are executed on blocks deployed from a "main" or "master" branch\n`
     )
     .action(async (blockId: string, version: string, opts) => {
       await cliCommand(
@@ -74,7 +78,9 @@ Example call:
       'after',
       `
 Example call:
-  > execute block action rollback contensis-app 3\n`
+  > execute block action rollback contensis-app 3
+
+Note: block actions are executed on blocks deployed from a "main" or "master" branch\n`
     )
     .action(async (blockId: string, version: string, opts) => {
       await cliCommand(
@@ -93,7 +99,9 @@ Example call:
       'after',
       `
 Example call:
-  > execute block action markasbroken contensis-app 3\n`
+  > execute block action markasbroken contensis-app 3
+
+Note: block actions are executed on blocks deployed from a "main" or "master" branch\n`
     )
     .action(async (blockId: string, version: string, opts) => {
       await cliCommand(

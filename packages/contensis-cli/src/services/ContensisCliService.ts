@@ -21,6 +21,7 @@ import {
   Model,
   MigrateModelsResult,
   BlockActionType,
+  BlockVersion,
 } from 'migratortron';
 import { Entry, Role } from 'contensis-management-api/lib/models';
 
@@ -1902,19 +1903,81 @@ class ContensisCli {
     }
   };
 
+  GetLastBlockVersionInMainOrMaster = async (
+    blockId: string
+  ): Promise<[AppError | null, string | undefined]> => {
+    const { contensis, log, messages } = this;
+
+    // Look for block versions pushed to main branch first
+    const [getErrMain, blockVersionMain] =
+      (await contensis?.blocks.GetBlockVersions(blockId, 'main')) || [];
+
+    let blockVersionResponse = [] as BlockVersion[];
+
+    if (getErrMain?.code === '404') {
+      // Try looking in master
+      const [getErrMaster, blockVersionMaster] =
+        (await contensis?.blocks.GetBlockVersions(blockId, 'master')) || [];
+      if (getErrMaster) {
+        return [getErrMaster, undefined];
+      } else if (blockVersionMaster) blockVersionResponse = blockVersionMaster;
+    } else if (getErrMain) {
+      return [getErrMain, undefined];
+    } else if (blockVersionMain) blockVersionResponse = blockVersionMain;
+
+    // Parse versionNo from response
+    let blockVersionNo = 'latest';
+    // The first blockVersion should be the latest one
+    try {
+      blockVersionNo = `${blockVersionResponse?.[0]?.version.versionNo}`;
+
+      if (!Number.isNaN(blockVersionNo) && Number(blockVersionNo) > 0)
+        // Is a valid versionNo
+        return [null, blockVersionNo];
+      else
+        throw new Error(
+          `Value cannot be parsed as a number: ${blockVersionNo}`
+        );
+    } catch (parseVersionEx: any) {
+      // Catch parsing errors in case of an unexpected response
+      log.error(messages.blocks.failedParsingVersion(), parseVersionEx);
+      log.info(`${blockVersionResponse}`);
+      return [parseVersionEx, undefined];
+    }
+  };
+
   ExecuteBlockAction = async (
     action: BlockActionType,
     blockId: string,
-    version: string
+    version = 'latest'
   ) => {
     const { currentEnv, env, log, messages } = this;
     const contensis = await this.ConnectContensis();
     if (contensis) {
+      let actionOnBlockVersion = version;
+
+      // If action is release and version is latest, find the latest version number
+      if (action === 'release' && version === 'latest') {
+        const [getErr, blockVersion] =
+          await this.GetLastBlockVersionInMainOrMaster(blockId);
+
+        if (getErr) {
+          // Log error getting latest block version no
+          log.error(jsonFormatter(getErr));
+          // and throw the error message so the process can exit with a failure
+          throw new Error(
+            messages.blocks.noList(currentEnv, env.currentProject)
+          );
+        } else if (blockVersion) {
+          actionOnBlockVersion = blockVersion;
+        }
+      }
+
       // Execute block action
       const [err, blockVersion] = await contensis.blocks.BlockAction(
         blockId,
         action,
-        version
+        actionOnBlockVersion
       );
 
       if (blockVersion) {

@@ -1181,11 +1181,9 @@ website t.durden@example-dev>
 
 ### Execute block actions
 
-We can perform certain actions on a specific version of a block with the `execute block action` command
+We can perform certain actions on a specific version of a block with the `execute block action {type}` command
 
-#### Release a block version
-
-To mark a block version as "released", first get the latest block version number
+To execute an action on a specific block version, first you can find the the latest block version number with `get block {block-id} {branch} latest` or leave out the `latest` argument to see a short list of recent versions.
 
 ```shell
 website t.durden@example-dev>get block contensis-website master latest
@@ -1215,12 +1213,16 @@ website t.durden@example-dev>get block contensis-website master latest
 website t.durden@example-dev>
 ```
 
-Add the block version number to the `execute block action release {block-id} {version}` command
+Add the block version number to the `execute block action {type} {block-id} {version}` command - further examples are below
+
+#### Release a block version
+
+To mark a block version as "released"
 
 ```shell
 
 website t.durden@example-dev> execute block action release contensis-website 78
-[cli] ✅ [example-dev] Released block contensis-website in project website
+[cli] ✅ [example-dev] Action release on contensis-website in project website requested successfully
   v78 contensis-website
     state: available
     released: [23/11/2022 01:42] n.flatley
@@ -1245,6 +1247,9 @@ website t.durden@example-dev> execute block action release contensis-website 78
 
 website t.durden@example-dev>
 ```
+
+> **Note**
+> you can leave out the `version` argument to release the last pushed version of the block
 
 #### Make a block version live
 
