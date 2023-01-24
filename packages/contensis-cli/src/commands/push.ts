@@ -71,7 +71,7 @@ Example call:
       };
 
       const blockRequest = mapJson(mapSourceVars, {
-        autoRelease: { $path: 'release', $default: () => false },
+        release: { $path: 'release', $default: () => false },
         id: ['blockId'],
         image: () => {
           const lastIndexOfColon = imageUri.lastIndexOf(':');
