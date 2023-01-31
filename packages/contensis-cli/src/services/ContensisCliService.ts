@@ -5,7 +5,7 @@ import inquirer from 'inquirer';
 import to from 'await-to-js';
 import chalk from 'chalk';
 import { Component, ContentType, Project } from 'contensis-core-api';
-import { isPassword, isSharedSecret, isUuid, url } from '~/util';
+import { isPassword, isSharedSecret, isUuid, tryStringify, url } from '~/util';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import ContensisAuthService from './ContensisAuthService';
 import CredentialProvider from '~/providers/CredentialProvider';
@@ -21,7 +21,6 @@ import {
   Model,
   MigrateModelsResult,
   BlockActionType,
-  BlockVersion,
 } from 'migratortron';
 import { Entry, Role } from 'contensis-management-api/lib/models';
 
@@ -1903,45 +1902,39 @@ class ContensisCli {
     }
   };
 
-  GetLastBlockVersionInMainOrMaster = async (
-    blockId: string
+  GetLatestBlockVersion = async (
+    blockId: string,
+    branch = 'default'
   ): Promise<[AppError | null, string | undefined]> => {
     const { contensis, log, messages } = this;
 
-    // Look for block versions pushed to main branch first
-    const [getErrMain, blockVersionMain] =
-      (await contensis?.blocks.GetBlockVersions(blockId, 'main')) || [];
+    // Look for block versions pushed to "default" branch
+    const [getErr, blockVersions] =
+      (await contensis?.blocks.GetBlockVersions(blockId, branch)) || [];
 
-    let blockVersionResponse = [] as BlockVersion[];
-
-    if (getErrMain?.code === '404') {
-      // Try looking in master
-      const [getErrMaster, blockVersionMaster] =
-        (await contensis?.blocks.GetBlockVersions(blockId, 'master')) || [];
-      if (getErrMaster) {
-        return [getErrMaster, undefined];
-      } else if (blockVersionMaster) blockVersionResponse = blockVersionMaster;
-    } else if (getErrMain) {
-      return [getErrMain, undefined];
-    } else if (blockVersionMain) blockVersionResponse = blockVersionMain;
+    if (getErr) {
+      return [getErr, undefined];
+    }
 
     // Parse versionNo from response
     let blockVersionNo = 'latest';
     // The first blockVersion should be the latest one
     try {
-      blockVersionNo = `${blockVersionResponse?.[0]?.version.versionNo}`;
+      blockVersionNo = `${blockVersions?.[0]?.version.versionNo}`;
 
       if (!Number.isNaN(blockVersionNo) && Number(blockVersionNo) > 0)
         // Is a valid versionNo
         return [null, blockVersionNo];
-      else
-        throw new Error(
-          `Value cannot be parsed as a number: ${blockVersionNo}`
-        );
+      else throw new Error(`'${blockVersionNo}' is not a valid version number`);
     } catch (parseVersionEx: any) {
       // Catch parsing errors in case of an unexpected response
-      log.error(messages.blocks.failedParsingVersion(), parseVersionEx);
-      log.info(`${blockVersionResponse}`);
+      log.info(
+        `Request for blockId: ${blockId}, branch: ${branch}, version: latest`
+      );
+      log.info(
+        `Get block versions response was: ${tryStringify(blockVersions)}`
+      );
+      log.error(messages.blocks.failedParsingVersion());
       return [parseVersionEx, undefined];
     }
   };
@@ -1958,15 +1951,18 @@ class ContensisCli {
 
       // If action is release and version is latest, find the latest version number
       if (action === 'release' && version === 'latest') {
-        const [getErr, blockVersion] =
-          await this.GetLastBlockVersionInMainOrMaster(blockId);
+        const [getErr, blockVersion] = await this.GetLatestBlockVersion(
+          blockId
+        );
 
         if (getErr) {
           // Log error getting latest block version no
-          log.error(jsonFormatter(getErr));
           // and throw the error message so the process can exit with a failure
           throw new Error(
-            messages.blocks.noList(currentEnv, env.currentProject)
+            `${messages.blocks.noList(
+              currentEnv,
+              env.currentProject
+            )} (${getErr})`
           );
         } else if (blockVersion) {
           actionOnBlockVersion = blockVersion;

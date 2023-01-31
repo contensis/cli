@@ -290,7 +290,7 @@ export const LogMessages = {
         id
       )} in project ${projectId} ${Logger.highlightText(version)}`,
     failedParsingVersion: () =>
-      `Could not parse ".[0].version.versionNo" from response`,
+      `Did not find a "version.versionNo" in response`,
     actionComplete: (
       action: BlockActionType,
       id: string,

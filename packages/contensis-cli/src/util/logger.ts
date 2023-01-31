@@ -223,9 +223,9 @@ export const logError: LogErrorFunc = (
 ) => {
   Logger[level](msg || err.message || err?.data?.message || err.Message);
   (Array.isArray(err) ? err : [err]).map((error: AppError) => {
-    if ('stack' in error) Logger.raw(`  ${Logger.infoText(error.stack)}`);
+    if ('stack' in error) Logger.raw(`  ${Logger.infoText(error.stack)}\n`);
     if ('data' in error)
-      Logger.raw(`  ${Logger.infoText(tryStringify(error.data))}`);
+      Logger.raw(`  ${Logger.infoText(tryStringify(error.data))}\n`);
   });
   //Logger.line();
   return null;
