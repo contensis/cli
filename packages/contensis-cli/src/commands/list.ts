@@ -108,6 +108,34 @@ Example call:
     });
 
   list
+    .command('proxies')
+    .description('print list of proxies')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > list proxies
+`
+    )
+    .action(async opts => {
+      await cliCommand(['list', 'proxies'], opts).PrintProxies();
+    });
+
+  list
+    .command('renderers')
+    .description('print list of renderers')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > list renderers
+`
+    )
+    .action(async opts => {
+      await cliCommand(['list', 'renderers'], opts).PrintRenderers();
+    });
+
+  list
     .command('roles')
     .description('print list of roles')
     .addHelpText(

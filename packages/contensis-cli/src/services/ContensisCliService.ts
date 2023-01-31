@@ -2049,6 +2049,87 @@ class ContensisCli {
     }
   };
 
+  PrintProxies = async (proxyId?: string) => {
+    const { currentEnv, env, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
+      // Retrieve proxies list for env
+      const [err, proxies] = await contensis.proxies.GetProxies(proxyId);
+
+      if (Array.isArray(proxies)) {
+        this.HandleFormattingAndOutput(proxies, () => {
+          // print the proxies to console
+          log.success(messages.proxies.list(currentEnv, env.currentProject));
+          for (const { id, name, description, endpoints, version } of proxies) {
+            console.log(
+              `  - ${name} [${
+                version.versionNo
+              }] ${id} ${log.infoText`${description}`}`
+            );
+            for (const [language, endpoint] of Object.entries(endpoints))
+              console.log(
+                `      - ${log.infoText`language: ${language}
+        server: ${endpoint.server}
+        headers.host: ${endpoint.headers.host}
+        ssl: ${endpoint.ssl}`}`
+              );
+          }
+        });
+      }
+
+      if (err) {
+        log.error(messages.proxies.noList(currentEnv, env.currentProject));
+        log.error(jsonFormatter(err));
+      }
+    }
+  };
+
+  PrintRenderers = async (rendererId?: string) => {
+    const { currentEnv, env, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
+      // Retrieve renderers list for env
+      const [err, renderers] = await contensis.renderers.GetRenderers(
+        rendererId
+      );
+
+      if (Array.isArray(renderers)) {
+        this.HandleFormattingAndOutput(renderers, () => {
+          // print the renderers to console
+          log.success(messages.renderers.list(currentEnv, env.currentProject));
+          for (const {
+            id,
+            description,
+            assignedContentTypes,
+            rules,
+            version,
+          } of renderers) {
+            console.log(
+              `  - ${id} [${version.versionNo}] ${log.infoText`${description}`}`
+            );
+            if (assignedContentTypes?.length)
+              console.log(
+                log.infoText`      assignedContentTypes: ${assignedContentTypes.join(
+                  ', '
+                )}`
+              );
+            for (const rule of rules)
+              if (rule.return)
+                console.log(
+                  log.infoText`      ${
+                    rule.return.endpointId ? 'endpointId' : 'blockId'
+                  }: ${rule.return.endpointId || rule.return.blockId}`
+                );
+          }
+        });
+      }
+
+      if (err) {
+        log.error(messages.renderers.noList(currentEnv, env.currentProject));
+        log.error(jsonFormatter(err));
+      }
+    }
+  };
   HandleFormattingAndOutput = <T>(obj: T, logFn: (obj: T) => void) => {
     const { format, log, messages, output } = this;
     if (!format) {

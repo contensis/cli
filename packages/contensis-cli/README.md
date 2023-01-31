@@ -264,6 +264,10 @@ contensis >
     - [Make a block version live](#make-a-block-version-live)
     - [Mark a block version as broken](#mark-a-block-version-as-broken)
     - [Rollback a live block version](#rollback-a-live-block-version)
+- [Manage renderers](#manage-renderers)
+  - [List renderers](#list-renderers)
+- [Manage proxies](#manage-proxies)
+  - [List proxies](#list-proxies)
 - [View webhook subscriptions](#view-webhook-subscriptions)
 - [Import content models](#import-content-models)
   - [Import from another Contensis environment](#import-from-another-contensis-environment)
@@ -1274,6 +1278,43 @@ Follow the examples for [releasing a block version](#release-a-block-version) ex
 ```shell
 execute block action rollback {block-id} {version}
 ```
+
+## Manage renderers
+
+You can manage renderers for any Contensis project using the following commands
+
+### List renderers
+
+### Get a renderer
+
+Append the renderer id to the `get renderer` command e.g. `get renderer contensis-website`
+
+## Manage proxies
+
+You can manage proxies for any Contensis project using the following commands
+
+### List proxies
+
+```shell
+website t.durden@example-dev> list proxies
+[cli] ✅ [example-dev] Retrieved proxies in project website:
+  - Get work requests [4.0] b8b6958f-6ae2-41d5-876a-abc86755fd7b Reverse proxy helpdesk endpoints
+      - language: en-GB
+        server: 10.0.46.200
+        headers.host: account-id.zendesk.com
+        ssl: true
+  - HelpDesk Webservice [5.0] fd04d8ad-b1ec-4b0c-95d9-a7a6aec6d05d Used to support the helpdesk
+      - language: en-GB
+        server: 10.0.46.200
+        headers.host: account-id.zendesk.com
+        ssl: true
+
+website t.durden@example-dev>
+```
+
+### Get a proxy
+
+Append the proxy id to the `get proxy` command e.g. `get proxy b8b6958f-6ae2-41d5-876a-abc86755fd7b`
 
 ## Import content models
 

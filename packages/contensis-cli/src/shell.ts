@@ -162,6 +162,8 @@ class ContensisShell {
         'list components',
         'list keys',
         'list models',
+        'list proxies',
+        'list renderers',
         'list roles',
         'list webhooks',
         'push block',

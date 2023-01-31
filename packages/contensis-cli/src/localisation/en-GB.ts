@@ -216,6 +216,72 @@ export const LogMessages = {
     failedRemove: (env: string, id: string) =>
       `[${env}] Unable to delete API key ${Logger.highlightText(id)}`,
   },
+  proxies: {
+    list: (env: string, projectId: string | undefined) =>
+      `[${env}] Retrieved proxies in project ${projectId}:`,
+    noList: (env: string, projectId: string | undefined) =>
+      `[${env}] Cannot retrieve proxies in project ${projectId}`,
+    // noneExist: () => `Create a role with "create renderer"`,
+    failedGet: (env: string, name: string, projectId: string) =>
+      `[${env}] Unable to find proxy ${Logger.highlightText(
+        name
+      )} in project ${projectId}`,
+    created: (env: string, name: string, projectId: string) =>
+      `[${env}] Created proxy ${Logger.highlightText(
+        name
+      )} in project ${projectId}\n`,
+    failedCreate: (env: string, name: string, projectId: string) =>
+      `[${env}] Unable to create proxy ${Logger.highlightText(
+        name
+      )} in project ${projectId}`,
+    setPayload: () => `Updating proxy with details\n`,
+    set: () => `Succesfully updated proxy\n`,
+    failedSet: (env: string, name: string, projectId: string) =>
+      `[${env}] Unable to update proxy ${Logger.highlightText(
+        name
+      )} in project ${projectId}`,
+    removed: (env: string, id: string, projectId: string) =>
+      `[${env}] Deleted proxy ${Logger.highlightText(
+        id
+      )} in project ${projectId}\n`,
+    failedRemove: (env: string, id: string, projectId: string) =>
+      `[${env}] Unable to delete proxy ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
+  },
+  renderers: {
+    list: (env: string, projectId: string | undefined) =>
+      `[${env}] Retrieved renderers in project ${projectId}:`,
+    noList: (env: string, projectId: string | undefined) =>
+      `[${env}] Cannot retrieve renderers in project ${projectId}`,
+    // noneExist: () => `Create a role with "create renderer"`,
+    failedGet: (env: string, name: string, projectId: string) =>
+      `[${env}] Unable to find renderer ${Logger.highlightText(
+        name
+      )} in project ${projectId}`,
+    created: (env: string, name: string, projectId: string) =>
+      `[${env}] Created renderer ${Logger.highlightText(
+        name
+      )} in project ${projectId}\n`,
+    failedCreate: (env: string, name: string, projectId: string) =>
+      `[${env}] Unable to create renderer ${Logger.highlightText(
+        name
+      )} in project ${projectId}`,
+    setPayload: () => `Updating renderer with details\n`,
+    set: () => `Succesfully updated renderer\n`,
+    failedSet: (env: string, name: string, projectId: string) =>
+      `[${env}] Unable to update renderer ${Logger.highlightText(
+        name
+      )} in project ${projectId}`,
+    removed: (env: string, id: string, projectId: string) =>
+      `[${env}] Deleted renderer ${Logger.highlightText(
+        id
+      )} in project ${projectId}\n`,
+    failedRemove: (env: string, id: string, projectId: string) =>
+      `[${env}] Unable to delete renderer ${Logger.highlightText(
+        id
+      )} in project ${projectId}`,
+  },
   roles: {
     list: (env: string) => `[${env}] Retrieved roles`,
     noList: (env: string) => `[${env}] Cannot retrieve roles`,
