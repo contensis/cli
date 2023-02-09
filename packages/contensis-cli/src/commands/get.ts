@@ -175,7 +175,7 @@ Example call:
     .argument(
       '[branch]',
       'the branch of the block to get version details for',
-      'main'
+      'default'
     )
     .argument(
       '[version]',
@@ -185,7 +185,8 @@ Example call:
       'after',
       `
 Example call:
-  > get block contensis-website master latest
+  > get block contensis-website
+  > get block contensis-website develop latest
 `
     )
     .action(async (blockId: string, branch: string, version: string, opts) => {
@@ -210,7 +211,7 @@ Example call:
     .argument(
       '[branch]',
       'the branch of the block to get version details for',
-      'main'
+      'default'
     )
     .argument(
       '[version]',
@@ -223,7 +224,7 @@ Example call:
       'after',
       `
 Example call:
-  > get block logs contensis-website master
+  > get block logs contensis-website default
   > get block logs contensis-website master latest london
 `
     )
