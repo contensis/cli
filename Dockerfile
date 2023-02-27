@@ -1,5 +1,5 @@
-ARG app_image=node:18-alpine
-ARG builder_image=node:18-alpine
+ARG app_image=node:18.13-alpine
+ARG builder_image=node:18.13-alpine
 FROM ${builder_image} AS prepare
 
 # RUN apk add --no-cache libsecret-dev
