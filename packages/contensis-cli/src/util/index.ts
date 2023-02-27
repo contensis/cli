@@ -8,7 +8,7 @@ export const isSharedSecret = (str = '') =>
 export const isPassword = (str = '') =>
   !isSharedSecret(str) ? str : undefined;
 
-export const tryParse = (str: string) => {
+export const tryParse = (str: any) => {
   try {
     return typeof str === 'object' ? str : JSON.parse(str);
   } catch (e) {

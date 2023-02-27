@@ -5,7 +5,14 @@ import inquirer from 'inquirer';
 import to from 'await-to-js';
 import chalk from 'chalk';
 import { Component, ContentType, Project } from 'contensis-core-api';
-import { isPassword, isSharedSecret, isUuid, tryStringify, url } from '~/util';
+import {
+  isPassword,
+  isSharedSecret,
+  isUuid,
+  tryParse,
+  tryStringify,
+  url,
+} from '~/util';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import ContensisAuthService from './ContensisAuthService';
 import CredentialProvider from '~/providers/CredentialProvider';
@@ -27,6 +34,8 @@ import { Entry, Role } from 'contensis-management-api/lib/models';
 import { csvFormatter } from '~/util/csv.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
 import { jsonFormatter } from '~/util/json.formatter';
+import { diffLogStrings } from '~/util/diff';
+import { promiseDelay } from '~/util/timers';
 import {
   printBlockVersion,
   printMigrateResult,
@@ -2009,7 +2018,8 @@ class ContensisCli {
     blockId: string,
     branch: string,
     version: string,
-    dataCenter: 'hq' | 'manchester' | 'london'
+    dataCenter: 'hq' | 'manchester' | 'london',
+    follow = false
   ) => {
     const { currentEnv, env, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -2026,8 +2036,17 @@ class ContensisCli {
         dataCenter,
       });
 
-      if (blockLogs) {
-        this.HandleFormattingAndOutput(blockLogs, () => {
+      if (err) {
+        log.error(
+          messages.blocks.failedGetLogs(blockId, currentEnv, env.currentProject)
+        );
+        log.error(jsonFormatter(err));
+      } else if (blockLogs) {
+        const removeTrailingNewline = (logs: string) =>
+          logs.endsWith('\n') ? logs.slice(0, logs.length - 1) : logs;
+        const renderLogs = removeTrailingNewline(blockLogs);
+
+        this.HandleFormattingAndOutput(renderLogs, () => {
           // print the logs to console
           console.log(
             `  - ${blockId} ${branch} ${
@@ -2035,16 +2054,91 @@ class ContensisCli {
             } [${dataCenter}]`
           );
           log.line();
-          console.log(log.infoText(blockLogs));
-          log.line();
+          console.log(log.infoText(renderLogs));
         });
-      }
 
-      if (err) {
-        log.error(
-          messages.blocks.failedGetLogs(blockId, currentEnv, env.currentProject)
-        );
-        log.error(jsonFormatter(err));
+        // Code for the `--follow` options
+        let following = follow;
+        let alreadyShown = blockLogs;
+        let needsNewLine = false;
+        let counter = 0;
+
+        // remove existing listeners and add them back afterwards
+        const listeners = process.listeners('SIGINT');
+
+        process.removeAllListeners('SIGINT');
+        // add listener to update following to false and break out
+        process.on('SIGINT', () => {
+          Logger.warning(
+            `\n${messages.blocks.stopFollow(
+              blockId,
+              currentEnv,
+              env.currentProject
+            )}`
+          );
+          stopFollowing();
+        });
+
+        let delay = promiseDelay(5 * 1000, null);
+        const stopFollowing = () => {
+          following = false;
+          delay.cancel();
+
+          // Add back the listeners we removed previously
+          process.removeAllListeners('SIGINT');
+          for (const listener of listeners)
+            process.addListener('SIGINT', listener);
+        };
+
+        while (following) {
+          if (counter++ > 300) {
+            Logger.warning(
+              `\n${messages.blocks.timeoutFollow(
+                blockId,
+                currentEnv,
+                env.currentProject
+              )}`
+            );
+            stopFollowing();
+          }
+
+          // wait n. seconds then poll for logs again
+          await delay.wait();
+
+          const [lastErr, lastLogs] = following
+            ? await contensis.blocks.GetBlockLogs({
+                blockId,
+                branchId: branch,
+                version,
+                dataCenter,
+              })
+            : [null, null];
+
+          if (lastLogs) {
+            // Find the difference and output it next
+            const difference = diffLogStrings(lastLogs, alreadyShown);
+            if (difference) {
+              if (needsNewLine) {
+                console.log('');
+              }
+              // Take the trailing newline off of the logged output to
+              // avoid blank lines inbetween logs fetched sequentially
+              const render = removeTrailingNewline(difference);
+              console.log(log.infoText(render));
+
+              // Add what we've just rendered to already shown "cache"
+              alreadyShown += render;
+              needsNewLine = false;
+            } else {
+              // If no difference output a dot
+              process.stdout.write('.');
+              needsNewLine = true;
+            }
+          } else if (lastErr) {
+            // If error output an x
+            process.stdout.write('x');
+          }
+        }
       }
     }
   };
@@ -2149,15 +2243,16 @@ class ContensisCli {
 
     if (output) {
       let writeString = '';
+      const isText = !tryParse(obj) && typeof obj === 'string';
       if (format === 'csv') {
         writeString = csvFormatter(obj as any);
       } else if (format === 'xml') {
         writeString = xmlFormatter(obj as any);
-      } else writeString = jsonFormatter(obj);
+      } else writeString = isText ? (obj as string) : jsonFormatter(obj);
       // write output to file
       if (writeString) {
         fs.writeFileSync(output, writeString);
-        log.success(messages.app.fileOutput(format, output));
+        log.success(messages.app.fileOutput(isText ? 'text' : format, output));
       } else {
         log.info(messages.app.noFileOutput());
       }

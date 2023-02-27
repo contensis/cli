@@ -385,6 +385,14 @@ export const LogMessages = {
       `[${env}] Unable to delete block ${Logger.highlightText(
         id
       )} in project ${projectId}`,
+    stopFollow: (id: string, env: string, projectId?: string) =>
+      `[${env}]\n\n 👌 stop fetching new ${Logger.highlightText(
+        id
+      )} logs in project ${projectId}`,
+    timeoutFollow: (id: string, env: string, projectId?: string) =>
+      `[${env}]\n\n 🤏 pausing fetching new ${Logger.highlightText(
+        id
+      )} logs in project ${projectId} due to too many requests`,
   },
   webhooks: {
     list: (env: string) => `[${env}] Webhook subscriptions:`,

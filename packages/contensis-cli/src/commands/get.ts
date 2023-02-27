@@ -1,4 +1,5 @@
 import { Argument, Command } from 'commander';
+import { merge } from 'lodash';
 import { cliCommand } from '~/services/ContensisCliService';
 import { addGlobalOptions, mapContensisOpts } from './globalOptions';
 
@@ -219,13 +220,14 @@ Example call:
       'latest'
     )
     .addArgument(dataCenter)
+    .option('-t, --follow', 'follow block logs in near realtime', false)
     .usage('get block logs [blockId] [branch] [version] [dataCenter]')
     .addHelpText(
       'after',
       `
 Example call:
   > get block logs contensis-website default
-  > get block logs contensis-website master latest london
+  > get block logs contensis-website master latest london --follow
 `
     )
     .action(
@@ -244,7 +246,8 @@ Example call:
           blockId,
           branch,
           version,
-          dataCenter
+          dataCenter,
+          opts.follow as boolean
         );
       }
     );
