@@ -236,7 +236,11 @@ Example call:
         dataCenter: 'hq' | 'manchester' | 'london',
         opts
       ) => {
-        await cliCommand(['get', 'block', 'logs'], opts).PrintBlockLogs(
+        const parentOpts = block.opts() || {};
+        await cliCommand(
+          ['get', 'block', 'logs'],
+          merge(opts, parentOpts)
+        ).PrintBlockLogs(
           blockId,
           branch,
           version,
