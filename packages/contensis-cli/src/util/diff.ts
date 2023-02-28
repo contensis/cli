@@ -6,12 +6,8 @@ export const diffLogStrings = (updates: string, previous: string) => {
   // of the last few lines previously rendered
   const incomingLineIndices = [];
   for (const lastRenderedLine of lastFewLines) {
-    if (lastRenderedLine.length > 20)
-      incomingLineIndices.push(
-        incomingLines.findIndex(
-          incomingLine => incomingLine === lastRenderedLine
-        )
-      );
+    if (lastRenderedLine.length > 10)
+      incomingLineIndices.push(incomingLines.lastIndexOf(lastRenderedLine));
   }
 
   // Get the new lines from the next position on from the last of the already shown lines

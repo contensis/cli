@@ -2070,11 +2070,7 @@ class ContensisCli {
         // add listener to update following to false and break out
         process.on('SIGINT', () => {
           Logger.warning(
-            `\n${messages.blocks.stopFollow(
-              blockId,
-              currentEnv,
-              env.currentProject
-            )}`
+            messages.blocks.stopFollow(blockId, currentEnv, env.currentProject)
           );
           stopFollowing();
         });
@@ -2093,11 +2089,11 @@ class ContensisCli {
         while (following) {
           if (counter++ > 300) {
             Logger.warning(
-              `\n${messages.blocks.timeoutFollow(
+              messages.blocks.timeoutFollow(
                 blockId,
                 currentEnv,
                 env.currentProject
-              )}`
+              )
             );
             stopFollowing();
           }
@@ -2137,6 +2133,7 @@ class ContensisCli {
           } else if (lastErr) {
             // If error output an x
             process.stdout.write('x');
+            needsNewLine = true;
           }
         }
       }

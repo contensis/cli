@@ -256,7 +256,8 @@ export const shell = () => {
   // Return a benign function for shell().restart() when used in cli context
   // as some commands need to restart the shell to show an updated prompt
   // after successful connect / login / set project
-  if (typeof process.argv?.[2] !== 'undefined') return { restart() {} } as any;
+  if (typeof process.argv?.[2] !== 'undefined')
+    return { quit() {}, restart() {} } as any;
   if (!globalShell) globalShell = new ContensisShell();
   return globalShell;
 };
