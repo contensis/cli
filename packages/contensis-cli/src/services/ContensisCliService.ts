@@ -2123,7 +2123,7 @@ class ContensisCli {
               console.log(log.infoText(render));
 
               // Add what we've just rendered to already shown "cache"
-              alreadyShown += render;
+              alreadyShown += `${render}\n`;
               needsNewLine = false;
             } else {
               // If no difference output a dot
