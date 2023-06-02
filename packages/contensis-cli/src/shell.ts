@@ -151,6 +151,7 @@ class ContensisShell {
         'get model',
         'get project',
         'get role',
+        'get token',
         'get version',
         'get webhook',
         'import contenttypes',

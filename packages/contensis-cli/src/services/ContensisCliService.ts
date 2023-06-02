@@ -563,7 +563,7 @@ class ContensisCli {
       const [projectsErr, projects] = await to(
         contensis.projects.GetSourceProjects()
       );
-
+      
       if (Array.isArray(projects)) {
         // Print contensis version to console
         this.HandleFormattingAndOutput(contensis.contensisVersion, () =>
@@ -574,6 +574,29 @@ class ContensisCli {
       if (projectsErr) {
         log.error(messages.projects.noList());
         log.error(projectsErr.message);
+      }
+    }
+  };
+
+  PrintBearerToken = async () => {
+    const { log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve token for env
+      const [error, token] = await to(
+        contensis.content.sourceRepo.repo.BearerToken()
+      );
+      if (token) {
+        // Print bearer token to console
+        this.HandleFormattingAndOutput(token, () =>
+          log.raw(log.highlightText(token))
+        );
+      }
+
+      if (error) {
+        log.error(messages.projects.noList());
+        log.error(error.message);
       }
     }
   };

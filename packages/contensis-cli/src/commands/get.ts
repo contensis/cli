@@ -26,6 +26,20 @@ Example call:
     });
 
   program
+    .command('token')
+    .description('show a bearer token for the currently logged in user')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get token
+`
+    )
+    .action(async opts => {
+      await cliCommand(['get', 'token'], opts).PrintBearerToken();
+    });
+
+  program
     .command('project')
     .description('get a project')
     .argument('[projectId]', 'id of the project to get (default: current)')
