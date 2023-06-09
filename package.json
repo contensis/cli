@@ -28,11 +28,9 @@
     "build": "lerna run build --stream",
     "build:exe": "pkg --no-bytecode --public-packages \"*\" --public --compress GZip --output bin/contensis-cli .",
     "build:exe:win": "node exe.config.js",
-    "bootstrap": "npx lerna bootstrap --force-local && lerna link --force-local",
-    "bootstrap:ci": "npx lerna bootstrap --force-local -- --ignore-scripts && lerna link --force-local",
+    "bootstrap": "yarn",
     "clean": "lerna clean",
     "nuke": "rimraf ./packages/*/node_modules && rimraf ./node_modules",
-    "postinstall": "patch-package",
     "prestart": "kill-port --port 3000,3001,3002",
     "start": "lerna exec --parallel --stream -- yarn start",
     "start2": "lerna run start --stream",
@@ -40,12 +38,10 @@
   },
   "devDependencies": {
     "@angablue/exe": "^1.2.0",
-    "kill-port": "^1.6.1",
-    "lerna": "^4.0.0",
-    "pkg": "^5.8.0",
-    "rimraf": "^3.0.2"
+    "kill-port": "^2.0.1",
+    "lerna": "^7.0.0",
+    "pkg": "^5.8.1",
+    "rimraf": "^5.0.1"
   },
-  "dependencies": {
-    "patch-package": "^6.4.7"
-  }
+  "dependencies": {}
 }
