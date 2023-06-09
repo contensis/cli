@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: 'main'
 
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
@@ -42,21 +44,21 @@ jobs:
           docker push --all-tags ${{ env.APP_IMAGE }}
           echo "image-uri=$BUILD_IMAGE" >> $GITHUB_OUTPUT
 
-      - name: Push block to Contensis (Test `contensis/block-push` Action)
-        id: push-block
-        # uses: ./.github/actions/block-push
-        uses: contensis/block-push@v1
-        with:
-          block-id: node-cli-ci-block
-          auto-release: false
-          image-uri: ${{ steps.build.outputs.image-uri }}
-          alias: zenhub-dev
-          project-id: contensis
-          client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
-          shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
-          tag-repo: true
-          git-token: ${{ github.token }}
-          cli-version: latest
+      # - name: Push block to Contensis (Test `contensis/block-push` Action)
+      #   id: push-block
+      #   # uses: ./.github/actions/block-push
+      #   uses: contensis/block-push@v1
+      #   with:
+      #     block-id: node-cli-ci-block
+      #     auto-release: false
+      #     image-uri: ${{ steps.build.outputs.image-uri }}
+      #     alias: zenhub-dev
+      #     project-id: contensis
+      #     client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
+      #     shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
+      #     tag-repo: true
+      #     git-token: ${{ github.token }}
+      #     cli-version: latest
 
       - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/cli-action
