@@ -563,7 +563,7 @@ class ContensisCli {
       const [projectsErr, projects] = await to(
         contensis.projects.GetSourceProjects()
       );
-      
+
       if (Array.isArray(projects)) {
         // Print contensis version to console
         this.HandleFormattingAndOutput(contensis.contensisVersion, () =>
@@ -2041,7 +2041,7 @@ class ContensisCli {
     blockId: string,
     branch: string,
     version: string,
-    dataCenter: 'hq' | 'manchester' | 'london',
+    dataCenter: 'hq' | 'manchester' | 'london' | undefined,
     follow = false
   ) => {
     const { currentEnv, env, log, messages } = this;
@@ -2074,7 +2074,7 @@ class ContensisCli {
           console.log(
             `  - ${blockId} ${branch} ${
               Number(version) ? `v${version}` : version
-            } [${dataCenter}]`
+            } ${dataCenter ? `[${dataCenter}]` : ''}`
           );
           log.line();
           console.log(log.infoText(renderLogs));

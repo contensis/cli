@@ -216,8 +216,8 @@ Example call:
     '[dataCenter]',
     'the datacentre of the block to get logs for'
   )
-    .choices(['hq', 'london', 'manchester'])
-    .default('hq');
+    .choices(['hq', 'london', 'manchester', 'all'])
+    .default('all');
 
   block
     .command('logs')
@@ -249,7 +249,7 @@ Example call:
         blockId: string,
         branch: string,
         version: string,
-        dataCenter: 'hq' | 'manchester' | 'london',
+        dataCenter: 'hq' | 'manchester' | 'london' | 'all',
         opts
       ) => {
         const parentOpts = block.opts() || {};
@@ -260,7 +260,7 @@ Example call:
           blockId,
           branch,
           version,
-          dataCenter,
+          dataCenter === 'all' ? undefined : dataCenter,
           opts.follow as boolean
         );
       }
