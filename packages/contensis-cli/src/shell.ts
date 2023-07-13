@@ -258,7 +258,19 @@ export const shell = () => {
   // as some commands need to restart the shell to show an updated prompt
   // after successful connect / login / set project
   if (typeof process.argv?.[2] !== 'undefined')
-    return { quit() {}, restart() {} } as any;
+    return {
+      quit(error?: Error) {
+        process.removeAllListeners('exit');
+
+        if (error) {
+          Logger.error(error.message);
+          process.exit(1);
+        } else {
+          process.exit(0);
+        }
+      },
+      restart() {},
+    } as any;
   if (!globalShell) globalShell = new ContensisShell();
   return globalShell;
 };
@@ -269,12 +281,14 @@ process.on('uncaughtException', function (err) {
 });
 
 process.on('SIGINT', () => {
-  console.log('catching SIGINT');
-  shell().quit();
+  Logger.warning('received SIGINT');
+  // setTimeout(() => {
+  //   shell().quit();
+  // }, 1000);
 });
 
 process.on('SIGTERM', () => {
-  console.log('catching SIGTERM');
+  Logger.warning('received SIGTERM');
   shell().quit();
 });
 
