@@ -56,15 +56,11 @@ class CredentialProvider {
 
   Init = async (): Promise<[Error, CredentialProvider]> => {
     await this.Import();
+
     const [err, stored] = (await to(
-      this.keytar.findCredentials(this.serviceId)
-    )) as [
-      Error,
-      {
-        account: string;
-        password: string;
-      }[]
-    ];
+      this.keytar.getPassword(this.serviceId, this.userId)
+    )) as [Error, string];
+
     if (err && this.passwordFallback) {
       this.current = {
         account: this.userId,
@@ -73,10 +69,7 @@ class CredentialProvider {
     }
     if (!err) {
       this.remarks = { secure: true };
-      this.current =
-        stored?.find(
-          u => u?.account?.toLowerCase() === this.userId.toLowerCase()
-        ) || null;
+      if (stored) this.current = { account: this.userId, password: stored };
 
       if (!this.current && this.passwordFallback) {
         await this.Save(this.passwordFallback);
@@ -104,7 +97,14 @@ class CredentialProvider {
         this.keytar.deletePassword(this.serviceId, this.userId)
       );
 
-      Logger.warning(`${this.serviceId} - invalid credentials removed`);
+      if (err)
+        Logger.warning(
+          `${this.serviceId} - could not remove invalid credentials for ${this.userId}`
+        );
+      else
+        Logger.warning(
+          `${this.serviceId} - invalid credentials removed for ${this.userId}`
+        );
       return err || true;
     }
   };
