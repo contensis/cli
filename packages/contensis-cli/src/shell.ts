@@ -259,16 +259,7 @@ export const shell = () => {
   // after successful connect / login / set project
   if (typeof process.argv?.[2] !== 'undefined')
     return {
-      quit(error?: Error) {
-        process.removeAllListeners('exit');
-
-        if (error) {
-          Logger.error(error.message);
-          process.exit(1);
-        } else {
-          process.exit(0);
-        }
-      },
+      quit: ContensisCli.quit,
       restart() {},
     } as any;
   if (!globalShell) globalShell = new ContensisShell();
@@ -282,9 +273,9 @@ process.on('uncaughtException', function (err) {
 
 process.on('SIGINT', () => {
   Logger.warning('received SIGINT');
+  shell().quit();
   // setTimeout(() => {
-  //   shell().quit();
-  // }, 1000);
+  // }, 2000);
 });
 
 process.on('SIGTERM', () => {

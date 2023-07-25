@@ -1,4 +1,3 @@
-import { execFile, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import fetch from 'node-fetch';
@@ -24,7 +23,7 @@ import ContensisAuthService from './ContensisAuthService';
 
 import { LogMessages } from '~/localisation/en-GB';
 
-import { appRootDir, readJsonFile } from '~/providers/file-provider';
+import { readJsonFile } from '~/providers/file-provider';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import CredentialProvider from '~/providers/CredentialProvider';
 
@@ -48,6 +47,7 @@ import { jsonFormatter } from '~/util/json.formatter';
 import { diffLogStrings } from '~/util/diff';
 import { logError, Logger } from '~/util/logger';
 import { promiseDelay } from '~/util/timers';
+
 
 type OutputFormat = 'json' | 'csv' | 'xml';
 
@@ -73,6 +73,17 @@ interface IImportOptions {
   sourceProjectId?: string;
 }
 
+export type OutputOptionsConstructorArg = OutputOptions &
+  IConnectOptions &
+  IImportOptions;
+
+export interface ContensisCliConstructor {
+  new (
+    args: string[],
+    outputOpts?: OutputOptionsConstructorArg,
+    contensisOpts?: Partial<MigrateRequest>
+  ): ContensisCli;
+}
 let insecurePasswordWarningShown = false;
 
 class ContensisCli {
@@ -143,7 +154,12 @@ class ContensisCli {
 
   constructor(
     args: string[],
-    outputOpts?: OutputOptions & IConnectOptions & IImportOptions,
+    outputOpts?: OutputOptionsConstructorArg,
+    contensisOpts?: Partial<MigrateRequest>
+  );
+  constructor(
+    args: string[],
+    outputOpts?: OutputOptionsConstructorArg,
     contensisOpts: Partial<MigrateRequest> = {}
   ) {
     // console.log('args: ', JSON.stringify(args, null, 2));
@@ -203,80 +219,6 @@ class ContensisCli {
       }
     }
   }
-
-  ExecRequestHandler = async (blockIds: string[], overrideArgs?: string[]) => {
-    const { log } = this;
-    // const getPrefixOld = log.getPrefix;
-    const exeHome = path.join(appRootDir, 'reqhan');
-    const exe = 'Zengenti.Contensis.RequestHandler.LocalDevelopment';
-    const exePath = path.join(exeHome, exe);
-    const siteConfigPath = path.join(appRootDir, 'site_config.yaml');
-
-    const args = overrideArgs
-      ? typeof overrideArgs?.[0] === 'string' &&
-        overrideArgs[0].includes(' ', 2)
-        ? overrideArgs[0].split(' ')
-        : overrideArgs
-      : []; // args could be [ '-c .\\site_config.yaml' ] or [ '-c', '.\\site_config.yaml' ]
-
-    // Add required args
-    if (!args.find(a => a === '-c')) args.push('-c', siteConfigPath);
-
-    // const child = execFile(exePath, args);
-
-    const child = spawn(exePath, args, { stdio: 'inherit' });
-
-    log.raw('');
-    log.info(`Launching request handler...`);
-    if (overrideArgs?.length)
-      this.log.warning(
-        `Spawning process: ${JSON.stringify(child.spawnargs, null, 2)}`
-      );
-
-    let isRunning = false;
-
-    // Log child output through event listeners
-    child?.stdout?.on('data', data => {
-      isRunning = true;
-      log.raw(data);
-    });
-
-    child?.stderr?.on('data', data => {
-      log.error(data);
-    });
-
-    child.on('spawn', () => {
-      isRunning = true;
-      log.help(
-        `You may see a firewall popup requesting network access, it is safe to approve`
-      );
-      // log.getPrefix = () => Logger.infoText(`[rqh]`);
-    });
-
-    child.on('exit', code => {
-      isRunning = false;
-
-      log[code === 0 ? 'success' : 'warning'](
-        `Request handler exited with code ${code}\n`
-      );
-    });
-
-    child.on('error', error => {
-      isRunning = false;
-      log.error(`Could not launch request handler due to error \n${error}`);
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // keep the method running until we can return
-    while (true === true) {
-      if (!isRunning) {
-        // log.getPrefix = getPrefixOld; // restore logger state
-        return;
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  };
 
   PrintEnvironments = () => {
     const { log, messages } = this;
@@ -1913,6 +1855,8 @@ class ContensisCli {
               );
           }
         });
+
+        return blocks;
       }
 
       if (err) {
@@ -1957,6 +1901,8 @@ class ContensisCli {
                 : undefined
             );
         });
+
+        return blocks;
       }
 
       if (err) {
@@ -2361,7 +2307,7 @@ class ContensisCli {
 
 export const cliCommand = (
   commandArgs: string[],
-  outputOpts: OutputOptions & IConnectOptions = {},
+  outputOpts: OutputOptionsConstructorArg,
   contensisOpts: Partial<MigrateRequest> = {}
 ) => {
   return new ContensisCli(['', '', ...commandArgs], outputOpts, contensisOpts);

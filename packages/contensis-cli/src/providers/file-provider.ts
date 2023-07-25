@@ -25,14 +25,17 @@ export const readFile = (filePath: string) => {
   }
 };
 
-export const readFiles = (directory: string) => {
+export const readFiles = (directory: string, createDirectory = true) => {
   const directoryPath = localPath(directory);
   if (fs.existsSync(directoryPath)) {
     const files = fs.readdirSync(directoryPath);
     return files;
-  } else {
+  } else if (createDirectory) {
     fs.mkdirSync(directoryPath, { recursive: true });
     return [];
+  } else {
+    throw new Error(`ENOENT: Directory does not exist ${directoryPath}`);
+    // return undefined;
   }
 };
 

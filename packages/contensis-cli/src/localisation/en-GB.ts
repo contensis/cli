@@ -4,7 +4,9 @@ import {
   MigrateModelsResult,
   MigrateStatus,
 } from 'migratortron';
+import { GitHelper } from '~/util/git';
 import { Logger } from '~/util/logger';
+import { winSlash } from '~/util/os';
 
 export const LogMessages = {
   app: {
@@ -410,5 +412,88 @@ export const LogMessages = {
       `[${env}] Unable to delete Webhook subscription ${Logger.highlightText(
         id
       )}`,
+  },
+  devinit: {
+    intro: () => `Contensis developer environment initialisation`,
+    //`This will initialise your local working directory to develop with the current connected Contensis project`,
+    projectDetails: (
+      name: string,
+      env: string,
+      projectId: string,
+      git: GitHelper
+    ) =>
+      `Project: ${Logger.highlightText(name)} set arg --name to override
+  - Home: ${Logger.standardText(process.cwd())}
+  - Repository: ${git.home} 
+    
+Connect to Contensis instance: ${Logger.standardText(env)}
+  - Project id: ${Logger.standardText(projectId)}`,
+    developmentKey: (name: string, existing: boolean) =>
+      `  - ${
+        !existing ? 'Create development API key' : 'Development API key found'
+      }: ${Logger[!existing ? 'highlightText' : 'standardText'](name)}`,
+    deploymentKey: (name: string, existing: boolean) =>
+      `  - ${
+        !existing ? 'Create deployment API key' : 'Deployment API key found'
+      }: ${Logger[!existing ? 'highlightText' : 'standardText'](name)}`,
+    ciIntro: (git: GitHelper) =>
+      `We will create API keys with permissions to use this project with Contensis, and add a job to your CI that will deploy a container build. We will ask you to add secrets/variables to your git repository to give your workflow permission to push a Block to Contensis.
+
+You could visit ${git.secretsUri} to check that you can see repository settings`,
+    ciDetails: (filename: string) =>
+      `Add push-block job to CI file: ${Logger.highlightText(filename)}\n`,
+    confirm: () =>
+      `Confirm these details are correct so we can make changes to your project`,
+    accessTokenPrompt: () =>
+      `Please supply the access token for the Delivery API (optional)`,
+    createDevKey: (keyName: string, existing: boolean) =>
+      `${
+        !existing ? 'Created' : 'Checked permissions for'
+      } development API key ${Logger.standardText(keyName)}`,
+    createDeployKey: (keyName: string, existing: boolean) =>
+      `${
+        !existing ? 'Created' : 'Checked permissions for'
+      } deployment API key ${Logger.standardText(keyName)}`,
+    createKeyFail: (keyName: string, existing: boolean) =>
+      `Failed to ${
+        !existing ? 'create' : 'update'
+      } API key ${Logger.highlightText(keyName)}`,
+    writeEnvFile: () => `Written .env file to project home directory`,
+    useEnvFileTip: () =>
+      `You should alter existing project code that connects a Contensis client to use the variables from this file`,
+    writeCiFile: (ciFilePath: string) =>
+      `Updated CI file ${Logger.standardText(winSlash(ciFilePath))}`,
+    ciBlockTip: (blockId: string, env: string, projectId: string) =>
+      `A job is included to deploy your built container image to ${Logger.standardText(
+        projectId
+      )} at ${Logger.standardText(env)} in a block called ${Logger.standardText(
+        blockId
+      )}`,
+    addGitSecretsIntro: () =>
+      `We have ceated an API key that allows you to deploy your app image to a Contensis Block but we need you to add these details to your GitLab repository.`,
+    addGitSecretsHelp: (git: GitHelper, id: string, secret: string) =>
+      `Add secrets or variables in your repository's settings page\n\nGo to ${Logger.highlightText(
+        git.secretsUri
+      )}\n\n${
+        git.type === 'github'
+          ? `Add a "New repository secret"`
+          : `Expand "Variables" and hit "Add variable"`
+      }\n\n    ${
+        git.type === 'github' ? `Secret name:` : `Key:`
+      } ${Logger.highlightText(`CONTENSIS_CLIENT_ID`)}\n    ${
+        git.type === 'github' ? `Secret:` : `Value:`
+      } ${Logger.highlightText(
+        id
+      )}\n\n ${`Add one more secret/variable to the repository`}\n\n    ${
+        git.type === 'github' ? `Secret name:` : `Key:`
+      } ${Logger.highlightText(`CONTENSIS_SHARED_SECRET`)}\n    ${
+        git.type === 'github' ? `Secret:` : `Value:`
+      } ${Logger.highlightText(secret)}`,
+    success: () => `Contensis developer environment initialisation complete`,
+    partialSuccess: () =>
+      `Contensis developer environment initialisation completed with errors`,
+    failed: () => `Contensis developer environment initialisation failed`,
+    startProjectTip: () =>
+      `Start up your project in the normal way for development`,
   },
 };

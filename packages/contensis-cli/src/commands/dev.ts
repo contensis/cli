@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { cliCommand } from '~/services/ContensisCliService';
+import { devCommand } from '~/services/ContensisDevService';
 
 export const makeDevCommand = () => {
   const dev = new Command()
@@ -8,6 +8,33 @@ export const makeDevCommand = () => {
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
+
+  dev
+    .command('init')
+    .description(
+      'initialise a git clone directory to connect and deploy to Contensis'
+    )
+    .argument(
+      '[projectHome]',
+      'the path of the folder to initialise',
+      process.cwd()
+    )
+    .option(
+      '--url <url>',
+      'override the git url or add one to initialise a non-git folder'
+    )
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > dev init\n`
+    )
+    .action(async (projectHome: string, opts) => {
+      await devCommand(['dev', 'init', projectHome], opts).DevelopmentInit(
+        projectHome,
+        opts
+      );
+    });
 
   dev
     .command('requests')
@@ -22,7 +49,7 @@ Example call:
   > dev requests test-block-one\n`
     )
     .action(async (blockIds: string[] = [], opts) => {
-      await cliCommand(
+      await devCommand(
         ['dev', 'requests', blockIds.join(' ')],
         opts
       ).ExecRequestHandler(blockIds, opts?.args);
