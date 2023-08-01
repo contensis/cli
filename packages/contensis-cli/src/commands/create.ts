@@ -19,12 +19,12 @@ export const makeCreateCommand = () => {
     .argument('<name>', 'the name of the project to create')
     .argument('[description]', 'optional description of the project')
     .option(
-      '-l, --language',
+      '-l --language',
       'the default language of the project to create',
       'en-GB'
     )
     .option(
-      '-langs, --supported-languages <langs...>',
+      '-langs --supported-languages <langs...>',
       'space separated list of other supported languages'
     )
     .usage(

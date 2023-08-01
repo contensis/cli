@@ -21,36 +21,36 @@ export const makePushCommand = () => {
     )
     .argument('[branch]', 'the branch we are pushing to')
     .option(
-      '-r, --release',
+      '-r --release',
       'whether to release the pushed block version',
       false
     )
     .option(
-      '-cid, --commit-id <commitId>',
+      '-cid --commit-id <commitId>',
       'the id of the source git commit for the supplied image uri'
     )
     .option(
-      '-cmsg, --commit-message <commitMessage>',
+      '-cmsg --commit-message <commitMessage>',
       'the git commit message for the supplied commit id'
     )
     .option(
-      '-cdt, --commit-datetime <commitDateTime>',
+      '-cdt --commit-datetime <commitDateTime>',
       'the timestamp of the source git commit for the supplied image uri'
     )
     .option(
-      '-author, --author-email <authorEmail>',
+      '-author --author-email <authorEmail>',
       'the git email address of the author of the source git commit'
     )
     .option(
-      '-committer, --committer-email <committerEmail>',
+      '-committer --committer-email <committerEmail>',
       'the git email address of the commiter of the source git commit'
     )
     .option(
-      '-repo, --repository-url <repositoryUrl>',
+      '-repo --repository-url <repositoryUrl>',
       'the url of the source repository for the supplied image uri'
     )
     .option(
-      '-pr, --provider <sourceProvider>',
+      '-pr --provider <sourceProvider>',
       'the url of the source repository for the supplied image uri'
     )
     .usage('<block-id> <image uri> [branch] [options]')

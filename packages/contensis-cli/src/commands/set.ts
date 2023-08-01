@@ -167,7 +167,7 @@ Example call:
     .description('add entry permissions to a role')
     .argument('<"Role name" or id>', 'the role name or id to update')
     .option(
-      '-contenttypes, --content-type-ids [content-type-id...]',
+      '-contenttypes --content-type-ids [content-type-id...]',
       'any content type ids to add permissions for'
     )
     .option(

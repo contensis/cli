@@ -103,12 +103,12 @@ Example call:
     )
     .addOption(commit)
     .option(
-      '-preserve, --preserve-guids',
+      '-preserve --preserve-guids',
       'include this flag when you are importing entries that you have previously exported and wish to update'
     )
     .addOption(
       new Option(
-        '-oe, --output-entries <outputEntries>',
+        '-oe --output-entries <outputEntries>',
         'which details of the entries included in the import to output'
       )
         .choices(['errors', 'changes', 'all'])

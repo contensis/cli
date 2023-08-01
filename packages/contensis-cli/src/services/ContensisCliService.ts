@@ -2307,7 +2307,7 @@ class ContensisCli {
 
 export const cliCommand = (
   commandArgs: string[],
-  outputOpts: OutputOptionsConstructorArg,
+  outputOpts?: OutputOptionsConstructorArg,
   contensisOpts: Partial<MigrateRequest> = {}
 ) => {
   return new ContensisCli(['', '', ...commandArgs], outputOpts, contensisOpts);

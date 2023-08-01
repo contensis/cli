@@ -26,47 +26,47 @@ export const mapContensisOpts = (opts: any = {}) => ({
 
 /* Output options */
 const output = new Option(
-  '-o, --output <output>',
+  '-o --output <output>',
   'save output to a file e.g. --output ./output.txt'
 );
 
 const format = new Option(
-  '-f, --format <format>',
+  '-f --format <format>',
   'format output as csv, json, xml or table (default)'
 ).choices(['csv', 'json', 'xml', 'table']);
 
 /* Connect options */
 const alias = new Option(
-  '-a, --alias <alias>',
+  '-a --alias <alias>',
   'the cloud CMS alias to connect your request with'
 );
 
 export const project = new Option(
-  '-p, --project-id <projectId>',
+  '-p --project-id <projectId>',
   'the projectId to make your request with'
 );
 
 /* Authentication options */
 const user = new Option(
-  '-u, --user <user>',
+  '-u --user <user>',
   'the username to authenticate your request with'
 );
 const password = new Option(
-  '-pw, --password <password>',
+  '-pw --password <password>',
   'the password to use to login with (optional/insecure)'
 );
 const clientId = new Option(
-  '-id, --client-id <clientId>',
+  '-id --client-id <clientId>',
   'the clientId to authenticate your request with'
 );
 const sharedSecret = new Option(
-  '-s, --shared-secret <sharedSecret>',
+  '-s --shared-secret <sharedSecret>',
   'the shared secret to use when logging in with a client id'
 );
 
 /* Entry get options */
 export const zenql = new Option(
-  '-q, --zenql <zenql>',
+  '-q --zenql <zenql>',
   'get entries with a supplied ZenQL statement'
 );
 
