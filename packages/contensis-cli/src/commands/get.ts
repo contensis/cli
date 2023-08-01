@@ -267,13 +267,6 @@ Example call:
       );
     });
 
-  const dataCenter = new Argument(
-    '[dataCenter]',
-    'the datacentre of the block to get logs for'
-  )
-    .choices(['hq', 'london', 'manchester', 'all'])
-    .default('all');
-
   block
     .command('logs')
     .description('get logs for a block')
@@ -288,8 +281,15 @@ Example call:
       'the version of the block pushed to the branch to get logs for',
       'latest'
     )
-    .addArgument(dataCenter)
-    .option('-t, --follow', 'follow block logs in near realtime', false)
+    .addArgument(
+      new Argument(
+        '[dataCenter]',
+        'the datacentre of the block to get logs for'
+      )
+        .choices(['hq', 'london', 'manchester', 'all'])
+        .default('all')
+    )
+    .option('-t --follow', 'follow block logs in near realtime', false)
     .usage('get block logs [blockId] [branch] [version] [dataCenter]')
     .addHelpText(
       'after',
