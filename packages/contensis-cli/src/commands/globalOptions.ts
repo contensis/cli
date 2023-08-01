@@ -13,10 +13,23 @@ export const mapContensisOpts = (opts: any = {}) => ({
       : undefined,
   models: opts.modelIds,
   query:
-    opts.id || opts.entryIds || opts.phrase || opts.fields
+    opts.id ||
+    opts.entryIds ||
+    opts.phrase ||
+    opts.fields ||
+    opts.orderBy ||
+    opts.paths ||
+    opts.assetType ||
+    opts.contentType ||
+    opts.dataFormat
       ? {
+          assetTypes: opts.assetType,
+          contentTypeIds: opts.contentType,
+          dataFormats: opts.dataFormat ? [opts.dataFormat] : undefined,
           fields: opts.fields,
           includeIds: opts.id || opts.entryIds,
+          includePaths: opts.paths,
+          orderBy: opts.orderBy,
           searchTerm: opts.phrase,
         }
       : undefined,
@@ -71,19 +84,27 @@ export const zenql = new Option(
 );
 
 export const entryId = new Option('-i --id <id...>', 'the entry id(s) to get');
+export const contentTypes = new Option(
+  '-c --content-type <contentType...>',
+  'get entries of these content type(s)'
+);
+export const assetTypes = new Option(
+  '-at --asset-type <assetType...>',
+  'get assets of given content type(s) e.g. image word pdf'
+);
 
 /* Import options */
 export const fromFile = new Option(
-  '-file, --from-file <fromFile>',
+  '-file --from-file <fromFile>',
   'file path to import asset(s) from'
 );
 
 export const fromCms = new Option(
-  '-source, --source-alias <fromCms>',
+  '-source --source-alias <fromCms>',
   'the cloud CMS alias to import asset(s) from'
 );
 export const fromProject = new Option(
-  '-sp, --source-project-id <fromProject>',
+  '-sp --source-project-id <fromProject>',
   'the id of the Contensis project to import asset(s) from (Default: [last connected project])'
 );
 
@@ -111,9 +132,17 @@ export const addImportOptions = (program: Command) => {
   }
   return program;
 };
+
+export const getEntryOptions = (command: Command) =>
+  command
+    .addOption(entryId)
+    .addOption(zenql)
+    .addOption(contentTypes)
+    .addOption(assetTypes);
+
 export const addGetEntryOptions = (program: Command) => {
   for (const command of program.commands) {
-    command.addOption(entryId).addOption(zenql);
+    getEntryOptions(command);
   }
   return program;
 };

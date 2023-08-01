@@ -37,7 +37,7 @@
     "jsonpath-mapper": "^1.1.0",
     "keytar": "^7.9.0",
     "lodash": "^4.17.21",
-    "migratortron": "^1.0.0-beta.30",
+    "migratortron": "^1.0.0-beta.32",
     "node-fetch": "^2.6.7",
     "parse-git-config": "^3.0.0",
     "patch-package": "^6.4.7",

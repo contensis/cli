@@ -1,7 +1,14 @@
-import { Argument, Command } from 'commander';
+import { Argument, Command, Option } from 'commander';
 import { merge } from 'lodash';
 import { cliCommand } from '~/services/ContensisCliService';
-import { addGlobalOptions, mapContensisOpts } from './globalOptions';
+import {
+  addGlobalOptions,
+  assetTypes,
+  contentTypes,
+  entryId,
+  mapContensisOpts,
+  zenql,
+} from './globalOptions';
 
 export const makeGetCommand = () => {
   const program = new Command()
@@ -144,6 +151,52 @@ Example call:
       );
     });
 
+  const sharedGetEntryOptions = (command: Command) =>
+    command
+      .addOption(entryId)
+      .addOption(zenql)
+      .addOption(
+        new Option(
+          '-fi --fields <fields...>',
+          'limit the output fields on returned entries'
+        )
+      )
+      .addOption(
+        new Option(
+          '-ob --order-by <orderBy...>',
+          'field name(s) to order the results by (prefix "-" for descending)'
+        )
+      );
+
+  sharedGetEntryOptions(
+    program
+      .command('assets')
+      .description('get asset entries')
+      .argument(
+        '[search phrase]',
+        'get assets with the search phrase, use quotes for multiple words'
+      )
+      .addOption(assetTypes)
+  )
+    .option('-l --paths <paths...>', 'get assets under the given path(s)')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get assets --zenql "sys.contentTypeId = blog" --fields sys.id sys.properties.filePath sys.properties.filename
+`
+    )
+    .action(async (phrase: string, opts) => {
+      // Maintaining a separate command for assets vs entries
+      // allows us to offer up more options when dealing with just assets
+      await cliCommand(
+        ['get', 'assets'],
+        opts,
+        mapContensisOpts({ dataFormat: 'asset', phrase, ...opts })
+      ).GetEntries({});
+    });
+
+  sharedGetEntryOptions(
   program
     .command('entries')
     .description('get entries')
@@ -151,24 +204,26 @@ Example call:
       '[search phrase]',
       'get entries with the search phrase, use quotes for multiple words'
     )
-    .option('-i --id <id...>', 'the entry id(s) to get')
+      .addOption(contentTypes)
     .option(
-      '-d, --dependents',
+        '-d --dependents',
       'find and return any dependencies of all found entries'
     )
-    .option(
-      '-fi, --fields <fields...>',
-      'limit the output fields on returned entries'
+  )
+    .addOption(
+      new Option(
+        '--data-format <dataFormat>',
+        'find and return entries of a specific data format'
     )
-    .option(
-      '-q, --zenql <zenql>',
-      'get entries with a supplied ZenQL statement'
+        .choices(['entry', 'asset', 'webpage'])
+        .default('entry')
     )
     .addHelpText(
       'after',
       `
 Example call:
   > get entries --zenql "sys.contentTypeId = blog" --fields entryTitle entryDescription sys.id --output ./blog-posts.csv --format csv
+  > get entries --content-type blog --fields entryTitle sys.version.modified --order-by -sys.version.modified
 `
     )
     .action(async (phrase: string, opts, cmd) => {
