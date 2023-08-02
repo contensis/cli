@@ -2,6 +2,7 @@
 import chalk from 'chalk';
 import dateFormat from 'dateformat';
 import deepCleaner from 'deep-cleaner';
+import { ansiEscapeCodes, first, strlen } from 'printable-characters';
 // import ProgressBar from 'progress';
 import { isSysError, tryStringify } from '.';
 
@@ -213,6 +214,26 @@ export class Logger {
   static raw: LogMethod = (content: string) => {
     if (progress.active) progress.current.interrupt(content);
     else console.log(content);
+  };
+
+  static limits = (content: string, displayLength = 30) => {
+    const consoleWidth = process.stdout.columns;
+    console.info(
+      consoleWidth
+        ? content
+            .split('\n')
+            .slice(0, consoleWidth ? displayLength : undefined)
+            .map((line: string) =>
+              consoleWidth && strlen(line) > consoleWidth
+                ? first(line, consoleWidth)
+                : line
+            )
+            .join('\n')
+        : content.replace(ansiEscapeCodes, '')
+    );
+    const tableArray = content.split('\n');
+    if (consoleWidth && tableArray.length > displayLength)
+      console.info(`\n`, `- and ${tableArray.length - displayLength} more...`);
   };
 }
 

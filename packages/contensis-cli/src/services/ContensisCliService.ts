@@ -6,6 +6,7 @@ import to from 'await-to-js';
 import chalk from 'chalk';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
+import { Node } from 'contensis-delivery-api/lib/models';
 import { Entry, Role } from 'contensis-management-api/lib/models';
 import {
   ContensisMigrationService,
@@ -1737,12 +1738,45 @@ class ContensisCli {
         log.error(messages.nodes.failedGet(currentProject), err);
         return;
       }
-      const nodes = contensis.content.sourceRepo.nodes.tree;
+      const root = contensis.content.sourceRepo.nodes.tree;
 
       log.success(messages.nodes.get(currentProject, rootPath, depth));
-      this.HandleFormattingAndOutput(nodes, () => {
+
+      const outputNode = (node: Node | any, spaces: string) =>
+        `${node.entry ? log.highlightText('e') : log.infoText('-')}${
+          node.isCanonical ? log.highlightText('c') : log.infoText('-')
+        }${
+          node.includeInMenu ? log.highlightText('m') : log.infoText('-')
+        }${spaces}${
+          node.isCanonical ? log.boldText(`/${node.slug}`) : `/${node.slug}`
+        }${node.entry ? ` ${log.helpText(node.entry.sys.contentTypeId)}` : ''}${
+          node.childCount ? ` +${node.childCount}` : ``
+        } ${log.infoText(node.displayName)}`;
+
+      this.HandleFormattingAndOutput(root, () => {
         // print the nodes to console
-        log.object(nodes);
+        log.object({ ...root, children: undefined });
+        log.raw('');
+        log.info(
+          `${log.highlightText('e')} = has entry; ${log.highlightText(
+            'c'
+          )} = canonical; ${log.highlightText('m')} = include in menu`
+        );
+        log.line();
+        const outputChildren = (root: Node | undefined, depth = 2) => {
+          let str = '';
+          for (const node of (root as any)?.children as Node[]) {
+            str += `${outputNode(node, Array(depth + 1).join('  '))}\n`;
+            if ('children' in node) str += outputChildren(node, depth + 1);
+          }
+          return str;
+        };
+
+        const children = outputChildren(root);
+        log.limits(
+          `${outputNode(root, '  ')}${children ? `\n${children}` : ''}`,
+          100
+        );
       });
     } else {
       log.warning(messages.models.noList(currentProject));
