@@ -8,7 +8,7 @@ import { isSysError, tryStringify } from '.';
 type LogMethod = (content: string) => void;
 type LogErrorMethod = (content: string, err?: any, newline?: string) => void;
 type LogJsonMethod = (content: any, depth?: number, indent?: string) => void;
-type LogJsonDepthMethod = (content: any, depth: number) => void;
+type LogJsonDepthMethod = (content: any, depth?: number) => void;
 type LogArrayMethod = (contentArray: string[]) => void;
 type LogErrorFunc = (
   err: any,
@@ -41,9 +41,9 @@ export class Logger {
     const message = `${Logger.getPrefix()} ${Logger.errorText(
       `${Logger.isUserTerminal ? '❌' : '[ERROR]'} ${content}${
         err
-          ? `\n\n${
+          ? `\n\n${Logger.infoText(
               isSysError(err) ? err.toString() : JSON.stringify(err, null, 2)
-            }`
+            )}`
           : ''
       }`
     )}${newline}`;

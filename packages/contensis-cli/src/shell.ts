@@ -224,7 +224,14 @@ class ContensisShell {
           } catch (ex: any) {
             const str = ex.toString();
             if (!str.includes('CommanderError'))
-              logError(ex, `Shell ${ex.toString()}`);
+              logError(
+                ex,
+                `Shell ${
+                  ex instanceof Error
+                    ? ex.toString()
+                    : JSON.stringify(ex, null, 2)
+                }`
+              );
           } finally {
             return this.contensisPrompt();
           }
