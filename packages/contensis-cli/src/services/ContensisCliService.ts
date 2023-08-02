@@ -48,7 +48,6 @@ import { diffLogStrings } from '~/util/diff';
 import { logError, Logger } from '~/util/logger';
 import { promiseDelay } from '~/util/timers';
 
-
 type OutputFormat = 'json' | 'csv' | 'xml';
 
 type OutputOptions = {
@@ -1719,6 +1718,32 @@ class ContensisCli {
         if (!result.entriesToMigrate[currentProject].totalCount)
           log.help(messages.entries.notFound(currentEnv));
       }
+    } else {
+      log.warning(messages.models.noList(currentProject));
+      log.help(messages.connect.tip());
+    }
+  };
+
+  GetNodes = async (rootPath: string, depth = 0) => {
+    const { currentProject, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      log.line();
+      const [err] = await to(
+        contensis.content.sourceRepo.nodes.GetNodes(rootPath, depth)
+      );
+      if (err) {
+        log.error(messages.nodes.failedGet(currentProject), err);
+        return;
+      }
+      const nodes = contensis.content.sourceRepo.nodes.tree;
+
+      log.success(messages.nodes.get(currentProject, rootPath, depth));
+      this.HandleFormattingAndOutput(nodes, () => {
+        // print the nodes to console
+        log.object(nodes);
+      });
     } else {
       log.warning(messages.models.noList(currentProject));
       log.help(messages.connect.tip());

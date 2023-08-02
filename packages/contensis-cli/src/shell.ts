@@ -148,6 +148,7 @@ class ContensisShell {
         'get contenttype',
         'get component',
         'get entries',
+        'get nodes',
         'get model',
         'get project',
         'get role',

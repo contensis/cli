@@ -154,6 +154,14 @@ export const LogMessages = {
     failedGet: (projectId: string, id: string) =>
       `[${projectId}] Unable to get content models ${Logger.highlightText(id)}`,
   },
+  nodes: {
+    failedGet: (projectId: string) =>
+      `[${projectId}] Cannot retrieve nodes from Site view`,
+    get: (projectId: string, root: string, depth: number) =>
+      `[${projectId}] Site view nodes at: ${Logger.highlightText(root)}${
+        depth ? ` to a depth of ${depth}` : ``
+      }\n`,
+  },
   contenttypes: {
     list: (projectId: string) =>
       `Content types in ${Logger.highlightText(projectId)}:`,

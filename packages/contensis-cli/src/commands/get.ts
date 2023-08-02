@@ -238,6 +238,29 @@ Example call:
       });
     });
 
+  program
+    .command('nodes')
+    .description('get nodes')
+    .argument('[root]', 'get node(s) from the specified path e.g. /blog', '/')
+    .option(
+      '-d --depth <depth>',
+      'get nodes with children to a specified depth',
+      '0'
+    )
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get nodes /blog --depth 1
+`
+    )
+    .action(async (root: string, opts) => {
+      await cliCommand(['get', 'nodes'], opts, mapContensisOpts(opts)).GetNodes(
+        root,
+        opts.depth
+      );
+    });
+
   const block = program
     .command('block')
     .description('get a block or block version')
