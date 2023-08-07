@@ -23,6 +23,15 @@ export const makeDevCommand = () => {
       '--url <url>',
       'override the git url or add one to initialise a non-git folder'
     )
+    .option(
+      '-d --dry-run',
+      'perform a dry run of the project initialisation where no changes are made',
+      true
+    )
+    .option(
+      '--commit',
+      'commit change (will eventually be deprecated in favour of --dry-run)'
+    )
     .addHelpText(
       'after',
       `
@@ -32,7 +41,7 @@ Example call:
     .action(async (projectHome: string, opts) => {
       await devCommand(['dev', 'init', projectHome], opts).DevelopmentInit(
         projectHome,
-        opts
+        { ...opts, dryRun: !opts.commit }
       );
     });
 

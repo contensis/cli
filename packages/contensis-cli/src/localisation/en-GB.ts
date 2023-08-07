@@ -221,6 +221,8 @@ export const LogMessages = {
       `Assign your new key to a role with "set role assignments", or create a new role with "create role"`,
     failedCreate: (env: string, name: string) =>
       `[${env}] Unable to create API key ${Logger.highlightText(name)}`,
+    failedUpdate: (env: string, name: string) =>
+      `[${env}] Unable to update API key ${Logger.highlightText(name)}`,
     removed: (env: string, id: string) =>
       `[${env}] Deleted API key ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
@@ -479,7 +481,7 @@ You could visit ${git.secretsUri} to check that you can see repository settings`
       )}`,
     addGitSecretsIntro: () =>
       `We have ceated an API key that allows you to deploy your app image to a Contensis Block but we need you to add these details to your GitLab repository.`,
-    addGitSecretsHelp: (git: GitHelper, id: string, secret: string) =>
+    addGitSecretsHelp: (git: GitHelper, id?: string, secret?: string) =>
       `Add secrets or variables in your repository's settings page\n\nGo to ${Logger.highlightText(
         git.secretsUri
       )}\n\n${

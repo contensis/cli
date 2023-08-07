@@ -1,19 +1,21 @@
+import to from 'await-to-js';
 import { execFile, spawn } from 'child_process';
 import inquirer from 'inquirer';
 import path from 'path';
+import { Entry, Role } from 'contensis-management-api/lib/models';
 
 import { MigrateRequest } from 'migratortron';
 import { stringify } from 'yaml';
-
-import ContensisCli, {
-  OutputOptionsConstructorArg,
-} from './ContensisCliService';
+import ContensisCli from './ContensisCliService';
+import ContensisRole from './ContensisRoleService';
+import { OutputOptionsConstructorArg } from '~/models/CliService';
 import { mapSiteConfigYaml } from '~/mappers/ContensisCliService-to-RequestHanderSiteConfigYaml';
-import { appRootDir, writeFile } from '~/providers/file-provider';
+import { appRootDir, readFile, writeFile } from '~/providers/file-provider';
 import { jsonFormatter } from '~/util/json.formatter';
 import { GitHelper } from '~/util/git';
+import { findByIdOrName } from '~/util/find';
 
-class ContensisDev extends ContensisCli {
+class ContensisDev extends ContensisRole {
   constructor(
     args: string[],
     outputOpts?: OutputOptionsConstructorArg,
@@ -23,6 +25,7 @@ class ContensisDev extends ContensisCli {
   }
 
   DevelopmentInit = async (projectHome: string, opts: any) => {
+    const { dryRun = false } = opts || {};
     const { currentEnv, currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();
 
@@ -45,12 +48,23 @@ class ContensisDev extends ContensisCli {
       // Retrieve ci workflow info
       const workflowFiles = git.workflows;
 
-      // Set variables for logging etc.
+      // Set variables for performing operations and logging etc.
       let ciFileName = git.ciFileName;
 
-      const devKey = `${git.name} development`;
-      const deployKey = `${git.name} deployment`;
+      const devKeyName = `${git.name} development`;
+      const devKeyDescription = `${git.name} [contensis-cli]`;
+      const devKeyPermissions = { blocks: [] } as Partial<Role['permissions']>;
+      let existingDevKey = apiKeyExists(devKeyName);
+
+      const deployKeyName = `${git.name} deployment`;
+      const deployKeyDescription = `${git.name} deploy [contensis-cli]`;
+      const deployKeyPermissions = { blocks: ['push', 'release'] } as Partial<
+        Role['permissions']
+      >;
+      let existingDeployKey = apiKeyExists(deployKeyName);
+
       const blockId = git.name;
+      const errors = [] as AppError[];
 
       // Start render console output
       log.raw('');
@@ -68,12 +82,12 @@ class ContensisDev extends ContensisCli {
       );
       log.raw(
         log.infoText(
-          messages.devinit.developmentKey(devKey, !!apiKeyExists(devKey))
+          messages.devinit.developmentKey(devKeyName, !!existingDevKey)
         )
       );
       log.raw(
         log.infoText(
-          messages.devinit.deploymentKey(deployKey, !!apiKeyExists(deployKey))
+          messages.devinit.deploymentKey(deployKeyName, !!existingDeployKey)
         )
       );
       log.raw('');
@@ -95,7 +109,7 @@ class ContensisDev extends ContensisCli {
       }
 
       log.raw(log.infoText(messages.devinit.ciDetails(ciFileName)));
-      log.help(messages.devinit.ciIntro(git));
+      ylog.help(messages.devinit.ciIntro(git));
 
       // Confirm prompt
       const { confirm } = await inquirer.prompt([
@@ -120,25 +134,131 @@ class ContensisDev extends ContensisCli {
       log.raw('');
 
       // Magic happens...
+      const checkpoint = (op: string) => {
+        if (errors.length) throw errors[0];
+        else log.debug(`${op} completed ok`);
+        return true;
+      };
 
       // Arrange API keys for development and deployment
-      log.success(messages.devinit.createDevKey(devKey, false));
-      log.success(messages.devinit.createDeployKey(deployKey, true));
+      const [getRolesErr, roles] = await to(contensis.roles.GetRoles());
+      if (!roles && getRolesErr) errors.push(getRolesErr);
+      checkpoint(`fetched ${roles?.length} roles`);
+      if (dryRun) {
+        checkpoint(`skip api key creation (dry-run)`);
+      } else {
+        existingDevKey = await this.CreateOrUpdateApiKey(
+          existingDevKey,
+          devKeyName,
+          devKeyDescription
+        );
+        checkpoint('dev key created');
+
+        existingDeployKey = await this.CreateOrUpdateApiKey(
+          existingDeployKey,
+          deployKeyName,
+          deployKeyDescription
+        );
+        checkpoint('deploy key created');
+
+        // Ensure dev API key is assigned to a role
+        let existingDevRole = findByIdOrName(roles || [], devKeyName, true) as
+          | Role
+          | undefined;
+        existingDevRole = await this.CreateOrUpdateRole(
+          existingDevRole,
+          devKeyName,
+          devKeyDescription,
+          { apiKeys: [devKeyName] },
+          devKeyPermissions
+        );
+        checkpoint('dev key role assigned');
+        log.success(messages.devinit.createDevKey(devKeyName, true));
+
+        // Ensure deploy API key is assigned to a role with the right permissions
+        let existingDeployRole = findByIdOrName(
+          roles || [],
+          deployKeyName,
+          true
+        ) as Role | undefined;
+        existingDeployRole = await this.CreateOrUpdateRole(
+          existingDeployRole,
+          deployKeyName,
+          deployKeyDescription,
+          { apiKeys: [deployKeyName] },
+          deployKeyPermissions
+        );
+
+        checkpoint('deploy key role assigned');
+        log.success(messages.devinit.createDeployKey(deployKeyName, true));
+        checkpoint('api keys done');
+      }
 
       // Update or create a file called .env in project home
-      log.success(messages.devinit.writeEnvFile());
-      // log.help(messages.devinit.useEnvFileTip());
+      const envContents = {
+        ALIAS: currentEnv,
+        PROJECT: currentProject,
+        ACCESS_TOKEN: accessToken,
+      };
+      const envFilePath = `${projectHome}/.env`;
+      const existingEnvFile = readFile(envFilePath);
+      const existingFileLines = (existingEnvFile || '').split('\n');
+      const envFileLines: string[] = [];
+
+      const updatedEnvKeys: string[] = [];
+      for (const ln of existingFileLines) {
+        let newline = '';
+        for (const [k, v] of Object.entries(envContents))
+          if (ln.startsWith(`${k}=`)) {
+            newline = `${k}=${v}`;
+            updatedEnvKeys.push(k);
+          }
+        envFileLines.push(newline || ln);
+      }
+      for (const addKey of existingFileLines
+        .filter(
+          efl =>
+            !updatedEnvKeys.find(uek =>
+              uek.startsWith(`${efl.split('=')?.[0]}=`)
+            ) && Object.keys(envContents).find(ck => ck === efl.split('=')?.[0])
+        )
+        .map(fl => fl.split('=')?.[0]) as (keyof typeof envContents)[]) {
+        envFileLines.push(`${addKey}=${envContents[addKey]}`);
+      }
+
+      if (dryRun) {
+        checkpoint('skip .env file update (dry-run)');
+        log.info(`.env file`);
+        log.object(envFileLines);
+      } else {
+        writeFile(envFilePath, envFileLines.join('\n'));
+        checkpoint('.env file updated');
+        log.success(messages.devinit.writeEnvFile());
+        // log.help(messages.devinit.useEnvFileTip());
+      }
 
       // Update CI file -- different for GH/GL -- create a sample one with build?
-      log.success(messages.devinit.writeCiFile(`./${ciFileName}`));
-      log.info(
-        messages.devinit.ciBlockTip(blockId, currentEnv, currentProject)
-      );
+      if (dryRun) {
+        checkpoint('skip CI file update (dry-run)');
+        log.info(`${ciFileName} file`);
+        // TODO: log what we might add to the file
+        //log.object(envFileLines);
+      } else {
+        log.success(messages.devinit.writeCiFile(`./${ciFileName}`));
+        log.info(
+          messages.devinit.ciBlockTip(blockId, currentEnv, currentProject)
+        );
+        checkpoint('CI file updated');
+      }
 
       // Echo Deployment API key to console, ask user to add secrets to repo
       log.warning(messages.devinit.addGitSecretsIntro());
       log.help(
-        messages.devinit.addGitSecretsHelp(git, '123-456', '789-012-345')
+        messages.devinit.addGitSecretsHelp(
+          git,
+          existingDeployKey?.id,
+          existingDeployKey?.sharedSecret
+        )
       );
 
       log.success(messages.devinit.success());
