@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import fetch from 'node-fetch';
-import inquirer from 'inquirer';
 import to from 'await-to-js';
 import chalk from 'chalk';
+import fs from 'fs';
+import inquirer from 'inquirer';
+import fetch from 'node-fetch';
+import path from 'path';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
 import { Node } from 'contensis-delivery-api/lib/models';
@@ -23,6 +23,7 @@ import {
 import ContensisAuthService from './ContensisAuthService';
 
 import { LogMessages } from '~/localisation/en-GB';
+import { OutputFormat, OutputOptionsConstructorArg } from '~/models/CliService';
 
 import { readJsonFile } from '~/providers/file-provider';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
@@ -48,42 +49,8 @@ import { jsonFormatter } from '~/util/json.formatter';
 import { diffLogStrings } from '~/util/diff';
 import { logError, Logger } from '~/util/logger';
 import { promiseDelay } from '~/util/timers';
+import { findByIdOrName } from '~/util/find';
 
-type OutputFormat = 'json' | 'csv' | 'xml';
-
-type OutputOptions = {
-  format?: OutputFormat;
-  output?: string;
-};
-
-interface IConnectOptions extends IAuthOptions {
-  alias?: string;
-  projectId?: string;
-}
-
-interface IAuthOptions {
-  user?: string;
-  password?: string;
-  clientId?: string;
-  sharedSecret?: string;
-}
-
-interface IImportOptions {
-  sourceAlias?: string;
-  sourceProjectId?: string;
-}
-
-export type OutputOptionsConstructorArg = OutputOptions &
-  IConnectOptions &
-  IImportOptions;
-
-export interface ContensisCliConstructor {
-  new (
-    args: string[],
-    outputOpts?: OutputOptionsConstructorArg,
-    contensisOpts?: Partial<MigrateRequest>
-  ): ContensisCli;
-}
 let insecurePasswordWarningShown = false;
 
 class ContensisCli {
@@ -938,15 +905,7 @@ class ContensisCli {
       if (Array.isArray(roles)) {
         log.success(messages.roles.list(currentEnv));
 
-        const role =
-          roles.find(
-            r =>
-              r.id === roleNameOrId ||
-              r.name.toLowerCase() === roleNameOrId.toLowerCase()
-          ) ||
-          roles.find(r =>
-            r.name.toLowerCase().includes(roleNameOrId.toLowerCase())
-          );
+        const role = findByIdOrName(roles, roleNameOrId);
 
         if (role) this.HandleFormattingAndOutput(role, log.object);
         else log.error(messages.roles.failedGet(currentEnv, roleNameOrId));
@@ -997,11 +956,7 @@ class ContensisCli {
       if (Array.isArray(roles)) {
         log.success(messages.roles.list(currentEnv));
 
-        const existingRole = roles.find(
-          r =>
-            r.id === roleNameOrId ||
-            r.name.toLowerCase() === roleNameOrId.toLowerCase()
-        );
+        const existingRole = findByIdOrName(roles, roleNameOrId, true);
         if (existingRole) {
           log.info(messages.roles.setPayload());
           log.object(role);
@@ -1041,11 +996,8 @@ class ContensisCli {
       if (Array.isArray(roles)) {
         log.success(messages.roles.list(currentEnv));
 
-        const existingRole = roles.find(
-          r =>
-            r.id === roleNameOrId ||
-            r.name.toLowerCase() === roleNameOrId.toLowerCase()
-        );
+        const existingRole = findByIdOrName(roles, roleNameOrId, true);
+
         if (existingRole) {
           const [deleteErr] = await contensis.roles.RemoveRole(existingRole.id);
 
@@ -2252,7 +2204,9 @@ class ContensisCli {
     const contensis = await this.ConnectContensis();
     if (contensis) {
       // Retrieve proxies list for env
-      const [err, proxies] = await contensis.proxies.GetProxies(proxyId);
+      const [err, proxies] = await (contensis.proxies.GetProxies as any)(
+        proxyId
+      ); // TODO: resolve any cast;
 
       if (Array.isArray(proxies)) {
         this.HandleFormattingAndOutput(proxies, () => {
@@ -2264,7 +2218,9 @@ class ContensisCli {
                 version.versionNo
               }] ${id} ${log.infoText`${description}`}`
             );
-            for (const [language, endpoint] of Object.entries(endpoints))
+            for (const [language, endpoint] of Object.entries(
+              endpoints as { [k: string]: any }
+            )) // TODO: resolve any cast
               console.log(
                 `      - ${log.infoText`language: ${language}
         server: ${endpoint.server}
@@ -2287,9 +2243,9 @@ class ContensisCli {
     const contensis = await this.ConnectContensis();
     if (contensis) {
       // Retrieve renderers list for env
-      const [err, renderers] = await contensis.renderers.GetRenderers(
+      const [err, renderers] = await (contensis.renderers.GetRenderers as any)(
         rendererId
-      );
+      ); // TODO: resolve any cast
 
       if (Array.isArray(renderers)) {
         this.HandleFormattingAndOutput(renderers, () => {
