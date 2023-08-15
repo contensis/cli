@@ -44,10 +44,7 @@ class ContensisRole extends ContensisCli {
 
   CreateOrUpdateRole = async (
     existingRole: Role | undefined,
-    name: string,
-    description: string,
-    assignments: Role['assignments'],
-    permissions: Role['permissions']
+    role: Partial<Role>
   ) => {
     const { contensis, currentEnv, messages } = this;
     if (!contensis) throw new Error('shouldnt be here');
@@ -56,24 +53,19 @@ class ContensisRole extends ContensisCli {
       // TODO: check is update needed?
       const [err, updated] = await contensis.roles.UpdateRole(existingRole.id, {
         ...existingRole,
-        assignments,
-        permissions,
+        ...role,
       });
       if (err)
-        throw new Error(messages.roles.failedSet(currentEnv, name), {
+        throw new Error(messages.roles.failedSet(currentEnv, role.name), {
           cause: err,
         });
       return updated;
     } else {
-      const [err, created] = await contensis.roles.CreateRole({
-        name,
-        description,
-        enabled: true,
-        assignments,
-        permissions,
-      } as Role);
+      const [err, created] = await contensis.roles.CreateRole(
+        role as Omit<Role, 'id'>
+      );
       if (err)
-        throw new Error(messages.roles.failedCreate(currentEnv, name), {
+        throw new Error(messages.roles.failedCreate(currentEnv, role.name), {
           cause: err,
         });
 

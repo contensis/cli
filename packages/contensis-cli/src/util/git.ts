@@ -14,18 +14,30 @@ export type GitTypes = hostedGitInfo.Hosts;
 
 export class GitHelper {
   private gitRepoPath: string;
+  private ciFile?: string;
+
   config = {} as GitConfig;
   info: hostedGitInfo | undefined;
   home: string | undefined;
 
+  set ciFileName(fileName: string) {
+    this.ciFile = fileName;
+  }
+
   get ciFileName() {
-    return this.workflows
-      ? this.type === 'github'
-        ? this.workflows.length > 1
-          ? '[multiple workflows]'
-          : this.workflows?.[0]
-        : GITLAB_CI_FILENAME
-      : '[unknown]';
+    return (
+      this.ciFile ||
+      (this.workflows
+        ? this.type === 'github'
+          ? this.workflows.length > 1
+            ? '[multiple workflows]'
+            : this.workflows?.[0]
+          : GITLAB_CI_FILENAME
+        : '[unknown]')
+    );
+  }
+  get ciFilePath() {
+    return `${this.gitRepoPath}/${this.ciFileName}`;
   }
   get name() {
     return (

@@ -23,11 +23,13 @@
   "author": "Zengenti",
   "license": "ISC",
   "dependencies": {
+    "@action-validator/core": "^0.5.3",
     "app-root-path": "^3.1.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
     "csv": "^6.1.0",
     "dayjs": "^1.11.6",
+    "diff": "^5.1.0",
     "figlet": "^1.5.2",
     "flat": "^5.0.2",
     "giturl": "^2.0.0",

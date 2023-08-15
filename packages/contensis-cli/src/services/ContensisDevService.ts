@@ -2,18 +2,26 @@ import to from 'await-to-js';
 import { execFile, spawn } from 'child_process';
 import inquirer from 'inquirer';
 import path from 'path';
-import { Entry, Role } from 'contensis-management-api/lib/models';
+import { parse, stringify } from 'yaml';
 
+import { Role } from 'contensis-management-api/lib/models';
 import { MigrateRequest } from 'migratortron';
-import { stringify } from 'yaml';
-import ContensisCli from './ContensisCliService';
+
 import ContensisRole from './ContensisRoleService';
 import { OutputOptionsConstructorArg } from '~/models/CliService';
-import { mapSiteConfigYaml } from '~/mappers/ContensisCliService-to-RequestHanderSiteConfigYaml';
+import { EnvContentsToAdd } from '~/models/DevService';
+import { mapSiteConfigYaml } from '~/mappers/DevRequests-to-RequestHanderSiteConfigYaml';
+import {
+  deployKeyRole,
+  devKeyRole,
+} from '~/mappers/DevInit-to-RolePermissions';
 import { appRootDir, readFile, writeFile } from '~/providers/file-provider';
 import { jsonFormatter } from '~/util/json.formatter';
 import { GitHelper } from '~/util/git';
 import { findByIdOrName } from '~/util/find';
+import { mergeDotEnvFileContents } from '~/util/dotenv';
+import { mapCIWorkflowContent } from '~/mappers/DevInit-to-CIWorkflow';
+import { diffFileContent } from '~/util/diff';
 
 class ContensisDev extends ContensisRole {
   constructor(
@@ -53,14 +61,11 @@ class ContensisDev extends ContensisRole {
 
       const devKeyName = `${git.name} development`;
       const devKeyDescription = `${git.name} [contensis-cli]`;
-      const devKeyPermissions = { blocks: [] } as Partial<Role['permissions']>;
       let existingDevKey = apiKeyExists(devKeyName);
 
       const deployKeyName = `${git.name} deployment`;
       const deployKeyDescription = `${git.name} deploy [contensis-cli]`;
-      const deployKeyPermissions = { blocks: ['push', 'release'] } as Partial<
-        Role['permissions']
-      >;
+
       let existingDeployKey = apiKeyExists(deployKeyName);
 
       const blockId = git.name;
@@ -97,34 +102,39 @@ class ContensisDev extends ContensisRole {
         ({ ciFileName } = await inquirer.prompt([
           {
             type: 'list',
-            message: `Multiple GitHub workflow files found\n${log.infoText(
-              `Tell us which GitHub workflow builds the container image after each push:`
-            )}`,
+            message: messages.devinit.ciMultipleChoices(),
             name: 'ciFileName',
             choices: workflowFiles,
             default: workflowFiles.find(f => f.includes('docker')),
           },
         ]));
         log.raw('');
+        git.ciFileName = ciFileName;
       }
 
       log.raw(log.infoText(messages.devinit.ciDetails(ciFileName)));
-      ylog.help(messages.devinit.ciIntro(git));
 
-      // Confirm prompt
-      const { confirm } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          message: messages.devinit.confirm(),
-          name: 'confirm',
-          default: false,
-        },
-      ]);
-      log.raw('');
-      if (!confirm) return;
+      // Look at the workflow file content and make updates
+      const mappedWorkflow = mapCIWorkflowContent(this, git);
+
+      log.help(messages.devinit.ciIntro(git));
+
+      if (!dryRun) {
+        // Confirm prompt
+        const { confirm } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            message: messages.devinit.confirm(),
+            name: 'confirm',
+            default: false,
+          },
+        ]);
+        log.raw('');
+        if (!confirm) return;
+      }
 
       // Access token prompt
-      const { accessToken } = await inquirer.prompt([
+      const { accessToken }: { accessToken: string } = await inquirer.prompt([
         {
           type: 'input',
           message: messages.devinit.accessTokenPrompt(),
@@ -167,10 +177,7 @@ class ContensisDev extends ContensisRole {
           | undefined;
         existingDevRole = await this.CreateOrUpdateRole(
           existingDevRole,
-          devKeyName,
-          devKeyDescription,
-          { apiKeys: [devKeyName] },
-          devKeyPermissions
+          devKeyRole(devKeyName, devKeyDescription)
         );
         checkpoint('dev key role assigned');
         log.success(messages.devinit.createDevKey(devKeyName, true));
@@ -183,10 +190,7 @@ class ContensisDev extends ContensisRole {
         ) as Role | undefined;
         existingDeployRole = await this.CreateOrUpdateRole(
           existingDeployRole,
-          deployKeyName,
-          deployKeyDescription,
-          { apiKeys: [deployKeyName] },
-          deployKeyPermissions
+          deployKeyRole(deployKeyName, deployKeyDescription)
         );
 
         checkpoint('deploy key role assigned');
@@ -195,42 +199,31 @@ class ContensisDev extends ContensisRole {
       }
 
       // Update or create a file called .env in project home
-      const envContents = {
+      const envContentsToAdd: EnvContentsToAdd = {
         ALIAS: currentEnv,
         PROJECT: currentProject,
-        ACCESS_TOKEN: accessToken,
       };
+      if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
+
       const envFilePath = `${projectHome}/.env`;
       const existingEnvFile = readFile(envFilePath);
-      const existingFileLines = (existingEnvFile || '').split('\n');
-      const envFileLines: string[] = [];
-
-      const updatedEnvKeys: string[] = [];
-      for (const ln of existingFileLines) {
-        let newline = '';
-        for (const [k, v] of Object.entries(envContents))
-          if (ln.startsWith(`${k}=`)) {
-            newline = `${k}=${v}`;
-            updatedEnvKeys.push(k);
-          }
-        envFileLines.push(newline || ln);
-      }
-      for (const addKey of existingFileLines
-        .filter(
-          efl =>
-            !updatedEnvKeys.find(uek =>
-              uek.startsWith(`${efl.split('=')?.[0]}=`)
-            ) && Object.keys(envContents).find(ck => ck === efl.split('=')?.[0])
-        )
-        .map(fl => fl.split('=')?.[0]) as (keyof typeof envContents)[]) {
-        envFileLines.push(`${addKey}=${envContents[addKey]}`);
-      }
+      const envFileLines = mergeDotEnvFileContents(
+        (existingEnvFile || '').split('\n').filter(l => !!l),
+        envContentsToAdd
+      );
+      const envDiff = diffFileContent(
+        existingEnvFile || '',
+        envFileLines.join('\n')
+      );
 
       if (dryRun) {
+        if (envDiff) {
+          log.info(`updating .env file ${envFilePath}: ${envDiff}`);
+          log.raw('');
+        }
         checkpoint('skip .env file update (dry-run)');
-        log.info(`.env file`);
-        log.object(envFileLines);
       } else {
+        if (envDiff) log.info(`updating .env file ${envFilePath}`);
         writeFile(envFilePath, envFileLines.join('\n'));
         checkpoint('.env file updated');
         log.success(messages.devinit.writeEnvFile());
@@ -239,11 +232,15 @@ class ContensisDev extends ContensisRole {
 
       // Update CI file -- different for GH/GL -- create a sample one with build?
       if (dryRun) {
+        if (mappedWorkflow?.diff) {
+          log.info(`updating${ciFileName} file: ${mappedWorkflow.diff}`);
+          log.raw('');
+        }
         checkpoint('skip CI file update (dry-run)');
-        log.info(`${ciFileName} file`);
-        // TODO: log what we might add to the file
-        //log.object(envFileLines);
+        //log.object(ciFileLines);
       } else {
+        if (mappedWorkflow?.diff) log.info(`updating${ciFileName} file`);
+        writeFile(git.ciFilePath, [].join('\n'));
         log.success(messages.devinit.writeCiFile(`./${ciFileName}`));
         log.info(
           messages.devinit.ciBlockTip(blockId, currentEnv, currentProject)
@@ -261,8 +258,13 @@ class ContensisDev extends ContensisRole {
         )
       );
 
-      log.success(messages.devinit.success());
-      log.help(messages.devinit.startProjectTip());
+      if (dryRun) {
+        log.success(messages.devinit.dryRun());
+        log.help(messages.devinit.noChanges());
+      } else {
+        log.success(messages.devinit.success());
+        log.help(messages.devinit.startProjectTip());
+      }
     }
   };
 

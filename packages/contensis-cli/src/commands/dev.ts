@@ -39,6 +39,7 @@ Example call:
   > dev init\n`
     )
     .action(async (projectHome: string, opts) => {
+      // TODO: add opts for overriding project name and git url
       await devCommand(['dev', 'init', projectHome], opts).DevelopmentInit(
         projectHome,
         { ...opts, dryRun: !opts.commit }

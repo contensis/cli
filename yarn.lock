@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@action-validator/core@^0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@action-validator/core/-/core-0.5.3.tgz#493b850ef7a2801830069d78f60cbefe0697423f"
+  integrity sha512-0ABelaY7nmpvV5q0z8Vl1cDeq2OZ1HyNXjXS54fBadLaCssZLbDvTa7M2uUaNMcEWV+Xl48WWbnqJWKePt9qHQ==
+
 "@angablue/exe@^1.2.0":
   version "1.2.0"
   resolved "https://registry.npmjs.org/@angablue/exe/-/exe-1.2.0.tgz"
@@ -1623,7 +1628,7 @@ contensis-delivery-api@^1.2.0:
     tslib "^1.10.0"
     whatwg-fetch "^3.0.0"
 
-contensis-management-api@^2.0.9, contensis-management-api@^2.1.1:
+contensis-management-api@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/contensis-management-api/-/contensis-management-api-2.1.1.tgz#9edd854f71a6a8a563a29eb8c7eab7ebb6045458"
   integrity sha512-GZ0CfV1Zh3TuhV2L/B2BUc6gdm/vYc43oFB3LDSRUWTXOe2jbsAmCRcb9066B1bE15LZ8PDWM7xwUGRLNNbe3Q==
@@ -2008,6 +2013,11 @@ diff@5.0.0:
 diff@^5.0.0:
   version "5.1.0"
   resolved "https://registry.npmjs.org/diff/-/diff-5.1.0.tgz"
+  integrity sha512-D+mk+qE8VC/PAUrlAU34N+VfXev0ghe5ywmpqrawphmVZc1bEfn56uo9qpyGp1p4xpzOHkSW4ztBd6L7Xx4ACw==
+
+diff@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-5.1.0.tgz#bc52d298c5ea8df9194800224445ed43ffc87e40"
   integrity sha512-D+mk+qE8VC/PAUrlAU34N+VfXev0ghe5ywmpqrawphmVZc1bEfn56uo9qpyGp1p4xpzOHkSW4ztBd6L7Xx4ACw==
 
 dir-glob@^3.0.1:
@@ -4219,38 +4229,6 @@ micromatch@^4.0.2, micromatch@^4.0.4:
     braces "^3.0.2"
     picomatch "^2.3.1"
 
-migratortron@^1.0.0-beta.32:
-  version "1.0.0-beta.32"
-  resolved "https://registry.yarnpkg.com/migratortron/-/migratortron-1.0.0-beta.32.tgz#308322549420692f7223ccf7f83fe870a332675e"
-  integrity sha512-5FezCWA84kWk4tc+QxD6PgqH3WF8zMXJZhp4yP5rVPbaZN3qp9om+hpDEUasA2X4vx+78rZ7+hwnX5nOWXErUg==
-  dependencies:
-    await-to-js "^2.1.1"
-    byte-size "^8.1.0"
-    chalk "^4.1.0"
-    console-table-printer "^2.10.0"
-    contensis-core-api "^1.0.5"
-    contensis-delivery-api "^1.2.0"
-    contensis-management-api "^2.1.1"
-    dateformat "^4.5.0"
-    deep-cleaner "^1.2.1"
-    deep-sort-object "^1.0.2"
-    deepmerge "^4.2.2"
-    diff "^5.0.0"
-    enterprise-fetch "^1.0.0"
-    express "^4.17.1"
-    jsonpath-mapper "^1.1.0"
-    lodash "^4.17.21"
-    minimist "^1.2.5"
-    module-alias "^2.2.2"
-    nock "^13.1.4"
-    p-queue "^6.6.2"
-    printable-characters "^1.0.42"
-    progress "^2.0.3"
-    prompts "^2.4.2"
-    request "^2.88.2"
-    rfdc "^1.3.0"
-    uuid-by-string "^3.0.2"
-
 mime-db@1.52.0:
   version "1.52.0"
   resolved "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz"
@@ -4455,6 +4433,11 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   version "1.0.4"
   resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
+
+mocha-suppress-logs@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/mocha-suppress-logs/-/mocha-suppress-logs-0.3.1.tgz#e0fb454daea9e65e4aced488c26e5000691ed598"
+  integrity sha512-Iu6jyTguAtFzmt7l4Agfnve0v+cQNbH92iMau1kjWwom7MNn18/Mzo1EaVhwDrH24cQ87RDKAMse2rDUkuXy8A==
 
 mocha@^9.1.1:
   version "9.2.2"

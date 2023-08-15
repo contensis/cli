@@ -304,11 +304,11 @@ export const LogMessages = {
       `[${env}] Created role ${Logger.highlightText(name)}\n`,
     tip: () =>
       `Give access to your role with "set role assignments", allow your role to do things with "set role permissions"`,
-    failedCreate: (env: string, name: string) =>
+    failedCreate: (env: string, name?: string) =>
       `[${env}] Unable to create role ${Logger.highlightText(name)}`,
     setPayload: () => `Updating role with details\n`,
     set: () => `Succesfully updated role\n`,
-    failedSet: (env: string, name: string) =>
+    failedSet: (env: string, name?: string) =>
       `[${env}] Unable to update role ${Logger.highlightText(name)}`,
     removed: (env: string, id: string) =>
       `[${env}] Deleted role ${Logger.highlightText(id)}\n`,
@@ -447,11 +447,17 @@ Connect to Contensis instance: ${Logger.standardText(env)}
         !existing ? 'Create deployment API key' : 'Deployment API key found'
       }: ${Logger[!existing ? 'highlightText' : 'standardText'](name)}`,
     ciIntro: (git: GitHelper) =>
-      `We will create API keys with permissions to use this project with Contensis, and add a job to your CI that will deploy a container build. We will ask you to add secrets/variables to your git repository to give your workflow permission to push a Block to Contensis.
-
-You could visit ${git.secretsUri} to check that you can see repository settings`,
+      `We will create API keys with permissions to use this project with Contensis, and add a job to your CI that will deploy a container build.
+      
+We will ask you to add secrets/variables to your git repository to give your workflow permission to push a Block to Contensis. ${Logger.infoText(
+        `You could visit ${git.secretsUri} to check that you can see repository settings, a page not found generally indicates you need to ask the repo owner for permission to add repository secrets, or ask the repo owner to add these secrets for you.`
+      )}`,
     ciDetails: (filename: string) =>
       `Add push-block job to CI file: ${Logger.highlightText(filename)}\n`,
+    ciMultipleChoices: () =>
+      `Multiple GitHub workflow files found\n${Logger.infoText(
+        `Tell us which GitHub workflow builds the container image after each push:`
+      )}`,
     confirm: () =>
       `Confirm these details are correct so we can make changes to your project`,
     accessTokenPrompt: () =>
@@ -480,7 +486,7 @@ You could visit ${git.secretsUri} to check that you can see repository settings`
         blockId
       )}`,
     addGitSecretsIntro: () =>
-      `We have ceated an API key that allows you to deploy your app image to a Contensis Block but we need you to add these details to your GitLab repository.`,
+      `We have created an API key that allows you to deploy your app image to a Contensis Block but we need you to add these details to your GitLab repository.`,
     addGitSecretsHelp: (git: GitHelper, id?: string, secret?: string) =>
       `Add secrets or variables in your repository's settings page\n\nGo to ${Logger.highlightText(
         git.secretsUri
@@ -492,17 +498,21 @@ You could visit ${git.secretsUri} to check that you can see repository settings`
         git.type === 'github' ? `Secret name:` : `Key:`
       } ${Logger.highlightText(`CONTENSIS_CLIENT_ID`)}\n    ${
         git.type === 'github' ? `Secret:` : `Value:`
-      } ${Logger.highlightText(
+      } ${Logger.standardText(
         id
       )}\n\n ${`Add one more secret/variable to the repository`}\n\n    ${
         git.type === 'github' ? `Secret name:` : `Key:`
       } ${Logger.highlightText(`CONTENSIS_SHARED_SECRET`)}\n    ${
         git.type === 'github' ? `Secret:` : `Value:`
-      } ${Logger.highlightText(secret)}`,
+      } ${Logger.standardText(secret)}`,
     success: () => `Contensis developer environment initialisation complete`,
     partialSuccess: () =>
       `Contensis developer environment initialisation completed with errors`,
     failed: () => `Contensis developer environment initialisation failed`,
+    dryRun: () =>
+      `Contensis developer environment initialisation dry run completed`,
+    noChanges: () =>
+      `No changes were made to your project - run the command again without the --dry-run flag to update your project with these changes`,
     startProjectTip: () =>
       `Start up your project in the normal way for development`,
   },
