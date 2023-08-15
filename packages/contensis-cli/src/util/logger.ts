@@ -90,11 +90,13 @@ export class Logger {
     progress.current.interrupt(message);
   };
   static debug: LogMethod = content => {
-    const message = `${Logger.getPrefix()} ${
-      Logger.isUserTerminal ? chalk.bgGrey(' ⚙ ') : '[DEBUG]'
-    } ${Logger.infoText(content)}`;
-    if (progress.active) progress.current.interrupt(message);
-    else console.log(message);
+    if (['true', '1'].includes(process.env.debug || '')) {
+      const message = `${Logger.getPrefix()} ${
+        Logger.isUserTerminal ? chalk.bgGrey(' ⚙ ') : '[DEBUG]'
+      } ${Logger.infoText(content)}`;
+      if (progress.active) progress.current.interrupt(message);
+      else console.log(message);
+    }
   };
   static json: LogJsonDepthMethod = (content, depth = 9) =>
     console.dir(deepCleaner(content), { colors: true, depth });
