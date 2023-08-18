@@ -58,7 +58,7 @@ jobs:
       #     shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
       #     tag-repo: true
       #     git-token: ${{ github.token }}
-      #     cli-version: latest
+      #     cli-version: latest 
 
       - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/cli-action
