@@ -37,8 +37,13 @@ jobs:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          cache: yarn
           node-version: ${{ matrix.node-version }}
+
+      - name: Install yarn
+        if: ${{ matrix.os == 'ARM64' }}
+        run: |
+          npm install --global yarn
+
       - name: Install additional dependencies
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: |
