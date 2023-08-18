@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-        os: [ubuntu-20.04, windows-2019, macos-latest]
+        os: [ubuntu-20.04, windows-2019, macos-latest, [self-hosted, linux, ARM64]]
         include:
           - os: ubuntu-20.04
             friendlyName: Ubuntu
@@ -22,6 +22,9 @@ jobs:
           - os: macos-latest
             friendlyName: macOS
             fileName: mac
+          - os: ARM64
+            friendlyName: Linux ARM64
+            fileName: arm64-linux
 
     runs-on: ${{ matrix.os }}
     continue-on-error: true
