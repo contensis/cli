@@ -456,8 +456,24 @@ We will ask you to add secrets/variables to your git repository to give your wor
       `Add push-block job to CI file: ${Logger.highlightText(filename)}\n`,
     ciMultipleChoices: () =>
       `Multiple GitHub workflow files found\n${Logger.infoText(
-        `Tell us which GitHub workflow builds the container image after each push:`
+        `Tell us which GitHub workflow builds a container image after each push:`
       )}`,
+    ciMultipleBuildJobChoices: () =>
+      `Multiple build jobs found in workflow\n${Logger.infoText(
+        `Choose the build job that produces a fresh container image to push to a block:`
+      )}`,
+    ciMultipleJobChoices: () =>
+      `Other jobs found in workflow\n${Logger.infoText(
+        `Choose the job that produces a fresh container image we can push to a block:`
+      )}`,
+    ciMultipleAppImageVarChoices: () =>
+      `Do one of these variables point to your tagged app image?\n${Logger.infoText(
+        `we have included a default choice - ensure your build image is tagged exactly the same as this`
+      )}`,
+    ciEnterOwnAppImagePrompt: () =>
+      `Tell us the registry uri your app image is tagged and pushed with (⏎ accept default) \n${Logger.infoText(
+        `Tip: GitHub context variables available\nhttps://docs.github.com/en/actions/learn-github-actions/variables#using-contexts-to-access-variable-values`
+      )}\n`,
     confirm: () =>
       `Confirm these details are correct so we can make changes to your project`,
     accessTokenPrompt: () =>
@@ -479,6 +495,10 @@ We will ask you to add secrets/variables to your git repository to give your wor
       `You should alter existing project code that connects a Contensis client to use the variables from this file`,
     writeCiFile: (ciFilePath: string) =>
       `Updated CI file ${Logger.standardText(winSlash(ciFilePath))}`,
+    ciFileNoChanges: (ciFilePath: string) =>
+      `No updates needed for CI file ${Logger.standardText(
+        winSlash(ciFilePath)
+      )}`,
     ciBlockTip: (blockId: string, env: string, projectId: string) =>
       `A job is included to deploy your built container image to ${Logger.standardText(
         projectId
@@ -512,7 +532,7 @@ We will ask you to add secrets/variables to your git repository to give your wor
     dryRun: () =>
       `Contensis developer environment initialisation dry run completed`,
     noChanges: () =>
-      `No changes were made to your project - run the command again without the --dry-run flag to update your project with these changes`,
+      `No changes were made to your project, run the command again without the --dry-run flag to update your project with these changes`,
     startProjectTip: () =>
       `Start up your project in the normal way for development`,
   },

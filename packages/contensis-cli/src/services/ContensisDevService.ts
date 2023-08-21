@@ -21,7 +21,7 @@ import { mergeDotEnvFileContents } from '~/util/dotenv';
 import { findByIdOrName } from '~/util/find';
 import { GitHelper } from '~/util/git';
 import { jsonFormatter } from '~/util/json.formatter';
-import { normaliseLineEndings } from '~/util/os';
+import { normaliseLineEndings, winSlash } from '~/util/os';
 import { stringifyYaml } from '~/util/yaml';
 
 class ContensisDev extends ContensisRole {
@@ -103,6 +103,7 @@ class ContensisDev extends ContensisRole {
         ({ ciFileName } = await inquirer.prompt([
           {
             type: 'list',
+            prefix: '⧰',
             message: messages.devinit.ciMultipleChoices(),
             name: 'ciFileName',
             choices: workflowFiles,
@@ -116,7 +117,7 @@ class ContensisDev extends ContensisRole {
       log.raw(log.infoText(messages.devinit.ciDetails(ciFileName)));
 
       // Look at the workflow file content and make updates
-      const mappedWorkflow = mapCIWorkflowContent(this, git);
+      const mappedWorkflow = await mapCIWorkflowContent(this, git);
 
       log.help(messages.devinit.ciIntro(git));
 
@@ -138,6 +139,7 @@ class ContensisDev extends ContensisRole {
       const { accessToken }: { accessToken: string } = await inquirer.prompt([
         {
           type: 'input',
+          prefix: '🛡️',
           message: messages.devinit.accessTokenPrompt(),
           name: 'accessToken',
         },
@@ -219,34 +221,41 @@ class ContensisDev extends ContensisRole {
 
       if (dryRun) {
         if (envDiff) {
-          log.info(`updating .env file ${envFilePath}: ${envDiff}`);
+          log.info(`Updating .env file ${winSlash(envFilePath)}:\n${envDiff}`);
           log.raw('');
         }
         checkpoint('skip .env file update (dry-run)');
       } else {
-        if (envDiff) log.info(`updating .env file ${envFilePath}`);
+        if (envDiff) log.info(`updating .env file ${winSlash(envFilePath)}`);
         writeFile(envFilePath, envFileLines.join('\n'));
         checkpoint('.env file updated');
         log.success(messages.devinit.writeEnvFile());
         // log.help(messages.devinit.useEnvFileTip());
       }
 
-      // Update CI file -- different for GH/GL -- create a sample one with build?
+      // Update CI file -- different for GH/GL
+      if (mappedWorkflow?.diff) {
+        log.info(
+          `Updating ${winSlash(ciFileName)} file:\n${mappedWorkflow.diff}`
+        );
+        log.raw('');
+      }
       if (dryRun) {
-        if (mappedWorkflow?.diff) {
-          log.info(`updating${ciFileName} file: ${mappedWorkflow.diff}`);
-          log.raw('');
-        }
         checkpoint('skip CI file update (dry-run)');
         //log.object(ciFileLines);
       } else {
-        if (mappedWorkflow?.diff) log.info(`updating${ciFileName} file`);
-        writeFile(git.ciFilePath, [].join('\n'));
-        log.success(messages.devinit.writeCiFile(`./${ciFileName}`));
-        log.info(
-          messages.devinit.ciBlockTip(blockId, currentEnv, currentProject)
-        );
-        checkpoint('CI file updated');
+        if (mappedWorkflow?.newWorkflow) {
+          if (mappedWorkflow?.diff) {
+            writeFile(git.ciFilePath, mappedWorkflow.newWorkflow);
+            log.success(messages.devinit.writeCiFile(`./${ciFileName}`));
+            log.info(
+              messages.devinit.ciBlockTip(blockId, currentEnv, currentProject)
+            );
+          } else {
+            log.info(messages.devinit.ciFileNoChanges(`./${ciFileName}`));
+          }
+          checkpoint('CI file updated');
+        }
       }
 
       // Echo Deployment API key to console, ask user to add secrets to repo

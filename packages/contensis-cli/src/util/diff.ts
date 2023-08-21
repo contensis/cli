@@ -40,12 +40,14 @@ export const diffFileContent = (
 
   const lnSpaces = Array(lnSpaceLength).join(' ');
 
+  let needsNewLine = false;
   for (let i = 0; i < diffRanges.length; i++) {
     const part = diffRanges[i];
     if (part.added || part.removed) {
       const colour = part.added ? 'green' : part.removed ? 'red' : 'grey';
 
-      if (part.value !== '\n')
+      if (part.value !== '\n') {
+        if (needsNewLine) output.push('\n### --');
         output.push(
           `\n${part.value
             .split('\n')
@@ -60,11 +62,11 @@ export const diffFileContent = (
             )
             .join('\n')}`
         );
-    }
+      } else needsNewLine = true;
+    } else needsNewLine = true;
   }
 
   return output.join('');
-  // return retOutput.endsWith('\n') ? retOutput : `${retOutput}\n`;
 };
 
 const addDiffPositionInfo = (diff: Change[]) => {
