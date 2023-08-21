@@ -10,20 +10,20 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
-        os: [ubuntu-20.04, windows-2019, macos-latest, ARM64]
+        node-version: [ 18.x ]
+        os: [ ubuntu-20.04, windows-2019, macos-latest, arm64 ]
         include:
           - os: ubuntu-20.04
-            friendlyName: Ubuntu
+            friendlyName: Ubuntu x64
             fileName: linux
           - os: windows-2019
-            friendlyName: Windows
+            friendlyName: Windows x64
             fileName: win
           - os: macos-latest
-            friendlyName: macOS
+            friendlyName: macOS x64
             fileName: mac
-          - os: ARM64
-            friendlyName: Linux ARM64
+          - os: arm64
+            friendlyName: Linux arm64
             fileName: arm64-linux
 
     runs-on: ${{ matrix.os }}
@@ -40,7 +40,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install yarn
-        if: ${{ matrix.os == 'ARM64' }}
+        if: ${{ matrix.os == 'arm64' }}
         run: |
           npm install --global yarn
 

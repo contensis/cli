@@ -19,7 +19,7 @@ jobs:
     secrets: inherit
 
   exe:
-    name: exe x64/arm64
+    name: exe
     needs: node
     uses: ./.github/workflows/build.exe.yml
     secrets: inherit
