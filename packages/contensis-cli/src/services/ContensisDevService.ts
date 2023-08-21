@@ -2,7 +2,6 @@ import to from 'await-to-js';
 import { execFile, spawn } from 'child_process';
 import inquirer from 'inquirer';
 import path from 'path';
-import { parse, stringify } from 'yaml';
 
 import { Role } from 'contensis-management-api/lib/models';
 import { MigrateRequest } from 'migratortron';
@@ -11,17 +10,19 @@ import ContensisRole from './ContensisRoleService';
 import { OutputOptionsConstructorArg } from '~/models/CliService';
 import { EnvContentsToAdd } from '~/models/DevService';
 import { mapSiteConfigYaml } from '~/mappers/DevRequests-to-RequestHanderSiteConfigYaml';
+import { mapCIWorkflowContent } from '~/mappers/DevInit-to-CIWorkflow';
 import {
   deployKeyRole,
   devKeyRole,
 } from '~/mappers/DevInit-to-RolePermissions';
 import { appRootDir, readFile, writeFile } from '~/providers/file-provider';
-import { jsonFormatter } from '~/util/json.formatter';
-import { GitHelper } from '~/util/git';
-import { findByIdOrName } from '~/util/find';
-import { mergeDotEnvFileContents } from '~/util/dotenv';
-import { mapCIWorkflowContent } from '~/mappers/DevInit-to-CIWorkflow';
 import { diffFileContent } from '~/util/diff';
+import { mergeDotEnvFileContents } from '~/util/dotenv';
+import { findByIdOrName } from '~/util/find';
+import { GitHelper } from '~/util/git';
+import { jsonFormatter } from '~/util/json.formatter';
+import { normaliseLineEndings } from '~/util/os';
+import { stringifyYaml } from '~/util/yaml';
 
 class ContensisDev extends ContensisRole {
   constructor(
@@ -211,10 +212,10 @@ class ContensisDev extends ContensisRole {
         (existingEnvFile || '').split('\n').filter(l => !!l),
         envContentsToAdd
       );
-      const envDiff = diffFileContent(
-        existingEnvFile || '',
-        envFileLines.join('\n')
+      const newEnvFileContent = normaliseLineEndings(
+        `${envFileLines.join('\n')}\n`
       );
+      const envDiff = diffFileContent(existingEnvFile || '', newEnvFileContent);
 
       if (dryRun) {
         if (envDiff) {
@@ -282,7 +283,7 @@ class ContensisDev extends ContensisRole {
     const siteConfigPath = path.join(appRootDir, 'site_config.yaml');
 
     const siteConfig = await mapSiteConfigYaml(this);
-    writeFile('site_config.yaml', stringify(siteConfig));
+    writeFile('site_config.yaml', stringifyYaml(siteConfig));
 
     const args = overrideArgs
       ? typeof overrideArgs?.[0] === 'string' &&

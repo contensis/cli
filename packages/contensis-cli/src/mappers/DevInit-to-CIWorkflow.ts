@@ -4,6 +4,7 @@ import ContensisDev from '~/services/ContensisDevService';
 import { diffFileContent } from '~/util/diff';
 import { GitHelper } from '~/util/git';
 import { logError } from '~/util/logger';
+import { normaliseLineEndings } from '~/util/os';
 import { parseYamlDocument, validateWorkflowYaml } from '~/util/yaml';
 
 type MappedWorkflowOutput = {
@@ -139,7 +140,9 @@ export const mapCIWorkflowContent = (
         `GitHub workflow YAML did not pass validation check`
       );
     }
-    const newWorkflow = workflowDoc.toString({ lineWidth: 0 });
+    const newWorkflow = normaliseLineEndings(
+      workflowDoc.toString({ lineWidth: 0 })
+    );
 
     return {
       existingWorkflow: workflowFile,

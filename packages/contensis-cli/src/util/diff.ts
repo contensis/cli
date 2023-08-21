@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { Change, diffLines } from 'diff';
-import { add } from 'lodash';
+import { normaliseLineEndings } from './os';
 
 export const diffLogStrings = (updates: string, previous: string) => {
   const lastFewLines = previous.split('\n').slice(-10);
@@ -24,7 +24,12 @@ export const diffFileContent = (
   existingContent: string,
   newContent: string
 ) => {
-  const diff = diffLines(existingContent, newContent, { newlineIsToken: true });
+  const existingContentNormalised = normaliseLineEndings(existingContent, '\n');
+  const newContentNormalised = normaliseLineEndings(newContent, '\n');
+
+  const diff = diffLines(existingContentNormalised, newContentNormalised, {
+    newlineIsToken: true,
+  });
   const diffRanges = addDiffPositionInfo(diff);
 
   // Create formatted output for console
