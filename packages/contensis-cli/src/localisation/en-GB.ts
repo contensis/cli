@@ -470,14 +470,18 @@ We will ask you to add secrets/variables to your git repository to give your wor
       `Do one of these variables point to your tagged app image?\n${Logger.infoText(
         `we have included a default choice - ensure your build image is tagged exactly the same as this`
       )}`,
-    ciEnterOwnAppImagePrompt: () =>
+    ciEnterOwnAppImagePrompt: (git: GitHelper) =>
       `Tell us the registry uri your app image is tagged and pushed with (⏎ accept default) \n${Logger.infoText(
-        `Tip: GitHub context variables available\nhttps://docs.github.com/en/actions/learn-github-actions/variables#using-contexts-to-access-variable-values`
+        `Tip: ${
+          git.type === 'github'
+            ? `GitHub context variables available\nhttps://docs.github.com/en/actions/learn-github-actions/variables#using-contexts-to-access-variable-values`
+            : `GitLab CI/CD variables available\nhttps://docs.gitlab.com/ee/ci/variables/`
+        }`
       )}\n`,
     confirm: () =>
       `Confirm these details are correct so we can make changes to your project`,
     accessTokenPrompt: () =>
-      `Please supply the access token for the Delivery API (optional)`,
+      `Please supply the access token for the Delivery API (⏎ continue)`,
     createDevKey: (keyName: string, existing: boolean) =>
       `${
         !existing ? 'Created' : 'Checked permissions for'

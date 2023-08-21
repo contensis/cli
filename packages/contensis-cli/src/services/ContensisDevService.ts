@@ -25,6 +25,8 @@ import { normaliseLineEndings, winSlash } from '~/util/os';
 import { stringifyYaml } from '~/util/yaml';
 
 class ContensisDev extends ContensisRole {
+  git!: GitHelper;
+
   constructor(
     args: string[],
     outputOpts?: OutputOptionsConstructorArg,
@@ -52,7 +54,7 @@ class ContensisDev extends ContensisRole {
         );
 
       // Retrieve git info
-      const git = new GitHelper(projectHome);
+      const git = this.git = new GitHelper(projectHome);
 
       // Retrieve ci workflow info
       const workflowFiles = git.workflows;
@@ -117,7 +119,7 @@ class ContensisDev extends ContensisRole {
       log.raw(log.infoText(messages.devinit.ciDetails(ciFileName)));
 
       // Look at the workflow file content and make updates
-      const mappedWorkflow = await mapCIWorkflowContent(this, git);
+      const mappedWorkflow = await mapCIWorkflowContent(this);
 
       log.help(messages.devinit.ciIntro(git));
 

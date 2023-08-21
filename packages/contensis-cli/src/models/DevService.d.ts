@@ -24,3 +24,15 @@ export type GitHubActionPushBlockJob = {
   needs?: string;
   steps: GitHubActionPushBlockJobStep[];
 };
+
+export type GitLabPushBlockJobStage = {
+  stage: string;
+  variables: {
+    alias: string;
+    project_id: string;
+    block_id: string;
+    image_uri?: string;
+    client_id: string;
+    shared_secret: string;
+  };
+};
