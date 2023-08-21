@@ -1,6 +1,8 @@
-ARG app_image=node:18.13-alpine
-ARG builder_image=node:18.13-alpine
-FROM ${builder_image} AS prepare
+ARG app_base=node:18-alpine
+ARG builder_base=node:18-alpine
+# registry url supplied with `docker build --build-args builder_image=$BUILDER_IMAGE` 
+ARG builder_image
+FROM ${builder_base} AS prepare
 
 # RUN apk add --no-cache libsecret-dev
 WORKDIR /usr/src/app
@@ -18,7 +20,7 @@ COPY packages/contensis-cli/tsconfig.json .
 COPY packages/contensis-cli/src src
 RUN yarn run build
 
-FROM ${app_image} AS final
+FROM ${app_base} AS final
 WORKDIR /usr/src/app
 RUN apk add jq -q
 # copy assets from source folder
@@ -30,7 +32,7 @@ RUN npm install patch-package --global --prefer-offline --no-audit
 RUN npm install --audit=false --production --loglevel error
 # RUN npm run postinstall
 
-FROM ${app_image} AS app
+FROM ${app_base} AS app
 WORKDIR /usr/src/app
 RUN apk add jq -q
 # copy ./app folder from final layer
