@@ -47,7 +47,10 @@ export const diffFileContent = (
       const colour = part.added ? 'green' : part.removed ? 'red' : 'grey';
 
       if (part.value !== '\n') {
-        if (needsNewLine) output.push('\n### --');
+        if (needsNewLine) {
+          output.push('\n### --');
+          needsNewLine = false;
+        }
         output.push(
           `\n${part.value
             .split('\n')
