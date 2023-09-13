@@ -1289,7 +1289,7 @@ contensis-delivery-api@^1.2.0:
 
 contensis-management-api@^2.1.1, contensis-management-api@^2.1.2:
   version "2.1.2"
-  resolved "http://localhost:4873/contensis-management-api/-/contensis-management-api-2.1.2.tgz"
+  resolved "https://registry.npmjs.org/contensis-management-api/-/contensis-management-api-2.1.2.tgz"
   integrity sha512-l9dC94FeRPnZppW7V9iFA3uyScGgMQipae5c/f/Vn2GuF4gm2aoVjuLqsd/k5F7I760846SCrajT8p6JBWpZqQ==
   dependencies:
     "@types/graceful-fs" "^4.1.3"

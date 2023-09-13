@@ -34,9 +34,8 @@ export const diffFileContent = (
 
   // Create formatted output for console
   const output: string[] = [];
-  const lnSpaceLength = Math.max(
-    ...diffRanges.map(d => d.startLineNumber.toString().length)
-  );
+  const lnSpaceLength =
+    Math.max(...diffRanges.map(d => d.startLineNumber.toString().length)) || 0;
 
   const lnSpaces = Array(lnSpaceLength).join(' ');
 
