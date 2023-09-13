@@ -15,7 +15,7 @@ export const diffLogStrings = (updates: string, previous: string) => {
   }
 
   // Get the new lines from the next position on from the last of the already shown lines
-  const differentFromPos = Math.max(...incomingLineIndices) + 1 || 0;
+  const differentFromPos = Math.max(...incomingLineIndices, 0) + 1;
   // Return just the incoming lines from the position we matched
   return incomingLines.slice(differentFromPos).join('\n');
 };
@@ -34,8 +34,10 @@ export const diffFileContent = (
 
   // Create formatted output for console
   const output: string[] = [];
-  const lnSpaceLength =
-    Math.max(...diffRanges.map(d => d.startLineNumber.toString().length)) || 0;
+  const lnSpaceLength = Math.max(
+    ...diffRanges.map(d => d.startLineNumber.toString().length),
+    0
+  );
 
   const lnSpaces = Array(lnSpaceLength).join(' ');
 
