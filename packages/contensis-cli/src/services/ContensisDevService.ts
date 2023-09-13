@@ -1,5 +1,5 @@
 import to from 'await-to-js';
-import { execFile, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import path from 'path';
 
@@ -21,8 +21,9 @@ import { mergeDotEnvFileContents } from '~/util/dotenv';
 import { findByIdOrName } from '~/util/find';
 import { GitHelper } from '~/util/git';
 import { jsonFormatter } from '~/util/json.formatter';
-import { normaliseLineEndings, winSlash } from '~/util/os';
+import { winSlash } from '~/util/os';
 import { stringifyYaml } from '~/util/yaml';
+import { createSpinner } from 'nanospinner';
 
 class ContensisDev extends ContensisRole {
   git!: GitHelper;
@@ -54,7 +55,7 @@ class ContensisDev extends ContensisRole {
         );
 
       // Retrieve git info
-      const git = this.git = new GitHelper(projectHome);
+      const git = (this.git = new GitHelper(projectHome));
 
       // Retrieve ci workflow info
       const workflowFiles = git.workflows;
@@ -118,10 +119,39 @@ class ContensisDev extends ContensisRole {
 
       log.raw(log.infoText(messages.devinit.ciDetails(ciFileName)));
 
-      // Look at the workflow file content and make updates
-      const mappedWorkflow = await mapCIWorkflowContent(this);
+      let mappedWorkflow;
+      // Location for Client ID / Secret.
+      const { clientDetailsOption } = await inquirer.prompt({
+        name: 'clientDetailsOption',
+        type: 'list',
+        prefix: '🔑',
+        // Where would you like to store your Client ID/Secret?
+        message: messages.devinit.clientDetailsLocation(),
+        choices: [
+          messages.devinit.clientDetailsInGit(git),
+          messages.devinit.clientDetailsInEnv(),
+        ],
+      });
 
-      log.help(messages.devinit.ciIntro(git));
+      // global 'clientDetailsLocation' variable stores users input on where client id / secert are stored
+      if (clientDetailsOption === messages.devinit.clientDetailsInEnv()) {
+        this.clientDetailsLocation = 'env';
+      } else {
+        this.clientDetailsLocation = 'git';
+      }
+
+      if (this.clientDetailsLocation === 'env') {
+        // Update CI Workflow to pull from ENV variables
+        mappedWorkflow = await mapCIWorkflowContent(this);
+        // Add client id and secret to global 'this'
+        this.clientId = existingDeployKey?.id;
+        this.clientSecret = existingDeployKey?.sharedSecret;
+        log.help(messages.devinit.ciIntro(git, this.clientDetailsLocation));
+      } else {
+        // Look at the workflow file content and make updates
+        mappedWorkflow = await mapCIWorkflowContent(this);
+        log.help(messages.devinit.ciIntro(git, this.clientDetailsLocation));
+      }
 
       if (!dryRun) {
         // Confirm prompt
@@ -138,15 +168,36 @@ class ContensisDev extends ContensisRole {
       }
 
       // Access token prompt
-      const { accessToken }: { accessToken: string } = await inquirer.prompt([
+      let accessToken: string | undefined = undefined;
+      const { canContinue } = await inquirer.prompt([
         {
-          type: 'input',
+          type: 'confirm',
           prefix: '🛡️',
+          // We're all set to grab your access token. Can we proceed? (⏎ continue)
           message: messages.devinit.accessTokenPrompt(),
-          name: 'accessToken',
+          name: 'canContinue',
         },
       ]);
       log.raw('');
+
+      if (!canContinue) return;
+      if (canContinue) {
+        const spinner = createSpinner(messages.devinit.accessTokenFetch());
+        spinner.start();
+
+        // Fetching access token
+        const token = await this.GetDeliveryApiKey();
+
+        if (token) {
+          spinner.success();
+          this.log.success(messages.devinit.accessTokenSuccess(token));
+          accessToken = token;
+        } else {
+          spinner.error();
+          this.log.error(messages.devinit.accessTokenFailed());
+          return;
+        }
+      }
 
       // Magic happens...
       const checkpoint = (op: string) => {
@@ -209,6 +260,12 @@ class ContensisDev extends ContensisRole {
         PROJECT: currentProject,
       };
       if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
+      if (this.clientDetailsLocation === 'env') {
+        if (git.type === 'github') {
+          envContentsToAdd['CONTENSIS_CLIENT_ID'] = this.clientId;
+          envContentsToAdd['CONTENSIS_CLIENT_SECRET'] = this.clientSecret;
+        }
+      }
 
       const envFilePath = `${projectHome}/.env`;
       const existingEnvFile = readFile(envFilePath);
@@ -216,9 +273,7 @@ class ContensisDev extends ContensisRole {
         (existingEnvFile || '').split('\n').filter(l => !!l),
         envContentsToAdd
       );
-      const newEnvFileContent = normaliseLineEndings(
-        `${envFileLines.join('\n')}\n`
-      );
+      const newEnvFileContent = envFileLines.join('\n');
       const envDiff = diffFileContent(existingEnvFile || '', newEnvFileContent);
 
       if (dryRun) {
@@ -260,15 +315,17 @@ class ContensisDev extends ContensisRole {
         }
       }
 
-      // Echo Deployment API key to console, ask user to add secrets to repo
-      log.warning(messages.devinit.addGitSecretsIntro());
-      log.help(
-        messages.devinit.addGitSecretsHelp(
-          git,
-          existingDeployKey?.id,
-          existingDeployKey?.sharedSecret
-        )
-      );
+      if (this.clientDetailsLocation === 'git') {
+        // Echo Deployment API key to console, ask user to add secrets to repo
+        log.warning(messages.devinit.addGitSecretsIntro());
+        log.help(
+          messages.devinit.addGitSecretsHelp(
+            git,
+            existingDeployKey?.id,
+            existingDeployKey?.sharedSecret
+          )
+        );
+      }
 
       if (dryRun) {
         log.success(messages.devinit.dryRun());

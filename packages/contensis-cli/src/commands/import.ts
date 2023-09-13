@@ -133,6 +133,31 @@ Example call:
       });
     });
 
+  // TODO: add options to import one an array of nodes? nodeIds: string[]
+  program
+    .command('nodes')
+    .description('import nodes')
+    .addOption(commit)
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > import nodes --from-file component-backup.json
+  > import nodes --source-alias example-alias --source-project-id example-project
+`
+    )
+    .action(async opts => {
+      await cliCommand(
+        ['import', 'nodes'],
+        opts,
+        mapContensisOpts({ ...opts })
+      ).ImportNodes({
+        commit: opts.commit,
+        fromFile: opts.fromFile,
+        logOutput: opts.outputNodes,
+      });
+    });
+
   return program;
 };
 

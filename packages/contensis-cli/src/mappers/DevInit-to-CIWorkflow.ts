@@ -102,8 +102,14 @@ const mapGitLabCIWorkflowContent = async (
       block_id: blockId,
       alias: cli.currentEnv,
       project_id: cli.currentProject,
-      client_id: '$CONTENSIS_CLIENT_ID',
-      shared_secret: '$CONTENSIS_SHARED_SECRET',
+      client_id:
+        cli.clientDetailsLocation === 'env'
+          ? cli.clientId
+          : '$CONTENSIS_CLIENT_ID',
+      shared_secret:
+        cli.clientDetailsLocation === 'env'
+          ? cli.clientSecret
+          : '$CONTENSIS_SHARED_SECRET',
     },
   };
 
@@ -174,12 +180,16 @@ const mapGitLabCIWorkflowContent = async (
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.variables.client_id`,
-      '$CONTENSIS_CLIENT_ID'
+      cli.clientDetailsLocation === 'env'
+        ? cli.clientId
+        : '$CONTENSIS_CLIENT_ID'
     );
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.variables.shared_secret`,
-      '$CONTENSIS_SHARED_SECRET'
+      cli.clientDetailsLocation === 'env'
+        ? cli.clientSecret
+        : '$CONTENSIS_SHARED_SECRET'
     );
   } else {
     // create job with push step
@@ -225,8 +235,14 @@ const mapGitHubActionCIWorkflowContent = async (
       // 'image-uri': '${{ steps.build.outputs.image-uri }}',
       alias: cli.currentEnv,
       'project-id': cli.currentProject,
-      'client-id': '${{ secrets.CONTENSIS_CLIENT_ID }}',
-      'shared-secret': '${{ secrets.CONTENSIS_SHARED_SECRET }}',
+      'client-id':
+        cli.clientDetailsLocation === 'env'
+          ? '${{ env.CONTENSIS_CLIENT_ID }}'
+          : '${{ secrets.CONTENSIS_CLIENT_ID }}',
+      'shared-secret':
+        cli.clientDetailsLocation === 'env'
+          ? '${{ env.CONTENSIS_SHARED_SECRET }}'
+          : '${{ secrets.CONTENSIS_SHARED_SECRET }}',
     },
   };
 
@@ -296,12 +312,16 @@ const mapGitHubActionCIWorkflowContent = async (
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.with.client-id`,
-      '${{ secrets.CONTENSIS_CLIENT_ID }}'
+      cli.clientDetailsLocation === 'env'
+        ? '${{ env.CONTENSIS_CLIENT_ID }}'
+        : '${{ secrets.CONTENSIS_CLIENT_ID }}'
     );
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.with.shared-secret`,
-      '${{ secrets.CONTENSIS_SHARED_SECRET }}'
+      cli.clientDetailsLocation === 'env'
+        ? '${{ env.CONTENSIS_SHARED_SECRET }}'
+        : '${{ secrets.CONTENSIS_SHARED_SECRET }}'
     );
   } else {
     // create job with push step
@@ -320,19 +340,22 @@ const mapGitHubActionCIWorkflowContent = async (
       const choices = existingBuildJobStep.map(s => s.parentProperty);
       choices.push(new inquirer.Separator() as any);
       choices.push('none');
+      if (choices.includes('build-app')) needs = 'build-app';
+      else {
+        ({ needs } = await inquirer.prompt([
+          {
+            type: 'list',
+            prefix: '⌛',
+            message: cli.messages.devinit.ciMultipleBuildJobChoices(),
+            name: 'needs',
+            choices,
+            default: choices.find(
+              s => typeof s === 'string' && s.includes('docker')
+            ),
+          },
+        ]));
+      }
 
-      ({ needs } = await inquirer.prompt([
-        {
-          type: 'list',
-          prefix: '⌛',
-          message: cli.messages.devinit.ciMultipleBuildJobChoices(),
-          name: 'needs',
-          choices,
-          default: choices.find(
-            s => typeof s === 'string' && s.includes('docker')
-          ),
-        },
-      ]));
       cli.log.raw('');
     } else if (existingBuildJobStep.length === 1)
       // Exactly one job step found containing a property name of *build*
@@ -399,9 +422,12 @@ const mapGitHubActionCIWorkflowContent = async (
       `GitHub workflow YAML did not pass validation check`
     );
   }
-  const newWorkflow = normaliseLineEndings(
-    workflowDoc.toString({ lineWidth: 0 })
-  );
+
+  // const newWorkflow = normaliseLineEndings(
+  //   workflowDoc.toString({ lineWidth: 0 })
+  // );
+
+  const newWorkflow = workflowDoc.toString();
 
   return newWorkflow;
 };

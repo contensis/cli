@@ -71,6 +71,10 @@ class ContensisCli {
   contensisOpts: Partial<MigrateRequest>;
   currentProject: string;
 
+  clientDetailsLocation?: 'env' | 'git';
+  clientId?: string;
+  clientSecret?: string;
+
   sourceAlias?: string;
   targetEnv?: string;
   urls:
@@ -290,6 +294,7 @@ class ContensisCli {
       | 'contentTypes'
       | 'components'
       | 'models'
+      | 'nodes'
       | 'user-input';
   }) => {
     const source: 'contensis' | 'file' = fromFile ? 'file' : 'contensis';
@@ -1730,6 +1735,85 @@ class ContensisCli {
           100
         );
       });
+    } else {
+      log.warning(messages.models.noList(currentProject));
+      log.help(messages.connect.tip());
+    }
+  };
+
+  ImportNodes = async ({
+    commit,
+    fromFile,
+    logOutput,
+  }: {
+    commit: boolean;
+    fromFile: string;
+    logOutput: string;
+  }) => {
+    const { currentEnv, currentProject, log, messages } = this;
+
+    const contensis = await this.ConnectContensisImport({
+      commit,
+      fromFile,
+      importDataType: 'nodes',
+    });
+
+    if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        console.log(log.successText(` -- IMPORT PREVIEW -- `));
+      } else {
+        console.log(log.warningText(` *** COMMITTING IMPORT *** `));
+      }
+
+      const [err, result] = await contensis.MigrateNodes();
+
+      if (err) logError(err);
+      else
+        this.HandleFormattingAndOutput(result, () => {
+          // print the migrateResult to console
+          // TODO: fix
+          printMigrateResult(this, result, {
+            showAllEntries: logOutput === 'all',
+            showChangedEntries: logOutput === 'changes',
+          });
+        });
+
+      const nodesTotalCount = result?.nodesToMigrate[currentProject].totalCount;
+      const nodesCreated = result?.nodesResult?.['created'] || 0;
+      const nodesUpdated = result?.nodesResult?.['updated'] || 0;
+      const noChange = result.nodesToMigrate[currentProject]['no change'] !== 0;
+
+      if (
+        !err &&
+        !result.errors?.length &&
+        ((!commit && nodesTotalCount) ||
+          (commit && (nodesCreated || nodesUpdated)))
+      ) {
+        let totalCount: number;
+        if (commit) {
+          let created = typeof nodesCreated === 'number' ? nodesCreated : 0;
+          let updated = typeof nodesUpdated === 'number' ? nodesUpdated : 0;
+
+          totalCount = created + updated;
+        } else {
+          totalCount =
+            typeof nodesTotalCount === 'number' ? nodesTotalCount : 0;
+        }
+
+        log.success(messages.nodes.imported(currentEnv, commit, totalCount));
+        if (!commit) {
+          log.raw(``);
+          log.help(messages.nodes.commitTip());
+        }
+      } else {
+        if (noChange) {
+          log.help(messages.nodes.noChange(currentEnv), err);
+        } else {
+          log.error(messages.nodes.failedImport(currentEnv), err);
+          if (!nodesTotalCount) log.help(messages.nodes.notFound(currentEnv));
+        }
+      }
     } else {
       log.warning(messages.models.noList(currentProject));
       log.help(messages.connect.tip());

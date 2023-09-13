@@ -155,12 +155,21 @@ export const LogMessages = {
       `[${projectId}] Unable to get content models ${Logger.highlightText(id)}`,
   },
   nodes: {
+    imported: (env: string, commit: boolean, count: number) =>
+      `[${env}] ${commit ? `Imported` : `Will import`} ${count} nodes`,
+    failedImport: (env: string) => `[${env}] Unable to import nodes`,
+    removed: (env: string, commit: boolean) =>
+      `[${env}] ${commit ? `Deleted` : `Will delete`} nodes`,
+    failedRemove: (env: string) => `[${env}] Unable to delete nodes`,
+    notFound: (env: string) => `[${env}] Nodes were not found `,
+    commitTip: () => `Add --commit flag to commit the previewed changes`,
     failedGet: (projectId: string) =>
       `[${projectId}] Cannot retrieve nodes from Site view`,
     get: (projectId: string, root: string, depth: number) =>
       `[${projectId}] Site view nodes at: ${Logger.highlightText(root)}${
         depth ? ` to a depth of ${depth}` : ``
       }\n`,
+    noChange: (env: string) => `[${env}] No changes to be made`,
   },
   contenttypes: {
     list: (projectId: string) =>
@@ -446,12 +455,16 @@ Connect to Contensis instance: ${Logger.standardText(env)}
       `  - ${
         !existing ? 'Create deployment API key' : 'Deployment API key found'
       }: ${Logger[!existing ? 'highlightText' : 'standardText'](name)}`,
-    ciIntro: (git: GitHelper) =>
+    ciIntro: (git: GitHelper, location: 'git' | 'env') =>
       `We will create API keys with permissions to use this project with Contensis, and add a job to your CI that will deploy a container build.
-      
-We will ask you to add secrets/variables to your git repository to give your workflow permission to push a Block to Contensis. ${Logger.infoText(
-        `You could visit ${git.secretsUri} to check that you can see repository settings, a page not found generally indicates you need to ask the repo owner for permission to add repository secrets, or ask the repo owner to add these secrets for you.`
-      )}`,
+      ${
+        location === 'git'
+          ? `We will ask you to add secrets/variables to your git repository to give your workflow permission to push a Block to Contensis.
+      ${Logger.infoText(`You could visit ${git.secretsUri} to check that you can see repository settings, 
+      a page not found generally indicates you need to ask the repo owner for permission to add repository secrets, 
+      or ask the repo owner to add these secrets for you.`)}`
+          : ''
+      }`,
     ciDetails: (filename: string) =>
       `Add push-block job to CI file: ${Logger.highlightText(filename)}\n`,
     ciMultipleChoices: () =>
@@ -481,7 +494,7 @@ We will ask you to add secrets/variables to your git repository to give your wor
     confirm: () =>
       `Confirm these details are correct so we can make changes to your project`,
     accessTokenPrompt: () =>
-      `Please supply the access token for the Delivery API (⏎ continue)`,
+      ` To continue setting up we need permission to fetch your Delivery API token. (Press (Y + ⏎) to continue or (N + ⏎) to exit the set up process)`,
     createDevKey: (keyName: string, existing: boolean) =>
       `${
         !existing ? 'Created' : 'Checked permissions for'
@@ -529,6 +542,21 @@ We will ask you to add secrets/variables to your git repository to give your wor
       } ${Logger.highlightText(`CONTENSIS_SHARED_SECRET`)}\n    ${
         git.type === 'github' ? `Secret:` : `Value:`
       } ${Logger.standardText(secret)}`,
+    accessTokenFetch: () => `Please wait, fecthing Delivery API token ⏳`,
+    accessTokenSuccess: (token: string) =>
+      `Successfully fetched Delivery API token 👉 ${Logger.infoText(token)}`,
+    accessTokenFailed: () =>
+      `Something went wrong! If the problem persists, please contact our support team 🛟`,
+    accessTokenPermission: () =>
+      `We need permission to fetch your Delivery API token, please try again ⚠️`,
+    clientDetailsLocation: () =>
+      `Which option would you like to use for storing your client ID and secret`,
+    clientDetailsInGit: (git: GitHelper) =>
+      `${
+        git.type === 'github' ? 'GitHub' : 'GitLab'
+      } variables (recommended for public repositories)`,
+    clientDetailsInEnv: () =>
+      `.env file (recommended for private repositories)`,
     success: () => `Contensis developer environment initialisation complete`,
     partialSuccess: () =>
       `Contensis developer environment initialisation completed with errors`,
@@ -536,7 +564,9 @@ We will ask you to add secrets/variables to your git repository to give your wor
     dryRun: () =>
       `Contensis developer environment initialisation dry run completed`,
     noChanges: () =>
-      `No changes were made to your project, run the command again without the --dry-run flag to update your project with these changes`,
+      `No changes were made to your project, run the command again without the ${Logger.highlightText(
+        '--dry-run'
+      )} flag to update your project with these changes`,
     startProjectTip: () =>
       `Start up your project in the normal way for development`,
   },

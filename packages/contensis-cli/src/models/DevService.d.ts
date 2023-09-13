@@ -2,6 +2,8 @@ export type EnvContentsToAdd = {
   ALIAS: string;
   PROJECT: string;
   ACCESS_TOKEN?: string;
+  CONTENSIS_CLIENT_ID?: string;
+  CONTENSIS_CLIENT_SECRET?: string;
 };
 
 export type GitHubActionPushBlockJobStep = {

@@ -1,8 +1,9 @@
 import { Role } from 'contensis-management-api/lib/models';
 import { ApiKey, MigrateRequest } from 'migratortron';
-
+import to from 'await-to-js';
 import ContensisCli from './ContensisCliService';
 import { OutputOptionsConstructorArg } from '~/models/CliService';
+import { Logger } from '~/util/logger';
 
 class ContensisRole extends ContensisCli {
   constructor(
@@ -12,6 +13,37 @@ class ContensisRole extends ContensisCli {
   ) {
     super(args, outputOpts, contensisOpts);
   }
+
+  GetDeliveryApiKey = async () => {
+    const { contensis, currentEnv } = this;
+
+    const CMS = `https://cms-${currentEnv}.cloud.contensis.com`;
+    const API = 'api/contensis-cli/settings/defaultDeliveryApiAccessToken';
+
+    if (contensis) {
+      const [error, bearerToken] = await to(
+        contensis.content.sourceRepo.repo.BearerToken()
+      );
+      if (error) Logger.error(error.message);
+
+      const token = fetch(`${CMS}/${API}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${bearerToken}`,
+        },
+      })
+        .then(repsonse => repsonse.json())
+        .then(({ value }) => {
+          if (value) return value;
+        })
+        .catch(error => {
+          throw new Error(error);
+        });
+
+      return token;
+    }
+  };
 
   CreateOrUpdateApiKey = async (
     existingKey: ApiKey | undefined,

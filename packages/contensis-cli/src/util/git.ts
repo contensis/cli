@@ -111,13 +111,14 @@ export class GitHelper {
   githubWorkflows = () => {
     const workflowPath = path.join(this.gitcwd(), '.github/workflows');
     const workflowFiles = readFiles(workflowPath, false);
-    // console.log('gh workflows: ', workflowFiles);
     const addFolderSuffix = (files: string[]) =>
       files.map(f => `.github/workflows/${f}`);
 
-    if (workflowFiles.some(f => f.includes('build')))
+    if (workflowFiles.some(f => f.includes('build'))) {
       return addFolderSuffix(workflowFiles.filter(f => f.includes('build')));
-    return addFolderSuffix(workflowFiles);
+    } else {
+      return addFolderSuffix(workflowFiles);
+    }
   };
   gitlabWorkflow = (ciFileName = GITLAB_CI_FILENAME) => {
     const workflowPath = this.gitcwd();

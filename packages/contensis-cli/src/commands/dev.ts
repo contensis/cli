@@ -25,13 +25,13 @@ export const makeDevCommand = () => {
     )
     .option(
       '-d --dry-run',
-      'perform a dry run of the project initialisation where no changes are made',
-      true
+      'perform a dry run of the project initialisation where no changes are made'
     )
-    .option(
-      '--commit',
-      'commit change (will eventually be deprecated in favour of --dry-run)'
-    )
+    // .option(
+    //   '--commit',
+    //   'commit change (will eventually be deprecated in favour of --dry-run)',
+    //   true
+    // )
     .addHelpText(
       'after',
       `
@@ -42,7 +42,7 @@ Example call:
       // TODO: add opts for overriding project name and git url
       await devCommand(['dev', 'init', projectHome], opts).DevelopmentInit(
         projectHome,
-        { ...opts, dryRun: !opts.commit }
+        { ...opts, dryRun: opts.dryRun }
       );
     });
 
