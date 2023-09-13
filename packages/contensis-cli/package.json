@@ -27,6 +27,7 @@
     "app-root-path": "^3.1.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
+    "contensis-management-api": "^2.1.2",
     "csv": "^6.1.0",
     "dayjs": "^1.11.6",
     "diff": "^5.1.0",
