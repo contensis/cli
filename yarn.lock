@@ -1237,7 +1237,7 @@ console-table-printer@^2.10.0:
     simple-wcswidth "^1.0.1"
 
 "contensis-cli@file:/Users/felicitybeavan/Desktop/node-cli/packages/contensis-cli":
-  version "1.0.3"
+  version "1.0.4"
   resolved "file:packages/contensis-cli"
   dependencies:
     "@action-validator/core" "^0.5.3"
