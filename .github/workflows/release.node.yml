@@ -38,18 +38,29 @@ jobs:
         run: |
           yarn run bootstrap
           yarn run build
-          APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
-          VERSION_EXISTS=$(npm view contensis-cli@$APP_VERSION version --silent || false)
-          [ "$APP_VERSION" == "$VERSION_EXISTS" ] && npm view contensis-cli@$APP_VERSION --silent
-          [ -z "$VERSION_EXISTS" ] && echo "v$APP_VERSION is not found in npm.js" || echo "v$APP_VERSION already published in npm.js"
-          echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
-          echo "exists=$VERSION_EXISTS" >> $GITHUB_OUTPUT
-
-      - name: Publish package version "${{ steps.build.outputs.version }}" to npm.js with tag "${{ inputs.tag }}"
-        if: steps.build.outputs.exists != steps.build.outputs.version
-        run: |
           cd packages/contensis-cli
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag ${{ inputs.tag }} --ignore-scripts
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    # - id: build
+    #     name: Install dependencies, build and set APP_VERSION output variable
+    #     run: |
+    #       yarn run bootstrap
+    #       yarn run build
+    #       APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
+    #       VERSION_EXISTS=$(npm view contensis-cli@$APP_VERSION version --silent || false)
+    #       [ "$APP_VERSION" == "$VERSION_EXISTS" ] && npm view contensis-cli@$APP_VERSION --silent
+    #       [ -z "$VERSION_EXISTS" ] && echo "v$APP_VERSION is not found in npm.js" || echo "v$APP_VERSION already published in npm.js"
+    #       echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
+    #       echo "exists=$VERSION_EXISTS" >> $GITHUB_OUTPUT
+
+    #   - name: Publish package version "${{ steps.build.outputs.version }}" to npm.js with tag "${{ inputs.tag }}"
+    #     if: steps.build.outputs.exists != steps.build.outputs.version
+    #     run: |
+    #       cd packages/contensis-cli
+    #       npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+    #       npm publish --tag ${{ inputs.tag }} --ignore-scripts
+    #     env:
+    #       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
