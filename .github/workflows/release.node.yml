@@ -38,6 +38,15 @@ jobs:
         run: |
           yarn run bootstrap
           yarn run build
+
+      - id: app_version
+        run: |
+          APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
+          echo "version=$APP_VERSION"
+
+      - id: publish
+        name: Install dependencies, build and set APP_VERSION output variable
+        run: |
           cd packages/contensis-cli
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag ${{ inputs.tag }} --ignore-scripts
