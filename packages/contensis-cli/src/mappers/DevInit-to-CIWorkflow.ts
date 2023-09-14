@@ -251,7 +251,7 @@ const mapGitHubActionCIWorkflowContent = async (
     const appImageUri = await determineAppImageUri(
       cli,
       Object.entries(workflowJS.env || {}),
-      'ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app:build-${{ github.run_number }}'
+      'ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app'
     );
 
     if (appImageUri.addVar)
@@ -265,7 +265,7 @@ const mapGitHubActionCIWorkflowContent = async (
     if (appImageUri.var)
       addGitHubActionJobStep.with[
         'image-uri'
-      ] = `\${{ env.${appImageUri.var} }}`;
+      ] = `\${{ env.${appImageUri.var} }}:build-\${{ github.run_number }}`;
   };
 
   // look for line in job
