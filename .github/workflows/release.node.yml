@@ -47,9 +47,8 @@ jobs:
       - id: publish
         name: Install dependencies, build and set APP_VERSION output variable
         run: |
-          cd packages/contensis-cli
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-          npm publish --tag ${{ inputs.tag }} --ignore-scripts
+          npm publish --tag ${{ inputs.tag }} --ignore-scripts --workspace contensis-cli
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
