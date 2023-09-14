@@ -52,6 +52,7 @@ To prepare the next release version
   - `npm start`
   - `--version` (in the shell prompt)
   - Commit changes. Add the phrase `[nobuild]` to the commit message and ensure this is the final commit before you push
+- Delete package-lock.json as root
 
 To create a release
 
