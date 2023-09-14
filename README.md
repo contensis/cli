@@ -51,7 +51,7 @@ To prepare the next release version
 - Build and check the version with
   - `npm start`
   - `--version` (in the shell prompt)
-  <!-- - Commit changes. Add the phrase `[nobuild]` to the commit message and ensure this is the final commit before you push -->
+  - Commit changes. Add the phrase `[nobuild]` to the commit message and ensure this is the final commit before you push
 
 To create a release
 
