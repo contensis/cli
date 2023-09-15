@@ -48,15 +48,21 @@ To prepare the next release version
   - `npm version minor`
   - `npm version major`
   - `npm version 1.0.1`
-- Build and check the version with
+- Delete the created `package-lock.json` file at the root (this is not needed as we have a `yarn.lock`)
+- Run and check version
   - `npm start`
   - `--version` (in the shell prompt)
-  - Commit changes. Add the phrase `[nobuild]` to the commit message and ensure this is the final commit before you push
-- Delete package-lock.json as root
+- Commiting:
+- Commit message should include the phrases `[nobuild]` and `[nopublish]` e.g **prep: release files [nobuild] [nopublish]**
+- Commit files should be:
+  - `yarn.lock`
+  - `package-lock.json` (packages/contensis-cli)
+  - `package.json` (packages/contensis-cli)
+  - `verison.ts` (packages/contensis-cli/src)
 
 To create a release
 
-- Create a new release from the repo Releases page
+- Create a new release from the repo [Releases page](https://github.com/contensis/node-cli/releases/new)
 - The release version will match the `package.json` version in `/packages/contensis-cli` (prefixed with "v" e.g. "v1.0.1")
 - A new git tag will be created matching the release version
 - Release notes are typed out and will be a summary of key changes since last release tag
