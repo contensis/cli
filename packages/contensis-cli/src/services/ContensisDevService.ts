@@ -249,23 +249,48 @@ class ContensisDev extends ContensisRole {
         checkpoint('api keys done');
       }
 
+      const envFilePath = `${projectHome}/.env`;
+      const existingEnvFile = readFile(envFilePath);
+      let existingEnvFileArray = (existingEnvFile || '')
+        .split('\n')
+        .filter(l => !!l);
+
       // Update or create a file called .env in project home
       const envContentsToAdd: EnvContentsToAdd = {
         ALIAS: currentEnv,
         PROJECT: currentProject,
       };
       if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
+      // add client id and secret to the env file
       if (this.clientDetailsLocation === 'env') {
-        if (git.type === 'github') {
-          envContentsToAdd['CONTENSIS_CLIENT_ID'] = this.clientId;
-          envContentsToAdd['CONTENSIS_CLIENT_SECRET'] = this.clientSecret;
-        }
+        envContentsToAdd['CONTENSIS_CLIENT_ID'] = this.clientId;
+        envContentsToAdd['CONTENSIS_CLIENT_SECRET'] = this.clientSecret;
       }
 
-      const envFilePath = `${projectHome}/.env`;
-      const existingEnvFile = readFile(envFilePath);
+      // if we have client id / secret in our env remove it
+      const removeEnvItems = (items: string[]) => {
+        const indexesToRemove = [];
+
+        for (let i = 0; i < existingEnvFileArray.length; i++) {
+          for (const item of items) {
+            if (existingEnvFileArray[i].includes(item)) {
+              indexesToRemove.push(i);
+              break;
+            }
+          }
+        }
+
+        for (let i = indexesToRemove.length - 1; i >= 0; i--) {
+          existingEnvFileArray.splice(indexesToRemove[i], 1);
+        }
+      };
+
+      if (this.clientDetailsLocation === 'git') {
+        removeEnvItems(['CONTENSIS_CLIENT_ID', 'CONTENSIS_CLIENT_SECRET']);
+      }
+
       const envFileLines = mergeDotEnvFileContents(
-        (existingEnvFile || '').split('\n').filter(l => !!l),
+        existingEnvFileArray,
         envContentsToAdd
       );
       const newEnvFileContent = envFileLines.join('\n');

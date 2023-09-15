@@ -73,20 +73,20 @@ const findExistingJobSteps = (
   return existingJobStep;
 };
 
+const findPath = (path: string | any[]) =>
+  typeof path === 'string' && path.includes('.')
+    ? path.split('.').map(p => (Number(p) || Number(p) !== 0 ? p : Number(p)))
+    : path;
+
 const setWorkflowElement = (
   workflowDoc: Document,
   path: string | any[],
   value: any
 ) => {
-  const findPath =
-    typeof path === 'string' && path.includes('.')
-      ? path.split('.').map(p => (Number(p) || Number(p) !== 0 ? p : Number(p)))
-      : path;
-
-  if (workflowDoc.hasIn(findPath)) {
-    workflowDoc.setIn(findPath, value);
+  if (workflowDoc.hasIn(findPath(path))) {
+    workflowDoc.setIn(findPath(path), value);
   } else {
-    workflowDoc.addIn(findPath, value);
+    workflowDoc.addIn(findPath(path), value);
   }
 };
 
@@ -284,6 +284,12 @@ const mapGitHubActionCIWorkflowContent = async (
       `env.CONTENSIS_SHARED_SECRET`,
       cli.clientSecret
     );
+  }
+
+  if (cli.clientDetailsLocation === 'git') {
+    // remove env vars from yml if we choose git
+    workflowDoc.deleteIn(findPath(`env.CONTENSIS_CLIENT_ID`));
+    workflowDoc.deleteIn(findPath(`env.CONTENSIS_SHARED_SECRET`));
   }
 
   // update job step
