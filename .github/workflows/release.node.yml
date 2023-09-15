@@ -43,6 +43,7 @@ jobs:
         run: |
           APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
           echo "version=$APP_VERSION"
+          echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
 
       - id: publish
         name: Install dependencies, build and set APP_VERSION output variable
