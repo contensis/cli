@@ -554,7 +554,7 @@ Connect to Contensis instance: ${Logger.standardText(env)}
         git.type === 'github' ? 'GitHub' : 'GitLab'
       } variables (recommended for public repositories)`,
     clientDetailsInEnv: () =>
-      `.env file (recommended for private repositories)`,
+      `Env variables (recommended for private repositories)`,
     success: () => `Contensis developer environment initialisation complete`,
     partialSuccess: () =>
       `Contensis developer environment initialisation completed with errors`,

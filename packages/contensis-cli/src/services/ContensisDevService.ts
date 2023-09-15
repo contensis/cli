@@ -72,9 +72,23 @@ class ContensisDev extends ContensisRole {
 
       let existingDeployKey = apiKeyExists(deployKeyName);
 
-      // Add client id and secret to global 'this'
-      this.clientId = existingDeployKey?.id;
-      this.clientSecret = existingDeployKey?.sharedSecret;
+      // if api key doesn't exisit go and create it (we need this for yml file).
+      if (!existingDeployKey) {
+        log.info('Please wait, creating deploy key');
+        existingDeployKey = await this.CreateOrUpdateApiKey(
+          existingDeployKey,
+          deployKeyName,
+          deployKeyDescription
+        );
+        log.success('Successfully created deploy key');
+      }
+
+      // check we have the deply key so we can assign them to this values
+      if (existingDeployKey) {
+        // Add client id and secret to global 'this'
+        this.clientId = existingDeployKey?.id;
+        this.clientSecret = existingDeployKey?.sharedSecret;
+      }
 
       const blockId = git.name;
       const errors = [] as AppError[];
@@ -207,13 +221,6 @@ class ContensisDev extends ContensisRole {
         //   devKeyDescription
         // );
         // checkpoint('dev key created');
-
-        existingDeployKey = await this.CreateOrUpdateApiKey(
-          existingDeployKey,
-          deployKeyName,
-          deployKeyDescription
-        );
-        checkpoint('deploy key created');
 
         // Ensure dev API key is assigned to a role
         // let existingDevRole = findByIdOrName(roles || [], devKeyName, true) as
