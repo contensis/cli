@@ -23,6 +23,12 @@ jobs:
     name: docker:release
     needs: node
     uses: ./.github/workflows/release.docker.yml
-    with:
-      version: ${{ needs.node.outputs.version }}
     secrets: inherit
+
+  # docker:
+  #   name: docker:release
+  #   needs: node
+  #   uses: ./.github/workflows/release.docker.yml
+  #   with:
+  #     version: ${{ needs.node.outputs.version }}
+  #   secrets: inherit
