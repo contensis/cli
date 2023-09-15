@@ -276,6 +276,16 @@ const mapGitHubActionCIWorkflowContent = async (
     'all'
   );
 
+  // Update 'env' and store client id and secret
+  if (cli.clientDetailsLocation === 'env') {
+    setWorkflowElement(workflowDoc, `env.CONTENSIS_CLIENT_ID`, cli.clientId);
+    setWorkflowElement(
+      workflowDoc,
+      `env.CONTENSIS_SHARED_SECRET`,
+      cli.clientSecret
+    );
+  }
+
   // update job step
   if (existingJobStep.length) {
     //cli.log.json(existingJobStep);
