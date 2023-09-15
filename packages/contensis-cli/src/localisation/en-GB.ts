@@ -493,8 +493,6 @@ Connect to Contensis instance: ${Logger.standardText(env)}
       )}\n`,
     confirm: () =>
       `Confirm these details are correct so we can make changes to your project`,
-    accessTokenPrompt: () =>
-      ` To continue setting up we need permission to fetch your Delivery API token. (Press (Y + ⏎) to continue or (N + ⏎) to exit the set up process)`,
     createDevKey: (keyName: string, existing: boolean) =>
       `${
         !existing ? 'Created' : 'Checked permissions for'

@@ -63,14 +63,18 @@ class ContensisDev extends ContensisRole {
       // Set variables for performing operations and logging etc.
       let ciFileName = git.ciFileName;
 
-      const devKeyName = `${git.name} development`;
-      const devKeyDescription = `${git.name} [contensis-cli]`;
-      let existingDevKey = apiKeyExists(devKeyName);
+      // const devKeyName = `${git.name} development`;
+      // const devKeyDescription = `${git.name} [contensis-cli]`;
+      // let existingDevKey = apiKeyExists(devKeyName);
 
       const deployKeyName = `${git.name} deployment`;
       const deployKeyDescription = `${git.name} deploy [contensis-cli]`;
 
       let existingDeployKey = apiKeyExists(deployKeyName);
+
+      // Add client id and secret to global 'this'
+      this.clientId = existingDeployKey?.id;
+      this.clientSecret = existingDeployKey?.sharedSecret;
 
       const blockId = git.name;
       const errors = [] as AppError[];
@@ -89,11 +93,11 @@ class ContensisDev extends ContensisRole {
           )
         )
       );
-      log.raw(
-        log.infoText(
-          messages.devinit.developmentKey(devKeyName, !!existingDevKey)
-        )
-      );
+      // log.raw(
+      //   log.infoText(
+      //     messages.devinit.developmentKey(devKeyName, !!existingDevKey)
+      //   )
+      // );
       log.raw(
         log.infoText(
           messages.devinit.deploymentKey(deployKeyName, !!existingDeployKey)
@@ -143,9 +147,6 @@ class ContensisDev extends ContensisRole {
       if (this.clientDetailsLocation === 'env') {
         // Update CI Workflow to pull from ENV variables
         mappedWorkflow = await mapCIWorkflowContent(this);
-        // Add client id and secret to global 'this'
-        this.clientId = existingDeployKey?.id;
-        this.clientSecret = existingDeployKey?.sharedSecret;
         log.help(messages.devinit.ciIntro(git, this.clientDetailsLocation));
       } else {
         // Look at the workflow file content and make updates
@@ -167,36 +168,23 @@ class ContensisDev extends ContensisRole {
         if (!confirm) return;
       }
 
-      // Access token prompt
+      // Fetching access token
       let accessToken: string | undefined = undefined;
-      const { canContinue } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          prefix: '🛡️',
-          // We're all set to grab your access token. Can we proceed? (⏎ continue)
-          message: messages.devinit.accessTokenPrompt(),
-          name: 'canContinue',
-        },
-      ]);
       log.raw('');
 
-      if (!canContinue) return;
-      if (canContinue) {
-        const spinner = createSpinner(messages.devinit.accessTokenFetch());
-        spinner.start();
+      const spinner = createSpinner(messages.devinit.accessTokenFetch());
+      spinner.start();
 
-        // Fetching access token
-        const token = await this.GetDeliveryApiKey();
+      const token = await this.GetDeliveryApiKey();
 
-        if (token) {
-          spinner.success();
-          this.log.success(messages.devinit.accessTokenSuccess(token));
-          accessToken = token;
-        } else {
-          spinner.error();
-          this.log.error(messages.devinit.accessTokenFailed());
-          return;
-        }
+      if (token) {
+        spinner.success();
+        this.log.success(messages.devinit.accessTokenSuccess(token));
+        accessToken = token;
+      } else {
+        spinner.error();
+        this.log.error(messages.devinit.accessTokenFailed());
+        return;
       }
 
       // Magic happens...
@@ -213,12 +201,12 @@ class ContensisDev extends ContensisRole {
       if (dryRun) {
         checkpoint(`skip api key creation (dry-run)`);
       } else {
-        existingDevKey = await this.CreateOrUpdateApiKey(
-          existingDevKey,
-          devKeyName,
-          devKeyDescription
-        );
-        checkpoint('dev key created');
+        // existingDevKey = await this.CreateOrUpdateApiKey(
+        //   existingDevKey,
+        //   devKeyName,
+        //   devKeyDescription
+        // );
+        // checkpoint('dev key created');
 
         existingDeployKey = await this.CreateOrUpdateApiKey(
           existingDeployKey,
@@ -228,15 +216,15 @@ class ContensisDev extends ContensisRole {
         checkpoint('deploy key created');
 
         // Ensure dev API key is assigned to a role
-        let existingDevRole = findByIdOrName(roles || [], devKeyName, true) as
-          | Role
-          | undefined;
-        existingDevRole = await this.CreateOrUpdateRole(
-          existingDevRole,
-          devKeyRole(devKeyName, devKeyDescription)
-        );
-        checkpoint('dev key role assigned');
-        log.success(messages.devinit.createDevKey(devKeyName, true));
+        // let existingDevRole = findByIdOrName(roles || [], devKeyName, true) as
+        //   | Role
+        //   | undefined;
+        // existingDevRole = await this.CreateOrUpdateRole(
+        //   existingDevRole,
+        //   devKeyRole(devKeyName, devKeyDescription)
+        // );
+        // checkpoint('dev key role assigned');
+        // log.success(messages.devinit.createDevKey(devKeyName, true));
 
         // Ensure deploy API key is assigned to a role with the right permissions
         let existingDeployRole = findByIdOrName(
