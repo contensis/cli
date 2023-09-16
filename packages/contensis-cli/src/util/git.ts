@@ -17,7 +17,6 @@ export class GitHelper {
   private gitRepoPath: string;
   private ciFile?: string;
 
-  isRepo: boolean | undefined;
   config = {} as GitConfig;
   info: hostedGitInfo | undefined;
   home: string | undefined;
@@ -47,7 +46,8 @@ export class GitHelper {
     );
   }
   get originUrl() {
-    return this.config.remote.origin.url;
+    const originUrl = this?.config?.remote?.origin?.url;
+    if (originUrl) return originUrl;
   }
   get secretsUri() {
     return `${
@@ -76,8 +76,11 @@ export class GitHelper {
   gitcwd = () => path.join(this.gitRepoPath);
   gitInfo = (url: string = this.originUrl) => hostedGitInfo.fromUrl(url);
   hostType = (url: string = this.originUrl): GitTypes => {
-    if (url.includes('github.com')) return 'github';
-    return 'gitlab';
+    if (url) {
+      if (url.includes('github.com')) return 'github';
+      else return 'gitlab';
+    }
+
     // if (url.includes('gitlab.com')) return 'gl';
     // if (url.includes('gitlab.zengenti.com')) return 'gl';
   };
@@ -137,9 +140,10 @@ export class GitHelper {
       this.config.core.repositoryformatversion
     ) {
       Logger.success('You are inside a Git repository.');
+      return true;
     } else {
       Logger.error('You are not inside a Git repository.');
-      return;
+      return false;
     }
   };
 }

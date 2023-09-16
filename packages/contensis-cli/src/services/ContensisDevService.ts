@@ -40,7 +40,8 @@ class ContensisDev extends ContensisRole {
     // Retrieve git info
     const git = (this.git = new GitHelper(projectHome));
     // Check if we are in a git repo
-    git.checkIsRepo();
+    const isRepo = git.checkIsRepo();
+    if (!isRepo) return;
 
     const { dryRun = false } = opts || {};
     const { currentEnv, currentProject, log, messages } = this;
