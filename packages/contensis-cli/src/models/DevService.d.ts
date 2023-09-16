@@ -4,6 +4,7 @@ export type EnvContentsToAdd = {
   ACCESS_TOKEN?: string;
   CONTENSIS_CLIENT_ID?: string;
   CONTENSIS_CLIENT_SECRET?: string;
+  BLOCK_ID: string;
 };
 
 export type GitHubActionPushBlockJobStep = {

@@ -26,8 +26,6 @@ export const mapCIWorkflowContent = async (
   const workflowFile = readFile(cli.git.ciFilePath);
   if (!workflowFile) return undefined;
 
-  const blockId = cli.git.name;
-
   // parse yaml to js
   const workflowDoc = parseYamlDocument(workflowFile);
   const workflowJS = workflowDoc.toJS();
@@ -35,7 +33,6 @@ export const mapCIWorkflowContent = async (
   if (cli.git.type === 'github') {
     const newWorkflow = await mapGitHubActionCIWorkflowContent(
       cli,
-      blockId,
       workflowDoc,
       workflowJS
     );
@@ -47,7 +44,6 @@ export const mapCIWorkflowContent = async (
   } else if (cli.git.type === 'gitlab') {
     const newWorkflow = await mapGitLabCIWorkflowContent(
       cli,
-      blockId,
       workflowDoc,
       workflowJS
     );
@@ -92,14 +88,13 @@ const setWorkflowElement = (
 
 const mapGitLabCIWorkflowContent = async (
   cli: ContensisDev,
-  blockId: string,
   workflowDoc: Document,
   workflowJS: any
 ) => {
   const addGitLabJobStage: GitLabPushBlockJobStage = {
     stage: 'push-block',
     variables: {
-      block_id: blockId,
+      block_id: cli.blockId,
       alias: cli.currentEnv,
       project_id: cli.currentProject,
       client_id:
@@ -171,7 +166,11 @@ const mapGitLabCIWorkflowContent = async (
       `${stepPath}.variables.project_id`,
       cli.currentProject
     );
-    setWorkflowElement(workflowDoc, `${stepPath}.variables.block_id`, blockId);
+    setWorkflowElement(
+      workflowDoc,
+      `${stepPath}.variables.block_id`,
+      cli.blockId
+    );
 
     // This is likely not needed when updating an existing push-block job step
     // we are assuming this is a forked/copied workflow with an already working image-uri reference
@@ -222,7 +221,6 @@ const mapGitLabCIWorkflowContent = async (
 
 const mapGitHubActionCIWorkflowContent = async (
   cli: ContensisDev,
-  blockId: string,
   workflowDoc: Document,
   workflowJS: any
 ) => {
@@ -231,7 +229,7 @@ const mapGitHubActionCIWorkflowContent = async (
     id: 'push-block',
     uses: 'contensis/block-push@v1',
     with: {
-      'block-id': blockId,
+      'block-id': cli.blockId,
       // 'image-uri': '${{ steps.build.outputs.image-uri }}',
       alias: cli.currentEnv,
       'project-id': cli.currentProject,
@@ -319,7 +317,7 @@ const mapGitHubActionCIWorkflowContent = async (
       `${stepPath}.with.project-id`,
       cli.currentProject
     );
-    setWorkflowElement(workflowDoc, `${stepPath}.with.block-id`, blockId);
+    setWorkflowElement(workflowDoc, `${stepPath}.with.block-id`, cli.blockId);
 
     // This is likely not needed when updating an existing push-block job step
     // we are assuming this is a forked/copied workflow with an already working image-uri reference

@@ -27,6 +27,7 @@ import { createSpinner } from 'nanospinner';
 
 class ContensisDev extends ContensisRole {
   git!: GitHelper;
+  blockId: string;
 
   constructor(
     args: string[],
@@ -48,6 +49,24 @@ class ContensisDev extends ContensisRole {
     const contensis = await this.ConnectContensis();
 
     if (contensis) {
+      // First we need to get the block id from the user
+      const validateBlockId = (blockId: string) => {
+        const pattern = /^[a-z-]*$/;
+        if (typeof blockId === 'string' && blockId.length >= 3) {
+          return pattern.test(blockId);
+        } else return false;
+      };
+      let { blockId } = await inquirer.prompt({
+        name: 'blockId',
+        type: 'input',
+        prefix: '🧱',
+        message: messages.devinit.blockIdQuestion,
+        validate: validateBlockId,
+      });
+      // make sure block id is lowercase
+      this.blockId = blockId.toLowerCase();
+      log.success(`Valid block id: ${blockId.toLowerCase()}`);
+
       // Retrieve keys list for env
       const [keysErr, apiKeys] = await contensis.apiKeys.GetKeys();
       if (keysErr) {
@@ -70,8 +89,8 @@ class ContensisDev extends ContensisRole {
       // const devKeyDescription = `${git.name} [contensis-cli]`;
       // let existingDevKey = apiKeyExists(devKeyName);
 
-      const deployKeyName = `${git.name} deployment`;
-      const deployKeyDescription = `${git.name} deploy [contensis-cli]`;
+      const deployKeyName = `${blockId} deployment`;
+      const deployKeyDescription = `${blockId} deploy [contensis-cli]`;
 
       let existingDeployKey = apiKeyExists(deployKeyName);
 
@@ -93,7 +112,7 @@ class ContensisDev extends ContensisRole {
         this.clientSecret = existingDeployKey?.sharedSecret;
       }
 
-      const blockId = git.name;
+      // const blockId = git.name;
       const errors = [] as AppError[];
 
       // Start render console output
@@ -106,6 +125,7 @@ class ContensisDev extends ContensisRole {
             git.name,
             currentEnv,
             currentProject,
+            blockId,
             git
           )
         )
@@ -164,11 +184,11 @@ class ContensisDev extends ContensisRole {
       if (this.clientDetailsLocation === 'env') {
         // Update CI Workflow to pull from ENV variables
         mappedWorkflow = await mapCIWorkflowContent(this);
-        log.help(messages.devinit.ciIntro(git, this.clientDetailsLocation));
+        log.help(messages.devinit.ciIntro(git, 'env'));
       } else {
         // Look at the workflow file content and make updates
         mappedWorkflow = await mapCIWorkflowContent(this);
-        log.help(messages.devinit.ciIntro(git, this.clientDetailsLocation));
+        log.help(messages.devinit.ciIntro(git, 'git'));
       }
 
       if (!dryRun) {
@@ -262,6 +282,7 @@ class ContensisDev extends ContensisRole {
       const envContentsToAdd: EnvContentsToAdd = {
         ALIAS: currentEnv,
         PROJECT: currentProject,
+        BLOCK_ID: blockId,
       };
       if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
       // add client id and secret to the env file

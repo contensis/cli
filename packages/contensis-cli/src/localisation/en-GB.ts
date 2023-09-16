@@ -439,14 +439,18 @@ export const LogMessages = {
       name: string,
       env: string,
       projectId: string,
+      blockId: string,
       git: GitHelper
     ) =>
-      `Project: ${Logger.highlightText(name)} set arg --name to override
-  - Home: ${Logger.standardText(process.cwd())}
-  - Repository: ${git.home} 
+      `
+      Project: ${Logger.standardText(name)}
+      - Home: ${Logger.standardText(process.cwd())}
+      - Repository: ${Logger.standardText(git.home)} 
+      - Block id: ${Logger.highlightText(blockId)}
     
-Connect to Contensis instance: ${Logger.standardText(env)}
-  - Project id: ${Logger.standardText(projectId)}`,
+      Connect to Contensis instance: ${Logger.standardText(env)}
+      - Project id: ${Logger.standardText(projectId)}
+      `,
     developmentKey: (name: string, existing: boolean) =>
       `  - ${
         !existing ? 'Create development API key' : 'Development API key found'
@@ -567,5 +571,9 @@ Connect to Contensis instance: ${Logger.standardText(env)}
       )} flag to update your project with these changes`,
     startProjectTip: () =>
       `Start up your project in the normal way for development`,
+    blockIdQuestion: () =>
+      `Please enter your block id, this should be unquie and in kebab case e.g ${Logger.highlightText(
+        'my-awesome-website'
+      )}`,
   },
 };
