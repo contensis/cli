@@ -37,6 +37,11 @@ class ContensisDev extends ContensisRole {
   }
 
   DevelopmentInit = async (projectHome: string, opts: any) => {
+    // Retrieve git info
+    const git = (this.git = new GitHelper(projectHome));
+    // Check if we are in a git repo
+    git.checkIsRepo();
+
     const { dryRun = false } = opts || {};
     const { currentEnv, currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -53,9 +58,6 @@ class ContensisDev extends ContensisRole {
         apiKeys?.find(
           k => k.name.trim().toLowerCase() === findKey?.trim().toLowerCase()
         );
-
-      // Retrieve git info
-      const git = (this.git = new GitHelper(projectHome));
 
       // Retrieve ci workflow info
       const workflowFiles = git.workflows;

@@ -5,6 +5,7 @@ import path from 'path';
 
 import { linuxSlash } from './os';
 import { readFile, readFiles } from '~/providers/file-provider';
+import { Logger } from './logger';
 
 const GITLAB_CI_FILENAME = '.gitlab-ci.yml';
 
@@ -16,6 +17,7 @@ export class GitHelper {
   private gitRepoPath: string;
   private ciFile?: string;
 
+  isRepo: boolean | undefined;
   config = {} as GitConfig;
   info: hostedGitInfo | undefined;
   home: string | undefined;
@@ -127,5 +129,17 @@ export class GitHelper {
     // console.log(ciFileName, workflowFile);
 
     return workflowFile;
+  };
+  checkIsRepo = () => {
+    if (
+      this.config &&
+      this.config.core &&
+      this.config.core.repositoryformatversion
+    ) {
+      Logger.success('You are inside a Git repository.');
+    } else {
+      Logger.error('You are not inside a Git repository.');
+      return;
+    }
   };
 }
