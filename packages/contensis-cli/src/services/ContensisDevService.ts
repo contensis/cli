@@ -24,6 +24,7 @@ import { jsonFormatter } from '~/util/json.formatter';
 import { winSlash } from '~/util/os';
 import { stringifyYaml } from '~/util/yaml';
 import { createSpinner } from 'nanospinner';
+import { mergeContentsToAddWithGitignore } from '~/util/gitignore';
 
 class ContensisDev extends ContensisRole {
   git!: GitHelper;
@@ -85,18 +86,27 @@ class ContensisDev extends ContensisRole {
       // Set variables for performing operations and logging etc.
       let ciFileName = git.ciFileName;
 
-      // const devKeyName = `${git.name} development`;
-      // const devKeyDescription = `${git.name} [contensis-cli]`;
-      // let existingDevKey = apiKeyExists(devKeyName);
+      const devKeyName = `${blockId} development`;
+      const devKeyDescription = `${blockId} [contensis-cli]`;
+      let existingDevKey = apiKeyExists(devKeyName);
+
+      // if dev api key doesn't exisit go and create it (we need this for local development, we will store these details in the .env file).
+      if (!existingDevKey) {
+        existingDevKey = await this.CreateOrUpdateApiKey(
+          existingDevKey,
+          devKeyName,
+          devKeyDescription
+        );
+        log.success('Successfully created development key');
+      }
 
       const deployKeyName = `${blockId} deployment`;
       const deployKeyDescription = `${blockId} deploy [contensis-cli]`;
 
       let existingDeployKey = apiKeyExists(deployKeyName);
 
-      // if api key doesn't exisit go and create it (we need this for yml file).
+      // if deploy api key doesn't exisit go and create it (we need this for yml file).
       if (!existingDeployKey) {
-        log.info('Please wait, creating deploy key');
         existingDeployKey = await this.CreateOrUpdateApiKey(
           existingDeployKey,
           deployKeyName,
@@ -130,11 +140,11 @@ class ContensisDev extends ContensisRole {
           )
         )
       );
-      // log.raw(
-      //   log.infoText(
-      //     messages.devinit.developmentKey(devKeyName, !!existingDevKey)
-      //   )
-      // );
+      log.raw(
+        log.infoText(
+          messages.devinit.developmentKey(devKeyName, !!existingDevKey)
+        )
+      );
       log.raw(
         log.infoText(
           messages.devinit.deploymentKey(deployKeyName, !!existingDeployKey)
@@ -238,24 +248,6 @@ class ContensisDev extends ContensisRole {
       if (dryRun) {
         checkpoint(`skip api key creation (dry-run)`);
       } else {
-        // existingDevKey = await this.CreateOrUpdateApiKey(
-        //   existingDevKey,
-        //   devKeyName,
-        //   devKeyDescription
-        // );
-        // checkpoint('dev key created');
-
-        // Ensure dev API key is assigned to a role
-        // let existingDevRole = findByIdOrName(roles || [], devKeyName, true) as
-        //   | Role
-        //   | undefined;
-        // existingDevRole = await this.CreateOrUpdateRole(
-        //   existingDevRole,
-        //   devKeyRole(devKeyName, devKeyDescription)
-        // );
-        // checkpoint('dev key role assigned');
-        // log.success(messages.devinit.createDevKey(devKeyName, true));
-
         // Ensure deploy API key is assigned to a role with the right permissions
         let existingDeployRole = findByIdOrName(
           roles || [],
@@ -287,8 +279,9 @@ class ContensisDev extends ContensisRole {
       if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
       // add client id and secret to the env file
       if (this.clientDetailsLocation === 'env') {
-        envContentsToAdd['CONTENSIS_CLIENT_ID'] = this.clientId;
-        envContentsToAdd['CONTENSIS_CLIENT_SECRET'] = this.clientSecret;
+        envContentsToAdd['CONTENSIS_CLIENT_ID'] = existingDevKey?.id;
+        envContentsToAdd['CONTENSIS_CLIENT_SECRET'] =
+          existingDevKey?.sharedSecret;
       }
 
       // if we have client id / secret in our env remove it
@@ -333,6 +326,11 @@ class ContensisDev extends ContensisRole {
         log.success(messages.devinit.writeEnvFile());
         // log.help(messages.devinit.useEnvFileTip());
       }
+
+      // Update git ignore
+      const gitIgnorePath = `${projectHome}/.gitignore`;
+      const gitIgnoreContentsToAdd = ['.env'];
+      mergeContentsToAddWithGitignore(gitIgnorePath, gitIgnoreContentsToAdd);
 
       // Update CI file -- different for GH/GL
       if (mappedWorkflow?.diff) {
