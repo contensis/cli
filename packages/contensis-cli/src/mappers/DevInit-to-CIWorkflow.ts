@@ -441,7 +441,7 @@ const mapGitHubActionCIWorkflowContent = async (
   //   workflowDoc.toString({ lineWidth: 0 })
   // );
 
-  const newWorkflow = workflowDoc.toString();
+  const newWorkflow = workflowDoc.toString({ lineWidth: 0 });
 
   return newWorkflow;
 };
