@@ -11,10 +11,7 @@ import { OutputOptionsConstructorArg } from '~/models/CliService';
 import { EnvContentsToAdd } from '~/models/DevService';
 import { mapSiteConfigYaml } from '~/mappers/DevRequests-to-RequestHanderSiteConfigYaml';
 import { mapCIWorkflowContent } from '~/mappers/DevInit-to-CIWorkflow';
-import {
-  deployKeyRole,
-  devKeyRole,
-} from '~/mappers/DevInit-to-RolePermissions';
+import { deployKeyRole } from '~/mappers/DevInit-to-RolePermissions';
 import { appRootDir, readFile, writeFile } from '~/providers/file-provider';
 import { diffFileContent } from '~/util/diff';
 import { mergeDotEnvFileContents } from '~/util/dotenv';
@@ -260,7 +257,7 @@ class ContensisDev extends ContensisRole {
         ) as Role | undefined;
         existingDeployRole = await this.CreateOrUpdateRole(
           existingDeployRole,
-          deployKeyRole(deployRoleName, deplyRoleDescription)
+          deployKeyRole(deployKeyName, deplyRoleDescription)
         );
 
         checkpoint('deploy key role assigned');
