@@ -1,6 +1,6 @@
 export type EnvContentsToAdd = {
   ALIAS: string;
-  PROJECT: string;
+  PROJECT_API_ID: string;
   ACCESS_TOKEN?: string;
   CONTENSIS_CLIENT_ID?: string;
   CONTENSIS_CLIENT_SECRET?: string;
