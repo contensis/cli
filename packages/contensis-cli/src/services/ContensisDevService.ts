@@ -273,7 +273,7 @@ class ContensisDev extends ContensisRole {
       // Update or create a file called .env in project home
       const envContentsToAdd: EnvContentsToAdd = {
         ALIAS: currentEnv,
-        PROJECT: currentProject,
+        PROJECT_API_ID: currentProject,
         BLOCK_ID: blockId,
       };
       if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
