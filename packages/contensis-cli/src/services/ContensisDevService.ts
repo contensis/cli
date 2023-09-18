@@ -376,6 +376,10 @@ class ContensisDev extends ContensisRole {
       } else {
         log.success(messages.devinit.success());
         log.help(messages.devinit.startProjectTip());
+        // Open CMS + TODO: Grab token to log user in.
+        log.help(
+          `Open Contensis 👉 https://cms-${currentEnv}.cloud.contensis.com/`
+        );
       }
     }
   };
