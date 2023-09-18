@@ -10,23 +10,25 @@ export const mergeContentsToAddWithGitignore = (
     // Read the existing .gitignore file
     const existingContent = fs.readFileSync(filename, 'utf-8');
 
-    // Split the existing content by newline and remove empty lines
-    const existingLines = existingContent
-      .split('\n')
-      .filter(line => line.trim() !== '');
+    // Create a Set from existing patterns for fast look-up
+    const existingContentSet = new Set(
+      existingContent.split('\n').filter(line => line.trim() !== '')
+    );
 
-    // Merge the existing content with the new contents to add
-    const mergedLines = [...existingLines, ...contentsToAdd];
+    // Filter out patterns that already exist
+    const newContents = contentsToAdd.filter(
+      contentsItem => !existingContentSet.has(contentsItem)
+    );
 
-    // Deduplicate and sort the lines
-    const updatedContent = Array.from(new Set(mergedLines)).sort().join('\n');
-
-    // Write the updated content back to .gitignore
-    fs.writeFileSync(filename, updatedContent);
-
-    Logger.success('.gitignore file updated');
+    if (newContents.length >= 1) {
+      // Append the new patterns to the end of the existing .gitignore content
+      fs.appendFileSync(filename, '\n' + newContents.join('\n'));
+      Logger.success('.gitignore file updated');
+    } else {
+      Logger.success('.gitignore checked, nothing to update');
+    }
   } else {
-    // If .gitignore doesn't exist, create one and add the contents to add
+    // If .gitignore doesn't exist, create one and add the contents
     const gitignoreContent = contentsToAdd.join('\n');
     fs.writeFileSync(filename, gitignoreContent);
 

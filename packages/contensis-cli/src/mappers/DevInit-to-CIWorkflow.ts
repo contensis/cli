@@ -403,7 +403,7 @@ const mapGitHubActionCIWorkflowContent = async (
     await addAppImageUri();
 
     const newJob: GitHubActionPushBlockJob = {
-      name: 'Deploy container image to Contensis',
+      name: 'Push block to Contensis',
       'runs-on': 'ubuntu-latest',
       needs,
       steps: [addGitHubActionJobStep],

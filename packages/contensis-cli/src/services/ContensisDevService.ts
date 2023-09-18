@@ -52,8 +52,8 @@ class ContensisDev extends ContensisRole {
     if (contensis) {
       // First we need to get the block id from the user
       const validateBlockId = (blockId: string) => {
-        const pattern = /^[a-z-]*$/;
-        if (typeof blockId === 'string' && blockId.length >= 3) {
+        const pattern = /^[0-9a-z](-?[0-9a-z])*$/;
+        if (blockId.length >= 1 && blockId.length <= 225) {
           return pattern.test(blockId);
         } else return false;
       };
@@ -86,8 +86,10 @@ class ContensisDev extends ContensisRole {
       // Set variables for performing operations and logging etc.
       let ciFileName = git.ciFileName;
 
-      const devKeyName = `${blockId} development`;
-      const devKeyDescription = `${blockId} [contensis-cli]`;
+      const apiKeyName = `block-${currentProject}-${blockId}`.toLowerCase();
+
+      const devKeyName = `${apiKeyName}`;
+      const devKeyDescription = `Created by Contensis to allow API access from the running block`;
       let existingDevKey = apiKeyExists(devKeyName);
 
       // if dev api key doesn't exisit go and create it (we need this for local development, we will store these details in the .env file).
@@ -100,8 +102,8 @@ class ContensisDev extends ContensisRole {
         log.success('Successfully created development key');
       }
 
-      const deployKeyName = `${blockId} deployment`;
-      const deployKeyDescription = `${blockId} deploy [contensis-cli]`;
+      const deployKeyName = `${apiKeyName}-ci`;
+      const deployKeyDescription = `Created by the Contensis CLI for use in continuous integration`;
 
       let existingDeployKey = apiKeyExists(deployKeyName);
 
@@ -249,18 +251,20 @@ class ContensisDev extends ContensisRole {
         checkpoint(`skip api key creation (dry-run)`);
       } else {
         // Ensure deploy API key is assigned to a role with the right permissions
+        const deployRoleName = `Role for CI push of block '${blockId}'`;
+        const deplyRoleDescription = `Created by the Contensis CLI for use in continuous integration`;
         let existingDeployRole = findByIdOrName(
           roles || [],
-          deployKeyName,
+          deployRoleName,
           true
         ) as Role | undefined;
         existingDeployRole = await this.CreateOrUpdateRole(
           existingDeployRole,
-          deployKeyRole(deployKeyName, deployKeyDescription)
+          deployKeyRole(deployRoleName, deplyRoleDescription)
         );
 
         checkpoint('deploy key role assigned');
-        log.success(messages.devinit.createDeployKey(deployKeyName, true));
+        log.success(messages.devinit.createDeployKey(deployRoleName, true));
         checkpoint('api keys done');
       }
 
