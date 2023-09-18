@@ -53,7 +53,7 @@ To prepare the next release version
   - `npm start`
   - `--version` (in the shell prompt)
 - Commiting:
-- Commit message should include the phrases `[nobuild]` and `[nopublish]` e.g **prep: release files [nobuild] [nopublish]**
+- Commit message should include the phrases `[nobuild]` and `[nopublish]` e.g **prep: release files [nobuild]**
 - Commit files should be:
   - `yarn.lock`
   - `package-lock.json` (packages/contensis-cli)
