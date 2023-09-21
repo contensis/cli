@@ -71,9 +71,13 @@ class ContensisCli {
   contensisOpts: Partial<MigrateRequest>;
   currentProject: string;
 
-  clientDetailsLocation?: 'env' | 'git';
-  clientId?: string;
-  clientSecret?: string;
+  devinit!: {
+    invokedBy: string;
+    credentials: {
+      clientId: string;
+      clientSecret: string;
+    };
+  };
 
   sourceAlias?: string;
   targetEnv?: string;
@@ -93,6 +97,10 @@ class ContensisCli {
   verb: string;
   noun: string;
   thirdArg: string;
+
+  get invokedBy() {
+    return this.command.createdUserId;
+  }
 
   get cache() {
     return this.session.Get();

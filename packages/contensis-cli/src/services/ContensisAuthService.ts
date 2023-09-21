@@ -57,6 +57,11 @@ class ContensisAuthService {
     });
   }
 
+  ClassicToken = async () => {
+    // make sure our token isn't expried.
+    await this.client.ensureBearerToken();
+    return (this.client as any).contensisClassicToken;
+  };
   BearerToken = async () =>
     this.client.bearerToken || (await this.client.ensureBearerToken());
   RefreshToken = async () =>

@@ -20,7 +20,8 @@ type MappedWorkflowOutput = {
 };
 
 export const mapCIWorkflowContent = async (
-  cli: ContensisDev
+  cli: ContensisDev,
+  loc: 'git' | 'env'
 ): Promise<MappedWorkflowOutput | undefined> => {
   // get existing workflow file
   const workflowFile = readFile(cli.git.ciFilePath);
@@ -34,7 +35,8 @@ export const mapCIWorkflowContent = async (
     const newWorkflow = await mapGitHubActionCIWorkflowContent(
       cli,
       workflowDoc,
-      workflowJS
+      workflowJS,
+      loc
     );
     return {
       existingWorkflow: workflowFile,
@@ -45,7 +47,8 @@ export const mapCIWorkflowContent = async (
     const newWorkflow = await mapGitLabCIWorkflowContent(
       cli,
       workflowDoc,
-      workflowJS
+      workflowJS,
+      loc
     );
     return {
       existingWorkflow: workflowFile,
@@ -89,7 +92,8 @@ const setWorkflowElement = (
 const mapGitLabCIWorkflowContent = async (
   cli: ContensisDev,
   workflowDoc: Document,
-  workflowJS: any
+  workflowJS: any,
+  loc: 'env' | 'git'
 ) => {
   const addGitLabJobStage: GitLabPushBlockJobStage = {
     stage: 'push-block',
@@ -98,15 +102,32 @@ const mapGitLabCIWorkflowContent = async (
       alias: cli.currentEnv,
       project_id: cli.currentProject,
       client_id:
-        cli.clientDetailsLocation === 'env'
-          ? cli.clientId
+        loc === 'env'
+          ? cli.devinit?.credentials.clientId
           : '$CONTENSIS_CLIENT_ID',
       shared_secret:
-        cli.clientDetailsLocation === 'env'
-          ? cli.clientSecret
+        loc === 'env'
+          ? cli.devinit?.credentials.clientSecret
           : '$CONTENSIS_SHARED_SECRET',
     },
   };
+
+  if (loc === 'git') {
+    // remove env vars from yml if we choose git
+    workflowDoc.deleteIn(findPath(`variables.CONTENSIS_CLIENT_ID`));
+    workflowDoc.deleteIn(findPath(`variables.CONTENSIS_SHARED_SECRET`));
+  } else {
+    setWorkflowElement(
+      workflowDoc,
+      `variables.CONTENSIS_CLIENT_ID`,
+      `${cli.devinit.credentials.clientId}`
+    );
+    setWorkflowElement(
+      workflowDoc,
+      `variables.CONTENSIS_CLIENT_SECRET`,
+      `${cli.devinit.credentials.clientSecret}`
+    );
+  }
 
   const addAppImageUri = async () => {
     // Look in document level "variables"
@@ -179,16 +200,12 @@ const mapGitLabCIWorkflowContent = async (
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.variables.client_id`,
-      cli.clientDetailsLocation === 'env'
-        ? cli.clientId
-        : '$CONTENSIS_CLIENT_ID'
+      '$CONTENSIS_CLIENT_ID'
     );
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.variables.shared_secret`,
-      cli.clientDetailsLocation === 'env'
-        ? cli.clientSecret
-        : '$CONTENSIS_SHARED_SECRET'
+      '$CONTENSIS_SHARED_SECRET'
     );
   } else {
     // create job with push step
@@ -212,17 +229,15 @@ const mapGitLabCIWorkflowContent = async (
 
   cli.log.debug(`New file content to write\n\n${workflowDoc}`);
 
-  const newWorkflow = normaliseLineEndings(
-    workflowDoc.toString({ lineWidth: 0 })
-  );
-
+  const newWorkflow = workflowDoc.toString({ lineWidth: 0 });
   return newWorkflow;
 };
 
 const mapGitHubActionCIWorkflowContent = async (
   cli: ContensisDev,
   workflowDoc: Document,
-  workflowJS: any
+  workflowJS: any,
+  loc: 'git' | 'env'
 ) => {
   const addGitHubActionJobStep: GitHubActionPushBlockJobStep = {
     name: 'Push block to Contensis',
@@ -234,11 +249,11 @@ const mapGitHubActionCIWorkflowContent = async (
       alias: cli.currentEnv,
       'project-id': cli.currentProject,
       'client-id':
-        cli.clientDetailsLocation === 'env'
+        loc === 'env'
           ? '${{ env.CONTENSIS_CLIENT_ID }}'
           : '${{ secrets.CONTENSIS_CLIENT_ID }}',
       'shared-secret':
-        cli.clientDetailsLocation === 'env'
+        loc === 'env'
           ? '${{ env.CONTENSIS_SHARED_SECRET }}'
           : '${{ secrets.CONTENSIS_SHARED_SECRET }}',
     },
@@ -274,20 +289,22 @@ const mapGitHubActionCIWorkflowContent = async (
     'all'
   );
 
-  // Update 'env' and store client id and secret
-  if (cli.clientDetailsLocation === 'env') {
-    setWorkflowElement(workflowDoc, `env.CONTENSIS_CLIENT_ID`, cli.clientId);
-    setWorkflowElement(
-      workflowDoc,
-      `env.CONTENSIS_SHARED_SECRET`,
-      cli.clientSecret
-    );
-  }
-
-  if (cli.clientDetailsLocation === 'git') {
+  if (loc === 'git') {
     // remove env vars from yml if we choose git
     workflowDoc.deleteIn(findPath(`env.CONTENSIS_CLIENT_ID`));
     workflowDoc.deleteIn(findPath(`env.CONTENSIS_SHARED_SECRET`));
+  } else {
+    // update 'env' and store client id and secret
+    setWorkflowElement(
+      workflowDoc,
+      `env.CONTENSIS_CLIENT_ID`,
+      cli.devinit?.credentials.clientId
+    );
+    setWorkflowElement(
+      workflowDoc,
+      'env.CONTENSIS_SHARED_SECRET',
+      cli.devinit?.credentials.clientSecret
+    );
   }
 
   // update job step
@@ -326,14 +343,14 @@ const mapGitHubActionCIWorkflowContent = async (
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.with.client-id`,
-      cli.clientDetailsLocation === 'env'
+      loc === 'env'
         ? '${{ env.CONTENSIS_CLIENT_ID }}'
         : '${{ secrets.CONTENSIS_CLIENT_ID }}'
     );
     setWorkflowElement(
       workflowDoc,
       `${stepPath}.with.shared-secret`,
-      cli.clientDetailsLocation === 'env'
+      loc === 'env'
         ? '${{ env.CONTENSIS_SHARED_SECRET }}'
         : '${{ secrets.CONTENSIS_SHARED_SECRET }}'
     );
@@ -437,12 +454,7 @@ const mapGitHubActionCIWorkflowContent = async (
     );
   }
 
-  // const newWorkflow = normaliseLineEndings(
-  //   workflowDoc.toString({ lineWidth: 0 })
-  // );
-
   const newWorkflow = workflowDoc.toString({ lineWidth: 0 });
-
   return newWorkflow;
 };
 

@@ -22,10 +22,12 @@ import { winSlash } from '~/util/os';
 import { stringifyYaml } from '~/util/yaml';
 import { createSpinner } from 'nanospinner';
 import { mergeContentsToAddWithGitignore } from '~/util/gitignore';
+import ContensisAuthService from './ContensisAuthService';
+import ansiEscapes from 'ansi-escapes';
 
 class ContensisDev extends ContensisRole {
   git!: GitHelper;
-  blockId: string;
+  blockId!: string;
 
   constructor(
     args: string[],
@@ -47,6 +49,8 @@ class ContensisDev extends ContensisRole {
     const contensis = await this.ConnectContensis();
 
     if (contensis) {
+      this.devinit = { ...this.devinit, invokedBy: this.invokedBy };
+
       // First we need to get the block id from the user
       const validateBlockId = (blockId: string) => {
         const pattern = /^[0-9a-z](-?[0-9a-z])*$/;
@@ -117,9 +121,29 @@ class ContensisDev extends ContensisRole {
       // check we have the deply key so we can assign them to this values
       if (existingDeployKey) {
         // Add client id and secret to global 'this'
-        this.clientId = existingDeployKey?.id;
-        this.clientSecret = existingDeployKey?.sharedSecret;
+        this.devinit = {
+          ...this.devinit,
+          credentials: {
+            clientId: existingDeployKey?.id,
+            clientSecret: existingDeployKey?.sharedSecret,
+          },
+        };
       }
+
+      // we need to credentials of the user so that we can create a auth service
+      const credentials = await this.GetCredentials(this.devinit.invokedBy);
+
+      // create new auth service using creds
+      let classicToken: string | undefined | null;
+      const auth = new ContensisAuthService({
+        username: credentials?.current?.account,
+        password: credentials?.current?.password,
+        projectId: currentProject,
+        rootUrl: `https://cms-${currentEnv}.cloud.contensis.com`,
+      });
+
+      // once we have auth service, we can go and fetch out classic token
+      classicToken = await auth.ClassicToken();
 
       // const blockId = git.name;
       const errors = [] as AppError[];
@@ -171,34 +195,27 @@ class ContensisDev extends ContensisRole {
 
       let mappedWorkflow;
       // Location for Client ID / Secret.
-      const { clientDetailsOption } = await inquirer.prompt({
-        name: 'clientDetailsOption',
+      const { loc } = await inquirer.prompt({
+        name: 'loc',
         type: 'list',
         prefix: '🔑',
-        // Where would you like to store your Client ID/Secret?
+        // Where would you like to store your client id/secret?
         message: messages.devinit.clientDetailsLocation(),
         choices: [
-          messages.devinit.clientDetailsInGit(git),
-          messages.devinit.clientDetailsInEnv(),
+          {
+            name: messages.devinit.clientDetailsInGit(git),
+            value: 'git',
+          },
+          {
+            name: messages.devinit.clientDetailsInEnv(),
+            value: 'env',
+          },
         ],
       });
 
-      // global 'clientDetailsLocation' variable stores users input on where client id / secert are stored
-      if (clientDetailsOption === messages.devinit.clientDetailsInEnv()) {
-        this.clientDetailsLocation = 'env';
-      } else {
-        this.clientDetailsLocation = 'git';
-      }
-
-      if (this.clientDetailsLocation === 'env') {
-        // Update CI Workflow to pull from ENV variables
-        mappedWorkflow = await mapCIWorkflowContent(this);
-        log.help(messages.devinit.ciIntro(git, 'env'));
-      } else {
-        // Look at the workflow file content and make updates
-        mappedWorkflow = await mapCIWorkflowContent(this);
-        log.help(messages.devinit.ciIntro(git, 'git'));
-      }
+      log.help(messages.devinit.ciIntro(git, loc));
+      // Update CI Workflow
+      mappedWorkflow = await mapCIWorkflowContent(this, loc);
 
       if (!dryRun) {
         // Confirm prompt
@@ -279,7 +296,7 @@ class ContensisDev extends ContensisRole {
       };
       if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
       // add client id and secret to the env file
-      if (this.clientDetailsLocation === 'env') {
+      if (loc === 'env') {
         envContentsToAdd['CONTENSIS_CLIENT_ID'] = existingDevKey?.id;
         envContentsToAdd['CONTENSIS_CLIENT_SECRET'] =
           existingDevKey?.sharedSecret;
@@ -303,7 +320,8 @@ class ContensisDev extends ContensisRole {
         }
       };
 
-      if (this.clientDetailsLocation === 'git') {
+      // remove client id and secret from env file
+      if (loc === 'git') {
         removeEnvItems(['CONTENSIS_CLIENT_ID', 'CONTENSIS_CLIENT_SECRET']);
       }
 
@@ -358,7 +376,7 @@ class ContensisDev extends ContensisRole {
         }
       }
 
-      if (this.clientDetailsLocation === 'git') {
+      if (loc === 'git') {
         // Echo Deployment API key to console, ask user to add secrets to repo
         log.warning(messages.devinit.addGitSecretsIntro());
         log.help(
@@ -376,9 +394,14 @@ class ContensisDev extends ContensisRole {
       } else {
         log.success(messages.devinit.success());
         log.help(messages.devinit.startProjectTip());
-        // Open CMS + TODO: Grab token to log user in.
+        // open the cms link -- if no classic token just return the cms url
         log.help(
-          `Open Contensis 👉 https://cms-${currentEnv}.cloud.contensis.com/`
+          ansiEscapes.link(
+            `Open Contensis`,
+            `https://cms-${currentEnv}.cloud.contensis.com${
+              classicToken ? `?SecurityToken=${classicToken}` : ''
+            }`
+          )
         );
       }
     }
