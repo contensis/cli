@@ -25,7 +25,15 @@ class ContensisAuthService {
       clientType: ClientGrantType;
       clientDetails: ClientGrants;
     };
-    if (username && password) {
+    if (clientId && clientSecret) {
+      credentials = {
+        clientType: 'client_credentials',
+        clientDetails: {
+          clientId,
+          clientSecret,
+        },
+      };
+    } else if (username && password) {
       credentials = {
         clientType: 'contensis_classic',
         clientDetails: {
@@ -41,13 +49,7 @@ class ContensisAuthService {
         },
       };
     } else {
-      credentials = {
-        clientType: 'client_credentials',
-        clientDetails: {
-          clientId,
-          clientSecret,
-        },
-      };
+      credentials = { clientType: 'none', clientDetails: { refreshToken: '' } };
     }
 
     this.client = NodejsClient.create({

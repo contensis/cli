@@ -444,9 +444,9 @@ class ContensisCli {
   Login = async (
     userId: string,
     {
-      password = isPassword(this.env.passwordFallback),
+      password = '',
       promptPassword = true,
-      sharedSecret = isSharedSecret(this.env.passwordFallback),
+      sharedSecret = '',
       silent = false,
       attempt = 1,
     }: {
@@ -458,6 +458,13 @@ class ContensisCli {
     } = {}
   ): Promise<string | undefined> => {
     let inputPassword = password || sharedSecret;
+
+    if (!inputPassword)
+      inputPassword =
+        isSharedSecret(this.env.passwordFallback) ||
+        isPassword(this.env.passwordFallback) ||
+        '';
+
     const { log, messages } = this;
 
     if (userId) {
