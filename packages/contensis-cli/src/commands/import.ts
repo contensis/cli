@@ -138,6 +138,14 @@ Example call:
     .command('nodes')
     .description('import nodes')
     .addOption(commit)
+    .addOption(
+      new Option(
+        '-on --output-nodes <outputNodes>',
+        'how much detail to output from the nodes import'
+      )
+        .choices(['errors', 'changes', 'all'])
+        .default('errors')
+    )
     .addHelpText(
       'after',
       `

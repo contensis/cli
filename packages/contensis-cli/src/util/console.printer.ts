@@ -1,5 +1,12 @@
+import { Node } from 'contensis-delivery-api/lib/models';
 import dayjs from 'dayjs';
-import { BlockVersion, MigrateModelsResult, MigrateStatus } from 'migratortron';
+import {
+  BlockVersion,
+  EntriesResult,
+  MigrateModelsResult,
+  MigrateStatus,
+  NodesResult,
+} from 'migratortron';
 import ContensisCli from '~/services/ContensisCliService';
 import { Logger } from './logger';
 
@@ -104,19 +111,19 @@ export const printBlockVersion = (
   console.log('');
 };
 
-export const printMigrateResult = (
+export const printEntriesMigrateResult = (
   { log, messages, currentProject }: ContensisCli,
-  migrateResult: any,
+  migrateResult: EntriesResult,
   {
     action = 'import',
     showDiff = false,
-    showAllEntries = false,
-    showChangedEntries = false,
+    showAll = false,
+    showChanged = false,
   }: {
     action?: 'import' | 'delete';
     showDiff?: boolean;
-    showAllEntries?: boolean;
-    showChangedEntries?: boolean;
+    showAll?: boolean;
+    showChanged?: boolean;
   } = {}
 ) => {
   console.log(``);
@@ -129,8 +136,8 @@ export const printMigrateResult = (
       any
     ][]) {
       if (
-        showAllEntries ||
-        (showChangedEntries &&
+        showAll ||
+        (showChanged &&
           (
             Object.entries(
               Object.entries(entryStatus[currentProject])[0]
@@ -173,7 +180,7 @@ export const printMigrateResult = (
       }
     }
   }
-  if (showAllEntries || showChangedEntries) console.log(``);
+  if (showAll || showChanged) console.log(``);
 
   for (const [projectId, contentTypeCounts] of Object.entries(
     migrateResult.entries || {}
@@ -254,6 +261,106 @@ export const printMigrateResult = (
   }
 };
 
+export const printNodesMigrateResult = (
+  { log, messages, currentProject }: ContensisCli,
+  migrateResult: NodesResult,
+  {
+    action = 'import',
+    showDiff = false,
+    showAll = false,
+    showChanged = false,
+  }: {
+    action?: 'import' | 'delete';
+    showDiff?: boolean;
+    showAll?: boolean;
+    showChanged?: boolean;
+  } = {}
+) => {
+  console.log(``);
+
+  for (const [originalId, migrateNodeId] of Object.entries(
+    migrateResult.nodesToMigrate.nodeIds
+  )) {
+    if (showAll || (showChanged && migrateNodeId.status !== 'no change')) {
+      console.log(
+        log.infoText(
+          `${originalId} ${`${messages.migrate.status(migrateNodeId.status)(
+            `${migrateNodeId.status}`
+          )}${
+            migrateNodeId.id !== originalId ? `-> ${migrateNodeId.id}` : ''
+          }`}`
+        ) + ` ${log.helpText(migrateNodeId.path)} ${migrateNodeId.displayName}`
+      );
+
+      if (migrateNodeId.diff && showDiff)
+        console.log(
+          `    ${log.highlightText(`diff:`)} ${log.infoText(
+            highlightDiffText(migrateNodeId.diff)
+          )}\n`
+        );
+    }
+  }
+  if (showAll || showChanged) console.log(``);
+
+  for (const [projectId, counts] of Object.entries(migrateResult.nodes || {})) {
+    log.help(
+      `${action} from project ${
+        action === 'delete'
+          ? log.warningText(currentProject)
+          : `${log.highlightText(projectId)} to ${log.boldText(
+              log.warningText(currentProject)
+            )}`
+      }`
+    );
+    counts.totalCount;
+    const migrateStatusAndCount = migrateResult.nodesToMigrate[currentProject];
+    const existingCount =
+      migrateResult.existing?.[currentProject]?.totalCount || 0;
+    const existingPercent = ((existingCount / counts.totalCount) * 100).toFixed(
+      0
+    );
+    const noChangeOrTotalEntriesCount =
+      typeof migrateStatusAndCount !== 'number'
+        ? migrateStatusAndCount?.['no change'] || 0
+        : migrateStatusAndCount;
+    const changedPercentage = (
+      (noChangeOrTotalEntriesCount / counts.totalCount) *
+      100
+    ).toFixed(0);
+    const existingColor =
+      existingPercent === '0' || action === 'delete'
+        ? log.warningText
+        : log.infoText;
+
+    const changedColor =
+      changedPercentage === '100' ? log.successText : log.warningText;
+
+    console.log(
+      `  - ${log.highlightText(`totalCount: ${counts.totalCount}`)}${
+        changedPercentage === '100'
+          ? ''
+          : existingColor(` [existing: ${`${existingPercent}%`}]`)
+      }${
+        existingPercent === '0'
+          ? ''
+          : changedColor(
+              ` ${
+                changedPercentage === '100'
+                  ? 'up to date'
+                  : `[needs update: ${100 - Number(changedPercentage)}%]`
+              }`
+            )
+      }`
+    );
+  }
+  if (migrateResult.errors?.length) {
+    console.log(
+      `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
+    );
+    for (const error of migrateResult.errors)
+      log.error(error.message || error, null, '');
+  }
+};
 const highlightDiffText = (str: string) => {
   const addedRegex = new RegExp(/<<\+>>(.*?)<<\/\+>>/, 'g');
   const removedRegex = new RegExp(/<<->>(.*?)<<\/->>/, 'g');
@@ -362,4 +469,44 @@ export const printModelMigrationResult = (
         );
     }
   }
+};
+
+export const printNodeTreeOutput = (
+  { log }: ContensisCli,
+  root: Node | undefined
+) => {
+  log.object({ ...root, children: undefined });
+  log.raw('');
+  log.info(
+    `${log.highlightText('e')} = has entry; ${log.highlightText(
+      'c'
+    )} = canonical; ${log.highlightText('m')} = include in menu`
+  );
+  log.line();
+
+  const outputNode = (node: Node | any, spaces: string) =>
+    `${node.entry ? log.highlightText('e') : log.infoText('-')}${
+      node.isCanonical ? log.highlightText('c') : log.infoText('-')
+    }${
+      node.includeInMenu ? log.highlightText('m') : log.infoText('-')
+    }${spaces}${
+      node.isCanonical ? log.boldText(`/${node.slug}`) : `/${node.slug}`
+    }${node.entry ? ` ${log.helpText(node.entry.sys.contentTypeId)}` : ''}${
+      node.childCount ? ` +${node.childCount}` : ``
+    } ${log.infoText(node.displayName)}`;
+
+  const outputChildren = (root: Node | undefined, depth = 2) => {
+    let str = '';
+    for (const node of (root as any)?.children as Node[]) {
+      str += `${outputNode(node, Array(depth + 1).join('  '))}\n`;
+      if ('children' in node) str += outputChildren(node, depth + 1);
+    }
+    return str;
+  };
+
+  const children = outputChildren(root);
+  log.limits(
+    `${outputNode(root, '  ')}${children ? `\n${children}` : ''}`,
+    100
+  );
 };

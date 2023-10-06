@@ -6,18 +6,17 @@ import fetch from 'node-fetch';
 import path from 'path';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
-import { Node } from 'contensis-delivery-api/lib/models';
 import { Entry, Role } from 'contensis-management-api/lib/models';
 import {
   ContensisMigrationService,
   MigrateRequest,
   PushBlockParams,
   SourceCms,
-  logEntriesTable,
   ContentTypesResult,
   Model,
   MigrateModelsResult,
   BlockActionType,
+  logEntitiesTable,
 } from 'migratortron';
 
 import ContensisAuthService from './ContensisAuthService';
@@ -39,9 +38,11 @@ import {
 } from '~/util';
 import {
   printBlockVersion,
-  printMigrateResult,
+  printEntriesMigrateResult,
   printModelMigrationAnalysis,
   printModelMigrationResult,
+  printNodeTreeOutput,
+  printNodesMigrateResult,
 } from '~/util/console.printer';
 import { csvFormatter } from '~/util/csv.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
@@ -897,9 +898,9 @@ class ContensisCli {
                 )}: ${permissions.contentTypes
                   .map(
                     p =>
-                      `${p.id} [${p.actions.join(',')}] ${p.languages.join(
-                        ' '
-                      )}`
+                      `${p.id} [${p.actions.join(',')}] ${(
+                        p as any
+                      ).languages.join(' ')}`
                   )
                   .join(', ')}`
               );
@@ -1580,9 +1581,9 @@ class ContensisCli {
       if (result)
         this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
-          printMigrateResult(this, result, {
+          printEntriesMigrateResult(this, result, {
             action: 'delete',
-            showAllEntries: true,
+            showAll: true,
           });
         });
       if (
@@ -1616,11 +1617,11 @@ class ContensisCli {
       const entries = await contensis.GetEntries({ withDependents });
       this.HandleFormattingAndOutput(entries, () =>
         // print the entries to console
-        logEntriesTable(
+        logEntitiesTable({
           entries,
-          currentProject,
-          contensis.payload.query?.fields
-        )
+          projectId: currentProject,
+          fields: contensis.payload.query?.fields,
+        })
       );
     } else {
       log.warning(messages.models.noList(currentProject));
@@ -1659,9 +1660,9 @@ class ContensisCli {
       else
         this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
-          printMigrateResult(this, result, {
-            showAllEntries: logOutput === 'all',
-            showChangedEntries: logOutput === 'changes',
+          printEntriesMigrateResult(this, result, {
+            showAll: logOutput === 'all',
+            showChanged: logOutput === 'changes',
           });
         });
 
@@ -1714,41 +1715,9 @@ class ContensisCli {
 
       log.success(messages.nodes.get(currentProject, rootPath, depth));
 
-      const outputNode = (node: Node | any, spaces: string) =>
-        `${node.entry ? log.highlightText('e') : log.infoText('-')}${
-          node.isCanonical ? log.highlightText('c') : log.infoText('-')
-        }${
-          node.includeInMenu ? log.highlightText('m') : log.infoText('-')
-        }${spaces}${
-          node.isCanonical ? log.boldText(`/${node.slug}`) : `/${node.slug}`
-        }${node.entry ? ` ${log.helpText(node.entry.sys.contentTypeId)}` : ''}${
-          node.childCount ? ` +${node.childCount}` : ``
-        } ${log.infoText(node.displayName)}`;
-
       this.HandleFormattingAndOutput(root, () => {
         // print the nodes to console
-        log.object({ ...root, children: undefined });
-        log.raw('');
-        log.info(
-          `${log.highlightText('e')} = has entry; ${log.highlightText(
-            'c'
-          )} = canonical; ${log.highlightText('m')} = include in menu`
-        );
-        log.line();
-        const outputChildren = (root: Node | undefined, depth = 2) => {
-          let str = '';
-          for (const node of (root as any)?.children as Node[]) {
-            str += `${outputNode(node, Array(depth + 1).join('  '))}\n`;
-            if ('children' in node) str += outputChildren(node, depth + 1);
-          }
-          return str;
-        };
-
-        const children = outputChildren(root);
-        log.limits(
-          `${outputNode(root, '  ')}${children ? `\n${children}` : ''}`,
-          100
-        );
+        printNodeTreeOutput(this, root);
       });
     } else {
       log.warning(messages.models.noList(currentProject));
@@ -1788,9 +1757,9 @@ class ContensisCli {
         this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
           // TODO: fix
-          printMigrateResult(this, result, {
-            showAllEntries: logOutput === 'all',
-            showChangedEntries: logOutput === 'changes',
+          printNodesMigrateResult(this, result, {
+            showAll: logOutput === 'all',
+            showChanged: logOutput === 'changes',
           });
         });
 
@@ -1823,7 +1792,7 @@ class ContensisCli {
         }
       } else {
         if (noChange) {
-          log.help(messages.nodes.noChange(currentEnv), err);
+          log.help(messages.nodes.noChange(currentEnv));
         } else {
           log.error(messages.nodes.failedImport(currentEnv), err);
           if (!nodesTotalCount) log.help(messages.nodes.notFound(currentEnv));

@@ -159,6 +159,7 @@ class ContensisShell {
         'import components',
         'import entries',
         'import models',
+        'import nodes',
         'list blocks',
         'list contenttypes',
         'list components',
