@@ -128,7 +128,7 @@ const addOutputAndFormatOptions = (program: Command) =>
 
 export const addImportOptions = (program: Command) => {
   for (const command of program.commands) {
-    command.addOption(fromFile).addOption(fromCms).addOption(fromProject);
+    command.addOption(fromCms).addOption(fromProject).addOption(fromFile);
   }
   return program;
 };
@@ -140,12 +140,6 @@ export const getEntryOptions = (command: Command) =>
     .addOption(contentTypes)
     .addOption(assetTypes);
 
-export const addGetEntryOptions = (program: Command) => {
-  for (const command of program.commands) {
-    getEntryOptions(command);
-  }
-  return program;
-};
 export const addGlobalOptions = (program: Command) => {
   for (const command of program.commands) {
     addOutputAndFormatOptions(command);

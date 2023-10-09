@@ -1,6 +1,6 @@
 import { Command, Option } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { commit, mapContensisOpts } from './globalOptions';
+import { commit, getEntryOptions, mapContensisOpts } from './globalOptions';
 
 export const makeImportCommand = () => {
   const program = new Command()
@@ -94,13 +94,15 @@ Example call:
       );
     });
 
-  program
-    .command('entries')
-    .description('import entries')
-    .argument(
-      '[search phrase]',
-      'get entries with the search phrase, use quotes for multiple words'
-    )
+  getEntryOptions(
+    program
+      .command('entries')
+      .description('import entries')
+      .argument(
+        '[search phrase]',
+        'get entries with the search phrase, use quotes for multiple words'
+      )
+  )
     .addOption(commit)
     .option(
       '-preserve --preserve-guids',

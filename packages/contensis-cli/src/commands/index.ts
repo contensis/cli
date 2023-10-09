@@ -10,7 +10,6 @@ import { makeGetCommand } from './get';
 import {
   addAuthenticationOptions,
   addConnectOptions,
-  addGetEntryOptions,
   addGlobalOptions,
   addImportOptions,
 } from './globalOptions';
@@ -60,7 +59,7 @@ const commands = () => {
   );
   program.addCommand(
     addGlobalOptions(
-      addGetEntryOptions(addImportOptions(makeDiffCommand()))
+      addImportOptions(makeDiffCommand())
     ).copyInheritedSettings(program)
   );
   program.addCommand(
@@ -68,7 +67,7 @@ const commands = () => {
   );
   program.addCommand(
     addGlobalOptions(
-      addGetEntryOptions(addImportOptions(makeImportCommand()))
+      addImportOptions(makeImportCommand())
     ).copyInheritedSettings(program)
   );
   program.addCommand(
