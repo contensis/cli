@@ -6,6 +6,7 @@ import {
   MigrateModelsResult,
   MigrateStatus,
   NodesResult,
+  ProjectNodesToMigrate,
 } from 'migratortron';
 import ContensisCli from '~/services/ContensisCliService';
 import { Logger } from './logger';
@@ -257,7 +258,7 @@ export const printEntriesMigrateResult = (
       `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
     );
     for (const error of migrateResult.errors)
-      log.error(error.message || error, null, '');
+      log.error(error.message, null, '');
   }
 };
 
@@ -312,21 +313,23 @@ export const printNodesMigrateResult = (
             )}`
       }`
     );
-    counts.totalCount;
-    const migrateStatusAndCount = migrateResult.nodesToMigrate[currentProject];
+
+    const migrateStatusAndCount = migrateResult.nodesToMigrate[
+      currentProject
+    ] as ProjectNodesToMigrate;
+
     const existingCount =
       migrateResult.existing?.[currentProject]?.totalCount || 0;
     const existingPercent = ((existingCount / counts.totalCount) * 100).toFixed(
       0
     );
     const noChangeOrTotalEntriesCount =
-      typeof migrateStatusAndCount !== 'number'
-        ? migrateStatusAndCount?.['no change'] || 0
-        : migrateStatusAndCount;
+      migrateStatusAndCount?.['no change'] || 0;
     const changedPercentage = (
       (noChangeOrTotalEntriesCount / counts.totalCount) *
       100
     ).toFixed(0);
+
     const existingColor =
       existingPercent === '0' || action === 'delete'
         ? log.warningText
@@ -357,8 +360,13 @@ export const printNodesMigrateResult = (
     console.log(
       `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
     );
-    for (const error of migrateResult.errors)
-      log.error(error.message || error, null, '');
+    for (const error of migrateResult.errors) {
+      let inner = '';
+      if (error.data?.[0]) {
+        inner = `${error.data?.[0].Field}: ${error.data?.[0].Message}`;
+      }
+      log.error(`${error.message} ${inner}`, null, '');
+    }
   }
 };
 const highlightDiffText = (str: string) => {
