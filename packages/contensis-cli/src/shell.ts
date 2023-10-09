@@ -143,6 +143,7 @@ class ContensisShell {
         'execute block action makelive',
         'execute block action rollback',
         'execute block action markasbroken',
+        'get assets',
         'get block',
         'get block logs',
         'get contenttype',
