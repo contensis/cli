@@ -1,5 +1,5 @@
-﻿From: https://raw.githubusercontent.com/contensis/node-cli/main/LICENSE
+﻿From: https://raw.githubusercontent.com/contensis/cli/main/LICENSE
 
 LICENSE
 
-https://raw.githubusercontent.com/contensis/node-cli/main/LICENSE
+https://raw.githubusercontent.com/contensis/cli/main/LICENSE

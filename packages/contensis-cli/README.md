@@ -2,7 +2,7 @@
 
 Use Contensis from your favourite terminal
 
-Download the executable for your operating system from the [Releases page](https://github.com/contensis/node-cli/releases) and add it to a folder in your local `PATH`
+Download the executable for your operating system from the [Releases page](https://github.com/contensis/cli/releases) and add it to a folder in your local `PATH`
 
 or use your preferred installation method below
 
@@ -14,7 +14,7 @@ or use your preferred installation method below
 choco install contensis-cli --pre
 ```
 
-- [Choco package docs and source](https://github.com/contensis/node-cli/tree/main/installers/chocolatey)
+- [Choco package docs and source](https://github.com/contensis/cli/tree/main/installers/chocolatey)
 - [Contensis CLI on the Chocolatey Community Repository](https://community.chocolatey.org/packages/contensis-cli)
 
 ### Mac ([Homebrew](https://docs.brew.sh/Installation))
@@ -47,7 +47,7 @@ If you use `nvm` and are frequently switching your local `node` version it will 
 
 ## Install from source
 
-Clone the [repository](https://github.com/contensis/node-cli) and follow the instructions in the [`README`](https://github.com/contensis/node-cli#readme)
+Clone the [repository](https://github.com/contensis/cli) and follow the instructions in the [`README`](https://github.com/contensis/cli#readme)
 
 # Skip to section
 
@@ -101,8 +101,8 @@ Using this approach in the cli or the shell will assume these credentials are fo
 Running the container with the `-it` docker options will launch a shell session
 
 ```bash
-docker pull ghcr.io/contensis/node-cli/main/app:latest
-docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest
+docker pull ghcr.io/contensis/cli/main/app:latest
+docker run --rm -it ghcr.io/contensis/cli/main/app:latest
 ```
 
 ### Run cli commands
@@ -110,7 +110,7 @@ docker run --rm -it ghcr.io/contensis/node-cli/main/app:latest
 Add the cli command and any options after the container image in the `docker run` command e.g.
 
 ```bash
-docker run --rm ghcr.io/contensis/node-cli/main/app:latest get entries "test"
+docker run --rm ghcr.io/contensis/cli/main/app:latest get entries "test"
 ```
 
 ### Persist connections to a local file
@@ -126,14 +126,14 @@ Linux
 
 ```bash
 touch environments.json
-docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+docker run --rm -v $(pwd)/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/cli/main/app:latest
 ```
 
 Windows
 
 ```powershell
 echo {} > environments.json
-docker run --rm -v ${PWD}/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/node-cli/main/app:latest
+docker run --rm -v ${PWD}/environments.json:/usr/src/app/environments.json -it ghcr.io/contensis/cli/main/app:latest
 ```
 
 ## Use in GitLab CI
@@ -143,7 +143,7 @@ push-to-contensis-block:
   stage: push-to-contensis
   only:
     - master
-  image: ghcr.io/contensis/node-cli/main/app:release
+  image: ghcr.io/contensis/cli/main/app:release
   script:
     # Create CI/CD Variables in repo settings called CONTENSIS_CLIENT_ID and CONTENSIS_SHARED_SECRET
     - contensis connect example-dev --project-id website --client-id $CONTENSIS_CLIENT_ID --shared-secret $CONTENSIS_SHARED_SECRET

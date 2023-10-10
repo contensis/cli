@@ -1,7 +1,7 @@
-﻿# Download a contensis/node-cli Windows release from github
+﻿# Download a contensis/cli Windows release from github
 param ($outFile, $preRelease = $false)
 
-$repo = "contensis/node-cli"
+$repo = "contensis/cli"
 $filenamePattern = "*-win.exe"
 
 Write-Output "Downloading contensis-cli from GitHub release"

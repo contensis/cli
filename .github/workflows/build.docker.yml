@@ -46,7 +46,7 @@ jobs:
       #   # uses: ./.github/actions/block-push
       #   uses: contensis/block-push@v1
       #   with:
-      #     block-id: node-cli-ci-block
+      #     block-id: cli-ci-block
       #     auto-release: false
       #     image-uri: ${{ steps.build.outputs.image-uri }}
       #     alias: zenhub-dev

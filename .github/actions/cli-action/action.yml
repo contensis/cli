@@ -47,7 +47,7 @@ runs:
       id: cli-command
       uses: addnab/docker-run-action@v3
       with:
-        image: ghcr.io/contensis/node-cli/main/app:${{ inputs.cli-version }}
+        image: ghcr.io/contensis/cli/main/app:${{ inputs.cli-version }}
         options: -v ${{ steps.pwd.outputs.pwd }}/output.json:/usr/src/app/output.json
         run: |
           ${{ inputs.cli-splash }} && contensis

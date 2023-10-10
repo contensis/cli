@@ -62,13 +62,13 @@ To prepare the next release version
 
 To create a release
 
-- Create a new release from the repo [Releases page](https://github.com/contensis/node-cli/releases/new)
+- Create a new release from the repo [Releases page](https://github.com/contensis/cli/releases/new)
 - The release version will match the `package.json` version in `/packages/contensis-cli` (prefixed with "v" e.g. "v1.0.1")
 - A new git tag will be created matching the release version
 - Release notes are typed out and will be a summary of key changes since last release tag
 - Release assets are found in the summary page of the last GitHub build pipeline (stored as build artifacts). Download the artifact for each OS, unzip and then attach them (upload) the extracted files to this new release.
 - Pre-releases are supported and are indicated with the "Set as a pre-release" flag in the GitHub Release
-- A GitHub Action will be triggered by creating the release. The workflow will publish the release version to npm.js (if it does not currently exist). Also push a release tag to the latest [`Docker`](https://github.com/contensis/node-cli/pkgs/container/node-cli%2Fmain%2Fapp/53826128?tag=release) image.
+- A GitHub Action will be triggered by creating the release. The workflow will publish the release version to npm.js (if it does not currently exist). Also push a release tag to the latest [`Docker`](https://github.com/contensis/cli/pkgs/container/cli%2Fmain%2Fapp) image.
 - If the release workflow fails, it can be manually run any time with a workflow trigger from the GitHub Action page - the input will be either "latest" or "prerelease"
 
 ## Related repositories / packages
