@@ -135,11 +135,6 @@ class ContensisCli {
   constructor(
     args: string[],
     outputOpts?: OutputOptionsConstructorArg,
-    contensisOpts?: Partial<MigrateRequest>
-  );
-  constructor(
-    args: string[],
-    outputOpts?: OutputOptionsConstructorArg,
     contensisOpts: Partial<MigrateRequest> = {}
   ) {
     // console.log('args: ', JSON.stringify(args, null, 2));
