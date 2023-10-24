@@ -304,15 +304,15 @@ export const printNodesMigrateResult = (
   if (showAll || showChanged) console.log(``);
 
   for (const [projectId, counts] of Object.entries(migrateResult.nodes || {})) {
-    log.help(
-      `${action} from project ${
-        action === 'delete'
-          ? log.warningText(currentProject)
-          : `${log.highlightText(projectId)} to ${log.boldText(
-              log.warningText(currentProject)
-            )}`
-      }`
-    );
+    const importTitle =
+      action === 'delete'
+        ? `Delete from project ${log.warningText(currentProject)}`
+        : `Import ${
+            projectId && projectId !== 'null'
+              ? `from project ${log.highlightText(projectId)} `
+              : ''
+          }to ${log.boldText(log.warningText(currentProject))}`;
+    log.help(importTitle);
 
     const migrateStatusAndCount = migrateResult.nodesToMigrate[
       currentProject
@@ -320,15 +320,14 @@ export const printNodesMigrateResult = (
 
     const existingCount =
       migrateResult.existing?.[currentProject]?.totalCount || 0;
-    const existingPercent = ((existingCount / counts.totalCount) * 100).toFixed(
-      0
-    );
+    const existingPercent = counts.totalCount
+      ? ((existingCount / counts.totalCount) * 100).toFixed(0)
+      : '0';
     const noChangeOrTotalEntriesCount =
       migrateStatusAndCount?.['no change'] || 0;
-    const changedPercentage = (
-      (noChangeOrTotalEntriesCount / counts.totalCount) *
-      100
-    ).toFixed(0);
+    const changedPercentage = counts.totalCount
+      ? ((noChangeOrTotalEntriesCount / counts.totalCount) * 100).toFixed(0)
+      : '0';
 
     const existingColor =
       existingPercent === '0' || action === 'delete'
