@@ -1,6 +1,8 @@
 import { Command, Option } from 'commander';
 import { url } from '~/util';
 
+// Map various input options into a request to be processed
+// by Migratortron / Contensis import library
 export const mapContensisOpts = (opts: any = {}) => ({
   source:
     opts.sourceAlias || opts.sourceProjectId

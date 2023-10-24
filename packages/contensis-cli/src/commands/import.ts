@@ -139,6 +139,10 @@ Example call:
   program
     .command('nodes')
     .description('import nodes')
+    .option(
+      '-preserve --preserve-guids',
+      'include this flag when you are importing nodes that you have previously exported and wish to update'
+    )
     .addOption(commit)
     .addOption(
       new Option(
@@ -152,7 +156,7 @@ Example call:
       'after',
       `
 Example call:
-  > import nodes --from-file component-backup.json
+  > import nodes --from-file site-backup.json
   > import nodes --source-alias example-alias --source-project-id example-project
 `
     )
