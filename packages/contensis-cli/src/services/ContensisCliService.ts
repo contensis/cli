@@ -1699,18 +1699,16 @@ class ContensisCli {
 
     if (contensis) {
       log.line();
-      const [err] = await to(
-        contensis.content.sourceRepo.nodes.GetNodes(rootPath, depth)
-      );
+      const [err, nodes] = await to(contensis.nodes.GetNodes(rootPath, depth));
       if (err) {
         log.error(messages.nodes.failedGet(currentProject), err);
         return;
       }
-      const root = contensis.content.sourceRepo.nodes.tree;
+      const root = contensis.nodes.sourceRepo.nodes.tree;
 
       log.success(messages.nodes.get(currentProject, rootPath, depth));
 
-      this.HandleFormattingAndOutput(root, () => {
+      this.HandleFormattingAndOutput(nodes, () => {
         // print the nodes to console
         printNodeTreeOutput(this, root);
       });
@@ -1751,7 +1749,6 @@ class ContensisCli {
       else
         this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
-          // TODO: fix
           printNodesMigrateResult(this, result, {
             showAll: logOutput === 'all',
             showChanged: logOutput === 'changes',
