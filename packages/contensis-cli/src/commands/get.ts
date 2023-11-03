@@ -245,7 +245,7 @@ Example call:
     .option(
       '-d --depth <depth>',
       'get nodes with children to a specified depth',
-      '0'
+      '1'
     )
     .addHelpText(
       'after',
