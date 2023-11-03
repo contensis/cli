@@ -1593,7 +1593,7 @@ class ContensisCli {
         }
       } else {
         log.error(messages.entries.failedRemove(currentEnv), err);
-        if (!result.entriesToMigrate[currentProject].totalCount)
+        if (!result?.entriesToMigrate?.[currentProject]?.totalCount)
           log.help(messages.entries.notFound(currentEnv));
       }
     }
@@ -1684,7 +1684,7 @@ class ContensisCli {
         }
       } else {
         log.error(messages.entries.failedImport(currentEnv), err);
-        if (!result.entriesToMigrate[currentProject].totalCount)
+        if (!result?.entriesToMigrate?.[currentProject]?.totalCount)
           log.help(messages.entries.notFound(currentEnv));
       }
     } else {
@@ -1755,14 +1755,16 @@ class ContensisCli {
           });
         });
 
-      const nodesTotalCount = result?.nodesToMigrate[currentProject].totalCount;
+      const nodesTotalCount =
+        result?.nodesToMigrate?.[currentProject].totalCount;
       const nodesCreated = result?.nodesResult?.['created'] || 0;
       const nodesUpdated = result?.nodesResult?.['updated'] || 0;
-      const noChange = result.nodesToMigrate[currentProject]['no change'] !== 0;
+      const noChange =
+        result?.nodesToMigrate?.[currentProject]['no change'] !== 0;
 
       if (
         !err &&
-        !result.errors?.length &&
+        (!result.errors?.length || this.contensisOpts.ignoreErrors) &&
         ((!commit && nodesTotalCount) ||
           (commit && (nodesCreated || nodesUpdated)))
       ) {
