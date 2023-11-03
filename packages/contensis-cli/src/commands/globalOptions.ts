@@ -37,6 +37,7 @@ export const mapContensisOpts = (opts: any = {}) => ({
       : undefined,
   zenQL: opts.zenql,
   transformGuids: !opts.preserveGuids,
+  ignoreErrors: opts.ignoreErrors,
 });
 
 /* Output options */
@@ -113,6 +114,11 @@ export const fromProject = new Option(
 export const commit = new Option(
   '--commit',
   'add this flag only after you have run a preview of the import and agree with the analysis'
+).default(false);
+
+export const ignoreErrors = new Option(
+  '-ignore --ignore-errors',
+  'commit the import ignoring any reported errors'
 ).default(false);
 
 export const addConnectOptions = (program: Command) =>

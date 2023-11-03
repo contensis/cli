@@ -1,6 +1,11 @@
 import { Command, Option } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { commit, getEntryOptions, mapContensisOpts } from './globalOptions';
+import {
+  commit,
+  getEntryOptions,
+  ignoreErrors,
+  mapContensisOpts,
+} from './globalOptions';
 
 export const makeImportCommand = () => {
   const program = new Command()
@@ -116,6 +121,7 @@ Example call:
         .choices(['errors', 'changes', 'all'])
         .default('errors')
     )
+    .addOption(ignoreErrors)
     .addHelpText(
       'after',
       `
@@ -152,6 +158,7 @@ Example call:
         .choices(['errors', 'changes', 'all'])
         .default('errors')
     )
+    .addOption(ignoreErrors)
     .addHelpText(
       'after',
       `
