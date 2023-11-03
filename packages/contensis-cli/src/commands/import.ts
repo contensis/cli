@@ -145,6 +145,7 @@ Example call:
   program
     .command('nodes')
     .description('import nodes')
+    .argument('[root]', 'import nodes from the specified path e.g. /blog', '/')
     .option(
       '-preserve --preserve-guids',
       'include this flag when you are importing nodes that you have previously exported and wish to update'
@@ -167,11 +168,11 @@ Example call:
   > import nodes --source-alias example-alias --source-project-id example-project
 `
     )
-    .action(async opts => {
+    .action(async (root: string, opts) => {
       await cliCommand(
         ['import', 'nodes'],
         opts,
-        mapContensisOpts({ ...opts })
+        mapContensisOpts({ paths: root.split(' '), ...opts })
       ).ImportNodes({
         commit: opts.commit,
         fromFile: opts.fromFile,
