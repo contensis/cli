@@ -320,13 +320,16 @@ export const printNodesMigrateResult = (
 
     const existingCount =
       migrateResult.existing?.[currentProject]?.totalCount || 0;
+
+    const totalCount = Object.keys(migrateResult.nodesToMigrate.nodeIds).length;
     const existingPercent = counts.totalCount
-      ? ((existingCount / counts.totalCount) * 100).toFixed(0)
+      ? ((existingCount / totalCount) * 100).toFixed(0)
       : '0';
-    const noChangeOrTotalEntriesCount =
-      migrateStatusAndCount?.['no change'] || 0;
+
+    const noChangeCount = migrateStatusAndCount?.['no change'] || 0;
+
     const changedPercentage = counts.totalCount
-      ? ((noChangeOrTotalEntriesCount / counts.totalCount) * 100).toFixed(0)
+      ? ((noChangeCount / totalCount) * 100).toFixed(0)
       : '0';
 
     const existingColor =
@@ -338,7 +341,9 @@ export const printNodesMigrateResult = (
       changedPercentage === '100' ? log.successText : log.warningText;
 
     console.log(
-      `  - ${log.highlightText(`totalCount: ${counts.totalCount}`)}${
+      `  - ${log.highlightText(
+        `totalCount: ${migrateStatusAndCount.totalCount}`
+      )}${
         changedPercentage === '100'
           ? ''
           : existingColor(` [existing: ${`${existingPercent}%`}]`)
