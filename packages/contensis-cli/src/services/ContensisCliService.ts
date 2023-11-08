@@ -779,7 +779,7 @@ class ContensisCli {
     }
   };
 
-  CreateApiKey = async (name: string, description?: string) => {
+  CreateApiKey = async (name: string, description = '') => {
     const { currentEnv, log, messages } = this;
     const contensis = await this.ConnectContensis();
 
