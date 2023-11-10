@@ -2,7 +2,12 @@
 import chalk from 'chalk';
 import dateFormat from 'dateformat';
 import deepCleaner from 'deep-cleaner';
-import { ansiEscapeCodes, first, strlen } from 'printable-characters';
+import {
+  ansiEscapeCodes,
+  first,
+  partition,
+  strlen,
+} from 'printable-characters';
 // import ProgressBar from 'progress';
 import { isSysError, tryStringify } from '.';
 
@@ -225,24 +230,39 @@ export class Logger {
     else console.log(content);
   };
 
-  static limits = (content: string, displayLength = 30) => {
-    const consoleWidth = process.stdout.columns;
-    console.info(
-      consoleWidth
-        ? content
-            .split('\n')
-            .slice(0, consoleWidth ? displayLength : undefined)
-            .map((line: string) =>
-              consoleWidth && strlen(line) > consoleWidth
-                ? first(line, consoleWidth)
-                : line
-            )
-            .join('\n')
-        : content.replace(ansiEscapeCodes, '')
-    );
+  static limits = (
+    content: string,
+    displayLength = 30,
+    consoleWidth = process.stdout.columns,
+    logMethod: Function = console.info
+  ) => {
+    if (consoleWidth) {
+      content
+        .split('\n')
+        .slice(0, consoleWidth ? displayLength : undefined)
+        .map((line: string) =>
+          logMethod(
+            line
+              .split('~n')
+              .map(l =>
+                consoleWidth && strlen(l) > consoleWidth
+                  ? first(l, consoleWidth)
+                  : l
+              )
+              .join('\n')
+          )
+        )
+        .join('\n');
+    } else {
+      logMethod(content.replace(ansiEscapeCodes, ''));
+    }
+
     const tableArray = content.split('\n');
     if (consoleWidth && tableArray.length > displayLength)
-      console.info(`\n`, `- and ${tableArray.length - displayLength} more...`);
+      console.info(
+        `\n`,
+        `- and ${tableArray.length - displayLength} more...\n`
+      );
   };
 }
 
@@ -263,6 +283,59 @@ export const logError: LogErrorFunc = (
   });
   //Logger.line();
   return null;
+};
+
+export const addNewLines = (
+  message = '',
+  newLineSeparater = '\n',
+  atPosition = process.stdout.columns
+) => {
+  if (message === '' || atPosition === 0) {
+    return '';
+  }
+
+  let result = '';
+  let lengthCounter = 0;
+
+  // Partition the message string into an array of
+  // [nonPrintable, printable][]
+  const partitioned = partition(message);
+  const addSeparater = () => {
+    // If line length counter has exceeded the console width
+    // add a new line separater and reset the line length counter
+    if (lengthCounter >= atPosition) {
+      result += newLineSeparater;
+      lengthCounter = 0;
+    }
+  };
+
+  // Loop through the partitioned message parts
+  for (const [nonPrintable, printable] of partitioned) {
+    // Convert string to array as this will provide accurate
+    // lengths and splicing methods with all unicode chars
+    const textParts = Array.from(printable);
+    // Splice the remaining allowable line length from the text parts array
+    const text = textParts.splice(0, atPosition - lengthCounter);
+    // In the first iteration append the non printable unicode chars
+    // to the beginning of the spliced text
+    result += nonPrintable + text.join('');
+    // Keep a count of the current line length
+    // as one line of output could span multiple "partitions"
+    lengthCounter += text.length;
+    addSeparater();
+
+    // Handle any remaining text in this "partition"
+    while (textParts.length) {
+      // Splice the remaining allowable line length from the text parts array
+      const text = textParts.splice(0, atPosition - lengthCounter);
+      // Append the spliced text to the result
+      result += text.join('');
+      // Increase line length counter
+      lengthCounter += text.length;
+      addSeparater();
+    }
+  }
+  return result;
 };
 
 export const progress = {

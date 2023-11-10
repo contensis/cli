@@ -1,15 +1,17 @@
 import { Node } from 'contensis-delivery-api/lib/models';
 import dayjs from 'dayjs';
+import { deconstructApiError } from './error';
+import { Logger, addNewLines } from './logger';
 import {
   BlockVersion,
   EntriesResult,
   MigrateModelsResult,
+  MigrateNodesTree,
   MigrateStatus,
   NodesResult,
   ProjectNodesToMigrate,
 } from 'migratortron';
 import ContensisCli from '~/services/ContensisCliService';
-import { Logger } from './logger';
 
 const formatDate = (date: Date | string, format = 'DD/MM/YYYY HH:mm') =>
   dayjs(date).format(format);
@@ -263,46 +265,22 @@ export const printEntriesMigrateResult = (
 };
 
 export const printNodesMigrateResult = (
-  { log, messages, currentProject }: ContensisCli,
+  { log, currentProject }: ContensisCli,
   migrateResult: NodesResult,
   {
     action = 'import',
+    logLimit = 50,
     showDiff = false,
     showAll = false,
     showChanged = false,
   }: {
     action?: 'import' | 'delete';
+    logLimit?: number;
     showDiff?: boolean;
     showAll?: boolean;
     showChanged?: boolean;
   } = {}
 ) => {
-  console.log(``);
-
-  for (const [originalId, migrateNodeId] of Object.entries(
-    migrateResult.nodesToMigrate.nodeIds
-  )) {
-    if (showAll || (showChanged && migrateNodeId.status !== 'no change')) {
-      console.log(
-        log.infoText(
-          `${originalId} ${`${messages.migrate.status(migrateNodeId.status)(
-            `${migrateNodeId.status}`
-          )}${
-            migrateNodeId.id !== originalId ? `-> ${migrateNodeId.id}` : ''
-          }`}`
-        ) + ` ${log.helpText(migrateNodeId.path)} ${migrateNodeId.displayName}`
-      );
-
-      if (migrateNodeId.diff && showDiff)
-        console.log(
-          `    ${log.highlightText(`diff:`)} ${log.infoText(
-            highlightDiffText(migrateNodeId.diff)
-          )}\n`
-        );
-    }
-  }
-  if (showAll || showChanged) console.log(``);
-
   for (const [projectId, counts] of Object.entries(migrateResult.nodes || {})) {
     const importTitle =
       action === 'delete'
@@ -364,15 +342,18 @@ export const printNodesMigrateResult = (
     console.log(
       `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
     );
-    for (const error of migrateResult.errors) {
-      let inner = '';
-      if (error.data?.[0]) {
-        inner = `${error.data?.[0].Field}: ${error.data?.[0].Message}`;
-      }
-      log.error(`${error.message} ${inner}`, null, '');
-    }
+
+    log.limits(
+      migrateResult.errors
+        .map(error => {
+          return log.errorText(deconstructApiError(error));
+        })
+        .join('\n'),
+      logLimit
+    );
   }
 };
+
 const highlightDiffText = (str: string) => {
   const addedRegex = new RegExp(/<<\+>>(.*?)<<\/\+>>/, 'g');
   const removedRegex = new RegExp(/<<->>(.*?)<<\/->>/, 'g');
@@ -484,41 +465,124 @@ export const printModelMigrationResult = (
 };
 
 export const printNodeTreeOutput = (
-  { log }: ContensisCli,
-  root: Node | undefined
+  { log, messages }: ContensisCli,
+  root: Node | MigrateNodesTree | undefined,
+  logDetail = 'errors',
+  logLimit = 1000
 ) => {
-  log.object({ ...root, children: undefined });
   log.raw('');
+  const statusColour = messages.migrate.status;
+
+  if (root && 'status' in root)
+    log.info(
+      `Migrate status: ${statusColour('no change')(
+        'N'
+      )} [no change]; ${statusColour('create')('C')} [create]; ${statusColour(
+        'update'
+      )('U')} [update]; ${statusColour('error')('E')} [error];`
+    );
   log.info(
-    `${log.highlightText('e')} = has entry; ${log.highlightText(
-      'c'
-    )} = canonical; ${log.highlightText('m')} = include in menu`
+    `Node properties: ${log.highlightText(
+      'e'
+    )} = has entry; ${log.highlightText('c')} = canonical; ${log.highlightText(
+      'm'
+    )} = include in menu`
   );
+
   log.line();
 
-  const outputNode = (node: Node | any, spaces: string) =>
-    `${node.entry ? log.highlightText('e') : log.infoText('-')}${
-      node.isCanonical ? log.highlightText('c') : log.infoText('-')
+  const outputNode = (
+    node: Node | MigrateNodesTree,
+    spaces: string,
+    isRoot = false
+  ) => {
+    const errorOutput =
+      'error' in node && node.error && deconstructApiError(node.error);
+    const fullOutput = logDetail === 'all';
+    const changesOutput =
+      logDetail === 'changes' &&
+      'status' in node &&
+      ['create', 'update'].includes(node.status);
+
+    const diffOutput =
+      (fullOutput || changesOutput || errorOutput) &&
+      'diff' in node &&
+      node.diff?.replaceAll('\n', '');
+
+    return `${
+      'status' in node
+        ? `${statusColour(node.status)(
+            node.status.substring(0, 1).toUpperCase()
+          )} `
+        : ''
+    }${node.entry ? log.highlightText('e') : log.infoText('-')}${
+      'isCanonical' in node && node.isCanonical
+        ? log.highlightText('c')
+        : log.infoText('-')
     }${
       node.includeInMenu ? log.highlightText('m') : log.infoText('-')
-    }${spaces}${
-      node.isCanonical ? log.boldText(`/${node.slug}`) : `/${node.slug}`
-    }${node.entry ? ` ${log.helpText(node.entry.sys.contentTypeId)}` : ''}${
+    }${spaces}${log[
+      'status' in node && node.status === 'no change'
+        ? 'infoText'
+        : 'standardText'
+    ](
+      'isCanonical' in node && node.isCanonical
+        ? log.boldText(fullOutput || isRoot ? node.path : `/${node.slug}`)
+        : fullOutput || isRoot
+        ? node.path
+        : `/${node.slug}`
+    )}${node.entry ? ` ${log.helpText(node.entry.sys.contentTypeId)}` : ''}${
       node.childCount ? ` +${node.childCount}` : ``
-    } ${log.infoText(node.displayName)}`;
+    } ${'displayName' in node ? log.infoText(node.displayName) : ''}${
+      fullOutput || (changesOutput && node.id !== node.originalId)
+        ? `~n  ${log.infoText(`id:`)} ${
+            node.id === node.originalId
+              ? node.id
+              : `${node.id} ${log.infoText(`<= ${node.originalId}`)}`
+          }`
+        : ''
+    }${
+      (fullOutput ||
+        (changesOutput && node.parentId !== node.originalParentId)) &&
+      node.parentId
+        ? `~n  ${log.infoText(
+            `parentId: ${
+              node.parentId === node.originalParentId
+                ? node.parentId
+                : `${node.parentId} <= ${node.originalParentId}`
+            }`
+          )}`
+        : ''
+    }${
+      fullOutput && node.entry?.sys.id
+        ? `~n  ${log.infoText(`entryId: ${node.entry.sys.id}`)}`
+        : ''
+    }${
+      errorOutput
+        ? `~n${addNewLines(`  ${log.errorText(errorOutput)}`, '~n')}`
+        : ''
+    }${
+      diffOutput
+        ? `~n${addNewLines(
+            `  ${log.infoText(`diff: ${highlightDiffText(diffOutput)}`)}`,
+            '~n'
+          )}`
+        : ''
+    }`;
+  };
 
-  const outputChildren = (root: Node | undefined, depth = 2) => {
+  const outputChildren = (node: Node | undefined, depth = 2) => {
     let str = '';
-    for (const node of (root as any)?.children as Node[]) {
-      str += `${outputNode(node, Array(depth + 1).join('  '))}\n`;
-      if ('children' in node) str += outputChildren(node, depth + 1);
+    for (const child of ((node as any)?.children || []) as Node[]) {
+      str += `${outputNode(child, Array(depth + 1).join('  '))}\n`;
+      if ('children' in child) str += outputChildren(child, depth + 1);
     }
     return str;
   };
 
   const children = outputChildren(root);
   log.limits(
-    `${outputNode(root, '  ')}${children ? `\n${children}` : ''}`,
-    100
+    `${outputNode(root || {}, ' ', true)}${children ? `\n${children}` : ''}`,
+    logLimit
   );
 };

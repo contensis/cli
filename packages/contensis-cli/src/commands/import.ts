@@ -150,16 +150,21 @@ Example call:
       '-preserve --preserve-guids',
       'include this flag when you are importing nodes that you have previously exported and wish to update'
     )
+    .addOption(ignoreErrors)
     .addOption(commit)
     .addOption(
       new Option(
-        '-on --output-nodes <outputNodes>',
-        'how much detail to output from the nodes import'
+        '-od --output-detail <outputDetail>',
+        'how much detail to output from the import'
       )
         .choices(['errors', 'changes', 'all'])
         .default('errors')
     )
-    .addOption(ignoreErrors)
+    .option(
+      '-ol --output-limit <outputLimit>',
+      'expand or limit the number of records output to the console',
+      '200'
+    )
     .addHelpText(
       'after',
       `
@@ -176,7 +181,8 @@ Example call:
       ).ImportNodes({
         commit: opts.commit,
         fromFile: opts.fromFile,
-        logOutput: opts.outputNodes,
+        logOutput: opts.outputDetail,
+        logLimit: Number(opts.outputLimit),
       });
     });
 

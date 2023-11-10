@@ -1710,6 +1710,7 @@ class ContensisCli {
 
       this.HandleFormattingAndOutput(nodes, () => {
         // print the nodes to console
+        log.object({ ...root, children: undefined, language: undefined });
         printNodeTreeOutput(this, root);
       });
     } else {
@@ -1722,10 +1723,12 @@ class ContensisCli {
     commit,
     fromFile,
     logOutput,
+    logLimit,
   }: {
     commit: boolean;
     fromFile: string;
     logOutput: string;
+    logLimit: number;
   }) => {
     const { currentEnv, currentProject, log, messages } = this;
 
@@ -1744,29 +1747,34 @@ class ContensisCli {
       }
 
       const [err, result] = await contensis.MigrateNodes();
+      const migrateTree =
+        contensis.nodes.targetRepos[currentProject].nodes.migrateNodesTreeView;
 
-      if (err) logError(err);
+      if (err) log.raw(``);
       else
         this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
+          printNodeTreeOutput(this, migrateTree, logOutput, logLimit);
           printNodesMigrateResult(this, result, {
             showAll: logOutput === 'all',
             showChanged: logOutput === 'changes',
           });
         });
 
-      const nodesTotalCount =
+      const nodesMigrateCount =
         result?.nodesToMigrate?.[currentProject].totalCount;
       const nodesCreated = result?.nodesResult?.['created'] || 0;
       const nodesUpdated = result?.nodesResult?.['updated'] || 0;
-      const noChange =
-        result?.nodesToMigrate?.[currentProject]['no change'] !== 0;
+      const nodesErrored = result?.nodesResult?.['errored'] || 0;
+      const noChanges =
+        result?.nodesToMigrate?.[currentProject]['no change'] &&
+        nodesMigrateCount === 0;
 
       if (
         !err &&
         (!result.errors?.length || this.contensisOpts.ignoreErrors) &&
-        ((!commit && nodesTotalCount) ||
-          (commit && (nodesCreated || nodesUpdated)))
+        ((!commit && nodesMigrateCount) ||
+          (commit && (nodesCreated || nodesUpdated || result.errors?.length)))
       ) {
         let totalCount: number;
         if (commit) {
@@ -1776,20 +1784,20 @@ class ContensisCli {
           totalCount = created + updated;
         } else {
           totalCount =
-            typeof nodesTotalCount === 'number' ? nodesTotalCount : 0;
+            typeof nodesMigrateCount === 'number' ? nodesMigrateCount : 0;
         }
 
         log.success(messages.nodes.imported(currentEnv, commit, totalCount));
-        if (!commit) {
           log.raw(``);
+        if (!commit) {
           log.help(messages.nodes.commitTip());
         }
       } else {
-        if (noChange) {
+        if (noChanges && !err && !nodesErrored) {
           log.help(messages.nodes.noChange(currentEnv));
         } else {
           log.error(messages.nodes.failedImport(currentEnv), err);
-          if (!nodesTotalCount) log.help(messages.nodes.notFound(currentEnv));
+          if (!nodesMigrateCount) log.help(messages.nodes.notFound(currentEnv));
         }
       }
     } else {
