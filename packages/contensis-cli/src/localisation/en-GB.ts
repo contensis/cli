@@ -432,6 +432,13 @@ export const LogMessages = {
         id
       )}`,
   },
+  workflows: {
+    list: (env: string) => `[${env}] Retrieved workflows`,
+    noList: (env: string) => `[${env}] Cannot retrieve workflows`,
+    noneExist: () => `No workflows found`,
+    failedGet: (env: string, name: string) =>
+      `[${env}] Unable to find workflow ${Logger.highlightText(name)}`,
+  },
   devinit: {
     intro: () => `Contensis developer environment initialisation`,
     //`This will initialise your local working directory to develop with the current connected Contensis project`,

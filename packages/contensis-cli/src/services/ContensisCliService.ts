@@ -1033,6 +1033,98 @@ class ContensisCli {
     }
   };
 
+  PrintWorkflows = async () => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve workflows list for env
+      const [workflowsErr, workflows] =
+        await contensis.content.sourceRepo.workflows.GetWorkflows();
+
+      if (Array.isArray(workflows)) {
+        log.success(messages.workflows.list(currentEnv));
+
+        if (!workflows.length) log.help(messages.workflows.noneExist());
+
+        const stringFromLanguageObject = (o: { [lang: string]: string }) =>
+          Object.values(o || {})?.[0];
+
+        this.HandleFormattingAndOutput(workflows, () => {
+          // print the workflows to console
+          // log.object(workflows);
+          for (const {
+            id,
+            name,
+            description,
+            states,
+            eventGroups,
+            isSystem,
+          } of workflows as any) {
+            const color = isSystem ? (s: string) => s : log.infoText;
+
+            console.log(
+              color(
+                `  - ${chalk.bold(
+                  stringFromLanguageObject(name)
+                )} ${log.infoText(id)}`
+              )
+            );
+            if (description)
+              console.log(
+                log.infoText(`    ${stringFromLanguageObject(description)}`)
+              );
+            if (isSystem === false)
+              console.log(`      ${chalk.bold.grey('isSystem')}: false`);
+            if (states?.length)
+              console.log(
+                `      ${chalk.bold.grey('states')}: ${states
+                  .map((state: any) => state.id)
+                  .join(', ')}`
+              );
+            if (eventGroups?.length)
+              console.log(
+                `      ${chalk.bold.grey('eventGroups')}: ${eventGroups
+                  .map((evtGrp: any) => evtGrp.id)
+                  .join(', ')}`
+              );
+          }
+        });
+      }
+
+      if (workflowsErr) {
+        log.error(messages.workflows.noList(currentEnv));
+        log.error(jsonFormatter(workflowsErr));
+      }
+    }
+  };
+
+  PrintWorkflow = async (workflowNameOrId: string) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve workflows list for env
+      const [workflowsErr, workflows] =
+        await contensis.content.sourceRepo.workflows.GetWorkflows();
+
+      if (Array.isArray(workflows)) {
+        log.success(messages.workflows.list(currentEnv));
+
+        const workflow = findByIdOrName(workflows, workflowNameOrId);
+
+        if (workflow) this.HandleFormattingAndOutput(workflow, log.object);
+        else
+          log.error(messages.workflows.failedGet(currentEnv, workflowNameOrId));
+      }
+
+      if (workflowsErr) {
+        log.error(messages.workflows.noList(currentEnv));
+        log.error(jsonFormatter(workflowsErr));
+      }
+    }
+  };
+
   CreateProject = async (project: Project) => {
     const { currentEnv, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -1788,7 +1880,7 @@ class ContensisCli {
         }
 
         log.success(messages.nodes.imported(currentEnv, commit, totalCount));
-          log.raw(``);
+        log.raw(``);
         if (!commit) {
           log.help(messages.nodes.commitTip());
         }

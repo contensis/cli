@@ -160,5 +160,20 @@ Example call:
         name ? [name] : id
       );
     });
+
+  list
+    .command('workflows')
+    .description('print list of workflow definitions')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > list workflows
+`
+    )
+    .action(async opts => {
+      await cliCommand(['list', 'workflows'], opts).PrintWorkflows();
+    });
+
   return list;
 };

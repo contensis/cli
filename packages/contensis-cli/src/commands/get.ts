@@ -99,6 +99,24 @@ Example call:
     });
 
   program
+    .command('workflow')
+    .description('get a workflow')
+    .argument('<workflowNameOrId>', 'id or name of the workflow to get')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get workflow "Approval workflow"
+`
+    )
+    .action(async (workflowNameOrId: string, opts) => {
+      await cliCommand(
+        ['get', 'workflow', workflowNameOrId],
+        opts
+      ).PrintWorkflow(workflowNameOrId);
+    });
+
+  program
     .command('model')
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')
