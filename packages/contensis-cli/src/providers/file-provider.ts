@@ -11,7 +11,8 @@ export const appRootDir =
     : path.join(userHomeDir, '.contensis/');
 
 export const readJsonFile = <T>(filePath: string) => {
-  const file = readFile(filePath);
+  const directoryPath = cwdPath(filePath);
+  const file = readFile(directoryPath);
   if (file) return tryParse(file) as T | string;
   return undefined;
 };
@@ -81,3 +82,6 @@ export const checkDir = (filePath: string) => {
 
 export const localPath = (filePath: string) =>
   path.isAbsolute(filePath) ? filePath : path.join(appRootDir, filePath);
+
+export const cwdPath = (filePath: string) =>
+  path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
