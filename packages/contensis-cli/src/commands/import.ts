@@ -169,8 +169,8 @@ Example call:
       'after',
       `
 Example call:
-  > import nodes --from-file site-backup.json
-  > import nodes --source-alias example-alias --source-project-id example-project
+  > import nodes /blog --source-alias example-alias --source-project-id example-project
+  > import nodes --from-file site-backup.json --preserve-guids
 `
     )
     .action(async (root: string, opts) => {

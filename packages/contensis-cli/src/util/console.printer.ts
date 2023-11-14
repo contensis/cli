@@ -281,6 +281,7 @@ export const printNodesMigrateResult = (
     showChanged?: boolean;
   } = {}
 ) => {
+  log.raw(``);
   for (const [projectId, counts] of Object.entries(migrateResult.nodes || {})) {
     const importTitle =
       action === 'delete'
@@ -479,7 +480,9 @@ export const printNodeTreeOutput = (
         'N'
       )} [no change]; ${statusColour('create')('C')} [create]; ${statusColour(
         'update'
-      )('U')} [update]; ${statusColour('error')('E')} [error];`
+      )('U')} [update]; ${statusColour('delete')('D')} [delete]; ${statusColour(
+        'error'
+      )('E')} [error];`
     );
   log.info(
     `Node properties: ${log.highlightText(

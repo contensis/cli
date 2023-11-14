@@ -237,24 +237,26 @@ export class Logger {
     logMethod: Function = console.info
   ) => {
     if (consoleWidth) {
-      content
-        .split('\n')
-        .slice(0, consoleWidth ? displayLength : undefined)
-        .map((line: string) =>
-          logMethod(
-            line
-              .split('~n')
-              .map(l =>
-                consoleWidth && strlen(l) > consoleWidth
-                  ? first(l, consoleWidth)
-                  : l
-              )
-              .join('\n')
-          )
-        )
-        .join('\n');
+      const contentArray = content.endsWith('\n')
+        ? content.split('\n').slice(0, -1)
+        : content.split('\n');
+      const contentLines = contentArray.slice(
+        0,
+        consoleWidth ? displayLength : undefined
+      );
+      for (const line of contentLines)
+        logMethod(
+          line
+            .split('~n')
+            .map(l =>
+              consoleWidth && strlen(l) > consoleWidth
+                ? first(l, consoleWidth)
+                : l
+            )
+            .join('\n')
+        );
     } else {
-      logMethod(content.replace(ansiEscapeCodes, ''));
+      logMethod(content.replace(ansiEscapeCodes, '').replaceAll('~n', '\n'));
     }
 
     const tableArray = content.split('\n');
