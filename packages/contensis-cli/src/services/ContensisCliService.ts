@@ -1392,7 +1392,7 @@ class ContensisCli {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input',
+      importDataType: 'user-input', // 'user-input' import type does not require a source cms
     });
     if (contensis) {
       const [err, result] = await contensis.DeleteContentTypes(contentTypeIds);
@@ -1569,7 +1569,7 @@ class ContensisCli {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input',
+      importDataType: 'user-input', // 'user-input' import type does not require a source cms
     });
     if (contensis) {
       const [err, result] = await contensis.DeleteContentTypes(
@@ -1655,7 +1655,7 @@ class ContensisCli {
     const { currentEnv, currentProject, log, messages } = this;
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input',
+      importDataType: 'user-input', // 'user-input' import type does not require a source cms
     });
 
     if (contensis) {
@@ -1857,7 +1857,7 @@ class ContensisCli {
         result?.nodesToMigrate?.[currentProject].totalCount;
       const nodesCreated = result?.nodesResult?.['created'] || 0;
       const nodesUpdated = result?.nodesResult?.['updated'] || 0;
-      const nodesErrored = result?.nodesResult?.['errored'] || 0;
+      const nodesErrored = result?.nodesResult?.['errors'] || 0;
       const noChanges =
         result?.nodesToMigrate?.[currentProject]['no change'] &&
         nodesMigrateCount === 0;
@@ -1895,6 +1895,54 @@ class ContensisCli {
     } else {
       log.warning(messages.models.noList(currentProject));
       log.help(messages.connect.tip());
+    }
+  };
+
+  RemoveNodes = async (commit = false) => {
+    const { currentEnv, currentProject, log, messages } = this;
+    const contensis = await this.ConnectContensisImport({
+      commit,
+      importDataType: 'user-input', // 'user-input' import type does not require a source cms
+    });
+
+    if (contensis) {
+      if (contensis.isPreview) {
+        console.log(log.successText(` -- PREVIEW -- `));
+      } else {
+        console.log(log.warningText(` *** COMMITTING DELETE *** `));
+      }
+      const [err, result] = await contensis.DeleteNodes();
+      if (result) {
+        this.HandleFormattingAndOutput(result, () => {
+          // print the migrateResult to console
+          printNodeTreeOutput(
+            this,
+            contensis.nodes.targetRepos[currentProject].nodes
+              .migrateNodesTreeView
+          );
+          // printNodesMigrateResult(this, result, {
+          //   action: 'delete',
+          //   showAll: true,
+          // });
+        });
+      }
+      if (
+        !err &&
+        ((!commit && result.nodesToMigrate[currentProject].totalCount) ||
+          (commit && result.nodesResult?.deleted))
+      ) {
+        log.success(
+          messages.nodes.removed(currentEnv, commit, contensis.nodes.rootPath)
+        );
+        log.raw(``);
+        if (!commit) {
+          log.help(messages.nodes.commitTip());
+        }
+      } else {
+        log.error(messages.nodes.failedRemove(currentEnv), err);
+        if (!result?.nodesToMigrate?.[currentProject]?.totalCount)
+          log.help(messages.nodes.notFound(currentEnv));
+      }
     }
   };
 

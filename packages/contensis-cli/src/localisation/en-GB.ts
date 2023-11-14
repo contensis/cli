@@ -158,8 +158,8 @@ export const LogMessages = {
     imported: (env: string, commit: boolean, count: number) =>
       `[${env}] ${commit ? `Imported` : `Will import`} ${count} nodes`,
     failedImport: (env: string) => `[${env}] Unable to import nodes`,
-    removed: (env: string, commit: boolean) =>
-      `[${env}] ${commit ? `Deleted` : `Will delete`} nodes`,
+    removed: (env: string, commit: boolean, root: string) =>
+      `[${env}] ${commit ? `Deleted` : `Will delete`} nodes at ${root}`,
     failedRemove: (env: string) => `[${env}] Unable to delete nodes`,
     notFound: (env: string) => `[${env}] Nodes were not found `,
     commitTip: () => `Add --commit flag to commit the previewed changes`,

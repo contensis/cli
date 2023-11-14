@@ -177,6 +177,7 @@ class ContensisShell {
         'remove contenttypes',
         'remove key',
         'remove entries',
+        'remove nodes',
         'remove role',
         'set project name',
         'set project description',

@@ -135,5 +135,25 @@ Example call:
       }
     });
 
+  remove
+    .command('nodes')
+    .description('delete nodes from the site view tree')
+    .argument('<root>', 'remove nodes from the specified path e.g. /blog or /')
+    .addOption(commit)
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > remove nodes /blog
+`
+    )
+    .action(async (root: string, opts) => {
+      await cliCommand(
+        ['remove', 'nodes', root],
+        opts,
+        mapContensisOpts({ paths: root.split(' '), ...opts })
+      ).RemoveNodes(opts.commit);
+    });
+
   return remove;
 };
