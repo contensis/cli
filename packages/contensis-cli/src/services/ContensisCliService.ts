@@ -159,15 +159,19 @@ class ContensisCli {
     const environments = this.cache.environments || {};
     this.currentEnv = currentEnvironment;
 
+    // Set env from command options
     const env = this.env;
-
     if (outputOpts?.projectId) env.currentProject = outputOpts.projectId;
     if (outputOpts?.user) env.lastUserId = outputOpts.user;
     // setting this in env means passwordFallback is written to environments.json
     if (outputOpts?.password) env.passwordFallback = outputOpts.password;
     if (outputOpts?.clientId) env.lastUserId = outputOpts.clientId;
     if (outputOpts?.sharedSecret)
-      env.passwordFallback = outputOpts.sharedSecret;
+      if (outputOpts.sharedSecret.startsWith('-'))
+        throw new Error(
+          `Shared secret option provided a value of ${outputOpts.sharedSecret}`
+        );
+      else env.passwordFallback = outputOpts.sharedSecret;
 
     this.currentProject = env?.currentProject || 'null';
     this.sourceAlias = outputOpts?.sourceAlias || currentEnvironment;
@@ -419,7 +423,10 @@ class ContensisCli {
 
       if (credentialError && !credentials.current) {
         // Log problem with Credential Provider
-        log.error(credentialError as any);
+        log.error(
+          `Unable to find credentials for user ${userId} at ${currentEnv}`,
+          credentialError as any
+        );
         return;
       }
 
