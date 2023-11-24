@@ -378,16 +378,13 @@ class ContensisDev extends ContensisRole {
 
       if (loc === 'git') {
         // Echo Deployment API key to console, ask user to add secrets to repo
+        const dryRunKeyMessage = dryRun ? 'not created in dry-run' : undefined;
         log.warning(messages.devinit.addGitSecretsIntro());
         log.help(
           messages.devinit.addGitSecretsHelp(
             git,
-            existingDeployKey?.id || dryRun
-              ? 'not created in dry-run'
-              : undefined,
-            existingDeployKey?.sharedSecret || dryRun
-              ? 'not created in dry-run'
-              : undefined
+            existingDeployKey?.id || dryRunKeyMessage,
+            existingDeployKey?.sharedSecret || dryRunKeyMessage
           )
         );
       }
