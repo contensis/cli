@@ -29,6 +29,11 @@ class ContensisDev extends ContensisRole {
   git!: GitHelper;
   blockId!: string;
 
+  deployCredentials = {
+    clientId: '',
+    clientSecret: '',
+  };
+
   constructor(
     args: string[],
     outputOpts?: OutputOptionsConstructorArg,
@@ -49,8 +54,6 @@ class ContensisDev extends ContensisRole {
     const contensis = await this.ConnectContensis();
 
     if (contensis) {
-      this.devinit = { ...this.devinit, invokedBy: this.invokedBy };
-
       // First we need to get the block id from the user
       const validateBlockId = (blockId: string) => {
         const pattern = /^[0-9a-z](-?[0-9a-z])*$/;
@@ -64,6 +67,7 @@ class ContensisDev extends ContensisRole {
         prefix: '🧱',
         message: messages.devinit.blockIdQuestion,
         validate: validateBlockId,
+        default: git.name,
       });
       // make sure block id is lowercase
       this.blockId = blockId.toLowerCase();
@@ -93,57 +97,10 @@ class ContensisDev extends ContensisRole {
       const devKeyDescription = `Created by Contensis to allow API access from the running block`;
       let existingDevKey = apiKeyExists(devKeyName);
 
-      // if dev api key doesn't exisit go and create it (we need this for local development, we will store these details in the .env file).
-      if (!existingDevKey) {
-        existingDevKey = await this.CreateOrUpdateApiKey(
-          existingDevKey,
-          devKeyName,
-          devKeyDescription
-        );
-        log.success('Successfully created development key');
-      }
-
       const deployKeyName = `${apiKeyName}-ci`;
       const deployKeyDescription = `Created by the Contensis CLI for use in continuous integration`;
 
       let existingDeployKey = apiKeyExists(deployKeyName);
-
-      // if deploy api key doesn't exisit go and create it (we need this for yml file).
-      if (!existingDeployKey) {
-        existingDeployKey = await this.CreateOrUpdateApiKey(
-          existingDeployKey,
-          deployKeyName,
-          deployKeyDescription
-        );
-        log.success('Successfully created deploy key');
-      }
-
-      // check we have the deply key so we can assign them to this values
-      if (existingDeployKey) {
-        // Add client id and secret to global 'this'
-        this.devinit = {
-          ...this.devinit,
-          credentials: {
-            clientId: existingDeployKey?.id,
-            clientSecret: existingDeployKey?.sharedSecret,
-          },
-        };
-      }
-
-      // we need to credentials of the user so that we can create a auth service
-      const credentials = await this.GetCredentials(this.devinit.invokedBy);
-
-      // create new auth service using creds
-      let classicToken: string | undefined | null;
-      const auth = new ContensisAuthService({
-        username: credentials?.current?.account,
-        password: credentials?.current?.password,
-        projectId: currentProject,
-        rootUrl: `https://cms-${currentEnv}.cloud.contensis.com`,
-      });
-
-      // once we have auth service, we can go and fetch out classic token
-      classicToken = await auth.ClassicToken();
 
       // const blockId = git.name;
       const errors = [] as AppError[];
@@ -151,7 +108,6 @@ class ContensisDev extends ContensisRole {
       // Start render console output
       log.raw('');
       log.success(messages.devinit.intro());
-      log.raw('');
       log.raw(
         log.infoText(
           messages.devinit.projectDetails(
@@ -193,7 +149,6 @@ class ContensisDev extends ContensisRole {
 
       log.raw(log.infoText(messages.devinit.ciDetails(ciFileName)));
 
-      let mappedWorkflow;
       // Location for Client ID / Secret.
       const { loc } = await inquirer.prompt({
         name: 'loc',
@@ -213,9 +168,8 @@ class ContensisDev extends ContensisRole {
         ],
       });
 
+      log.raw('');
       log.help(messages.devinit.ciIntro(git, loc));
-      // Update CI Workflow
-      mappedWorkflow = await mapCIWorkflowContent(this, loc);
 
       if (!dryRun) {
         // Confirm prompt
@@ -233,7 +187,6 @@ class ContensisDev extends ContensisRole {
 
       // Fetching access token
       let accessToken: string | undefined = undefined;
-      log.raw('');
 
       const spinner = createSpinner(messages.devinit.accessTokenFetch());
       spinner.start();
@@ -241,9 +194,9 @@ class ContensisDev extends ContensisRole {
       const token = await this.GetDeliveryApiKey();
 
       if (token) {
-        spinner.success();
-        this.log.success(messages.devinit.accessTokenSuccess(token));
         accessToken = token;
+        spinner.success({ text: messages.devinit.accessTokenSuccess(token) });
+        log.raw('');
       } else {
         spinner.error();
         this.log.error(messages.devinit.accessTokenFailed());
@@ -261,9 +214,48 @@ class ContensisDev extends ContensisRole {
       const [getRolesErr, roles] = await to(contensis.roles.GetRoles());
       if (!roles && getRolesErr) errors.push(getRolesErr);
       checkpoint(`fetched ${roles?.length} roles`);
+
       if (dryRun) {
         checkpoint(`skip api key creation (dry-run)`);
       } else {
+        // if dev api key doesn't exist go and create it (we need this for local development, we will store these details in the .env file).
+        const devKeyExisted = !!existingDevKey;
+        if (!existingDevKey) {
+          existingDevKey = await this.CreateOrUpdateApiKey(
+            existingDevKey,
+            devKeyName,
+            devKeyDescription
+          );
+          log.success(messages.devinit.createDevKey(devKeyName, devKeyExisted));
+        }
+        // NF 24/11/23 Added this commented code back in as we are not assigning the dev key to any role here
+        // // Ensure dev API key is assigned to a role
+        // let existingDevRole = findByIdOrName(roles || [], devKeyName, true) as
+        //   | Role
+        //   | undefined;
+        // existingDevRole = await this.CreateOrUpdateRole(
+        //   existingDevRole,
+        //   devKeyRole(devKeyName, devKeyDescription)
+        // );
+        // checkpoint('dev key role assigned');
+
+        // if deploy api key doesn't exist go and create it (we need this for yml file).
+        const deployKeyExisted = !!existingDeployKey;
+        if (!existingDeployKey) {
+          existingDeployKey = await this.CreateOrUpdateApiKey(
+            existingDeployKey,
+            deployKeyName,
+            deployKeyDescription
+          );
+        }
+
+        // check we have the deploy key so we can assign them to this values
+        if (existingDeployKey) {
+          // Add client id and secret to credentials
+          this.deployCredentials.clientId = existingDeployKey?.id;
+          this.deployCredentials.clientSecret = existingDeployKey?.sharedSecret;
+        }
+
         // Ensure deploy API key is assigned to a role with the right permissions
         const deployRoleName = `Role for CI push of block '${blockId}'`;
         const deplyRoleDescription = `Created by the Contensis CLI for use in continuous integration`;
@@ -274,11 +266,13 @@ class ContensisDev extends ContensisRole {
         ) as Role | undefined;
         existingDeployRole = await this.CreateOrUpdateRole(
           existingDeployRole,
-          deployKeyRole(deployKeyName, deplyRoleDescription)
+          deployKeyRole(deployRoleName, deplyRoleDescription)
         );
 
         checkpoint('deploy key role assigned');
-        log.success(messages.devinit.createDeployKey(deployRoleName, true));
+        log.success(
+          messages.devinit.createDeployKey(deployRoleName, deployKeyExisted)
+        );
         checkpoint('api keys done');
       }
 
@@ -339,7 +333,7 @@ class ContensisDev extends ContensisRole {
         }
         checkpoint('skip .env file update (dry-run)');
       } else {
-        if (envDiff) log.info(`updating .env file ${winSlash(envFilePath)}`);
+        if (envDiff) log.info(`Updating .env file ${winSlash(envFilePath)}`);
         writeFile(envFilePath, envFileLines.join('\n'));
         checkpoint('.env file updated');
         log.success(messages.devinit.writeEnvFile());
@@ -347,16 +341,21 @@ class ContensisDev extends ContensisRole {
       }
 
       // Update git ignore
-      const gitIgnorePath = `${projectHome}/.gitignore`;
-      const gitIgnoreContentsToAdd = ['.env'];
-      mergeContentsToAddWithGitignore(gitIgnorePath, gitIgnoreContentsToAdd);
+      if (dryRun) {
+        checkpoint('skip .gitignore file update (dry-run)');
+      } else {
+        mergeContentsToAddWithGitignore(`${projectHome}/.gitignore`, ['.env']);
+        log.raw('');
+      }
+
+      // Update CI Workflow
+      const mappedWorkflow = await mapCIWorkflowContent(this, loc);
 
       // Update CI file -- different for GH/GL
       if (mappedWorkflow?.diff) {
         log.info(
           `Updating ${winSlash(ciFileName)} file:\n${mappedWorkflow.diff}`
         );
-        log.raw('');
       }
       if (dryRun) {
         checkpoint('skip CI file update (dry-run)');
@@ -372,6 +371,7 @@ class ContensisDev extends ContensisRole {
           } else {
             log.info(messages.devinit.ciFileNoChanges(`./${ciFileName}`));
           }
+          log.raw('');
           checkpoint('CI file updated');
         }
       }
@@ -382,8 +382,12 @@ class ContensisDev extends ContensisRole {
         log.help(
           messages.devinit.addGitSecretsHelp(
             git,
-            existingDeployKey?.id,
-            existingDeployKey?.sharedSecret
+            existingDeployKey?.id || dryRun
+              ? 'not created in dry-run'
+              : undefined,
+            existingDeployKey?.sharedSecret || dryRun
+              ? 'not created in dry-run'
+              : undefined
           )
         );
       }
@@ -395,10 +399,13 @@ class ContensisDev extends ContensisRole {
         log.success(messages.devinit.success());
         log.help(messages.devinit.startProjectTip());
         // open the cms link -- if no classic token just return the cms url
+
+        // go and fetch the classic token from auth service
+        const classicToken = await this.auth?.ClassicToken();
         log.help(
           ansiEscapes.link(
             `Open Contensis`,
-            `https://cms-${currentEnv}.cloud.contensis.com${
+            `${this.urls?.cms}${
               classicToken ? `?SecurityToken=${classicToken}` : ''
             }`
           )

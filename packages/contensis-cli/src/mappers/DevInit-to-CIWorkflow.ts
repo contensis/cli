@@ -102,12 +102,10 @@ const mapGitLabCIWorkflowContent = async (
       alias: cli.currentEnv,
       project_id: cli.currentProject,
       client_id:
-        loc === 'env'
-          ? cli.devinit?.credentials.clientId
-          : '$CONTENSIS_CLIENT_ID',
+        loc === 'env' ? cli.deployCredentials.clientId : '$CONTENSIS_CLIENT_ID',
       shared_secret:
         loc === 'env'
-          ? cli.devinit?.credentials.clientSecret
+          ? cli.deployCredentials.clientSecret
           : '$CONTENSIS_SHARED_SECRET',
     },
   };
@@ -120,12 +118,12 @@ const mapGitLabCIWorkflowContent = async (
     setWorkflowElement(
       workflowDoc,
       `variables.CONTENSIS_CLIENT_ID`,
-      `${cli.devinit.credentials.clientId}`
+      `${cli.deployCredentials.clientId}`
     );
     setWorkflowElement(
       workflowDoc,
       `variables.CONTENSIS_CLIENT_SECRET`,
-      `${cli.devinit.credentials.clientSecret}`
+      `${cli.deployCredentials.clientSecret}`
     );
   }
 
@@ -298,12 +296,12 @@ const mapGitHubActionCIWorkflowContent = async (
     setWorkflowElement(
       workflowDoc,
       `env.CONTENSIS_CLIENT_ID`,
-      cli.devinit?.credentials.clientId
+      cli.deployCredentials.clientId
     );
     setWorkflowElement(
       workflowDoc,
       'env.CONTENSIS_SHARED_SECRET',
-      cli.devinit?.credentials.clientSecret
+      cli.deployCredentials.clientSecret
     );
   }
 

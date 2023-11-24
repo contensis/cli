@@ -1,6 +1,7 @@
 import { Role } from 'contensis-management-api/lib/models';
 
 export const devKeyPermissions = {} as Partial<Role['permissions']>;
+
 export const deployKeyPermissions = {
   blocks: { actions: ['push', 'release', 'view'] },
 } as Role['permissions'];

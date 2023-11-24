@@ -451,7 +451,7 @@ export const LogMessages = {
     ) =>
       `
       Project: ${Logger.standardText(name)}
-      - Home: ${Logger.standardText(process.cwd())}
+      - Home: ${Logger.standardText(git.gitcwd())}
       - Repository: ${Logger.standardText(git.home)} 
       - Block id: ${Logger.highlightText(blockId)}
     

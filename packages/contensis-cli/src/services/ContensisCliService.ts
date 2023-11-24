@@ -63,22 +63,15 @@ class ContensisCli {
     process.exit(exitCode);
   };
 
-  private command: CliCommand;
   private format?: OutputFormat;
   private output?: string;
   private session: SessionCacheProvider;
-
+  
+  auth?: ContensisAuthService;
+  command: CliCommand;
   contensis?: ContensisMigrationService;
   contensisOpts: Partial<MigrateRequest>;
   currentProject: string;
-
-  devinit!: {
-    invokedBy: string;
-    credentials: {
-      clientId: string;
-      clientSecret: string;
-    };
-  };
 
   sourceAlias?: string;
   targetEnv?: string;
@@ -98,10 +91,6 @@ class ContensisCli {
   verb: string;
   noun: string;
   thirdArg: string;
-
-  get invokedBy() {
-    return this.command.createdUserId;
-  }
 
   get cache() {
     return this.session.Get();
@@ -183,7 +172,7 @@ class ContensisCli {
     this.command = {
       commandText,
       createdDate: new Date().toISOString(),
-      createdUserId: env?.lastUserId,
+      invokedBy: env?.lastUserId,
     };
 
     if (currentEnvironment) {
@@ -494,7 +483,7 @@ class ContensisCli {
           }
 
           if (inputPassword || cachedPassword || cachedSecret) {
-            const authService = new ContensisAuthService({
+            this.auth = new ContensisAuthService({
               username: userId,
               password: inputPassword || cachedPassword,
               projectId: env?.currentProject || 'website',
@@ -503,9 +492,7 @@ class ContensisCli {
               clientSecret: sharedSecret || cachedSecret,
             });
 
-            const [authError, bearerToken] = await to(
-              authService.BearerToken()
-            );
+            const [authError, bearerToken] = await to(this.auth.BearerToken());
 
             // Login successful
             if (bearerToken) {

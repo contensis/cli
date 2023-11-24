@@ -59,7 +59,7 @@ class ContensisAuthService {
     });
   }
 
-  ClassicToken = async () => {
+  ClassicToken = async (): Promise<string | null | undefined> => {
     // make sure our token isn't expried.
     await this.client.ensureBearerToken();
     return (this.client as any).contensisClassicToken;

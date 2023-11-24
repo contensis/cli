@@ -19,7 +19,7 @@ type EnvironmentCache = {
 
 type CliCommand = {
   createdDate: string;
-  createdUserId: string;
+  invokedBy: string;
   commandText: string;
   result?: any;
 };
