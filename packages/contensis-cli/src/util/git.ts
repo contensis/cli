@@ -75,7 +75,7 @@ export class GitHelper {
   }
   gitcwd = () => path.join(this.gitRepoPath);
   gitInfo = (url: string = this.originUrl) => hostedGitInfo.fromUrl(url);
-  hostType = (url: string = this.originUrl): GitTypes => {
+  hostType = (url: string = this.originUrl): GitTypes | undefined => {
     if (url) {
       if (url.includes('github.com')) return 'github';
       else return 'gitlab';
@@ -87,6 +87,7 @@ export class GitHelper {
   gitConfig = (cwd = this.gitRepoPath) => {
     // Find .git/config in project cwd
     const config = parseGitConfig.sync({
+      cwd,
       path: '.git/config',
       expandKeys: true,
     });
