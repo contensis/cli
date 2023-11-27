@@ -1,6 +1,8 @@
+import ansiEscapes from 'ansi-escapes';
 import to from 'await-to-js';
 import { spawn } from 'child_process';
 import inquirer from 'inquirer';
+import { createSpinner } from 'nanospinner';
 import path from 'path';
 
 import { Role } from 'contensis-management-api/lib/models';
@@ -20,10 +22,7 @@ import { GitHelper } from '~/util/git';
 import { jsonFormatter } from '~/util/json.formatter';
 import { winSlash } from '~/util/os';
 import { stringifyYaml } from '~/util/yaml';
-import { createSpinner } from 'nanospinner';
 import { mergeContentsToAddWithGitignore } from '~/util/gitignore';
-import ContensisAuthService from './ContensisAuthService';
-import ansiEscapes from 'ansi-escapes';
 
 class ContensisDev extends ContensisRole {
   git!: GitHelper;
@@ -291,9 +290,11 @@ class ContensisDev extends ContensisRole {
       if (accessToken) envContentsToAdd['ACCESS_TOKEN'] = accessToken;
       // add client id and secret to the env file
       if (loc === 'env') {
-        envContentsToAdd['CONTENSIS_CLIENT_ID'] = existingDevKey?.id;
+        envContentsToAdd['CONTENSIS_CLIENT_ID'] =
+          existingDevKey?.id || messages.devinit.dryRunKeyMessage(dryRun);
         envContentsToAdd['CONTENSIS_CLIENT_SECRET'] =
-          existingDevKey?.sharedSecret;
+          existingDevKey?.sharedSecret ||
+          messages.devinit.dryRunKeyMessage(dryRun);
       }
 
       // if we have client id / secret in our env remove it
@@ -356,6 +357,7 @@ class ContensisDev extends ContensisRole {
         log.info(
           `Updating ${winSlash(ciFileName)} file:\n${mappedWorkflow.diff}`
         );
+        log.raw('');
       }
       if (dryRun) {
         checkpoint('skip CI file update (dry-run)');
@@ -378,13 +380,13 @@ class ContensisDev extends ContensisRole {
 
       if (loc === 'git') {
         // Echo Deployment API key to console, ask user to add secrets to repo
-        const dryRunKeyMessage = dryRun ? 'not created in dry-run' : undefined;
         log.warning(messages.devinit.addGitSecretsIntro());
         log.help(
           messages.devinit.addGitSecretsHelp(
             git,
-            existingDeployKey?.id || dryRunKeyMessage,
-            existingDeployKey?.sharedSecret || dryRunKeyMessage
+            existingDeployKey?.id || messages.devinit.dryRunKeyMessage(dryRun),
+            existingDeployKey?.sharedSecret ||
+              messages.devinit.dryRunKeyMessage(dryRun)
           )
         );
       }

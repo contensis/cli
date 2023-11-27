@@ -66,7 +66,7 @@ class ContensisCli {
   private format?: OutputFormat;
   private output?: string;
   private session: SessionCacheProvider;
-  
+
   auth?: ContensisAuthService;
   command: CliCommand;
   contensis?: ContensisMigrationService;
@@ -171,6 +171,7 @@ class ContensisCli {
 
     this.command = {
       commandText,
+      options: outputOpts as any,
       createdDate: new Date().toISOString(),
       invokedBy: env?.lastUserId,
     };

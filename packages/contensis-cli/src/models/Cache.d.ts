@@ -21,5 +21,6 @@ type CliCommand = {
   createdDate: string;
   invokedBy: string;
   commandText: string;
+  options: { [key: string]: string | boolean };
   result?: any;
 };

@@ -118,12 +118,14 @@ const mapGitLabCIWorkflowContent = async (
     setWorkflowElement(
       workflowDoc,
       `variables.CONTENSIS_CLIENT_ID`,
-      `${cli.deployCredentials.clientId}`
+      cli.deployCredentials.clientId ||
+        cli.messages.devinit.dryRunKeyMessage(!!cli.command.options.dryRun)
     );
     setWorkflowElement(
       workflowDoc,
       `variables.CONTENSIS_CLIENT_SECRET`,
-      `${cli.deployCredentials.clientSecret}`
+      cli.deployCredentials.clientSecret ||
+        cli.messages.devinit.dryRunKeyMessage(!!cli.command.options.dryRun)
     );
   }
 

@@ -551,9 +551,10 @@ export const LogMessages = {
       } ${Logger.highlightText(`CONTENSIS_SHARED_SECRET`)}\n    ${
         git.type === 'github' ? `Secret:` : `Value:`
       } ${Logger.standardText(secret)}`,
-    accessTokenFetch: () => `Please wait, fecthing Delivery API token ⏳`,
+    accessTokenFetch: () =>
+      `Please wait, fetching Delivery API access token ⏳`,
     accessTokenSuccess: (token: string) =>
-      `Successfully fetched Delivery API token 👉 ${Logger.infoText(token)}`,
+      `Successfully fetched Delivery API token\n  ${Logger.infoText(token)}`,
     accessTokenFailed: () =>
       `Something went wrong! If the problem persists, please contact our support team 🛟`,
     accessTokenPermission: () =>
@@ -572,6 +573,8 @@ export const LogMessages = {
     failed: () => `Contensis developer environment initialisation failed`,
     dryRun: () =>
       `Contensis developer environment initialisation dry run completed`,
+    dryRunKeyMessage: (dryRun: boolean) =>
+      dryRun ? '<< not created: dry-run >>' : undefined,
     noChanges: () =>
       `No changes were made to your project, run the command again without the ${Logger.highlightText(
         '--dry-run'

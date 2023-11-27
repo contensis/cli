@@ -70,7 +70,7 @@ export const diffFileContent = (
     } else needsNewLine = true;
   }
 
-  return output.join('');
+  return output.join('').replaceAll('\n\n\n', '\n\n');
 };
 
 const addDiffPositionInfo = (diff: Change[]) => {
