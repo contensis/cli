@@ -265,7 +265,7 @@ class ContensisDev extends ContensisRole {
         ) as Role | undefined;
         existingDeployRole = await this.CreateOrUpdateRole(
           existingDeployRole,
-          deployKeyRole(deployRoleName, deplyRoleDescription)
+          deployKeyRole(deployKeyName, deployRoleName, deplyRoleDescription)
         );
 
         checkpoint('deploy key role assigned');

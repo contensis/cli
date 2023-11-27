@@ -8,9 +8,10 @@ export const deployKeyPermissions = {
 
 export const devKeyRole = (
   keyName: string,
+  roleName: string,
   description: string
 ): Partial<Role> => ({
-  name: keyName,
+  name: roleName,
   description,
   assignments: {
     apiKeys: [keyName],
@@ -21,9 +22,10 @@ export const devKeyRole = (
 
 export const deployKeyRole = (
   keyName: string,
+  roleName: string,
   description: string
 ): Partial<Role> => ({
-  name: keyName,
+  name: roleName,
   description,
   assignments: {
     apiKeys: [keyName],
