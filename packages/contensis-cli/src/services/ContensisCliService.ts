@@ -46,7 +46,7 @@ import {
 } from '~/util/console.printer';
 import { csvFormatter } from '~/util/csv.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
-import { jsonFormatter } from '~/util/json.formatter';
+import { jsonFormatter, limitFields } from '~/util/json.formatter';
 import { diffLogStrings } from '~/util/diff';
 import { logError, Logger } from '~/util/logger';
 import { promiseDelay } from '~/util/timers';
@@ -2491,18 +2491,20 @@ class ContensisCli {
   };
   HandleFormattingAndOutput = <T>(obj: T, logFn: (obj: T) => void) => {
     const { format, log, messages, output } = this;
+    const fields = this.contensis?.payload.query?.fields;
+
     if (!format) {
       // print the object to console
       logFn(obj);
     } else if (format === 'csv') {
       log.raw('');
-      log.raw(log.infoText(csvFormatter(obj)));
+      log.raw(log.infoText(csvFormatter(limitFields(obj, fields))));
     } else if (format === 'xml') {
       log.raw('');
-      log.raw(log.infoText(xmlFormatter(obj)));
+      log.raw(log.infoText(xmlFormatter(limitFields(obj, fields))));
     } else if (format === 'json') {
       log.raw('');
-      log.raw(log.infoText(jsonFormatter(obj)));
+      log.raw(log.infoText(jsonFormatter(obj, fields)));
     }
     log.raw('');
 
@@ -2510,10 +2512,11 @@ class ContensisCli {
       let writeString = '';
       const isText = !tryParse(obj) && typeof obj === 'string';
       if (format === 'csv') {
-        writeString = csvFormatter(obj as any);
+        writeString = csvFormatter(limitFields(obj, fields));
       } else if (format === 'xml') {
-        writeString = xmlFormatter(obj as any);
-      } else writeString = isText ? (obj as string) : jsonFormatter(obj);
+        writeString = xmlFormatter(limitFields(obj, fields));
+      } else
+        writeString = isText ? (obj as string) : jsonFormatter(obj, fields);
       // write output to file
       if (writeString) {
         fs.writeFileSync(output, writeString);

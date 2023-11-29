@@ -1,8 +1,5 @@
-import { flatten } from 'flat';
 import { Parser } from 'json2csv';
-import cleaner from 'deep-cleaner';
-
-const flattenObject = (obj: any) => flatten(cleaner(obj, ['workflow']));
+import { flattenObject } from './json.formatter';
 
 export const csvFormatter = <T>(entries: T | T[]) => {
   // Flatten the passed in object
