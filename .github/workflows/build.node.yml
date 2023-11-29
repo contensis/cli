@@ -11,7 +11,7 @@ jobs:
   build:
     name: Build, test and publish
     runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit.message, 'chore:') != true && !startsWith(github.event.head_commit.message, 'docs:') && !contains(github.ref_name, github.event.head_commit.message)
+    if: startsWith(github.event.head_commit.message, 'docs:') != true && contains(github.ref_name, github.event.head_commit.message) != true
 
     steps:
       - uses: actions/checkout@v3
