@@ -152,6 +152,8 @@ class ContensisShell {
         'get nodes',
         'get model',
         'get project',
+        'get proxy',
+        'get renderer',
         'get role',
         'get token',
         'get version',
@@ -303,3 +305,5 @@ process.stdin.on('data', key => {
     shell().quit();
   }
 });
+
+// process.env.http_proxy = 'http://127.0.0.1:8888';
