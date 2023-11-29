@@ -3,6 +3,10 @@ name: Node.js CI
 on:
   workflow_call:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build:
     name: Build, test and publish
@@ -68,3 +72,9 @@ jobs:
           npm publish --tag prerelease --ignore-scripts
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          command: manifest
+          token: ${{secrets.GITHUB_TOKEN}}
+          default-branch: main

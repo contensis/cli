@@ -1,0 +1,9 @@
+{
+  "bootstrap-sha": "51772230b9eb125c9bf81e1a694771c9e9ab10d2",
+  "draft": true,
+  "include-v-in-tag": true,
+  "packages": {
+    "packages/contensis-cli": {}
+  },
+  "plugins": ["node-workspace"]
+}
