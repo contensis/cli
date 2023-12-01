@@ -3,10 +3,13 @@
   "draft": true,
   "include-v-in-tag": true,
   "include-component-in-tag": false,
+  "separate-pull-requests": true,
   "packages": {
     "packages/contensis-cli": {
-      "component": "contensis-cli"
+      "component": "contensis-cli",
+      "release-type": "node"
     }
   },
-  "plugins": ["node-workspace"]
+  "plugins": ["node-workspace"],
+  "pull-request-title-pattern": "chore: release ${component} ${version}"
 }
