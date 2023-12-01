@@ -126,7 +126,7 @@ jobs:
           path: bin/contensis-cli*
 
       - name: Upload Release Artifact
-        if: inputs.release == 'true'
+        if: inputs.release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
         run: |
