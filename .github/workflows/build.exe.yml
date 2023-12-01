@@ -2,7 +2,16 @@ name: Package executables CI
 
 on:
   workflow_call:
+    inputs:
+      release:
+        type: boolean
+        default: false
   workflow_dispatch:
+    inputs:
+      release:
+        description: 'Whether to add the build artifacts to a release'
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -10,8 +19,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 18.x ]
-        os: [ ubuntu-20.04, windows-2019, macos-latest, arm64 ]
+        node-version: [18.x]
+        os: [ubuntu-20.04, windows-2019, macos-latest, arm64]
         include:
           - os: ubuntu-20.04
             friendlyName: Ubuntu x64
@@ -115,3 +124,12 @@ jobs:
         with:
           name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
           path: bin/contensis-cli*
+
+      - name: Upload Release Artifact
+        if: inputs.release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
+        run: |
+          cd bin
+          FILENAME=$( [ "${{ matrix.os == 'windows-2019' }}" = "true" ] && echo "contensis-cli-win.exe" || echo "contensis-cli-${{ matrix.fileName }}")
+          gh release upload v${{ env.APP_VERSION }} ./$FILENAME

@@ -22,7 +22,15 @@ jobs:
   docker:
     name: docker:release
     needs: node
+    secrets: inherit
     uses: ./.github/workflows/release.docker.yml
     with:
       version: ${{ needs.node.outputs.version }}
+
+  exe:
+    name: exe
+    needs: node
     secrets: inherit
+    uses: ./.github/workflows/build.exe.yml
+    with:
+      release: ${{ github.event_name == 'release' }}
