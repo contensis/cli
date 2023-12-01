@@ -44,27 +44,6 @@ jobs:
           # contensis-cli connect trial-006
           # contensis-cli login zengenti 123456
 
-      - name: Increment package version
-        if: contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
-        run: |
-          cd packages/contensis-cli
-          npm version prerelease --preid=beta --no-git-tag-version
-          npm run build
-          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
-          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
-
-      - name: Push version increment to GIT
-        if: contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
-        run: |
-          git config user.email "github@zengenti.com"
-          git config user.name "$GITHUB_ACTOR"
-          git add packages/contensis-cli/.
-          git commit -m "ci: bumps version to ${{ env.APP_VERSION }} [skip ci]"
-          git push
-        env:
-          # The secret is passed automatically. Nothing to configure.
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
@@ -79,11 +58,36 @@ jobs:
           echo "paths_released=${{ steps.release.outputs.paths_released  }}" >> $GITHUB_OUTPUT
           echo "npm_tag=${{ steps.release.outputs.release_created != 'true' && 'prerelease' || 'latest' }}" >> $GITHUB_OUTPUT
 
-      - name: Publish with ${{ steps.check.outputs.npm_tag }} tag
+      - name: Increment prerelease package version
+        if: steps.release.outputs.release_created != 'true' && contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
+        run: |
+          cd packages/contensis-cli
+          npm version prerelease --preid=beta --no-git-tag-version
+
+      - name: Build package
         if: contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
         run: |
           cd packages/contensis-cli
+          npm run build
+          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+
+      - name: Push version increment to GIT
+        if: steps.release.outputs.release_created != 'true' && contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
+        run: |
+          git config user.email "github@zengenti.com"
+          git config user.name "$GITHUB_ACTOR"
+          git add packages/contensis-cli/.
+          git commit -m "ci: bumps version to ${{ env.APP_VERSION }} [skip ci]"
+          git push
+        env:
+          # The secret is passed automatically. Nothing to configure.
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish with ${{ steps.check.outputs.npm_tag }} tag
+        if: contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
+        run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-          npm publish --tag ${{ steps.check.outputs.npm_tag }} --ignore-scripts
+          npm publish --tag ${{ steps.check.outputs.npm_tag }} --ignore-scripts --workspace contensis-cli
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
