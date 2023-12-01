@@ -129,7 +129,5 @@ jobs:
         if: inputs.release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
-        run: |
-          cd bin
-          FILENAME=$( [ "${{ matrix.os == 'windows-2019' }}" = "true" ] && echo "contensis-cli-win.exe" || echo "contensis-cli-${{ matrix.fileName }}")
-          gh release upload contensis-cli-v${{ env.APP_VERSION }} ./$FILENAME
+          FILENAME: ${{ matrix.os == 'windows-2019' && 'win.exe' || matrix.fileName }}
+        run: gh release upload contensis-cli-v${{ env.APP_VERSION }} ./bin/contensis-cli-${{ env.FILENAME }} --clobber
