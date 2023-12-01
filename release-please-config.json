@@ -2,7 +2,6 @@
   "bootstrap-sha": "51772230b9eb125c9bf81e1a694771c9e9ab10d2",
   "draft": false,
   "include-v-in-tag": true,
-  "include-component-in-tag": false,
   "separate-pull-requests": false,
   "packages": {
     "packages/contensis-cli": {
