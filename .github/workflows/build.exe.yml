@@ -132,4 +132,4 @@ jobs:
         run: |
           cd bin
           FILENAME=$( [ "${{ matrix.os == 'windows-2019' }}" = "true" ] && echo "contensis-cli-win.exe" || echo "contensis-cli-${{ matrix.fileName }}")
-          gh release upload v${{ env.APP_VERSION }} ./$FILENAME
+          gh release upload contensis-cli-v${{ env.APP_VERSION }} ./$FILENAME
