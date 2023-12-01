@@ -6,9 +6,9 @@
   "packages": {
     "packages/contensis-cli": {
       "component": "contensis-cli",
-      "release-type": "node",
-      "pull-request-title-pattern": "chore: ${scope} release ${component} v${version}"
+      "release-type": "node"
     }
   },
-  "plugins": ["node-workspace"]
+  "plugins": ["node-workspace"],
+  "pull-request-title-pattern": "chore: ${scope} release ${component} v${version}"
 }
