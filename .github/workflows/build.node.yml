@@ -74,7 +74,13 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - uses: google-github-actions/release-please-action@v3
+        id: release
         with:
           command: manifest
           token: ${{secrets.RELEASE_PLEASE_GITHUB_TOKEN}}
           default-branch: main
+
+      - name: Check release output
+        run: |
+          echo "release_created=${{ steps.release.outputs.release_created  }}" >> $GITHUB_OUTPUT
+          echo "paths_released=${{ steps.release.outputs.paths_released  }}" >> $GITHUB_OUTPUT
