@@ -2,14 +2,13 @@
   "bootstrap-sha": "51772230b9eb125c9bf81e1a694771c9e9ab10d2",
   "draft": true,
   "include-v-in-tag": true,
-  "include-component-in-tag": false,
-  "separate-pull-requests": true,
+  "separate-pull-requests": false,
   "packages": {
     "packages/contensis-cli": {
       "component": "contensis-cli",
-      "release-type": "node"
+      "release-type": "node",
+      "pull-request-title-pattern": "chore: ${scope} release ${component} v${version}"
     }
   },
-  "plugins": ["node-workspace"],
-  "pull-request-title-pattern": "chore: release ${component} ${version}"
+  "plugins": ["node-workspace"]
 }
