@@ -73,7 +73,8 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - uses: google-github-actions/release-please-action@v4
+      - uses: google-github-actions/release-please-action@v3
         with:
+          command: manifest
           token: ${{secrets.RELEASE_PLEASE_GITHUB_TOKEN}}
           default-branch: main
