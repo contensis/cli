@@ -1,4 +1,5 @@
-import { parse, stringify } from 'csv/sync';
+import { parse, stringify } from 'csv/dist/esm/sync';
+// import { parse, stringify } from 'csv/sync';
 import { flattenObject } from './json.formatter';
 
 export const csvFormatter = <T>(entries: T | T[]) => {
