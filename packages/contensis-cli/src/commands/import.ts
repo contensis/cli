@@ -127,6 +127,7 @@ Example call:
       `
 Example call:
   > import entries --source-cms example-dev --source-project-id microsite --zenql "sys.contentTypeId = blog"
+  > import entries --from-file myImportData.json --preserve-guids
 `
     )
     .action(async (phrase: string, opts, cmd) => {

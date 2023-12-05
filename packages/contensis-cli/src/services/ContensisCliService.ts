@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 import path from 'path';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
-import { Entry, Role } from 'contensis-management-api/lib/models';
+import { Role } from 'contensis-management-api/lib/models';
 import {
   ContensisMigrationService,
   MigrateRequest,
@@ -24,7 +24,7 @@ import ContensisAuthService from './ContensisAuthService';
 import { LogMessages } from '~/localisation/en-GB';
 import { OutputFormat, OutputOptionsConstructorArg } from '~/models/CliService';
 
-import { readJsonFile } from '~/providers/file-provider';
+import { readFileAsJSON } from '~/providers/file-provider';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import CredentialProvider from '~/providers/CredentialProvider';
 
@@ -297,9 +297,7 @@ class ContensisCli {
   }) => {
     const source: 'contensis' | 'file' = fromFile ? 'file' : 'contensis';
 
-    const fileData = fromFile
-      ? readJsonFile<(Entry | ContentType | Component)[]>(fromFile) || []
-      : [];
+    const fileData = fromFile ? (await readFileAsJSON(fromFile)) || [] : [];
 
     if (typeof fileData === 'string')
       throw new Error(`Import file format must be of type JSON`);
@@ -1279,7 +1277,7 @@ class ContensisCli {
     const { currentProject, log, messages } = this;
 
     const fileData = fromFile
-      ? readJsonFile<(ContentType | Component)[]>(fromFile) || []
+      ? (await readFileAsJSON<(ContentType | Component)[]>(fromFile)) || []
       : [];
     if (typeof fileData === 'string')
       throw new Error(`Import file format must be of type JSON`);
@@ -1428,7 +1426,9 @@ class ContensisCli {
   ) => {
     const { currentProject, log, messages } = this;
 
-    let fileData = fromFile ? readJsonFile<ContentType[]>(fromFile) || [] : [];
+    let fileData = fromFile
+      ? (await readFileAsJSON<ContentType[]>(fromFile)) || []
+      : [];
     if (typeof fileData === 'string')
       throw new Error(`Import file format must be of type JSON`);
 
@@ -1476,7 +1476,9 @@ class ContensisCli {
   ) => {
     const { log } = this;
 
-    let fileData = fromFile ? readJsonFile<ContentType[]>(fromFile) || [] : [];
+    let fileData = fromFile
+      ? (await readFileAsJSON<ContentType[]>(fromFile)) || []
+      : [];
     if (typeof fileData === 'string')
       throw new Error(`Import file format must be of type JSON`);
 
@@ -1608,7 +1610,9 @@ class ContensisCli {
   ) => {
     const { currentProject, log, messages } = this;
 
-    let fileData = fromFile ? readJsonFile<Component[]>(fromFile) || [] : [];
+    let fileData = fromFile
+      ? (await readFileAsJSON<Component[]>(fromFile)) || []
+      : [];
     if (typeof fileData === 'string')
       throw new Error(`Import file format must be of type JSON`);
 

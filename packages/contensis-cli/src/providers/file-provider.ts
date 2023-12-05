@@ -2,6 +2,10 @@ import fs from 'fs';
 import { homedir } from 'os';
 import path from 'path';
 import { tryParse } from '~/util';
+import { csvToJson, detectCsv } from '~/util/csv.formatter';
+import { unflattenObject } from '~/util/json.formatter';
+import { Logger } from '~/util/logger';
+import { xmlToJson } from '~/util/xml.formatter';
 
 const userHomeDir = homedir();
 
@@ -10,14 +14,8 @@ export const appRootDir =
     ? process.cwd()
     : path.join(userHomeDir, '.contensis/');
 
-export const readJsonFile = <T>(filePath: string) => {
-  const directoryPath = cwdPath(filePath);
-  const file = readFile(directoryPath);
-  if (file) return tryParse(file) as T | string;
-  return undefined;
-};
 export const readFile = (filePath: string) => {
-  const directoryPath = localPath(filePath);
+  const directoryPath = appPath(filePath);
   if (fs.existsSync(directoryPath)) {
     const file = fs.readFileSync(directoryPath, 'utf8');
     return file;
@@ -27,7 +25,7 @@ export const readFile = (filePath: string) => {
 };
 
 export const readFiles = (directory: string, createDirectory = true) => {
-  const directoryPath = localPath(directory);
+  const directoryPath = appPath(directory);
   if (fs.existsSync(directoryPath)) {
     const files = fs.readdirSync(directoryPath);
     return files;
@@ -41,12 +39,12 @@ export const readFiles = (directory: string, createDirectory = true) => {
 };
 
 export const writeFile = (filePath: string, content: string) => {
-  const directoryPath = localPath(filePath);
+  const directoryPath = appPath(filePath);
   fs.writeFileSync(directoryPath, content, { encoding: 'utf-8' });
 };
 
 export const removeFile = (filePath: string) => {
-  const directoryPath = localPath(filePath);
+  const directoryPath = appPath(filePath);
   if (fs.existsSync(directoryPath)) {
     fs.rmSync(directoryPath);
   }
@@ -75,13 +73,63 @@ export const moveFile = (file: string, fromPath: string, toPath: string) => {
 };
 
 export const checkDir = (filePath: string) => {
-  const directoryPath = path.dirname(localPath(filePath));
+  const directoryPath = path.dirname(appPath(filePath));
   if (!fs.existsSync(directoryPath))
     fs.mkdirSync(directoryPath, { recursive: true });
 };
 
-export const localPath = (filePath: string) =>
+export const appPath = (filePath: string) =>
   path.isAbsolute(filePath) ? filePath : path.join(appRootDir, filePath);
 
 export const cwdPath = (filePath: string) =>
   path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+
+type DetectedFileType =
+  | { type: 'json'; contents: any }
+  | { type: 'xml' | 'csv'; contents: string };
+
+const detectFileType = (
+  fromFile: string
+): DetectedFileType | undefined => {
+  try {
+    const fileData = readFile(fromFile);
+    if (fileData) {
+      // if XML
+      if (fileData.startsWith('<')) return { contents: fileData, type: 'xml' };
+
+      // if JSON
+      const jsonData = tryParse(fileData);
+      if (jsonData) return { contents: jsonData, type: 'json' };
+
+      // if CSV
+      const csv = detectCsv(fileData);
+      if (csv) return { contents: fileData, type: 'csv' };
+    }
+  } catch (ex) {
+    Logger.error(`Problem detecting file type ${fromFile}`, ex);
+  }
+};
+
+export const readFileAsJSON = async <T = any>(
+  fromFile: string
+): Promise<T | undefined> => {
+  const detectedFile = detectFileType(cwdPath(fromFile));
+  if (!detectedFile) return undefined;
+  try {
+    switch (detectedFile.type) {
+      case 'csv': {
+        const flatJson = csvToJson(detectedFile.contents);
+        const unflattenedJson = flatJson.map(record => unflattenObject(record));
+        return unflattenedJson as T;
+      }
+      case 'xml':
+        return (await xmlToJson(detectedFile.contents)) as T;
+
+      case 'json':
+      default:
+        return detectedFile.contents;
+    }
+  } catch (ex) {
+    Logger.error(`Problem converting file from ${detectedFile.type}`, ex);
+  }
+};

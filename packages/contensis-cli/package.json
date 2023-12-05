@@ -36,7 +36,6 @@
     "giturl": "^2.0.0",
     "hosted-git-info": "^6.1.1",
     "inquirer-command-prompt": "^0.1.0",
-    "json2csv": "^5.0.7",
     "jsonpath-mapper": "^1.1.0",
     "keytar": "^7.9.0",
     "lodash": "^4.17.21",

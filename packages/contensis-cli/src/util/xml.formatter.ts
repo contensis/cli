@@ -14,7 +14,13 @@ export const xmlFormatter = <T>(entries: T | T[]) => {
 
     return xml;
   } catch (ex) {
-    Logger.error(`Problem building XML from entries`, ex);
+    Logger.error(`Problem building XML from json data`, ex);
     return '';
   }
+};
+
+export const xmlToJson = async <T>(data: string) => {
+  const json = await xml2js.parseStringPromise(data, { explicitArray: false });
+
+  return json.Items?.Entry || json;
 };
