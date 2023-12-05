@@ -118,7 +118,7 @@ export const readFileAsJSON = async <T = any>(
   try {
     switch (detectedFile.type) {
       case 'csv': {
-        const flatJson = csvToJson(detectedFile.contents);
+        const flatJson = await csvToJson(detectedFile.contents);
         const unflattenedJson = flatJson.map(record => unflattenObject(record));
         return unflattenedJson as T;
       }

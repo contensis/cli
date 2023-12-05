@@ -189,12 +189,12 @@ class ContensisCli {
     }
   }
 
-  PrintEnvironments = () => {
+  PrintEnvironments = async () => {
     const { log, messages } = this;
     const { currentEnvironment, environments = {} } = this.cache;
     const envKeys = Object.keys(environments);
     log.success(messages.envs.found(envKeys.length));
-    this.HandleFormattingAndOutput(envKeys, () => {
+    await this.HandleFormattingAndOutput(envKeys, () => {
       // print the envKeys to console
       for (const env of envKeys) {
         console.log(`  - ${currentEnvironment === env ? '* ' : ''}${env}`);
@@ -563,7 +563,7 @@ class ContensisCli {
 
       if (Array.isArray(projects)) {
         // Print contensis version to console
-        this.HandleFormattingAndOutput(contensis.contensisVersion, () =>
+        await this.HandleFormattingAndOutput(contensis.contensisVersion, () =>
           log.raw(log.highlightText(contensis.contensisVersion))
         );
       }
@@ -586,7 +586,7 @@ class ContensisCli {
       );
       if (token) {
         // Print bearer token to console
-        this.HandleFormattingAndOutput(token, () =>
+        await this.HandleFormattingAndOutput(token, () =>
           log.raw(log.highlightText(token))
         );
       }
@@ -625,7 +625,7 @@ class ContensisCli {
         log.success(messages.projects.list());
         log.raw('');
 
-        this.HandleFormattingAndOutput(projects, () => {
+        await this.HandleFormattingAndOutput(projects, () => {
           // print the projects to console
           for (const project of projects.sort((a, b) =>
             a.id.localeCompare(b.id)
@@ -679,7 +679,7 @@ class ContensisCli {
 
       if (foundProject) {
         log.raw('');
-        this.HandleFormattingAndOutput(foundProject, log.object);
+        await this.HandleFormattingAndOutput(foundProject, log.object);
       }
 
       if (projectsErr) {
@@ -744,7 +744,7 @@ class ContensisCli {
 
       if (Array.isArray(apiKeys)) {
         log.success(messages.keys.list(currentEnv));
-        this.HandleFormattingAndOutput(apiKeys, () => {
+        await this.HandleFormattingAndOutput(apiKeys, () => {
           // print the keys to console
           for (const {
             id,
@@ -833,7 +833,7 @@ class ContensisCli {
 
         if (!roles.length) log.help(messages.roles.noneExist());
 
-        this.HandleFormattingAndOutput(roles, () => {
+        await this.HandleFormattingAndOutput(roles, () => {
           // print the roles to console
           for (const {
             id,
@@ -916,7 +916,7 @@ class ContensisCli {
 
         const role = findByIdOrName(roles, roleNameOrId);
 
-        if (role) this.HandleFormattingAndOutput(role, log.object);
+        if (role) await this.HandleFormattingAndOutput(role, log.object);
         else log.error(messages.roles.failedGet(currentEnv, roleNameOrId));
       }
 
@@ -939,7 +939,7 @@ class ContensisCli {
           messages.roles.created(currentEnv, role.id || role.name || '')
         );
 
-        this.HandleFormattingAndOutput(created, log.object);
+        await this.HandleFormattingAndOutput(created, log.object);
 
         log.help(messages.roles.tip());
         return role.id;
@@ -979,7 +979,7 @@ class ContensisCli {
           else {
             log.success(messages.roles.set());
 
-            this.HandleFormattingAndOutput(updated, log.object);
+            await this.HandleFormattingAndOutput(updated, log.object);
           }
         } else {
           // Role does not exist
@@ -1043,7 +1043,7 @@ class ContensisCli {
         const stringFromLanguageObject = (o: { [lang: string]: string }) =>
           Object.values(o || {})?.[0];
 
-        this.HandleFormattingAndOutput(workflows, () => {
+        await this.HandleFormattingAndOutput(workflows, () => {
           // print the workflows to console
           // log.object(workflows);
           for (const {
@@ -1106,7 +1106,8 @@ class ContensisCli {
 
         const workflow = findByIdOrName(workflows, workflowNameOrId);
 
-        if (workflow) this.HandleFormattingAndOutput(workflow, log.object);
+        if (workflow)
+          await this.HandleFormattingAndOutput(workflow, log.object);
         else
           log.error(messages.workflows.failedGet(currentEnv, workflowNameOrId));
       }
@@ -1128,7 +1129,7 @@ class ContensisCli {
       if (created) {
         log.success(messages.projects.created(currentEnv, project.id));
 
-        this.HandleFormattingAndOutput(created, () => {
+        await this.HandleFormattingAndOutput(created, () => {
           // set the CLI project to the newly created project
           this.SetProject(project.id);
           // print all the projects to console
@@ -1156,7 +1157,7 @@ class ContensisCli {
       if (updated) {
         log.success(messages.projects.updated(currentEnv, currentProject));
 
-        this.HandleFormattingAndOutput(updated, log.object);
+        await this.HandleFormattingAndOutput(updated, log.object);
         return updated.id;
       }
 
@@ -1216,7 +1217,7 @@ class ContensisCli {
 
       if (Array.isArray(returnModels)) {
         log.success(messages.models.list(currentProject));
-        this.HandleFormattingAndOutput(contentModelBackup, () => {
+        await this.HandleFormattingAndOutput(contentModelBackup, () => {
           // print the content models to console
           for (const model of returnModels) {
             log.raw('');
@@ -1230,7 +1231,7 @@ class ContensisCli {
         );
         log.raw('');
         if (models?.length) {
-          this.HandleFormattingAndOutput(contentModelBackup, () => {
+          await this.HandleFormattingAndOutput(contentModelBackup, () => {
             // print the content models to console
             for (const model of models) {
               const components = model.components?.length || 0;
@@ -1300,7 +1301,7 @@ class ContensisCli {
 
       if (migrateErr) logError(migrateErr);
       else
-        this.HandleFormattingAndOutput(result, () => {
+        await this.HandleFormattingAndOutput(result, () => {
           // print the results to console
           if (!commit) {
             log.raw(log.boldText(`\nContent types:`));
@@ -1340,7 +1341,7 @@ class ContensisCli {
 
       if (Array.isArray(contentTypes)) {
         log.success(messages.contenttypes.list(currentProject));
-        this.HandleFormattingAndOutput(contentTypes, () => {
+        await this.HandleFormattingAndOutput(contentTypes, () => {
           // print the content types to console
           for (const contentType of contentTypes) {
             const fieldsLength = contentType.fields?.length || 0;
@@ -1371,7 +1372,7 @@ class ContensisCli {
             messages.contenttypes.get(currentProject, contentType.id)
           );
           // print the content type to console
-          this.HandleFormattingAndOutput(contentType, log.object);
+          await this.HandleFormattingAndOutput(contentType, log.object);
         } else {
           log.error(
             messages.contenttypes.failedGet(currentProject, contentTypeId)
@@ -1407,7 +1408,7 @@ class ContensisCli {
           )
         );
         // print the results to console
-        this.HandleFormattingAndOutput(result, () =>
+        await this.HandleFormattingAndOutput(result, () =>
           log.object(jsonFormatter(result))
         );
       }
@@ -1460,7 +1461,7 @@ class ContensisCli {
             )
           );
           // print the content type to console
-          this.HandleFormattingAndOutput(contentType, () => {});
+          await this.HandleFormattingAndOutput(contentType, () => {});
         }
       }
     }
@@ -1497,7 +1498,7 @@ class ContensisCli {
       if (err) log.error(err.message, err);
       if (result)
         // print the content type to console
-        this.HandleFormattingAndOutput(result, () => {
+        await this.HandleFormattingAndOutput(result, () => {
           log.success(
             `Queried models ${log.infoText(
               `"${result.query.modelIds?.join(', ')}"`
@@ -1525,7 +1526,7 @@ class ContensisCli {
       if (Array.isArray(components)) {
         log.success(messages.components.list(currentProject));
 
-        this.HandleFormattingAndOutput(components, () => {
+        await this.HandleFormattingAndOutput(components, () => {
           // print the components to console
           for (const component of components) {
             const fieldsLength = component.fields?.length || 0;
@@ -1554,7 +1555,7 @@ class ContensisCli {
         if (component) {
           log.success(messages.components.get(currentProject, component.id));
           // print the component to console
-          this.HandleFormattingAndOutput(component, log.object);
+          await this.HandleFormattingAndOutput(component, log.object);
         } else {
           log.error(messages.components.failedGet(currentProject, componentId));
         }
@@ -1591,7 +1592,7 @@ class ContensisCli {
           )
         );
         // print the results to console
-        this.HandleFormattingAndOutput(result, () =>
+        await this.HandleFormattingAndOutput(result, () =>
           log.info(jsonFormatter(result))
         );
       }
@@ -1644,7 +1645,7 @@ class ContensisCli {
             )
           );
           // print the component to console
-          this.HandleFormattingAndOutput(component, () => {});
+          await this.HandleFormattingAndOutput(component, () => {});
         }
       }
     }
@@ -1665,7 +1666,7 @@ class ContensisCli {
       }
       const [err, result] = await contensis.DeleteEntries();
       if (result)
-        this.HandleFormattingAndOutput(result, () => {
+        await this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
           printEntriesMigrateResult(this, result, {
             action: 'delete',
@@ -1701,7 +1702,7 @@ class ContensisCli {
     if (contensis) {
       log.line();
       const entries = await contensis.GetEntries({ withDependents });
-      this.HandleFormattingAndOutput(entries, () =>
+      await this.HandleFormattingAndOutput(entries, () =>
         // print the entries to console
         logEntitiesTable({
           entries,
@@ -1744,7 +1745,7 @@ class ContensisCli {
 
       if (err) logError(err);
       else
-        this.HandleFormattingAndOutput(result, () => {
+        await this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
           printEntriesMigrateResult(this, result, {
             showAll: logOutput === 'all',
@@ -1799,7 +1800,7 @@ class ContensisCli {
 
       log.success(messages.nodes.get(currentProject, rootPath, depth));
 
-      this.HandleFormattingAndOutput(nodes, () => {
+      await this.HandleFormattingAndOutput(nodes, () => {
         // print the nodes to console
         log.object({ ...root, children: undefined, language: undefined });
         printNodeTreeOutput(this, root);
@@ -1843,7 +1844,7 @@ class ContensisCli {
 
       if (err) log.raw(``);
       else
-        this.HandleFormattingAndOutput(result, () => {
+        await this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
           printNodeTreeOutput(this, migrateTree, logOutput, logLimit);
           printNodesMigrateResult(this, result, {
@@ -1912,7 +1913,7 @@ class ContensisCli {
       }
       const [err, result] = await contensis.DeleteNodes();
       if (result) {
-        this.HandleFormattingAndOutput(result, () => {
+        await this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
           printNodeTreeOutput(
             this,
@@ -1969,7 +1970,7 @@ class ContensisCli {
         log.success(messages.webhooks.list(currentEnv));
         if (!webhooks?.length) log.warning(messages.webhooks.noneExist());
         else {
-          this.HandleFormattingAndOutput(filteredResults, () => {
+          await this.HandleFormattingAndOutput(filteredResults, () => {
             // print the keys to console
             for (const {
               id,
@@ -2047,7 +2048,7 @@ class ContensisCli {
       const [err, blocks] = await contensis.blocks.GetBlocks();
 
       if (Array.isArray(blocks)) {
-        this.HandleFormattingAndOutput(blocks, () => {
+        await this.HandleFormattingAndOutput(blocks, () => {
           // print the blocks to console
           log.success(messages.blocks.list(currentEnv, env.currentProject));
           for (const {
@@ -2102,7 +2103,7 @@ class ContensisCli {
       );
 
       if (blocks) {
-        this.HandleFormattingAndOutput(blocks, () => {
+        await this.HandleFormattingAndOutput(blocks, () => {
           // print the version detail to console
           log.success(
             messages.blocks.get(blockId, currentEnv, env.currentProject)
@@ -2163,7 +2164,7 @@ class ContensisCli {
         );
       }
       if (blockVersion) {
-        this.HandleFormattingAndOutput(blockVersion, () => {
+        await this.HandleFormattingAndOutput(blockVersion, () => {
           // print the version detail to console
           printBlockVersion(this, blockVersion);
         });
@@ -2254,7 +2255,7 @@ class ContensisCli {
       );
 
       if (blockVersion) {
-        this.HandleFormattingAndOutput(blockVersion, () => {
+        await this.HandleFormattingAndOutput(blockVersion, () => {
           // print the version detail to console
           log.success(
             messages.blocks.actionComplete(
@@ -2314,7 +2315,7 @@ class ContensisCli {
           logs.endsWith('\n') ? logs.slice(0, logs.length - 1) : logs;
         const renderLogs = removeTrailingNewline(blockLogs);
 
-        this.HandleFormattingAndOutput(renderLogs, () => {
+        await this.HandleFormattingAndOutput(renderLogs, () => {
           // print the logs to console
           console.log(
             `  - ${blockId} ${branch} ${
@@ -2418,7 +2419,7 @@ class ContensisCli {
       ); // TODO: resolve any cast;
 
       if (Array.isArray(proxies)) {
-        this.HandleFormattingAndOutput(proxies, () => {
+        await this.HandleFormattingAndOutput(proxies, () => {
           // print the proxies to console
           log.success(messages.proxies.list(currentEnv, env.currentProject));
           for (const { id, name, description, endpoints, version } of proxies) {
@@ -2457,7 +2458,7 @@ class ContensisCli {
       ); // TODO: resolve any cast
 
       if (Array.isArray(renderers)) {
-        this.HandleFormattingAndOutput(renderers, () => {
+        await this.HandleFormattingAndOutput(renderers, () => {
           // print the renderers to console
           log.success(messages.renderers.list(currentEnv, env.currentProject));
           for (const {
@@ -2493,7 +2494,7 @@ class ContensisCli {
       }
     }
   };
-  HandleFormattingAndOutput = <T>(obj: T, logFn: (obj: T) => void) => {
+  HandleFormattingAndOutput = async <T>(obj: T, logFn: (obj: T) => void) => {
     const { format, log, messages, output } = this;
     const fields = this.contensis?.payload.query?.fields;
 
@@ -2502,7 +2503,7 @@ class ContensisCli {
       logFn(obj);
     } else if (format === 'csv') {
       log.raw('');
-      log.raw(log.infoText(csvFormatter(limitFields(obj, fields))));
+      log.raw(log.infoText(await csvFormatter(limitFields(obj, fields))));
     } else if (format === 'xml') {
       log.raw('');
       log.raw(log.infoText(xmlFormatter(limitFields(obj, fields))));
@@ -2516,7 +2517,7 @@ class ContensisCli {
       let writeString = '';
       const isText = !tryParse(obj) && typeof obj === 'string';
       if (format === 'csv') {
-        writeString = csvFormatter(limitFields(obj, fields));
+        writeString = await csvFormatter(limitFields(obj, fields));
       } else if (format === 'xml') {
         writeString = xmlFormatter(limitFields(obj, fields));
       } else

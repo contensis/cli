@@ -1,10 +1,10 @@
-import { parse, stringify } from 'csv/dist/esm/sync';
+import { parse, stringify } from 'csv';
 // import { parse, stringify } from 'csv/sync';
 import { flattenObject } from './json.formatter';
 
-export const csvFormatter = <T>(entries: T | T[]) => {
+export const csvFormatter = async <T>(entries: T | T[]) => {
   // Flatten the passed in object
-  const flatEntries = [];
+  const flatEntries = [] as any[];
   if (Array.isArray(entries))
     for (const entry of entries) {
       flatEntries.push(flattenObject(entry));
@@ -12,15 +12,33 @@ export const csvFormatter = <T>(entries: T | T[]) => {
   else flatEntries.push(flattenObject(entries));
 
   // Parse the flattened object to csv
-  const csv = stringify(flatEntries, { header: true });
-
+  // const csv = stringify(flatEntries, { header: true });
+  const csv = await new Promise<string>((resolve, reject) => {
+    stringify(flatEntries, { header: true }, (err, data) => {
+      if (err) reject(err);
+      resolve(data);
+    });
+  });
   return csv;
 };
 
-export const csvToJson = <T>(data: string): T[] => {
-  return parse(data, {
-    columns: true,
-    skip_empty_lines: true,
+export const csvToJson = async <T = any>(data: string): Promise<T[]> => {
+  // return parse(data, {
+  //   columns: true,
+  //   skip_empty_lines: true,
+  // });
+  return new Promise((resolve, reject) => {
+    parse(
+      data,
+      {
+        columns: true,
+        skip_empty_lines: true,
+      },
+      (err, records) => {
+        if (err) reject(err);
+        resolve(records);
+      }
+    );
   });
 };
 

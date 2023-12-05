@@ -19,8 +19,8 @@ Example call:
   > list envs
 `
     )
-    .action(opts => {
-      cliCommand(['list', 'envs'], opts).PrintEnvironments();
+    .action(async opts => {
+      await cliCommand(['list', 'envs'], opts).PrintEnvironments();
     });
 
   list
