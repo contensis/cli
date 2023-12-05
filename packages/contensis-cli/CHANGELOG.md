@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/contensis/cli/compare/contensis-cli-v1.1.0...contensis-cli-v1.1.1) (2023-12-05)
+
+
+### Bug Fixes
+
+* better handling of file imports and exports for csv and xml formats ([f562a08](https://github.com/contensis/cli/commit/f562a088dea04fdcdfc57a55ec90882e33f27b06))
+
 ## [1.1.0](https://github.com/contensis/cli/compare/contensis-cli-v1.0.11...contensis-cli-v1.1.0) (2023-12-01)
 
 
