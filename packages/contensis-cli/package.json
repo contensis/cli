@@ -1,6 +1,6 @@
 {
   "name": "contensis-cli",
-  "version": "1.1.1-beta.2",
+  "version": "1.1.1-beta.3",
   "description": "A fully featured Contensis command line interface with a shell UI provides simple and intuitive ways to manage or profile your content in any NodeJS terminal.",
   "repository": "https://github.com/contensis/cli",
   "homepage": "https://github.com/contensis/cli/tree/main/packages/contensis-cli#readme",
