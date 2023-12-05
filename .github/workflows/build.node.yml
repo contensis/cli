@@ -56,38 +56,34 @@ jobs:
         run: |
           echo "releases_created=${{ steps.release.outputs.releases_created  }}" >> $GITHUB_OUTPUT
           echo "paths_released=${{ steps.release.outputs.paths_released  }}" >> $GITHUB_OUTPUT
+          echo "release_tag=${{ steps.release.outputs.contensis-cli--release_created  }}" >> $GITHUB_OUTPUT
           echo "npm_tag=${{ steps.release.outputs.releases_created != 'true' && 'prerelease' || 'latest' }}" >> $GITHUB_OUTPUT
 
-      # - name: Increment prerelease package version
-      #   if: steps.release.outputs.releases_created != 'true' && contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
-      #   run: |
-      #     cd packages/contensis-cli
-      #     npm version prerelease --preid=beta --no-git-tag-version
+      - name: Increment prerelease package version and build package
+        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')
+        run: |
+          cd packages/contensis-cli
+          npm version prerelease --preid=beta --no-git-tag-version
+          npm run build
+          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
-      # - name: Build package
-      #   if: contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
-      #   run: |
-      #     cd packages/contensis-cli
-      #     npm run build
-      #     APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
-      #     echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+      - name: Push prerelease version increment to GIT
+        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')
+        run: |
+          git config user.email "github@zengenti.com"
+          git config user.name "$GITHUB_ACTOR"
+          git add packages/contensis-cli/.
+          git commit -m "ci: bumps prerelease version to ${{ env.APP_VERSION }} [skip ci]"
+          git push
+        env:
+          # The secret is passed automatically. Nothing to configure.
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Push version increment to GIT
-      #   if: steps.release.outputs.releases_created != 'true' && contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
-      #   run: |
-      #     git config user.email "github@zengenti.com"
-      #     git config user.name "$GITHUB_ACTOR"
-      #     git add packages/contensis-cli/.
-      #     git commit -m "ci: bumps version to ${{ env.APP_VERSION }} [skip ci]"
-      #     git push
-      #   env:
-      #     # The secret is passed automatically. Nothing to configure.
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Publish with ${{ steps.check.outputs.npm_tag }} tag
-      #   if: contains(github.event.head_commit.message, '[nobuild]') != true && !contains(github.event.head_commit.message, '[nopublish]')
-      #   run: |
-      #     npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-      #     npm publish --tag ${{ steps.check.outputs.npm_tag }} --ignore-scripts --workspace contensis-cli
-      #   env:
-      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish prerelease with ${{ steps.check.outputs.npm_tag }} tag
+        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --tag ${{ steps.check.outputs.npm_tag }} --ignore-scripts --workspace contensis-cli
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
