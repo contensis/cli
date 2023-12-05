@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: 'Whether to add the build artifacts to a release'
+        description: 'Whether to make these built binaries the latest release'
         type: boolean
         default: false
 
@@ -25,15 +25,21 @@ jobs:
           - os: ubuntu-20.04
             friendlyName: Ubuntu x64
             fileName: linux
+            exeName: contensis-cli-linux
+            homebrewFormula: contensis-cli-linux
           - os: windows-2019
             friendlyName: Windows x64
             fileName: win
+            exeName: contensis-cli-win.exe
           - os: macos-latest
             friendlyName: macOS x64
             fileName: mac
+            exeName: contensis-cli-mac
+            homebrewFormula: contensis-cli
           - os: arm64
             friendlyName: Linux arm64
-            fileName: arm64-linux
+            fileName: linux-arm64
+            exeName: contensis-cli-linux-arm64
 
     runs-on: ${{ matrix.os }}
     continue-on-error: true
@@ -113,11 +119,11 @@ jobs:
         if: matrix.os != 'windows-2019'
         run: |
           cd bin
-          mv contensis-cli contensis-cli-${{ matrix.fileName }}
+          mv contensis-cli ${{ matrix.exeName }}
 
       - name: Rename executable to contensis-cli-win.exe
         if: matrix.os == 'windows-2019'
-        run: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "contensis-cli-win.exe"
+        run: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "${{ matrix.exeName }}"
 
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
@@ -129,10 +135,10 @@ jobs:
         if: inputs.release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
-          FILENAME: ${{ matrix.os == 'windows-2019' && 'win.exe' || matrix.fileName }}
+          FILENAME: ${{ matrix.fileName == 'win' && 'win.exe' || matrix.fileName }}
         run: gh release upload contensis-cli-v${{ env.APP_VERSION }} ./bin/contensis-cli-${{ env.FILENAME }} --clobber
 
-        # Handle Chocolatey release
+        # Handle Chocolatey version bump and release
       - name: Make a copy of the exe for chocolatey
         if: matrix.os == 'windows-2019'
         run: Copy-Item -Path ".\bin\contensis-cli-win.exe" ".\installers\chocolatey"
@@ -154,4 +160,19 @@ jobs:
         if: inputs.release && matrix.os == 'windows-2019'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: push ${{ env.CHOCO_NUSPEC }} -s https://push.chocolatey.org/ -k ${{ secrets.CHOCOLATEY_API_KEY }}
+          args: push -s https://push.chocolatey.org/ -k ${{ secrets.CHOCOLATEY_API_KEY }}
+
+        # Handle Homebrew version bump and release
+      - uses: mislav/bump-homebrew-formula-action@v3
+        if: inputs.release && matrix.homebrewFormula
+        env:
+          COMMITTER_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
+        with:
+          formula-name: ${{ matrix.homebrewFormula }}
+          formula-path: Formula/${{ matrix.homebrewFormula }}.rb
+          homebrew-tap: contensis/homebrew-cli
+          download-url: https://github.com/contensis/cli/releases/download/v${{ env.APP_VERSION }}/${{ matrix.exeName }}
+          commit-message: |
+            {{formulaName}} {{version}}
+
+            Created by https://github.com/mislav/bump-homebrew-formula-action
