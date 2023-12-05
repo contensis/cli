@@ -122,7 +122,7 @@ jobs:
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: contensis-cli-$APP_VERSION-${{ matrix.fileName }}
+          name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
           path: bin/contensis-cli*
 
       - name: Upload package build artifact to release assets
@@ -130,7 +130,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
           FILENAME: ${{ matrix.os == 'windows-2019' && 'win.exe' || matrix.fileName }}
-        run: gh release upload contensis-cli-v$APP_VERSION ./bin/contensis-cli-${{ env.FILENAME }} --clobber
+        run: gh release upload contensis-cli-v${{ env.APP_VERSION }} ./bin/contensis-cli-${{ env.FILENAME }} --clobber
 
         # Handle Chocolatey release
       - name: Make a copy of the exe for chocolatey
@@ -148,12 +148,10 @@ jobs:
         if: matrix.os == 'windows-2019'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: pack $CHOCO_NUSPEC --version $APP_VERSION
+          args: pack ${{ env.CHOCO_NUSPEC }} --version ${{ env.APP_VERSION }}
 
       - name: Publish release to chocolatey
         if: inputs.release && matrix.os == 'windows-2019'
-        env:
-          CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: push $CHOCO_NUSPEC -s https://push.chocolatey.org/ -k $CHOCOLATEY_API_KEY
+          args: push ${{ env.CHOCO_NUSPEC }} -s https://push.chocolatey.org/ -k ${{ secrets.CHOCOLATEY_API_KEY }}
