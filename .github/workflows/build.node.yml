@@ -35,7 +35,7 @@ jobs:
           cd packages/contensis-cli
           APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
           npm i -g contensis-cli-$APP_VERSION.tgz
-          CMSG="${{ github.event.head_commit.message }}"
+          CMSG="${{ toJSON(github.event.head_commit.message) }}"
           # contensis-cli push block cli-ci-block ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app:latest -r -cmsg "${CMSG}" -cdt ${{ github.event.head_commit.timestamp }} -author ${{ github.event.head_commit.author.email }} -committer ${{ github.event.head_commit.committer.email }} -a zenhub-dev -p contensis -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           # contensis connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           # contensis connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
