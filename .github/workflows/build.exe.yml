@@ -38,6 +38,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: true
 
+    env:
+      CHOCO_NUSPEC: installers/chocolatey/contensis-cli.nuspec
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -103,7 +106,6 @@ jobs:
           CONTAINER_CONTEXT: 'true'
         run: |
           cd bin
-          ./contensis-cli connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli get entries
 
@@ -139,14 +141,14 @@ jobs:
         if: matrix.os == 'windows-2019'
         uses: Thundernerd/dotnet-project-version-updater@v1.2
         with:
-          file: 'installers/chocolatey/contensis-cli.nuspec'
+          file: ${{ env.CHOCO_NUSPEC }}
           version: ${{ env.APP_VERSION }}
 
       - name: Package chocolatey release
         if: matrix.os == 'windows-2019'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: pack --version $APP_VERSION
+          args: pack $CHOCO_NUSPEC --version $APP_VERSION
 
       - name: Publish release to chocolatey
         if: inputs.release && matrix.os == 'windows-2019'
@@ -154,4 +156,4 @@ jobs:
           CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: push -s https://push.chocolatey.org/ -k $CHOCOLATEY_API_KEY
+          args: push $CHOCO_NUSPEC -s https://push.chocolatey.org/ -k $CHOCOLATEY_API_KEY
