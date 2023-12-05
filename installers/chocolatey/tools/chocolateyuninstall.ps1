@@ -20,10 +20,17 @@ if ($key.Count -eq 1) {
     }
 
     Uninstall-ChocolateyPackage @packageArgs
+    
   }
 }
 elseif ($key.Count -eq 0) {
+  # Remove additional alias exes and from chocolatey\bin
+  Write-Output "[uninstall-cli] Remove additional alias shims ""contensis"" and ""contensis-cli"""
+  Uninstall-BinFile -Name 'contensis'
+  Uninstall-BinFile -Name 'contensis-cli'
+
   Write-Warning "$packageName has already been uninstalled by other means."
+  
 }
 elseif ($key.Count -gt 1) {
   Write-Warning "$($key.Count) matches found!"
@@ -31,4 +38,3 @@ elseif ($key.Count -gt 1) {
   Write-Warning "Please alert package maintainer the following keys were matched:"
   $key | % { Write-Warning "- $($_.DisplayName)" }
 }
-

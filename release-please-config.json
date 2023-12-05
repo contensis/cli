@@ -1,6 +1,5 @@
 {
   "$schema": "https://github.com/googleapis/release-please/raw/main/schemas/config.json",
-  "bootstrap-sha": "51772230b9eb125c9bf81e1a694771c9e9ab10d2",
   "draft": false,
   "include-v-in-tag": true,
   "separate-pull-requests": false,
@@ -12,7 +11,7 @@
         {
           "type": "xml",
           "path": "/installers/chocolatey/contensis-cli.nuspec",
-          "xpath": "//package/metadata/version"
+          "xpath": "/package/metadata/version"
         }
       ]
     }

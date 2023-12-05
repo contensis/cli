@@ -8,13 +8,15 @@
     <packageSourceUrl>https://github.com/contensis/cli</packageSourceUrl>
     <owners>Copyright © Zengenti 2001-2023</owners>
     <!-- == SOFTWARE SPECIFIC SECTION == -->
-    <title>contensis-cli (Install)</title>
+    <title>Contensis CLI</title>
     <authors>Zengenti</authors>
     <projectUrl>https://github.com/contensis/cli</projectUrl>
-    <iconUrl>https://github.com/contensis/cli/raw/main/assets/icon.ico</iconUrl>
+    <iconUrl>https://github.com/contensis/cli/raw/main/assets/icon.png</iconUrl>
     <copyright>Zengenti 2023</copyright>
-    <projectSourceUrl>https://github.com/contensis/cli</projectSourceUrl>
+    <licenseUrl>https://raw.githubusercontent.com/contensis/cli/main/LICENSE</licenseUrl>
+    <projectSourceUrl>https://github.com/contensis/cli/tree/main/packages/contensis-cli</projectSourceUrl>
     <docsUrl>https://github.com/contensis/cli/blob/main/packages/contensis-cli/README.md</docsUrl>
+    <releaseNotes>https://github.com/contensis/cli/blob/main/packages/contensis-cli/CHANGELOG.md</releaseNotes>
     <bugTrackerUrl>https://github.com/contensis/cli/issues</bugTrackerUrl>
     <tags>contensis cli cms content management migration</tags>
     <summary>A fully featured Contensis command line interface</summary>

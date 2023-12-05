@@ -14,16 +14,16 @@ $packageArgs = @{
   file           = $fileLocation
   
   softwareName   = 'contensis-cli*' #part or all of the Display Name as you see it in Programs and Features. It should be enough to be unique
-  checksum       = ''
-  checksumType   = 'sha256' #default is md5, can also be sha1, sha256 or sha512
-  checksum64     = ''
-  checksumType64 = 'sha256' #default is checksumType
+  # checksum       = ''
+  # checksumType   = 'sha256' #default is md5, can also be sha1, sha256 or sha512
+  # checksum64     = ''
+  # checksumType64 = 'sha256' #default is checksumType
   validExitCodes = @(0) #please insert other valid exit codes here
 }
 
-# Download release binary for embedded choco install from GitHub with script
-Write-Host "Installing contensis-cli with script $toolsDir\install-cli.ps1"
-& $toolsDir\install-cli.ps1 $fileLocation -preRelease $true
+# # Download release binary for embedded choco install from GitHub with script
+# Write-Host "Installing contensis-cli with script $toolsDir\install-cli.ps1"
+# & $toolsDir\install-cli.ps1 $fileLocation -preRelease $true
 
 # Create aliases and install them to chocolatey\bin so they are in $PATH
 Install-BinFile -Name 'contensis' -Path $fileLocation
