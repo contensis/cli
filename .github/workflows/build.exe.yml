@@ -49,12 +49,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install yarn
-        if: ${{ matrix.os == 'arm64' }}
+        if: matrix.os == 'arm64'
         run: |
           npm install --global yarn
 
       - name: Install additional dependencies
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt-get -qq -y install gnome-keyring \
                                libsecret-1-dev \
@@ -66,7 +66,9 @@ jobs:
           yarn run bootstrap
           yarn run build
 
-      - run: |
+      - name: Prepare system keyring (Linux)
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
           echo "Install keyring..."
           pip3 install --upgrade pip
           pip3 install keyring
@@ -77,11 +79,9 @@ jobs:
           echo 'neil' | gnome-keyring-daemon -r -d --unlock
           echo "Create a test key using script..."
           python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
-        name: Prepare system keyring (Linux)
 
       - name: Build Windows executable and get app version
-        if: ${{ matrix.os == 'windows-2019' }}
+        if: matrix.os == 'windows-2019'
         run: |
           yarn run build:exe:win
           cd bin
@@ -91,7 +91,7 @@ jobs:
           exit 0
 
       - name: Build Linux/macOS executable from os native sources and get app version
-        if: ${{ matrix.os != 'windows-2019' }}
+        if: matrix.os != 'windows-2019'
         run: |
           yarn run build:exe
           cd bin && ls -lah
@@ -108,26 +108,50 @@ jobs:
           ./contensis-cli get entries
 
       - name: Rename executable to include platform (Linux/macOS)
-        if: ${{ matrix.os != 'windows-2019' }}
+        if: matrix.os != 'windows-2019'
         run: |
           cd bin
           mv contensis-cli contensis-cli-${{ matrix.fileName }}
 
       - name: Rename executable to contensis-cli-win.exe
-        if: ${{ matrix.os == 'windows-2019' }}
-        run: |
-          cd bin
-          Rename-Item -Path "contensis-cli.exe" -NewName "contensis-cli-win.exe"
+        if: matrix.os == 'windows-2019'
+        run: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "contensis-cli-win.exe"
 
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
+          name: contensis-cli-$APP_VERSION-${{ matrix.fileName }}
           path: bin/contensis-cli*
 
-      - name: Upload Release Artifact
+      - name: Upload package build artifact to release assets
         if: inputs.release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
           FILENAME: ${{ matrix.os == 'windows-2019' && 'win.exe' || matrix.fileName }}
-        run: gh release upload contensis-cli-v${{ env.APP_VERSION }} ./bin/contensis-cli-${{ env.FILENAME }} --clobber
+        run: gh release upload contensis-cli-v$APP_VERSION ./bin/contensis-cli-${{ env.FILENAME }} --clobber
+
+        # Handle Chocolatey release
+      - name: Make a copy of the exe for chocolatey
+        if: matrix.os == 'windows-2019'
+        run: Copy-Item -Path ".\bin\contensis-cli-win.exe" ".\installers\chocolatey"
+
+      - name: Set contensis-cli.nuspec version for chocolatey
+        if: matrix.os == 'windows-2019'
+        uses: Thundernerd/dotnet-project-version-updater@v1.2
+        with:
+          file: 'installers/chocolatey/contensis-cli.nuspec'
+          version: ${{ env.APP_VERSION }}
+
+      - name: Package chocolatey release
+        if: matrix.os == 'windows-2019'
+        uses: crazy-max/ghaction-chocolatey@v3
+        with:
+          args: pack --version $APP_VERSION
+
+      - name: Publish release to chocolatey
+        if: inputs.release && matrix.os == 'windows-2019'
+        env:
+          CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
+        uses: crazy-max/ghaction-chocolatey@v3
+        with:
+          args: push -s https://push.chocolatey.org/ -k $CHOCOLATEY_API_KEY
