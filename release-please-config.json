@@ -7,16 +7,16 @@
   "packages": {
     "packages/contensis-cli": {
       "component": "contensis-cli",
-      "release-type": "node"
+      "release-type": "node",
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "/installers/chocolatey/contensis-cli.nuspec",
+          "xpath": "//package/metadata/version"
+        }
+      ]
     }
   },
-  "extra-files": [
-    {
-      "type": "xml",
-      "path": "installers/chocolatey/contensis-cli.nuspec",
-      "xpath": "//package/metadata/version"
-    }
-  ],
   "plugins": ["node-workspace"],
   "pull-request-title-pattern": "chore: ${scope} release ${component} v${version}"
 }
