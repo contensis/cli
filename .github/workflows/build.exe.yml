@@ -165,7 +165,7 @@ jobs:
           args: push installers\chocolatey\contensis-cli.${{ env.APP_VERSION }}.nupkg --source="'https://push.chocolatey.org/'" --debug --verbose
 
         # Handle Homebrew version bump and release
-      - uses: nflatley-zengenti/bump-homebrew-formula-action@v3
+      - uses: mislav/bump-homebrew-formula-action@v3
         if: inputs.release && matrix.homebrewFormula
         env:
           COMMITTER_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
@@ -175,6 +175,7 @@ jobs:
           formula-path: Formula/${{ matrix.homebrewFormula }}.rb
           homebrew-tap: contensis/homebrew-cli
           tag-name: ${{ env.RELEASE_TAG }}
+          create-pullrequest: true
           download-url: https://github.com/contensis/cli/releases/download/${{ env.RELEASE_TAG }}/${{ matrix.exeName }}
           commit-message: |
             {{formulaName}} {{version}}
