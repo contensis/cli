@@ -150,7 +150,7 @@ jobs:
         if: matrix.os == 'windows-2019'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: pack ${{ env.CHOCO_NUSPEC }} --version ${{ env.APP_VERSION }}
+          args: pack ${{ env.CHOCO_NUSPEC }} --version ${{ env.APP_VERSION }} --outputdirectory installers/chocolatey
 
       - name: Set chocolatey publish key
         if: inputs.release && matrix.os == 'windows-2019'
@@ -162,7 +162,7 @@ jobs:
         if: inputs.release && matrix.os == 'windows-2019'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: push --source="'https://push.chocolatey.org/'"
+          args: push installers/chocolatey/contensis-cli.${{ env.APP_VERSION }}.nupkg --source="'https://push.chocolatey.org/'"
 
         # Handle Homebrew version bump and release
       - uses: nflatley-zengenti/bump-homebrew-formula-action@v3
