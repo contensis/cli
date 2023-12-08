@@ -116,11 +116,10 @@ jobs:
           ./contensis-cli get entries
 
       - name: Rename executable to include platform
-        if: matrix.os != 'windows-2019'
+        run: ${{ matrix.os == 'windows-2019' && env.WIN || env.COMMAND }}
         env:
           COMMAND: mv bin/contensis-cli bin/${{ matrix.exeName }}
           WIN: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "${{ matrix.exeName }}"
-        run: ${{ matrix.os == 'windows-2019' && env.WIN || env.COMMAND }}
 
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
@@ -164,12 +163,13 @@ jobs:
         if: inputs.release && matrix.homebrewFormula
         env:
           COMMITTER_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
+          RELEASE_TAG: contensis-cli-v${{ env.APP_VERSION }}
         with:
           formula-name: ${{ matrix.homebrewFormula }}
           formula-path: Formula/${{ matrix.homebrewFormula }}.rb
           homebrew-tap: contensis/homebrew-cli
-          tag-name: contensis-cli-v${{ env.APP_VERSION }}
-          download-url: https://github.com/contensis/cli/releases/download/v${{ env.APP_VERSION }}/${{ matrix.exeName }}
+          tag-name: ${{ env.RELEASE_TAG }}
+          download-url: https://github.com/contensis/cli/releases/download/${{ env.RELEASE_TAG }}/${{ matrix.exeName }}
           commit-message: |
             {{formulaName}} {{version}}
 
