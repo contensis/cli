@@ -165,7 +165,7 @@ jobs:
           args: push --source="'https://push.chocolatey.org/'"
 
         # Handle Homebrew version bump and release
-      - uses: mislav/bump-homebrew-formula-action@v3
+      - uses: nflatley-zengenti/bump-homebrew-formula-action
         if: inputs.release && matrix.homebrewFormula
         env:
           COMMITTER_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
