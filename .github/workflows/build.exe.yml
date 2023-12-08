@@ -115,15 +115,12 @@ jobs:
           ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli get entries
 
-      - name: Rename executable to include platform (Linux/macOS)
+      - name: Rename executable to include platform
         if: matrix.os != 'windows-2019'
-        run: |
-          cd bin
-          mv contensis-cli ${{ matrix.exeName }}
-
-      - name: Rename executable to contensis-cli-win.exe
-        if: matrix.os == 'windows-2019'
-        run: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "${{ matrix.exeName }}"
+        env:
+          COMMAND: mv bin/contensis-cli bin/${{ matrix.exeName }}
+          WIN: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "${{ matrix.exeName }}"
+        run: ${{ matrix.os == 'windows-2019' && env.WIN || env.COMMAND }}
 
       - name: Archive packaged artifacts
         uses: actions/upload-artifact@v3
@@ -171,6 +168,7 @@ jobs:
           formula-name: ${{ matrix.homebrewFormula }}
           formula-path: Formula/${{ matrix.homebrewFormula }}.rb
           homebrew-tap: contensis/homebrew-cli
+          tag-name: contensis-cli-v${{ env.APP_VERSION }}
           download-url: https://github.com/contensis/cli/releases/download/v${{ env.APP_VERSION }}/${{ matrix.exeName }}
           commit-message: |
             {{formulaName}} {{version}}
