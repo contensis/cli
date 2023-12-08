@@ -152,11 +152,17 @@ jobs:
         with:
           args: pack ${{ env.CHOCO_NUSPEC }} --version ${{ env.APP_VERSION }}
 
+      - name: Set chocolatey publish key
+        if: inputs.release && matrix.os == 'windows-2019'
+        uses: crazy-max/ghaction-chocolatey@v3
+        with:
+          args: apikey --key="'${{ secrets.CHOCOLATEY_API_KEY }}'" --source="'https://push.chocolatey.org/'"
+
       - name: Publish release to chocolatey
         if: inputs.release && matrix.os == 'windows-2019'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
-          args: push -s="'https://push.chocolatey.org/'" -k="'${{ secrets.CHOCOLATEY_API_KEY }}'"
+          args: push --source="'https://push.chocolatey.org/'"
 
         # Handle Homebrew version bump and release
       - uses: mislav/bump-homebrew-formula-action@v3
