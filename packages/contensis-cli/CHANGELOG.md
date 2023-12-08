@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1](https://github.com/contensis/cli/compare/contensis-cli-v1.1.0...contensis-cli-v1.1.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* better handling of file imports and exports for csv and xml formats ([f562a08](https://github.com/contensis/cli/commit/f562a088dea04fdcdfc57a55ec90882e33f27b06))
+* diff not outputting in `import entries` ([1964de0](https://github.com/contensis/cli/commit/1964de0a67f83b4ce987aefb6dfc11f0a9167e34))
+* return an error when file is not found when using `--from-file` with import commands ([c8198d8](https://github.com/contensis/cli/commit/c8198d8ddba9526bc16f0c4a7a884d8ff51785ce))
+
 ## [1.1.0](https://github.com/contensis/cli/compare/contensis-cli-v1.0.11...contensis-cli-v1.1.0) (2023-12-01)
 
 
