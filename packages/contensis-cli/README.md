@@ -1604,7 +1604,7 @@ Found 113 entries in leif
  - and 15 more...
 
 --------------------------------------------
-[26/11 02:16:30] [OK] Done migrating entries
+[26/11 02:16:30] [OK] Entries migration preview done
 
 [cli] ⏩ import from project leif to website
 

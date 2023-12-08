@@ -149,7 +149,7 @@ export const printEntriesMigrateResult = (
       ) {
         console.log(
           log.infoText(
-            `${originalId} ${Object.entries(entryStatus || {})
+            `${Object.entries(entryStatus || {})
               .filter(x => x[0] !== 'entryTitle')
               .map(([projectId, projectStatus]) => {
                 const [targetGuid, { status }] = (Object.entries(
@@ -158,11 +158,13 @@ export const printEntriesMigrateResult = (
                   '',
                   { x: { status: undefined } },
                 ];
-                return `${messages.migrate.status(status)(`${status}`)}${
-                  targetGuid !== originalId ? `-> ${targetGuid}` : ''
+                return `${messages.migrate.status(status)(
+                  `${status}`
+                )} ${originalId}${
+                  targetGuid !== originalId ? ` -> ${targetGuid}\n  ` : ' '
                 }`;
               })}`
-          ) + ` ${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`
+          ) + `${log.helpText(contentTypeId)} ${entryStatus.entryTitle}`
         );
 
         for (const [projectId, projectStatus] of Object.entries(
@@ -174,9 +176,7 @@ export const printEntriesMigrateResult = (
           if (error) log.error(error);
           if (diff && showDiff) {
             console.log(
-              `    ${log.highlightText(`diff:`)} ${log.infoText(
-                highlightDiffText(diff)
-              )}\n`
+              `  ${log.infoText(`diff: ${highlightDiffText(diff)}`)}\n`
             );
           }
         }

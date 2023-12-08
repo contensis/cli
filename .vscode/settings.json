@@ -41,7 +41,7 @@
   "html.format.endWithNewline": false,
   // Turns auto fix on save on or off.
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "files.exclude": {
     // exclude .js and .js.map files, when in a TypeScript project

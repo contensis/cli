@@ -1749,6 +1749,7 @@ class ContensisCli {
           // print the migrateResult to console
           printEntriesMigrateResult(this, result, {
             showAll: logOutput === 'all',
+            showDiff: logOutput === 'all' || logOutput === 'changes',
             showChanged: logOutput === 'changes',
           });
         });
