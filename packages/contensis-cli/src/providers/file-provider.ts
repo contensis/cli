@@ -88,23 +88,20 @@ type DetectedFileType =
   | { type: 'json'; contents: any }
   | { type: 'xml' | 'csv'; contents: string };
 
-const detectFileType = (
-  fromFile: string
-): DetectedFileType | undefined => {
+const detectFileType = (fromFile: string): DetectedFileType | undefined => {
+  const fileData = readFile(fromFile);
+  if (!fileData) throw new Error(`Unable to read file at ${fromFile}`);
   try {
-    const fileData = readFile(fromFile);
-    if (fileData) {
-      // if XML
-      if (fileData.startsWith('<')) return { contents: fileData, type: 'xml' };
+    // if XML
+    if (fileData.startsWith('<')) return { contents: fileData, type: 'xml' };
 
-      // if JSON
-      const jsonData = tryParse(fileData);
-      if (jsonData) return { contents: jsonData, type: 'json' };
+    // if JSON
+    const jsonData = tryParse(fileData);
+    if (jsonData) return { contents: jsonData, type: 'json' };
 
-      // if CSV
-      const csv = detectCsv(fileData);
-      if (csv) return { contents: fileData, type: 'csv' };
-    }
+    // if CSV
+    const csv = detectCsv(fileData);
+    if (csv) return { contents: fileData, type: 'csv' };
   } catch (ex) {
     Logger.error(`Problem detecting file type ${fromFile}`, ex);
   }
