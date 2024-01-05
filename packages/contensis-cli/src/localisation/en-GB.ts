@@ -341,10 +341,34 @@ export const LogMessages = {
           return Logger.infoText(status);
       }
     },
-    get: (id: string, env: string, projectId?: string) =>
-      `[${env}] Block ${id} in project ${projectId}:`,
+    get: (
+      id: string,
+      branch: string,
+      version: string,
+      env: string,
+      projectId?: string
+    ) =>
+      `[${env}] ${
+        version ? `Found v${version}` : 'Latest block versions'
+      } for ${Logger.infoText(`${branch}/`)}${Logger.highlightText(
+        id
+      )} in project ${projectId}\n`,
+    noGet: (
+      id: string,
+      branch: string,
+      version: string,
+      env: string,
+      projectId?: string
+    ) =>
+      `[${env}] Did not find ${
+        version ? `v${version}` : 'any block versions'
+      } for ${Logger.highlightText(id)} in branch ${Logger.infoText(
+        branch
+      )} in ${Logger.infoText(projectId)} project`,
+    noGetTip: () =>
+      `Check the available blocks and branches in this project by running "list blocks"`,
     list: (env: string, projectId?: string) =>
-      `[${env}] Blocks in project ${projectId}:`,
+      `[${env}] Blocks in project ${projectId}\n`,
     noList: (env: string, projectId?: string) =>
       `[${env}] Cannot retrieve blocks in project ${projectId}`,
     getLogs: (id: string, branch: string, env: string, projectId?: string) =>
@@ -367,15 +391,6 @@ export const LogMessages = {
       `[${env}] Unable to push block ${Logger.highlightText(
         id
       )} in project ${projectId}`,
-    latestVersion: (
-      version: string,
-      id: string,
-      env: string,
-      projectId?: string
-    ) =>
-      `[${env}] Found latest block version ${Logger.highlightText(
-        id
-      )} in project ${projectId} ${Logger.highlightText(version)}`,
     failedParsingVersion: () =>
       `Did not find a "version.versionNo" in response`,
     actionComplete: (

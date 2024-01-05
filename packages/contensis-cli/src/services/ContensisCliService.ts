@@ -2103,11 +2103,29 @@ class ContensisCli {
         version
       );
 
-      if (blocks) {
+      if (err || blocks?.length === 0) {
+        log.warning(
+          messages.blocks.noGet(
+            blockId,
+            branch,
+            version,
+            currentEnv,
+            env.currentProject
+          )
+        );
+        log.help(messages.blocks.noGetTip());
+        // if (err) log.error(jsonFormatter(err));
+      } else if (blocks) {
         await this.HandleFormattingAndOutput(blocks, () => {
           // print the version detail to console
           log.success(
-            messages.blocks.get(blockId, currentEnv, env.currentProject)
+            messages.blocks.get(
+              blockId,
+              branch,
+              version,
+              currentEnv,
+              env.currentProject
+            )
           );
           for (const block of blocks)
             printBlockVersion(
@@ -2125,11 +2143,6 @@ class ContensisCli {
         });
 
         return blocks;
-      }
-
-      if (err) {
-        log.error(messages.blocks.noList(currentEnv, env.currentProject));
-        log.error(jsonFormatter(err));
       }
     }
   };
