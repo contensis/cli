@@ -24,6 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@action-validator/core": "^0.5.3",
+    "adm-zip": "^0.5.10",
     "app-root-path": "^3.1.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
@@ -49,6 +50,8 @@
     "yaml": "^2.3.1"
   },
   "devDependencies": {
+    "@octokit/types": "^12.4.0",
+    "@types/adm-zip": "^0.5.5",
     "@types/figlet": "^1.5.4",
     "@types/flat": "^5.0.2",
     "@types/hosted-git-info": "^3.0.2",

@@ -1,27 +1,25 @@
 import ansiEscapes from 'ansi-escapes';
 import to from 'await-to-js';
-import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import { createSpinner } from 'nanospinner';
-import path from 'path';
 
 import { Role } from 'contensis-management-api/lib/models';
 import { MigrateRequest } from 'migratortron';
 
 import ContensisRole from './ContensisRoleService';
+import { createRequestHandler } from '~/factories/RequestHandlerFactory';
 import { OutputOptionsConstructorArg } from '~/models/CliService';
 import { EnvContentsToAdd } from '~/models/DevService';
-import { mapSiteConfigYaml } from '~/mappers/DevRequests-to-RequestHanderSiteConfigYaml';
 import { mapCIWorkflowContent } from '~/mappers/DevInit-to-CIWorkflow';
+import { requestHandlerCliArgs } from '~/mappers/DevRequests-to-RequestHanderCliArgs';
 import { deployKeyRole } from '~/mappers/DevInit-to-RolePermissions';
-import { appRootDir, readFile, writeFile } from '~/providers/file-provider';
+import { readFile, writeFile } from '~/providers/file-provider';
 import { diffFileContent } from '~/util/diff';
 import { mergeDotEnvFileContents } from '~/util/dotenv';
 import { findByIdOrName } from '~/util/find';
 import { GitHelper } from '~/util/git';
 import { jsonFormatter } from '~/util/json.formatter';
 import { winSlash } from '~/util/os';
-import { stringifyYaml } from '~/util/yaml';
 import { mergeContentsToAddWithGitignore } from '~/util/gitignore';
 
 class ContensisDev extends ContensisRole {
@@ -413,90 +411,26 @@ class ContensisDev extends ContensisRole {
     }
   };
 
-  ExecRequestHandler = async (blockIds: string[], overrideArgs?: string[]) => {
-    // if no request handler exe
-    // download it.
+  ExecRequestHandler = async (
+    blockIds: string[],
+    overrideArgs: string[] = []
+  ) => {
+    const { debug, log, messages } = this;
 
-    // if update arg, redownload it
+    const spinner = !debug
+      ? createSpinner(messages.devrequests.launch())
+      : log.info(messages.devrequests.launch());
 
-    const { log } = this;
-    // const getPrefixOld = log.getPrefix;
-    const exeHome = path.join(appRootDir, 'reqhan');
-    const exe = 'Zengenti.Contensis.RequestHandler.LocalDevelopment';
-    const exePath = path.join(exeHome, exe);
-    const siteConfigPath = path.join(appRootDir, 'site_config.yaml');
+    // Ensure request handler is available to use
+    const requestHandler = await createRequestHandler();
 
-    const siteConfig = await mapSiteConfigYaml(this);
-    writeFile('site_config.yaml', stringifyYaml(siteConfig));
+    // Generate args for request handler using CLI methods
+    spinner?.start();
+    const args = await requestHandlerCliArgs(this, overrideArgs);
+    spinner?.success();
 
-    const args = overrideArgs
-      ? typeof overrideArgs?.[0] === 'string' &&
-        overrideArgs[0].includes(' ', 2)
-        ? overrideArgs[0].split(' ')
-        : overrideArgs
-      : []; // args could be [ '-c .\\site_config.yaml' ] or [ '-c', '.\\site_config.yaml' ]
-
-    // Add required args
-    if (!args.find(a => a === '-c')) args.push('-c', siteConfigPath);
-
-    // const child = execFile(exePath, args);
-
-    const child = spawn(exePath, args, { stdio: 'inherit' });
-
-    // log.raw('');
-    log.info(`Launching request handler...`);
-    if (overrideArgs?.length)
-      this.log.warning(
-        `Spawning process with supplied args: ${JSON.stringify(
-          child.spawnargs,
-          null,
-          2
-        )}`
-      );
-
-    let isRunning = false;
-
-    // Log child output through event listeners
-    child?.stdout?.on('data', data => {
-      isRunning = true;
-      log.raw(data);
-    });
-
-    child?.stderr?.on('data', data => {
-      log.error(data);
-    });
-
-    child.on('spawn', () => {
-      isRunning = true;
-      log.help(
-        `You may see a firewall popup requesting network access, it is safe to approve`
-      );
-      // log.getPrefix = () => Logger.infoText(`[rqh]`);
-    });
-
-    child.on('exit', code => {
-      isRunning = false;
-
-      log[code === 0 ? 'success' : 'warning'](
-        `Request handler exited with code ${code}\n`
-      );
-    });
-
-    child.on('error', error => {
-      isRunning = false;
-      log.error(`Could not launch request handler due to error \n${error}`);
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // keep the method running until we can return
-    while (true === true) {
-      if (!isRunning) {
-        // log.getPrefix = getPrefixOld; // restore logger state
-        return;
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+    // Launch request handler
+    await requestHandler(args);
   };
 }
 export const devCommand = (

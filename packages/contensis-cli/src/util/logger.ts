@@ -57,7 +57,6 @@ export class Logger {
     else console.log(message);
   };
   static warning: LogMethod = content => {
-    // if (process.env.DEBUG === 'true') {
     const message = `${Logger.getPrefix()} ${Logger.warningText(
       `${Logger.isUserTerminal ? '⚠️ ' : '[WARN]'} ${content}`
     )}\n`;

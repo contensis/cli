@@ -349,7 +349,9 @@ export const LogMessages = {
       projectId?: string
     ) =>
       `[${env}] ${
-        version ? `Found v${version}` : 'Latest block versions'
+        version && version !== 'latest'
+          ? `Found v${version}`
+          : 'Latest block versions'
       } for ${Logger.infoText(`${branch}/`)}${Logger.highlightText(
         id
       )} in project ${projectId}\n`,
@@ -600,5 +602,30 @@ export const LogMessages = {
       `Please enter your block id, this should be unquie and in kebab case e.g ${Logger.highlightText(
         'my-awesome-website'
       )}`,
+  },
+  devrequests: {
+    install: {
+      notFound: (repo: string) =>
+        `Could not find a release in ${repo} repo - please check github`,
+      download: (repo: string, version: string) =>
+        `Found release ${repo} ${version}`,
+      downloading: (repo: string, version: string) =>
+        `Downloading ${repo} ${version}`,
+      downloadFail: (repo: string, version: string) =>
+        `Problem downloading release ${version} from ${repo}`,
+      downloaded: (repo: string, version: string) =>
+        `Downloaded ${repo} ${version}`,
+      applyUpdate: (version: string, existing: string) =>
+        `Use updated version ${version} ${Logger.infoText(
+          `(replaces ${existing})`
+        )}?`,
+    },
+    launch: () => `Launching request handler for local development`,
+    spawn: () =>
+      `If you see a firewall popup requesting network access, it is safe to approve`,
+    exited: (code: number | null) =>
+      `Request handler exited with code ${code}\n`,
+    errored: (error: Error) =>
+      `Could not launch request handler due to error \n${error}`,
   },
 };

@@ -45,12 +45,13 @@ import {
   printNodesMigrateResult,
 } from '~/util/console.printer';
 import { csvFormatter } from '~/util/csv.formatter';
-import { xmlFormatter } from '~/util/xml.formatter';
 import { jsonFormatter, limitFields } from '~/util/json.formatter';
+import { xmlFormatter } from '~/util/xml.formatter';
+import { isDebug } from '~/util/debug';
 import { diffLogStrings } from '~/util/diff';
+import { findByIdOrName } from '~/util/find';
 import { logError, Logger } from '~/util/logger';
 import { promiseDelay } from '~/util/timers';
-import { findByIdOrName } from '~/util/find';
 
 let insecurePasswordWarningShown = false;
 
@@ -72,6 +73,7 @@ class ContensisCli {
   contensis?: ContensisMigrationService;
   contensisOpts: Partial<MigrateRequest>;
   currentProject: string;
+  debug = isDebug();
 
   sourceAlias?: string;
   targetEnv?: string;
@@ -2048,7 +2050,7 @@ class ContensisCli {
       // Retrieve blocks list for env
       const [err, blocks] = await contensis.blocks.GetBlocks();
 
-      if (Array.isArray(blocks)) {
+      if (Array.isArray(blocks) && blocks.length) {
         await this.HandleFormattingAndOutput(blocks, () => {
           // print the blocks to console
           log.success(messages.blocks.list(currentEnv, env.currentProject));
@@ -2082,8 +2084,8 @@ class ContensisCli {
       }
 
       if (err) {
-        log.error(messages.blocks.noList(currentEnv));
-        log.error(jsonFormatter(err));
+        log.error(messages.blocks.noList(currentEnv, env.currentProject));
+        // log.error(jsonFormatter(err));
       }
     }
   };
@@ -2467,9 +2469,7 @@ class ContensisCli {
     const contensis = await this.ConnectContensis();
     if (contensis) {
       // Retrieve renderers list for env
-      const [err, renderers] = await (contensis.renderers.GetRenderers as any)(
-        rendererId
-      ); // TODO: resolve any cast
+      const [err, renderers] = await contensis.renderers.GetRenderers();
 
       if (Array.isArray(renderers)) {
         await this.HandleFormattingAndOutput(renderers, () => {
@@ -2500,6 +2500,7 @@ class ContensisCli {
                 );
           }
         });
+        return renderers;
       }
 
       if (err) {
@@ -2508,6 +2509,7 @@ class ContensisCli {
       }
     }
   };
+
   HandleFormattingAndOutput = async <T>(obj: T, logFn: (obj: T) => void) => {
     const { format, log, messages, output } = this;
     const fields = this.contensis?.payload.query?.fields;

@@ -50,6 +50,13 @@ export const removeFile = (filePath: string) => {
   }
 };
 
+export const removeDirectory = (filePath: string) => {
+  const directoryPath = appPath(filePath);
+  if (fs.existsSync(directoryPath)) {
+    fs.rmSync(directoryPath, { force: true, recursive: true });
+  }
+};
+
 export const moveFile = (file: string, fromPath: string, toPath: string) => {
   const from = path.join(appRootDir, `${fromPath}${file}`);
   const to = path.join(appRootDir, `${toPath}${file}`);
@@ -83,6 +90,8 @@ export const appPath = (filePath: string) =>
 
 export const cwdPath = (filePath: string) =>
   path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+
+export const joinPath = path.join;
 
 type DetectedFileType =
   | { type: 'json'; contents: any }

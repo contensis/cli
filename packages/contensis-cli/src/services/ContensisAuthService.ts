@@ -3,6 +3,17 @@ import { ClientGrants, ClientGrantType } from 'contensis-core-api';
 
 class ContensisAuthService {
   private client: NodejsClient;
+  private credentials: {
+    clientType: ClientGrantType;
+    clientDetails: ClientGrants;
+  };
+
+  get clientType() {
+    return this.credentials.clientType;
+  }
+  get clientDetails() {
+    return this.credentials.clientDetails;
+  }
 
   constructor({
     clientId = '',
@@ -21,39 +32,37 @@ class ContensisAuthService {
     projectId: string;
     rootUrl: string;
   }) {
-    let credentials: {
-      clientType: ClientGrantType;
-      clientDetails: ClientGrants;
-    };
-    if (clientId && clientSecret) {
-      credentials = {
+    if (clientId && clientSecret)
+      this.credentials = {
         clientType: 'client_credentials',
         clientDetails: {
           clientId,
           clientSecret,
         },
       };
-    } else if (username && password) {
-      credentials = {
+    else if (username && password)
+      this.credentials = {
         clientType: 'contensis_classic',
         clientDetails: {
           username,
           password,
         },
       };
-    } else if (refreshToken) {
-      credentials = {
+    else if (refreshToken)
+      this.credentials = {
         clientType: 'contensis_classic_refresh_token',
         clientDetails: {
           refreshToken,
         },
       };
-    } else {
-      credentials = { clientType: 'none', clientDetails: { refreshToken: '' } };
-    }
+    else
+      this.credentials = {
+        clientType: 'none',
+        clientDetails: { refreshToken: '' },
+      };
 
     this.client = NodejsClient.create({
-      ...credentials,
+      ...this.credentials,
       projectId,
       rootUrl,
     });

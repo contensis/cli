@@ -16,7 +16,7 @@ export const tryParse = (str: any) => {
   }
 };
 
-export const isJson = (str: string) =>
+export const isJson = (str?: string) =>
   typeof str === 'object' || !!tryParse(str);
 
 export const tryStringify = (obj: any) => {
