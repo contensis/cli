@@ -607,8 +607,7 @@ export const LogMessages = {
     install: {
       notFound: (repo: string) =>
         `Could not find a release in ${repo} repo - please check github`,
-      download: (repo: string, version: string) =>
-        `Found release ${repo} ${version}`,
+      download: (repo: string, version: string) => `Found release ${version}`,
       downloading: (repo: string, version: string) =>
         `Downloading ${repo} ${version}`,
       downloadFail: (repo: string, version: string) =>

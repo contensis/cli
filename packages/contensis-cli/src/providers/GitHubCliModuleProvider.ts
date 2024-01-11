@@ -3,6 +3,7 @@ import Zip from 'adm-zip';
 import type { Endpoints } from '@octokit/types';
 import HttpProvider from '~/providers/HttpProvider';
 import {
+  addExecutePermission,
   checkDir,
   joinPath,
   removeDirectory,
@@ -72,10 +73,16 @@ class GitHubCliModuleProvider {
   async DownloadRelease(
     release: GitHubApiRelease,
     {
+      cmd,
       path,
       platforms,
       unzip = true,
-    }: { path: string; unzip?: boolean; platforms: [NodeJS.Platform, string][] }
+    }: {
+      cmd: string;
+      path: string;
+      unzip?: boolean;
+      platforms: [NodeJS.Platform, string][];
+    }
   ) {
     // find os-specific asset
     const platform = platforms.find(p => p[0] === os.platform()) || [
@@ -102,6 +109,8 @@ class GitHubCliModuleProvider {
         // delete the downloaded zip file
         removeFile(filePath);
       }
+
+      addExecutePermission(joinPath(path, cmd));
     } else
       throw new Error(
         `no asset found in release ${

@@ -122,10 +122,13 @@ export class RequestHandlerFactory {
   }
 
   async CheckUpdate({ verbose = false }: { verbose?: boolean } = {}) {
-    const { debug, log, manifest, messages, moduleInfo } = this;
+    const { cmd, debug, log, manifest, messages, moduleInfo } = this;
+
     const github = new GitHubCliModuleProvider(moduleInfo.github);
+
     // Find latest version
     const release = await github.FindLatestRelease();
+
     if (verbose || debug)
       if (release)
         log.info(
@@ -160,6 +163,7 @@ export class RequestHandlerFactory {
       }
       try {
         await github.DownloadRelease(release, {
+          cmd,
           path: downloadPath,
           // Map NodeJS os platform to release asset name
           platforms: [

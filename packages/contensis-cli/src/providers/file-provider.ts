@@ -93,6 +93,9 @@ export const cwdPath = (filePath: string) =>
 
 export const joinPath = path.join;
 
+export const addExecutePermission = (filePath: string) =>
+  fs.chmodSync(filePath, fs.constants.S_IRWXU);
+
 type DetectedFileType =
   | { type: 'json'; contents: any }
   | { type: 'xml' | 'csv'; contents: string };
