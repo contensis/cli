@@ -49,20 +49,28 @@ Example call:
   dev
     .command('requests')
     .description('launch request handler for local development')
-    .argument('[block-ids...]', 'ids of any blocks to develop locally')
+    .argument(
+      '[block-id...]',
+      'id of block to develop locally and the local uri to pass requests for this block onto'
+    )
     .option('--args <args...>', 'override or add additional args')
-    .usage('[block-ids...]')
+    .option(
+      '--release <release>',
+      'launch a specific release version of the request handler'
+    )
+    .usage('[block-id] [local-uri]')
     .addHelpText(
       'after',
       `
 Example call:
-  > dev requests test-block-one\n`
+  > dev requests test-block-one
+  > dev requests my-website http://localhost:8080\n`
     )
-    .action(async (blockIds: string[] = [], opts) => {
+    .action(async (blockId: string[] = [], opts) => {
       await devCommand(
-        ['dev', 'requests', blockIds.join(' ')],
+        ['dev', 'requests', blockId.join(' ')],
         opts
-      ).ExecRequestHandler(blockIds, opts?.args);
+      ).ExecRequestHandler(blockId, opts?.args, opts.release);
     });
 
   return dev;

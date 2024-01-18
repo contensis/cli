@@ -6,7 +6,7 @@ import { LogMessages } from '~/localisation/en-GB';
 import GitHubCliModuleProvider from '~/providers/GitHubCliModuleProvider';
 
 import ManifestProvider from '~/providers/ManifestProvider';
-import { appRootDir, joinPath } from '~/providers/file-provider';
+import { appRootDir, checkDir, joinPath } from '~/providers/file-provider';
 import { isDebug } from '~/util/debug';
 import { Logger } from '~/util/logger';
 
@@ -21,6 +21,7 @@ export class RequestHandlerFactory {
   cmd = 'Zengenti.Contensis.RequestHandler.LocalDevelopment';
 
   prerelease;
+  version; // pass in a specific release version to run
 
   get exePath() {
     return path.join(this.basePath, `${this.name}-${this.moduleInfo.version}`);
@@ -35,29 +36,31 @@ export class RequestHandlerFactory {
     );
   }
 
-  constructor(prerelease = false) {
+  constructor(version?: string, prerelease = false) {
     this.prerelease = prerelease;
+    this.version = version;
   }
 
   // Use the factory to create a request handler instance
   // handling the download and updating of the external binary
   async Create() {
-    const { moduleInfo } = this;
-    const firstUse = !moduleInfo?.version || moduleInfo?.version === '*';
+    const { moduleInfo, version } = this;
+    const downloadImmediately =
+      !moduleInfo?.version || moduleInfo?.version === '*' || this.version;
 
-    if (firstUse) {
+    if (downloadImmediately) {
       // Create cli-manifest.json
       this.manifest.writeModule(this.name, this.moduleInfo);
 
       // Download for first time use (await)
-      await this.CheckUpdate({ verbose: true });
+      await this.CheckUpdate({ verbose: true, version });
     }
 
     // Apply any downloaded/pending update so we launch that version
     await this.ApplyUpdate();
 
     // Fire an async update check and continue working in the background (do not await)
-    if (!firstUse) this.CheckUpdate();
+    if (!downloadImmediately) this.CheckUpdate();
 
     // Return a RequestHandler ready to invoke
     return this.CreateInvoke(this);
@@ -121,13 +124,16 @@ export class RequestHandlerFactory {
     };
   }
 
-  async CheckUpdate({ verbose = false }: { verbose?: boolean } = {}) {
+  async CheckUpdate({
+    verbose = false,
+    version,
+  }: { verbose?: boolean; version?: string } = {}) {
     const { cmd, debug, log, manifest, messages, moduleInfo } = this;
 
     const github = new GitHubCliModuleProvider(moduleInfo.github);
 
     // Find latest version
-    const release = await github.FindLatestRelease();
+    const release = await github.FindLatestRelease(version);
 
     if (verbose || debug)
       if (release)
@@ -140,10 +146,14 @@ export class RequestHandlerFactory {
       else
         log.warning(messages.devrequests.install.notFound(moduleInfo.github));
 
+    const downloadSpecificRelease =
+      version && !checkDir('c') && release?.tag_name;
+
     // Should we download an update?
     if (
-      release?.tag_name &&
-      ![moduleInfo.version, moduleInfo.install].includes(release.tag_name)
+      (release?.tag_name &&
+        ![moduleInfo.version, moduleInfo.install].includes(release.tag_name)) ||
+      downloadSpecificRelease
     ) {
       // Download platform-specific release asset
       const downloadPath = path.join(
@@ -190,10 +200,16 @@ export class RequestHandlerFactory {
             ),
           });
 
-        // Update module info with downloaded release
-        this.moduleInfo.install = release.tag_name;
-        // Write module info update to manifest so it installs on next invoke
-        manifest.writeModule(this.name, this.moduleInfo);
+        if (!version) {
+          // Update module info with downloaded release
+          this.moduleInfo.install = release.tag_name;
+          // Write module info update to manifest so it installs on next invoke
+          manifest.writeModule(this.name, this.moduleInfo);
+        } else {
+          // Set module version in memory so the request handler
+          // will be invoked with this version this time only
+          this.moduleInfo.version = release.tag_name;
+        }
       }
     }
   }
@@ -226,4 +242,5 @@ export class RequestHandlerFactory {
   }
 }
 
-export const createRequestHandler = () => new RequestHandlerFactory().Create();
+export const createRequestHandler = (version?: string) =>
+  new RequestHandlerFactory(version).Create();

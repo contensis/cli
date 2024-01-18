@@ -11,7 +11,7 @@ import { createRequestHandler } from '~/factories/RequestHandlerFactory';
 import { OutputOptionsConstructorArg } from '~/models/CliService';
 import { EnvContentsToAdd } from '~/models/DevService';
 import { mapCIWorkflowContent } from '~/mappers/DevInit-to-CIWorkflow';
-import { requestHandlerCliArgs } from '~/mappers/DevRequests-to-RequestHanderCliArgs';
+import RequestHandlerArgs from '~/mappers/DevRequests-to-RequestHanderCliArgs';
 import { deployKeyRole } from '~/mappers/DevInit-to-RolePermissions';
 import { readFile, writeFile } from '~/providers/file-provider';
 import { diffFileContent } from '~/util/diff';
@@ -412,8 +412,9 @@ class ContensisDev extends ContensisRole {
   };
 
   ExecRequestHandler = async (
-    blockIds: string[],
-    overrideArgs: string[] = []
+    blockId: string[],
+    overrideArgs: string[] = [],
+    version?: string
   ) => {
     const { debug, log, messages } = this;
 
@@ -422,15 +423,45 @@ class ContensisDev extends ContensisRole {
       : log.info(messages.devrequests.launch());
 
     // Ensure request handler is available to use
-    const requestHandler = await createRequestHandler();
+    const requestHandler = await createRequestHandler(version);
 
     // Generate args for request handler using CLI methods
+    const args = new RequestHandlerArgs(this);
     spinner?.start();
-    const args = await requestHandlerCliArgs(this, overrideArgs);
+    await args.Create();
     spinner?.success();
 
+    // Prompt block id and dev uri to run locally (if not supplied)
+    const blockIdChoices = args.siteConfig?.blocks.map(block => block.id) || [];
+    blockIdChoices.push('none');
+    const defaultDeveloperUri = 'http://localhost:3000';
+
+    const { overrideBlockId, overrideUri } = blockId.length
+      ? {
+          overrideBlockId: blockId[0],
+          overrideUri: blockId?.[1] || defaultDeveloperUri,
+        }
+      : await inquirer.prompt([
+          {
+            type: 'list',
+            prefix: '🧱',
+            message: messages.devrequests.overrideBlock(),
+            name: 'overrideBlockId',
+            choices: blockIdChoices,
+          },
+          {
+            type: 'input',
+            prefix: '🔗',
+            message: messages.devrequests.overrideUri(),
+            name: 'overrideUri',
+            default: defaultDeveloperUri,
+          },
+        ]);
+
+    args.overrideBlock(overrideBlockId, overrideUri);
+
     // Launch request handler
-    await requestHandler(args);
+    await requestHandler(args.getArgs(overrideArgs));
   };
 }
 export const devCommand = (

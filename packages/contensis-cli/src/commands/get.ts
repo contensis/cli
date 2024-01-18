@@ -298,6 +298,7 @@ Example call:
 Example call:
   > get block contensis-website
   > get block contensis-website develop latest
+  > get block contensis-website feature-branch 3
 `
     )
     .action(async (blockId: string, branch: string, version: string, opts) => {

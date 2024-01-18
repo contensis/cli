@@ -94,6 +94,7 @@ export const cwdPath = (filePath: string) =>
 export const joinPath = path.join;
 
 export const addExecutePermission = (filePath: string) =>
+  // Fails in windows with `TypeError [ERR_INVALID_ARG_TYPE]: The "mode" argument must be of type number. Received undefined`
   fs.chmodSync(filePath, fs.constants.S_IRWXU);
 
 type DetectedFileType =

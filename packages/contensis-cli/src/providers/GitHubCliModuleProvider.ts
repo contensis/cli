@@ -38,7 +38,7 @@ class GitHubCliModuleProvider {
     this.repo = repo;
   }
 
-  async FindLatestRelease() {
+  async FindLatestRelease(version?: string) {
     const { http, latest_release_url, releases_url } = this;
     // return latest tag version is:
 
@@ -56,14 +56,18 @@ class GitHubCliModuleProvider {
       throw new Error(`Unable to get releases`, { cause: releasesErr });
     } else if (!releases || releases.length === 0)
       throw new Error(`No releases available`);
-    else if (latestErr && !latest) {
+    else if (version) {
+      const release = releases.find(
+        r => r.tag_name.toLowerCase() === version.toLowerCase()
+      );
+      if (release) return release;
+      else throw new Error(`No release for ${version} found`);
+    } else if (latestErr && !latest) {
       if (latestResponse?.status === 404 && releases?.length) {
         // No latest release, check releases for prerelease version, fallback to last release
         const release = releases.find(r => r.prerelease) || releases[0];
 
-        if (release) {
-          return release;
-        }
+        if (release) return release;
       }
     } else {
       return latest;
@@ -110,7 +114,7 @@ class GitHubCliModuleProvider {
         removeFile(filePath);
       }
 
-      addExecutePermission(joinPath(path, cmd));
+      if (os.platform() !== 'win32') addExecutePermission(joinPath(path, cmd));
     } else
       throw new Error(
         `no asset found in release ${
