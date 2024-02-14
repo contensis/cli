@@ -1,4 +1,5 @@
 import { ContensisMigrationService } from 'migratortron';
+import PQueue from 'p-queue';
 import ContensisCli from '~/services/ContensisCliService';
 
 type EndpointJson = {
@@ -32,6 +33,8 @@ type RendererRuleJson = {
 interface ISiteConfigYaml {
   alias: string;
   projectId: string;
+  iisHostname: string;
+  podClusterId: string;
   accessToken: string; // needed?
   clientId: string;
   sharedSecret: string;
@@ -55,10 +58,14 @@ class RequestHandlerArgs {
   };
 
   buildSiteConfig = async () => {
-    const { currentEnv, currentProject, env, log, messages } = this.cli;
+    const { currentEnv, currentProject, env, log, messages, urls } = this.cli;
+    const contensis = await this.cli.ConnectContensis();
+
     const siteConfig: ISiteConfigYaml = {
       alias: currentEnv,
       projectId: currentProject,
+      iisHostname: urls?.iisPreviewWeb.split('//')[1] || '',
+      podClusterId: 'hq',
       accessToken: '',
       clientId: '',
       sharedSecret: '',
@@ -74,39 +81,43 @@ class RequestHandlerArgs {
       // const blocksRaw = await cli.PrintBlocks();
 
       const blocks: BlockJson[] = [];
+      const queue = new PQueue({ concurrency: 4 });
       for (const block of blocksRaw || []) {
-        // Retrieve block version
-        const [err, versions] = await contensis.blocks.GetBlockVersions(
-          block.id,
-          'default',
-          'latest'
-        );
-        if (err || versions?.length === 0)
-          log.warning(
-            messages.blocks.noGet(
-              block.id,
-              'default',
-              'latest',
-              currentEnv,
-              env.currentProject
-            )
+        queue.add(async () => {
+          // Retrieve block version
+          const [err, versions] = await contensis.blocks.GetBlockVersions(
+            block.id,
+            'default',
+            'latest'
           );
-        if (versions?.[0]) {
-          const v = versions[0];
-          blocks.push({
-            id: v.id,
-            baseUri: v.previewUrl,
-            staticPaths: v.staticPaths,
-            endpoints: v.endpoints,
-            versionNo: v.version.versionNo,
-            branch: v.source.branch,
-          });
-        }
+          if (err || versions?.length === 0)
+            log.warning(
+              messages.blocks.noGet(
+                block.id,
+                'default',
+                'latest',
+                currentEnv,
+                env.currentProject
+              )
+            );
+          if (versions?.[0]) {
+            const v = versions[0];
+            blocks.push({
+              id: v.id,
+              baseUri: v.previewUrl,
+              staticPaths: v.staticPaths,
+              endpoints: v.endpoints,
+              versionNo: v.version.versionNo,
+              branch: v.source.branch,
+            });
+          }
+        });
       }
+
+      await queue.onIdle();
       return blocks;
     };
 
-    const contensis = await this.cli.ConnectContensis();
     if (contensis) {
       const [blocks, renderers] = await Promise.all([
         getBlocks(contensis),
@@ -114,12 +125,14 @@ class RequestHandlerArgs {
       ]);
 
       siteConfig.blocks = blocks;
-      siteConfig.renderers = renderers?.[1]?.map(r => ({
-        id: r.id,
-        name: r.name,
-        assignedContentTypes: r.assignedContentTypes,
-        rules: r.rules,
-      }));
+      siteConfig.renderers = renderers?.[1]
+        ?.filter(r => blocks.find(b => b.id === r.id))
+        .map(r => ({
+          id: r.id,
+          name: r.name,
+          assignedContentTypes: r.assignedContentTypes,
+          rules: r.rules,
+        }));
     }
     return siteConfig;
   };
@@ -139,6 +152,10 @@ class RequestHandlerArgs {
         args.push('--alias', cli.currentEnv);
       if (!args.find(a => a === '--project-api-id'))
         args.push('--project-api-id', cli.currentProject);
+      if (!args.find(a => a === '--iis-hostname'))
+        args.push('--iis-hostname', siteConfig.iisHostname);
+      if (!args.find(a => a === '--pod-cluster-id'))
+        args.push('--pod-cluster-id', siteConfig.podClusterId);
       if (!args.find(a => a === '--blocks-json'))
         args.push('--blocks-json', JSON.stringify(siteConfig.blocks));
       if (!args.find(a => a === '--renderers-json'))
@@ -171,6 +188,10 @@ class RequestHandlerArgs {
         this.siteConfig?.blocks[blockIndex]
       ) {
         this.siteConfig.blocks[blockIndex].baseUri = overrideUri;
+        // this.siteConfig.blocks[blockIndex].staticPaths.push(
+        //   ...['/static/*', '/image-library/*']
+        // );
+        this.siteConfig.blocks[blockIndex].staticPaths.push('/*.js');
       }
     }
   };
