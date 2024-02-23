@@ -36,6 +36,7 @@ import {
   tryStringify,
   url,
 } from '~/util';
+import { sanitiseIds } from '~/util/api-ids';
 import {
   printBlockVersion,
   printEntriesMigrateResult,
@@ -142,6 +143,14 @@ class ContensisCli {
     this.session = new SessionCacheProvider();
 
     this.contensisOpts = contensisOpts;
+
+    // Explicitly sanitise supplied fields to api-friendly ids
+    if (Array.isArray(this.contensisOpts.query?.fields)) {
+      this.contensisOpts.query.fields = sanitiseIds(
+        this.contensisOpts.query.fields
+      );
+    }
+
     this.format = outputOpts?.format;
     this.output =
       outputOpts?.output && path.join(process.cwd(), outputOpts.output);
