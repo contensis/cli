@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { Logger } from '~/util/logger';
 import { LIB_VERSION } from '~/version';
 import { makeConnectCommand } from './connect';
+import { makeCopyCommand } from './copy';
 import { makeCreateCommand } from './create';
 import { makeDevCommand } from './dev';
 import { makeDiffCommand } from './diff';
@@ -50,6 +51,9 @@ const commands = () => {
     addGlobalOptions(makeCreateCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
+    addGlobalOptions(makeCopyCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
     addConnectOptions(
       addAuthenticationOptions(makeDevCommand())
     ).copyInheritedSettings(program)
@@ -58,9 +62,9 @@ const commands = () => {
     addGlobalOptions(makeExecuteCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
-    addGlobalOptions(
-      addImportOptions(makeDiffCommand())
-    ).copyInheritedSettings(program)
+    addGlobalOptions(addImportOptions(makeDiffCommand())).copyInheritedSettings(
+      program
+    )
   );
   program.addCommand(
     addGlobalOptions(makeGetCommand()).copyInheritedSettings(program)

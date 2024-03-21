@@ -135,6 +135,7 @@ class ContensisShell {
       availableCommands.push('login', 'list projects', 'set project');
     if (userId)
       availableCommands.push(
+        'copy field',
         'create key',
         'create project',
         'create role',
@@ -306,4 +307,4 @@ process.stdin.on('data', key => {
   }
 });
 
-// // process.env.http_proxy = 'http://127.0.0.1:8888';
+// process.env.http_proxy = 'http://127.0.0.1:8888';

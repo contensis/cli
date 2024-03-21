@@ -1,9 +1,10 @@
 import { Command, Option } from 'commander';
+import { MigrateRequest } from 'migratortron';
 import { url } from '~/util';
 
 // Map various input options into a request to be processed
 // by Migratortron / Contensis import library
-export const mapContensisOpts = (opts: any = {}) => ({
+export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   source:
     opts.sourceAlias || opts.sourceProjectId
       ? {
@@ -14,6 +15,8 @@ export const mapContensisOpts = (opts: any = {}) => ({
         }
       : undefined,
   models: opts.modelIds,
+  copyField: opts.copyField,
+  // convert various cli options into MigrateRequest.query format
   query:
     opts.id ||
     opts.entryIds ||
@@ -38,6 +41,7 @@ export const mapContensisOpts = (opts: any = {}) => ({
   zenQL: opts.zenql,
   transformGuids: !opts.preserveGuids,
   ignoreErrors: opts.ignoreErrors,
+  concurrency: opts.concurrency ? Number(opts.concurrency) : undefined,
 });
 
 /* Output options */
@@ -120,6 +124,18 @@ export const ignoreErrors = new Option(
   '-ignore --ignore-errors',
   'commit the import ignoring any reported errors'
 ).default(false);
+
+export const outputEntries = new Option(
+  '-oe --output-entries <outputEntries>',
+  'which details of the entries included in the import to output'
+)
+  .choices(['errors', 'changes', 'all'])
+  .default('errors');
+
+export const concurrency = new Option(
+  '-conc --concurrency <concurrency>',
+  'the number of entries to load in parallel'
+).default(2);
 
 export const addConnectOptions = (program: Command) =>
   program.addOption(alias.hideHelp()).addOption(project.hideHelp());

@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import { Project } from 'contensis-core-api';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
-import { isUuid } from '~/util';
 
 export const makeCreateCommand = () => {
   const create = new Command()

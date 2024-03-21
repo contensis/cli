@@ -4,6 +4,7 @@ import { deconstructApiError } from './error';
 import { Logger, addNewLines } from './logger';
 import {
   BlockVersion,
+  CopyFieldResult,
   EntriesResult,
   MigrateModelsResult,
   MigrateNodesTree,
@@ -116,7 +117,7 @@ export const printBlockVersion = (
 
 export const printEntriesMigrateResult = (
   { log, messages, currentProject }: ContensisCli,
-  migrateResult: EntriesResult,
+  migrateResult: EntriesResult | CopyFieldResult,
   {
     action = 'import',
     showDiff = false,

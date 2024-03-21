@@ -1797,6 +1797,79 @@ class ContensisCli {
     }
   };
 
+  CopyEntryField = async ({
+    commit,
+    fromFile,
+    logOutput,
+  }: {
+    commit: boolean;
+    fromFile: string;
+    logOutput: string;
+  }) => {
+    const { currentEnv, currentProject, log, messages } = this;
+
+    const contensis = await this.ConnectContensisImport({
+      commit,
+      fromFile,
+      importDataType: 'entries',
+    });
+
+    if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        console.log(log.successText(` -- IMPORT PREVIEW -- `));
+      } else {
+        console.log(log.warningText(` *** COMMITTING IMPORT *** `));
+      }
+
+      const [err, result] = await to(
+        contensis.content.copy.MigrateFieldContent()
+      );
+
+      if (err) logError(err);
+      if (result)
+        await this.HandleFormattingAndOutput(result, () => {
+          // print the migrateResult to console
+          printEntriesMigrateResult(this, result, {
+            showAll: logOutput === 'all',
+            showDiff: logOutput === 'all' || logOutput === 'changes',
+            showChanged: logOutput === 'changes',
+          });
+        });
+
+      if (
+        result &&
+        !err &&
+        !result.errors?.length &&
+        ((!commit && result.entriesToMigrate[currentProject].totalCount) ||
+          (commit &&
+            (result.migrateResult?.created || result.migrateResult?.updated)))
+      ) {
+        log.success(
+          messages.entries.imported(
+            currentEnv,
+            commit,
+            commit
+              ? (result.migrateResult?.created || 0) +
+                  (result.migrateResult?.updated || 0)
+              : result.entriesToMigrate[currentProject].totalCount
+          )
+        );
+        if (!commit) {
+          log.raw(``);
+          log.help(messages.entries.commitTip());
+        }
+      } else {
+        log.error(messages.entries.failedImport(currentEnv), err);
+        if (!result?.entriesToMigrate?.[currentProject]?.totalCount)
+          log.help(messages.entries.notFound(currentEnv));
+      }
+    } else {
+      log.warning(messages.models.noList(currentProject));
+      log.help(messages.connect.tip());
+    }
+  };
+
   GetNodes = async (rootPath: string, depth = 0) => {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();

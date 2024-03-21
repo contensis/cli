@@ -215,24 +215,24 @@ Example call:
     });
 
   sharedGetEntryOptions(
-  program
-    .command('entries')
-    .description('get entries')
-    .argument(
-      '[search phrase]',
-      'get entries with the search phrase, use quotes for multiple words'
-    )
+    program
+      .command('entries')
+      .description('get entries')
+      .argument(
+        '[search phrase]',
+        'get entries with the search phrase, use quotes for multiple words'
+      )
       .addOption(contentTypes)
-    .option(
+      .option(
         '-d --dependents',
-      'find and return any dependencies of all found entries'
-    )
+        'find and return any dependencies of all found entries'
+      )
   )
     .addOption(
       new Option(
         '--data-format <dataFormat>',
         'find and return entries of a specific data format'
-    )
+      )
         .choices(['entry', 'asset', 'webpage'])
         .default('entry')
     )
