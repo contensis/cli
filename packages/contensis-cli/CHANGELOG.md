@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.2.0](https://github.com/contensis/cli/compare/contensis-cli-v1.1.1...contensis-cli-v1.2.0) (2024-03-21)
+
+
+### Features
+
+* added `RequestHandlerFactory` to manage request handler release binary install/update before returning a request handler invocation method in `dev requests` command. Update implementation to supply args instead of writing yaml to launch request handler. ([1898a2a](https://github.com/contensis/cli/commit/1898a2a6a83dedbe17fc7725795b0fd1dac198d3))
+* new command `copy field` ([1f27c2d](https://github.com/contensis/cli/commit/1f27c2d009072a9708272929feca4f79b72ecee0))
+* prompt to override a running block and set a local uri with `dev requests`, ability to run a specific request handler version with `--release` option ([a39ebbd](https://github.com/contensis/cli/commit/a39ebbd0ad449d42398db38992fbbc298f552de5))
+
+
+### Bug Fixes
+
+* ensure downloaded request handler script has execute permission ([cb6b9c7](https://github.com/contensis/cli/commit/cb6b9c760e55ef72b31342129edbb575ce47f7b7))
+* improve output logging when finding block versions using `get block` command ([6f3f003](https://github.com/contensis/cli/commit/6f3f0030f0c0fe09830d27d1b91ab9a421cf3a8e))
+* sanitise `--fields` input ensuring they are valid api ids ([fefcb34](https://github.com/contensis/cli/commit/fefcb3415cdc1cbdf89148a88f18e26e8838d2ff))
+* update migration package version for latest fixes ([964cdb0](https://github.com/contensis/cli/commit/964cdb0447856a6bae87a4285ffa4c7af5268fc2))
+
+
+### Performance Improvements
+
+* improve response times when using `import entries` with very large workloads ([28c2535](https://github.com/contensis/cli/commit/28c2535f2fe09593c47b0d6f38c523a44a587555))
+* request block versions concurrently before launching local request handler with `dev requests` ([18135b6](https://github.com/contensis/cli/commit/18135b635284f3714f82581cb755cb9b1a1edeec))
+
 ## [1.1.1](https://github.com/contensis/cli/compare/contensis-cli-v1.1.0...contensis-cli-v1.1.1) (2023-12-08)
 
 
