@@ -1,5 +1,5 @@
-ARG app_base=node:18-alpine
-ARG builder_base=node:18-alpine
+ARG app_base=node:20-alpine
+ARG builder_base=node:20-alpine
 # registry url supplied with `docker build --build-args builder_image=$BUILDER_IMAGE` 
 ARG builder_image
 FROM ${builder_base} AS prepare
