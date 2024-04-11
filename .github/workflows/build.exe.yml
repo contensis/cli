@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x]
         os: [ubuntu-20.04, windows-2019, macos-latest, arm64]
         include:
           - os: ubuntu-20.04
