@@ -28,7 +28,7 @@ export const makeCopyCommand = () => {
     .argument('<destinationId>', 'the id of the field to copy to')
     .option(
       '-t --template <template>',
-      'apply a liquidjs template to modify the copied field content'
+      'apply a liquidjs template (surrounded by double quotes) to modify the copied field content'
     )
     .addOption(commit)
     .addOption(concurrency)
@@ -39,7 +39,8 @@ export const makeCopyCommand = () => {
       'after',
       `
 Example call:
-  > copy field blog authorName contributors\n`
+  > copy field blog authorName contributors\n
+  > copy field blog description kicker --template "<h2>{{ source_value }}</h2>"\n`
     )
     .action(
       async (
