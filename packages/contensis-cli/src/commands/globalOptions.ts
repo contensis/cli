@@ -26,7 +26,8 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
     opts.paths ||
     opts.assetType ||
     opts.contentType ||
-    opts.dataFormat
+    opts.dataFormat ||
+    opts.deliveryApi
       ? {
           assetTypes: opts.assetType,
           contentTypeIds: opts.contentType,
@@ -36,6 +37,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
           includePaths: opts.paths,
           orderBy: opts.orderBy,
           searchTerm: opts.phrase,
+          useDelivery: opts.deliveryApi,
         }
       : undefined,
   zenQL: opts.zenql,
@@ -85,6 +87,11 @@ const sharedSecret = new Option(
 );
 
 /* Entry get options */
+export const delivery = new Option(
+  '-delivery --delivery-api',
+  'use delivery api to get the entries'
+);
+
 export const zenql = new Option(
   '-q --zenql <zenql>',
   'get entries with a supplied ZenQL statement'

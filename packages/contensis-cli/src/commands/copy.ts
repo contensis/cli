@@ -4,9 +4,12 @@ import { cliCommand } from '~/services/ContensisCliService';
 import {
   commit,
   concurrency,
+  delivery,
+  entryId,
   ignoreErrors,
   mapContensisOpts,
   outputEntries,
+  zenql,
 } from './globalOptions';
 
 export const makeCopyCommand = () => {
@@ -34,6 +37,9 @@ export const makeCopyCommand = () => {
     .addOption(concurrency)
     .addOption(ignoreErrors)
     .addOption(outputEntries)
+    .addOption(delivery)
+    .addOption(entryId)
+    .addOption(zenql)
     .usage('<contentTypeId> <fieldId> <destinationId> (all arguments required)')
     .addHelpText(
       'after',
@@ -49,6 +55,7 @@ Example call:
         destinationId: string,
         opts: any
       ) => {
+        const { template, ...restOpts } = opts;
         const copyField: CopyField = {
           contentTypeId,
           fieldId,
@@ -59,7 +66,7 @@ Example call:
         return await cliCommand(
           ['copy', 'project', contentTypeId, fieldId, destinationId],
           opts,
-          mapContensisOpts({ copyField })
+          mapContensisOpts({ copyField, ...restOpts })
         ).CopyEntryField({
           commit: opts.commit,
           fromFile: opts.fromFile,
