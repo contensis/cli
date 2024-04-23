@@ -1406,7 +1406,7 @@ class ContensisCli {
         log.error(
           messages.contenttypes.failedRemove(
             currentProject,
-            contentTypeIds.join('", "')
+            contentTypeIds.join(', ')
           ),
           err
         );
@@ -1414,14 +1414,12 @@ class ContensisCli {
         log.success(
           messages.contenttypes.removed(
             currentProject,
-            contentTypeIds.join('", "'),
+            contentTypeIds.join(', '),
             !contensis.isPreview
           )
         );
         // print the results to console
-        await this.HandleFormattingAndOutput(result, () =>
-          log.object(jsonFormatter(result))
-        );
+        await this.HandleFormattingAndOutput(result, log.object);
       }
     }
   };
@@ -1452,28 +1450,37 @@ class ContensisCli {
     });
 
     if (contensis) {
-      // Pass each content type to the target repo
-      for (const contentType of fileData) {
-        // Fix invalid data
-        contentType.projectId = currentProject;
-        delete contentType.uuid;
+      if (fromFile)
+        // Pass each content type to the target repo
+        for (const contentType of fileData) {
+          // Fix invalid data
+          contentType.projectId = currentProject;
+          delete contentType.uuid;
 
-        const [err, created, createStatus] = await contensis.models.targetRepos[
-          currentProject
-        ].repo.UpsertContentType(false, contentType);
+          const [err, created, createStatus] =
+            await contensis.models.targetRepos[
+              currentProject
+            ].repo.UpsertContentType(false, contentType);
 
-        if (err) log.error(err.message, err);
-        if (createStatus) {
-          log.success(
-            messages.contenttypes.created(
-              currentProject,
-              contentType.id,
-              createStatus
-            )
-          );
-          // print the content type to console
-          await this.HandleFormattingAndOutput(contentType, () => {});
+          if (err) log.error(err.message, err);
+          if (createStatus) {
+            log.success(
+              messages.contenttypes.created(
+                currentProject,
+                contentType.id,
+                createStatus
+              )
+            );
+            // print the content type to console
+            await this.HandleFormattingAndOutput(contentType, () => {});
+          }
         }
+      else {
+        const result = await contensis.simpleMigration.Migrate(
+          contentTypeIds,
+          []
+        );
+        await this.HandleFormattingAndOutput(result, log.object);
       }
     }
   };
@@ -1590,7 +1597,7 @@ class ContensisCli {
         log.error(
           messages.components.failedRemove(
             currentProject,
-            componentIds.join('", "')
+            componentIds.join(', ')
           ),
           err
         );
@@ -1598,14 +1605,12 @@ class ContensisCli {
         log.success(
           messages.components.removed(
             currentProject,
-            componentIds.join('", "'),
+            componentIds.join(', '),
             !contensis.isPreview
           )
         );
         // print the results to console
-        await this.HandleFormattingAndOutput(result, () =>
-          log.info(jsonFormatter(result))
-        );
+        await this.HandleFormattingAndOutput(result, log.object);
       }
     }
   };
@@ -1637,27 +1642,36 @@ class ContensisCli {
 
     if (contensis) {
       // Pass each component to the target repo
-      for (const component of fileData) {
-        // Fix invalid data
-        component.projectId = currentProject;
-        delete component.uuid;
+      if (fromFile)
+        for (const component of fileData) {
+          // Fix invalid data
+          component.projectId = currentProject;
+          delete component.uuid;
 
-        const [err, created, createStatus] = await contensis.models.targetRepos[
-          currentProject
-        ].repo.UpsertComponent(false, component);
+          const [err, created, createStatus] =
+            await contensis.models.targetRepos[
+              currentProject
+            ].repo.UpsertComponent(false, component);
 
-        if (err) log.error(err.message, err);
-        if (createStatus) {
-          log.success(
-            messages.components.created(
-              currentProject,
-              component.id,
-              createStatus
-            )
-          );
-          // print the component to console
-          await this.HandleFormattingAndOutput(component, () => {});
+          if (err) log.error(err.message, err);
+          if (createStatus) {
+            log.success(
+              messages.components.created(
+                currentProject,
+                component.id,
+                createStatus
+              )
+            );
+            // print the component to console
+            await this.HandleFormattingAndOutput(component, () => {});
+          }
         }
+      else {
+        const result = await contensis.simpleMigration.Migrate(
+          [],
+          componentIds
+        );
+        await this.HandleFormattingAndOutput(result, log.object);
       }
     }
   };

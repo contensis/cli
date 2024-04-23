@@ -183,9 +183,9 @@ export const LogMessages = {
     removed: (env: string, id: string, commit: boolean) =>
       `[${env}] ${
         commit ? `Deleted` : `Will delete`
-      } content type ${Logger.highlightText(id)}`,
+      } content type(s) ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete content type ${Logger.highlightText(id)}`,
+      `[${env}] Unable to delete content type(s) ${Logger.highlightText(id)}`,
   },
   components: {
     list: (projectId: string) =>
@@ -199,9 +199,9 @@ export const LogMessages = {
     removed: (env: string, id: string, commit: boolean) =>
       `[${env}] ${
         commit ? `Deleted` : `Will delete`
-      } component ${Logger.highlightText(id)}`,
+      } component(s) ${Logger.highlightText(id)}`,
     failedRemove: (env: string, id: string) =>
-      `[${env}] Unable to delete component ${Logger.highlightText(id)}`,
+      `[${env}] Unable to delete component(s) ${Logger.highlightText(id)}`,
   },
   version: {
     set: (env: string, versionStatus: string) =>
