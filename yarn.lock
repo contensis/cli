@@ -109,10 +109,10 @@
   resolved "https://registry.yarnpkg.com/@contensis/canvas-html/-/canvas-html-1.0.0.tgz#9796aa872cf4c433070e096801958ab7792f8541"
   integrity sha512-eooMCs+FunmB5fpYeXfuve2RnYSf/CYgG5GtXKzXngfB6uDx6r3Eyyvu/fCFVrdN6HdB4LiAyhkX3QjcfTANzg==
 
-"@contensis/html-canvas@^1.0.0-beta.1":
-  version "1.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@contensis/html-canvas/-/html-canvas-1.0.0-beta.1.tgz#52d05031064c4e16a552c508f7a63671f8d872d6"
-  integrity sha512-HKGRMNn1/qg6txoi0XZ2QpWFaXDDkijvl01l6w70s+PZu7yeqHzixbYSKtwOw/OnmIagdq/wD6hyIGfoDntcbw==
+"@contensis/html-canvas@^1.0.0-beta.3":
+  version "1.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/@contensis/html-canvas/-/html-canvas-1.0.0-beta.3.tgz#2c096925c8c70ac6d519134bb76ea759adf0ce91"
+  integrity sha512-Ci5Ly4oq3jwWtT7KSK8mR21/+taNm2gd9BAylgBvhRMmPKNy/P94BmipQNn5xUln+w+Lp3cAdoe0fFbIytYJrw==
   dependencies:
     htmlparser2 "^9.1.0"
     markdown-it "^14.0.0"
@@ -1694,10 +1694,10 @@ contensis-core-api@1.1.0, contensis-core-api@^1.1.0:
     es6-promise "^4.2.6"
     tslib "^1.9.3"
 
-contensis-delivery-api@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/contensis-delivery-api/-/contensis-delivery-api-1.4.0.tgz#83ab21630128f728e78944630771ead7da705297"
-  integrity sha512-F1zchs+IDqWgvjUhVQvV7z3TSH1bdGgNlB8Qo/ByvzF7MUcdlM2YOK+7MbP7Rv97oOSR+Y1iZR3KdkAbjWTNaQ==
+contensis-delivery-api@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/contensis-delivery-api/-/contensis-delivery-api-1.4.1.tgz#d5abe0926874d9563b9b87f7c15d7f4db97ec656"
+  integrity sha512-Zog+f3YS1DpI7lGZkvl7QmADFB4zUlWsQgAI79IbY0eVS2JIf6rfgfUlQLsLCQSBdOxuCR6ZJ7z/sttM+sjqIg==
   dependencies:
     contensis-core-api "1.1.0"
     cross-fetch "^3.1.5"

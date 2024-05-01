@@ -11,6 +11,7 @@
     "strict": true,
     "declaration": true,
     "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {

@@ -19,7 +19,7 @@
       "node_modules/figlet/fonts/*"
     ],
     "targets": [
-      "node16"
+      "latest"
     ]
   },
   "scripts": {
