@@ -126,11 +126,11 @@ Example call:
   > import entries --from-file myImportData.json --preserve-guids
 `
     )
-    .action(async (phrase: string, opts, cmd) => {
+    .action(async (search: string, opts, cmd) => {
       await cliCommand(
         ['import', 'entries'],
         opts,
-        mapContensisOpts({ phrase, ...opts })
+        mapContensisOpts({ search, ...opts })
       ).ImportEntries({
         commit: opts.commit,
         fromFile: opts.fromFile,

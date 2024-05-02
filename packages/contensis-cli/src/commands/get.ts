@@ -246,13 +246,11 @@ Example call:
   > get entries --content-type blog --fields entryTitle sys.version.modified --order-by -sys.version.modified
 `
     )
-    .action(async (phrase: string, opts, cmd) => {
-      // console.log('phrase: ', phrase, '\nopts:', JSON.stringify(opts, null, 2));
-      // console.log('opts:', JSON.stringify(opts, null, 2));
+    .action(async (search: string, opts, cmd) => {
       await cliCommand(
         ['get', 'entries'],
         opts,
-        mapContensisOpts({ phrase, ...opts })
+        mapContensisOpts({ search, ...opts })
       ).GetEntries({
         withDependents: opts.dependents,
       });

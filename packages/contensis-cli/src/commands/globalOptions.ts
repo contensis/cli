@@ -20,7 +20,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   query:
     opts.id ||
     opts.entryIds ||
-    opts.phrase ||
+    opts.search ||
     opts.fields ||
     opts.orderBy ||
     opts.paths ||
@@ -36,7 +36,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
           includeIds: opts.id || opts.entryIds,
           includePaths: opts.paths,
           orderBy: opts.orderBy,
-          searchTerm: opts.phrase,
+          searchTerm: opts.search,
           useDelivery: opts.deliveryApi,
         }
       : undefined,
@@ -91,7 +91,10 @@ export const delivery = new Option(
   '-delivery --delivery-api',
   'use delivery api to get the entries'
 );
-
+ export const search = new Option(
+   '--search <phrase>',
+   'get entries with the search phrase, use quotes for multiple words'
+ );
 export const zenql = new Option(
   '-q --zenql <zenql>',
   'get entries with a supplied ZenQL statement'

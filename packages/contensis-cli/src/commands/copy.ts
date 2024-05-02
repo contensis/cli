@@ -4,7 +4,6 @@ import { cliCommand } from '~/services/ContensisCliService';
 import {
   commit,
   concurrency,
-  delivery,
   entryId,
   ignoreErrors,
   mapContensisOpts,
@@ -37,7 +36,10 @@ export const makeCopyCommand = () => {
     .addOption(concurrency)
     .addOption(ignoreErrors)
     .addOption(outputEntries)
-    .addOption(delivery)
+    .option(
+      '--search <phrase>',
+      'get entries with the search phrase, use quotes for multiple words'
+    )
     .addOption(entryId)
     .addOption(zenql)
     .usage('<contentTypeId> <fieldId> <destinationId> (all arguments required)')
