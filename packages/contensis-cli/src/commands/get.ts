@@ -5,6 +5,7 @@ import {
   addGlobalOptions,
   assetTypes,
   contentTypes,
+  delivery,
   entryId,
   mapContensisOpts,
   zenql,
@@ -184,7 +185,8 @@ Example call:
           '-ob --order-by <orderBy...>',
           'field name(s) to order the results by (prefix "-" for descending)'
         )
-      );
+      )
+      .addOption(delivery);
 
   sharedGetEntryOptions(
     program
@@ -204,13 +206,13 @@ Example call:
   > get assets --zenql "sys.contentTypeId = blog" --fields sys.id sys.properties.filePath sys.properties.filename
 `
     )
-    .action(async (phrase: string, opts) => {
+    .action(async (search: string, opts) => {
       // Maintaining a separate command for assets vs entries
       // allows us to offer up more options when dealing with just assets
       await cliCommand(
         ['get', 'assets'],
         opts,
-        mapContensisOpts({ dataFormat: 'asset', phrase, ...opts })
+        mapContensisOpts({ dataFormat: 'asset', search, ...opts })
       ).GetEntries({});
     });
 
