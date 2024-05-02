@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.2.0](https://github.com/contensis/cli/compare/contensis-cli-v1.1.1...contensis-cli-v1.2.0) (2024-05-02)
+
+
+### Features
+
+* add `save-entries` option in `copy field` to save the built entries to json file specified in `output` option ([283a6cd](https://github.com/contensis/cli/commit/283a6cd439df1d51a86a1d1e6bd9cf3edaae5f6f))
+* add `search` option in `copy field` ([45bc264](https://github.com/contensis/cli/commit/45bc264f73c3be2fcfd9c1ed66f1b8f2f4cb20ea))
+* added `delivery-api` option in `get entries` ([d2028bf](https://github.com/contensis/cli/commit/d2028bfeef3a8334f0c6d5c5f0a4c4c617b5e768))
+* added `RequestHandlerFactory` to manage request handler release binary install/update before returning a request handler invocation method in `dev requests` command. Update implementation to supply args instead of writing yaml to launch request handler. ([1898a2a](https://github.com/contensis/cli/commit/1898a2a6a83dedbe17fc7725795b0fd1dac198d3))
+* new command `copy field` ([1f27c2d](https://github.com/contensis/cli/commit/1f27c2d009072a9708272929feca4f79b72ecee0))
+* prompt to override a running block and set a local uri with `dev requests`, ability to run a specific request handler version with `--release` option ([a39ebbd](https://github.com/contensis/cli/commit/a39ebbd0ad449d42398db38992fbbc298f552de5))
+* templating improvements with `copy field` command, new arguments to copy just entry ids, or copy from zenql. Initial support for getting entries via delivery api ([caa4eab](https://github.com/contensis/cli/commit/caa4eab906f24a1bab280267eb32d254fd44ffe8))
+
+
+### Bug Fixes
+
+* `import contenttypes` and `import components` implementation when specifiying a source-cms, fix corrupted console output on both `remove` commands ([e4b6afa](https://github.com/contensis/cli/commit/e4b6afaf2417ef61d9eee1d545e82685bc3b8747))
+* after extensive testing copy field template variables ([186ece2](https://github.com/contensis/cli/commit/186ece2b9bd5594ead103b4aaa673390df7a9314))
+* ensure downloaded request handler script has execute permission ([cb6b9c7](https://github.com/contensis/cli/commit/cb6b9c760e55ef72b31342129edbb575ce47f7b7))
+* improve output logging when finding block versions using `get block` command ([6f3f003](https://github.com/contensis/cli/commit/6f3f0030f0c0fe09830d27d1b91ab9a421cf3a8e))
+* language option in `create project` command incorrectly read as boolean and needs to be a string ([2bb5c90](https://github.com/contensis/cli/commit/2bb5c902055acff285666a081c80ba71f62b8c8e))
+* sanitise `--fields` input ensuring they are valid api ids ([fefcb34](https://github.com/contensis/cli/commit/fefcb3415cdc1cbdf89148a88f18e26e8838d2ff))
+* update migration package version for latest fixes ([964cdb0](https://github.com/contensis/cli/commit/964cdb0447856a6bae87a4285ffa4c7af5268fc2))
+
+
+### Performance Improvements
+
+* improve response times when using `import entries` with very large workloads ([28c2535](https://github.com/contensis/cli/commit/28c2535f2fe09593c47b0d6f38c523a44a587555))
+* request block versions concurrently before launching local request handler with `dev requests` ([18135b6](https://github.com/contensis/cli/commit/18135b635284f3714f82581cb755cb9b1a1edeec))
+
 ## [1.1.1](https://github.com/contensis/cli/compare/contensis-cli-v1.1.0...contensis-cli-v1.1.1) (2023-12-08)
 
 
