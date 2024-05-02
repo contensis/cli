@@ -27,7 +27,7 @@
     "build": "lerna run build --stream",
     "build:exe": "pkg --no-bytecode --public-packages \"*\" --public --compress GZip --output bin/contensis-cli .",
     "build:exe:win": "node exe.config.js",
-    "bootstrap": "yarn",
+    "bootstrap": "yarn && lerna run package-lock",
     "clean": "lerna clean",
     "nuke": "rimraf ./packages/*/node_modules && rimraf ./node_modules",
     "prestart": "kill-port --port 3000,3001,3002",
