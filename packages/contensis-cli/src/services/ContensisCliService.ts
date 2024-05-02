@@ -1815,10 +1815,12 @@ class ContensisCli {
     commit,
     fromFile,
     logOutput,
+    saveEntries,
   }: {
     commit: boolean;
     fromFile: string;
     logOutput: string;
+    saveEntries: boolean;
   }) => {
     const { currentEnv, currentProject, log, messages } = this;
 
@@ -1841,8 +1843,13 @@ class ContensisCli {
       );
 
       if (err) logError(err);
-      if (result)
-        await this.HandleFormattingAndOutput(result, () => {
+      if (result) {
+        const output = saveEntries
+          ? contensis.content.copy.targets[currentProject].migrateEntries?.map(
+              me => me.finalEntry
+            )
+          : result;
+        await this.HandleFormattingAndOutput(output, () => {
           // print the migrateResult to console
           printEntriesMigrateResult(this, result, {
             showAll: logOutput === 'all',
@@ -1850,6 +1857,7 @@ class ContensisCli {
             showChanged: logOutput === 'changes',
           });
         });
+      }
 
       if (
         result &&

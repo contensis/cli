@@ -42,6 +42,10 @@ export const makeCopyCommand = () => {
     )
     .addOption(entryId)
     .addOption(zenql)
+    .option(
+      '-s --save-entries',
+      "save the entries we're migrating instead of the migration preview when using --output option"
+    )
     .usage('<contentTypeId> <fieldId> <destinationId> (all arguments required)')
     .addHelpText(
       'after',
@@ -73,6 +77,7 @@ Example call:
           commit: opts.commit,
           fromFile: opts.fromFile,
           logOutput: opts.outputEntries,
+          saveEntries: opts.saveEntries,
         });
       }
     );
