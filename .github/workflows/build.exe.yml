@@ -20,9 +20,9 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-        os: [ubuntu-20.04, windows-2019, macos-latest, arm64]
+        os: [ubuntu-22.04, windows-2019, macos-13, arm64]
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             friendlyName: Ubuntu x64
             fileName: linux
             exeName: contensis-cli-linux
@@ -31,7 +31,7 @@ jobs:
             friendlyName: Windows x64
             fileName: win
             exeName: contensis-cli-win.exe
-          - os: macos-latest
+          - os: macos-13
             friendlyName: macOS x64
             fileName: mac
             exeName: contensis-cli-mac
@@ -63,7 +63,7 @@ jobs:
           npm install --global yarn
 
       - name: Install additional dependencies
-        if: matrix.os == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get -qq -y install gnome-keyring \
                                libsecret-1-dev \
@@ -76,7 +76,7 @@ jobs:
           yarn run build
 
       - name: Prepare system keyring (Linux)
-        if: matrix.os == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           echo "Install keyring..."
           pip3 install --upgrade pip
@@ -136,18 +136,18 @@ jobs:
 
         # Handle Chocolatey version bump and release
       - name: Make a copy of the exe for chocolatey
-        if: matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2019'
         run: Copy-Item -Path ".\bin\contensis-cli-win.exe" ".\installers\chocolatey\tools"
 
       - name: Set contensis-cli.nuspec version for chocolatey
-        if: matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2019'
         uses: Thundernerd/dotnet-project-version-updater@v1.2
         with:
           file: ${{ env.CHOCO_NUSPEC }}
           version: ${{ env.APP_VERSION }}
 
       - name: Package chocolatey release
-        if: matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2019'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
           args: pack ${{ env.CHOCO_NUSPEC }} --version ${{ env.APP_VERSION }} --outputdirectory installers\chocolatey
