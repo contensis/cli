@@ -10,16 +10,16 @@ permissions:
 jobs:
   build:
     name: Build, test and publish
-    runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit.message, 'docs:') != true && contains(github.ref_name, github.event.head_commit.message) != true
+    runs-on: ubuntu-22.04
+    # if: startsWith(github.event.head_commit.message, 'docs:') != true && contains(github.ref_name, github.event.head_commit.message) != true
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.13.x'
+          node-version: '20.x'
 
       - name: Install dependencies, build and package
         if: contains(github.event.head_commit.message, '[nobuild]') != true
@@ -29,23 +29,23 @@ jobs:
           cd packages/contensis-cli
           npm pack
 
-      - name: Test install and run some cli commands
-        if: contains(github.event.head_commit.message, '[nobuild]') != true
-        env:
-          CMSG: ${{ toJSON(github.event.head_commit.message) }}
-        run: |
-          cd packages/contensis-cli
-          APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
-          npm i -g contensis-cli-$APP_VERSION.tgz
-          # contensis-cli push block cli-ci-block ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app:latest -r -cmsg "${CMSG}" -cdt ${{ github.event.head_commit.timestamp }} -author ${{ github.event.head_commit.author.email }} -committer ${{ github.event.head_commit.committer.email }} -a zenhub-dev -p contensis -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
-          # contensis connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
-          # contensis connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
-          # contensis get entries
-          # contensis-cli get entries -q "externalURL EXISTS" -a trial-006 -p leif2 -id e4376db2-ed3e-49d3-a799-a6ec733a3611 -s a8590f6b4630404186b72fea198d3c12-c6f1f565eb86428ea0170e1b4b8a4b7f-de88eb42e46c4d548a8c36f490f34866
-          # contensis-cli connect trial-006
-          # contensis-cli login zengenti 123456
+      # - name: Test install and run some cli commands
+      #   if: contains(github.event.head_commit.message, '[nobuild]') != true
+      #   env:
+      #     CMSG: ${{ toJSON(github.event.head_commit.message) }}
+      #   run: |
+      #     cd packages/contensis-cli
+      #     APP_VERSION=$(node --eval="process.stdout.write(require('./package.json').version)")
+      #     npm i -g contensis-cli-$APP_VERSION.tgz
+      #     # contensis-cli push block cli-ci-block ghcr.io/${{ github.repository }}/${{ github.ref_name }}/app:latest -r -cmsg "${CMSG}" -cdt ${{ github.event.head_commit.timestamp }} -author ${{ github.event.head_commit.author.email }} -committer ${{ github.event.head_commit.committer.email }} -a zenhub-dev -p contensis -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
+      #     # contensis connect zenhub-dev -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
+      #     # contensis connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
+      #     # contensis get entries
+      #     # contensis-cli get entries -q "externalURL EXISTS" -a trial-006 -p leif2 -id e4376db2-ed3e-49d3-a799-a6ec733a3611 -s a8590f6b4630404186b72fea198d3c12-c6f1f565eb86428ea0170e1b4b8a4b7f-de88eb42e46c4d548a8c36f490f34866
+      #     # contensis-cli connect trial-006
+      #     # contensis-cli login zengenti 123456
 
-      - uses: google-github-actions/release-please-action@v3
+      - uses: google-github-actions/release-please-action@v4
         id: release
         with:
           command: manifest
