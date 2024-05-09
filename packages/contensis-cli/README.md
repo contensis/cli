@@ -11,7 +11,7 @@ or use your preferred installation method below
 ### Windows ([Chocolatey](https://chocolatey.org/install))
 
 ```shell
-choco install contensis-cli --pre
+choco install contensis-cli
 ```
 
 - [Choco package docs and source](https://github.com/contensis/cli/tree/main/installers/chocolatey)
@@ -242,6 +242,7 @@ contensis >
   - [Get an entry with all of its dependents](#get-an-entry-with-all-of-its-dependents)
   - [Get entries with a ZenQL statement](#get-entries-with-a-zenql-statement)
   - [Choose entry fields to output](#choose-entry-fields-to-output)
+  - [Get entries using the Delivery API](#get-entries-using-the-delivery-api)
   - [Output results to a file](#output-results-to-a-file)
 - [Format output](#format-output)
 - [Manage API keys](#manage-api-keys)
@@ -254,7 +255,7 @@ contensis >
   - [Set role details](#set-role-details)
   - [Disable role](#disable-role)
   - [Remove role](#remove-role)
-- [Manage content Blocks](#manage-content-blocks)
+- [Manage blocks](#manage-blocks)
   - [List blocks](#list-blocks)
   - [Get block](#get-block)
   - [Get block logs](#get-block-logs)
@@ -277,6 +278,12 @@ contensis >
   - [Import from a file](#import-from-a-file-1)
   - [Import entries further reading](#import-entries-further-reading)
 - [Remove entries](#remove-entries)
+- [Copy an entry field](#copy-an-entry-field)
+  - [Copy a simple entry field](#copy-a-simple-entry-field)
+  - [Limit entries when copying field content](#limit-entries-when-copying-field-content)
+  - [Copy a composer into a canvas field](#copy-a-composer-into-a-canvas-field)
+  - [Copy a field using a template](#copy-a-field-using-a-template)
+  - [Copy a field and save the entries as output](#copy-a-field-and-save-the-entries-as-output)
 
 ## Get started
 
@@ -706,7 +713,7 @@ Use a ZenQL statement to find entries with the `--zenql` or `-q` option, add you
 website t.durden@example-dev> get entries --zenql "sys.contentTypeId = plant"
   -------------------------------------
 [24/07 01:52:37] [INFO] Fetching initial entries in project 'website'
- Fetch [website]                                      >> 100% 21 0.0s/0.0s Infinityp/s
+ Fetch [website]                                      >> 100% 21 0.0s/0.0s
 
 Found 21 entries in [website]
 --------------------------------------------
@@ -771,6 +778,16 @@ Found 12 entries in [website]
 website t.durden@example-dev>
 ```
 
+### Get entries using the Delivery API
+
+By default all Contensis operations are performed using the Management API. Some data fields are only available to output when searching the Delivery API e.g. `sys.uri`
+
+To include the `sys.uri` field with the entries returned from the above example, as well as adding the `sys.uri` field to the `--fields` list, we would also include the `--delivery-api` option in the `get entries` command.
+
+```shell
+website t.durden@example-dev> get entries --delivery-api --fields sys.uri productName colour material externalPromotion --zenql "sys.contentTypeId = pot"
+```
+
 ### Output results to a file
 
 Use the `--output` or `-o` option followed by the file name you wish for command output to be written to
@@ -784,10 +801,10 @@ website t.durden@example-dev> get entries --zenql "sys.contentTypeId = pot" --ou
 website t.durden@example-dev>
 ```
 
-Combine other options and mobilise your data to consume elsewhere
+Combine other options and mobilise your data to consume elsewhere: this command will dump an entry and all of its dependents (at all link depths) to a json file creating a complete picture of the entry data and everything that is linked to it.
 
 ```shell
-get entries -d -o aloe-complete-entry.json -id 7cf921a0-ee4f-4bd6-a3f2-0fb0fe1a2ac8
+get entries --dependents --output aloe-complete-entry.json --id 7cf921a0-ee4f-4bd6-a3f2-0fb0fe1a2ac8
   -------------------------------------
 [24/07 02:16:04] [INFO] Fetching initial entries in project 'website'
  Fetch [website]                         >> 100% 1 0.0s/0.0s 100000p/s
@@ -1103,9 +1120,9 @@ website t.durden@example-dev> get webhook "Slack"
 website t.durden@example-dev>
 ```
 
-## Manage content Blocks
+## Manage blocks
 
-You can manage blocks for any Contensis project using the following commands
+You can manage deployed blocks for any Contensis project using the following commands
 
 ### List blocks
 
@@ -1229,7 +1246,7 @@ website t.durden@example-dev> execute block action release contensis-website 78
 [cli] ✅ [example-dev] Action release on contensis-website in project website requested successfully
   v78 contensis-website
     state: available
-    released: [23/11/2022 01:42] n.flatley
+    released: [23/11/2022 01:42] t.durden
     status:
       deployment: deployed
       workflow: released
@@ -1697,3 +1714,147 @@ website t.durden@example-dev>
 ```
 
 <sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
+
+## Copy an entry field
+
+This command allows us to copy the contents of one entry field to another, this is useful if, for example - when a field is named incorrectly, or was specified originally as one field type but we would like to curate and present this content differently in future.
+
+The required inputs for using `copy field` are:
+
+- `contentTypeId`: the content type containing the field to copy
+- `fieldId`: the field id containing the source data
+- `destinationId`: the target field id where the data will be copied to
+
+Copying field data from one field to another can only be done with fields that exist in the content type, and with the source and destination field types are metioned in the [transformation matrix](docs/copy_field_transformation_matrix.md)
+
+Similar to the `import` commands, the `copy` command is safe to run again and again for testing and reviewing the output. The changes are made to the entries permanently when the `--commit` option is added.
+
+### Copy a simple entry field
+
+To copy the contents of one field to another use the command like this:
+
+```
+copy field <contentTypeId> <fieldId> <destinationId>
+```
+
+For the next example, we will copy the contents of a field called `text` into another field called `heading`, in the `contentPage` content type
+
+```shell
+website t.durden@example-dev> copy field contentPage text heading
+  -------------------------------------
+ -- IMPORT PREVIEW --
+[07/05 16:21:40] [INFO] OK to copy contentPage[text]<string> field into contentPage[heading]<string> in website on example-dev [direct]
+[07/05 16:21:40] [INFO] Searching for initial entries in example-dev project 'website'
+[07/05 16:21:40] [INFO] Finding 2 entries in example-dev project 'website'
+[07/05 16:21:45] [INFO] Building 2 content entries
+
+2/2 entries to migrate into [website]
+
+ contentTypeId         status     total
+----------------------------------------------
+ contentPage    update     2
+----------------------------------------------
+
+ id                                    contentTypeId         status    updates  entryTitle
+--------------------------------------------------------------------------------------------------------------
+ 21818721-f03e-4e8a-9982-c83212409850  contentPage    update    -1,+1    Content page
+ 70fa7283-cdba-462d-8cd3-a1d4b30ac2e7  contentPage    update    -0,+1    Test field data
+--------------------------------------------------------------------------------------------------------------
+
+[07/05 16:21:45] [OK] Entries migration preview ready
+
+[cli] ⏩ import from project website to website
+
+  - contentPage: 2 [existing: 100%] [needs update: 100%]
+  - totalCount: 2
+
+[cli] ✅ [example-dev] Will import 2 entries
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
+
+We can request more output for our preview by adding `--output-entries changes` option and we will see a diff of the entries that have updates applied to them.
+
+### Limit entries when copying field content
+
+If the number of entries to copy in a content type are too large to manage, or if we are testing the `copy field` command with a subset of entries we can supply one of the following options to limit the entries that are returned when we run the `copy field` command.
+
+- `--id`: copy the field contents of one entry only
+- `--zenql`: provides the finest level of control over the returned entries
+- `--search`: limits the results with a simple keyword or phrase
+
+Consult the command `copy field --help` to see all of the available options
+
+### Copy a composer into a canvas field
+
+, in order to transform the contents of a Composer field in an entry to a canvas field type, we achieve this by rendering each item in the Composer as simple HTML representation internally before parsing this markup and converting it to canvas then adding the output to our destination entry field, working in the same way as if we were copying the contents of a rich text field type (containing markup) to a canvas field.
+
+```shell
+contensis t.durden@example-dev> copy field contentPage composer canvas --output-entries changes        
+  -------------------------------------
+ -- IMPORT PREVIEW -- 
+[07/05 17:02:51] [INFO] OK to copy contentPage[composer]<objectArray> field into contentPage[canvas]<objectArray> in website on example-dev [canvas]
+[07/05 17:02:51] [INFO] Searching for initial entries in example-dev project 'website'
+[07/05 17:02:53] [INFO] Finding 1 entries in example-dev project 'website'
+[07/05 17:02:56] [INFO] Building 1 content entries
+
+1/1 entries to migrate into [website]
+
+ contentTypeId         status     total  
+----------------------------------------------
+ contentPage    update     1
+----------------------------------------------
+
+ id                                    contentTypeId         status    updates  entryTitle
+--------------------------------------------------------------------------------------------------------------
+ 401abeba-d47d-4975-8890-db4b07ad58c4  contentPage    update    -1,+1    Content page
+--------------------------------------------------------------------------------------------------------------
+
+[07/05 17:02:56] [OK] Entries migration preview ready
+
+update 401abeba-d47d-4975-8890-db4b07ad58c4 contentPage Content page
+  diff: '{'canvas':[{'id':'<->9fef6713','type':'_paragraph'}],'</-><+>c2c69573','type':'_paragraph','value':[{'id':'2edb9251','type':'_fragment','value':'This is the page content curated in a '},{'id':'fc28bf06','properties':{'decorators':['code']},'type':'_fragment','value':'markup'},{'id':'b67233b7','type':'_fragment','value':' composer item'}]},{'id':'f13ced2f','type':'_image','value':{'asset':{'sys':{'availableLanguages':['en-GB'],'id':'e7ee357f-35b1-4315-be7a-3d0cc2ff661b','isPublished':true,'language':'en-GB','metadata':{'includeInAToZ':false,'includeInMenu':false,'includeInSearch':true,'includeInSiteMap':false,'nodeId':'e7ee357f-35b1-4315-be7a-3d0cc2ff661b'},'owner':'d.mee','projectId':'contensis','properties':{'fileId':'e7ee357f-35b1-4315-be7a-3d0cc2ff661b','filename':'swiss-army-knife-blog-image1.jpeg','filePath':'/image-library/blog-images/','fileSize':48731,'height':512,'width':357},'version':{'created':'2021-09-24T10:56:10.8000819Z','createdBy':'ServicesUser','modified':'2021-09-24T10:56:10.8000819Z','modifiedBy':'ServicesUser','published':'2021-10-04T10:05:45.9434807Z','publishedBy':'ServicesUser','versionNo':'1.0'},'versionStatus':'latest','workflow':{'id':'contensisEntryBasic','state':'versionComplete'}},'title':'Swiss Army Knife - Blog image1'}}},{'id':'867aebcd','type':'_paragraph','value':'This line was curated as plain text'},{'id':'f9e378c8','properties':{'component':'iconWithText'},'type':'_component','value':{'icon':{'sys':{'id':'7d62ee24-b36a-46c3-b49f-09b32575dfbd','language':'en-GB'}},'text':'Some text curated in a component along with my icon'}}],'</+>composer':[{'type':'markup','value':'<p>This is the page content curated in a <code>markup</code> composer item</p>'},{'type':'image','value':{'altText':'An inline image in my content page','asset':{'sys':{'id':'e7ee357f-35b1-4315-be7a-3d0cc2ff661b'}}}},{'type':'text','value':'This line was curated as plain text'},{'type':'iconWithText','value':{'icon':{'sys':{'id':'7d62ee24-b36a-46c3-b49f-09b32575dfbd'}},'text':'Some text curated in a component along with my icon'}}],'heading':'This is my content heading','text':'Content page'}
+
+[cli] ⏩ import from project website to website
+
+  - contentPage: 1 [existing: 100%] [needs update: 100%]
+  - totalCount: 1
+
+[cli] ✅ [example-dev] Will import 1 entries
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
+
+### Copy a field using a template
+
+For fine-grained control of what is rendered or copied into the target field we can supply a `--template` option with a string value that is a [LiquidJS](https://liquidjs.com/tutorials/intro-to-liquid.html) template with access to variables we can use to directly drive how the output is written into our target field
+
+The syntax for applying a template with the `copy field` command is 
+```shell
+copy field blog description kicker --template "<h2>{{ value }}</h2>"
+```
+in this example the `value` from `description` field will be wrapped in a `<h2>` tag before being added to the `kicker` field
+
+The template must be surrounded in double-quotes and be entered (or pasted) in a single line for it to be parsed correctly with the intended command.
+
+Adding a template containing html? Attributes can be wrapped in single quotes.
+
+Escape characters and new lines can be introduced inside templates when calling `contensis copy field` from your system shell as a cli command. This is OS/shell dependent and does not work in the Contensis shell (due to the combined layers of command parsing)
+
+Further documentation on using [templates](docs/copy_field_templates.md)
+
+### Copy a field and save the entries as output
+
+As we do not actually commit the output of a `copy field` command until specified we can also save the entries preview containing the new field data.
+
+With the saved output we can examine the raw output of each entry containing the copied field data before we choose to load it, or we can repurpose the saved entries output for further processing.
+
+Add the `--save-entries` option to the `copy field` command, remember to also include the `--output copy-entries.json` option, specifying the file where the output will be saved.
+
+```shell
+copy field contentPage composer canvas --save-entries --output canvas-entries.json
+```
