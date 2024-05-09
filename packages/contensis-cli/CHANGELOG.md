@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/contensis/cli/compare/contensis-cli-v1.2.0...contensis-cli-v1.2.1) (2024-05-09)
+
+
+### Bug Fixes
+
+* post testing issues with `copy field` transformations and issues in v1.2.0 ([fa26f4d](https://github.com/contensis/cli/commit/fa26f4df6b5d18121a9ef58d5ffe87a787cf4a43))
+
 ## [1.2.0](https://github.com/contensis/cli/compare/contensis-cli-v1.1.1...contensis-cli-v1.2.0) (2024-05-02)
 
 
