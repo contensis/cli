@@ -48,9 +48,8 @@ jobs:
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
-          command: manifest
           token: ${{secrets.RELEASE_PLEASE_GITHUB_TOKEN}}
-          default-branch: main
+          target-branch: main
 
       - name: Check release output
         id: check
