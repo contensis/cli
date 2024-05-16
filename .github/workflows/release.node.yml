@@ -33,12 +33,13 @@ jobs:
           node-version: '20.x'
 
       - id: build
-        name: Install dependencies, build and set APP_VERSION output variable
+        name: Install dependencies, and build
         run: |
           yarn run bootstrap
           yarn run build
 
       - id: app_version
+        name: Set APP_VERSION output variable
         run: |
           APP_VERSION=$(node --eval="process.stdout.write(require('./packages/contensis-cli/package.json').version)")
           echo "version=$APP_VERSION"
