@@ -192,8 +192,9 @@ export class Logger {
       for (const item of content) {
         if (item && typeof item === 'object') {
           if (Array.isArray(item) && depth > 3)
-            Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
-          else Logger.objectRecurse(item, depth + 1, `${indent}  `);
+            if (item.length)
+              Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
+            else Logger.objectRecurse(item, depth + 1, `${indent}  `);
         } else Logger.raw(`${indent}${item}`);
       }
     } else {

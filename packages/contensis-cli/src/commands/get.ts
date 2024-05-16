@@ -122,6 +122,7 @@ Example call:
     .command('model')
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')
+    .option('--required-by', 'shows the id(s) that created each dependency')
     .addOption(noCache)
     .addHelpText(
       'after',
@@ -135,7 +136,7 @@ Example call:
         ['get', 'model', modelIds.join(' ')],
         opts,
         mapContensisOpts(opts)
-      ).PrintContentModels(modelIds);
+      ).PrintContentModels(modelIds, opts.requiredBy);
     });
 
   program

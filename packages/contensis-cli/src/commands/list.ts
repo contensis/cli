@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { noCache } from './globalOptions';
+import { mapContensisOpts, noCache } from './globalOptions';
 
 export const makeListCommand = () => {
   const list = new Command()
@@ -50,7 +50,11 @@ Example call:
 `
     )
     .action(async opts => {
-      await cliCommand(['list', 'models'], opts).PrintContentModels();
+      await cliCommand(
+        ['list', 'models'],
+        opts,
+        mapContensisOpts(opts)
+      ).PrintContentModels();
     });
 
   list

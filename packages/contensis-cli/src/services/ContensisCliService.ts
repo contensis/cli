@@ -1181,7 +1181,10 @@ class ContensisCli {
     }
   };
 
-  PrintContentModels = async (modelIds: string[] = []) => {
+  PrintContentModels = async (
+    modelIds: string[] = [],
+    printRequiredBy?: boolean
+  ) => {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();
     if (contensis) {
@@ -1231,6 +1234,14 @@ class ContensisCli {
         await this.HandleFormattingAndOutput(contentModelBackup, () => {
           // print the content models to console
           for (const model of returnModels) {
+            if (!printRequiredBy) { // truncate parts of the output
+              delete model.dependencyOf;
+              if (model.dependencies?.contentTypes)
+                model.dependencies.contentTypes.forEach(id => (id[1] = []));
+              if (model.dependencies?.components)
+                model.dependencies.components.forEach(id => (id[1] = []));
+            }
+
             log.raw('');
             log.object(model);
           }
