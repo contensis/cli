@@ -40,7 +40,7 @@ brew install contensis-cli-linux
 Install the package via [`npm`](https://www.npmjs.com/package/contensis-cli) as a global module (requires [Node.js](https://nodejs.org/en/download/))
 
 ```shell
-npm i --global contensis-cli@prelease
+npm i --global contensis-cli@prerelease
 ```
 
 If you use `nvm` and are frequently switching your local `node` version it will also switch your global `node_modules` each time, it is recommended use one of the binary installations instead.
