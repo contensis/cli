@@ -59,12 +59,12 @@ const commands = () => {
     ).copyInheritedSettings(program)
   );
   program.addCommand(
-    addGlobalOptions(makeExecuteCommand()).copyInheritedSettings(program)
-  );
-  program.addCommand(
     addGlobalOptions(addImportOptions(makeDiffCommand())).copyInheritedSettings(
       program
     )
+  );
+  program.addCommand(
+    addGlobalOptions(makeExecuteCommand()).copyInheritedSettings(program)
   );
   program.addCommand(
     addGlobalOptions(makeGetCommand()).copyInheritedSettings(program)

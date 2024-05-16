@@ -8,6 +8,7 @@ import {
   delivery,
   entryId,
   mapContensisOpts,
+  noCache,
   zenql,
 } from './globalOptions';
 
@@ -121,6 +122,7 @@ Example call:
     .command('model')
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')
+    .addOption(noCache)
     .addHelpText(
       'after',
       `
@@ -131,7 +133,8 @@ Example call:
     .action(async (modelIds: string[], opts) => {
       await cliCommand(
         ['get', 'model', modelIds.join(' ')],
-        opts
+        opts,
+        mapContensisOpts(opts)
       ).PrintContentModels(modelIds);
     });
 

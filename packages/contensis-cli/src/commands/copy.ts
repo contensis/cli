@@ -7,6 +7,7 @@ import {
   entryId,
   ignoreErrors,
   mapContensisOpts,
+  noCache,
   outputEntries,
   zenql,
 } from './globalOptions';
@@ -36,6 +37,7 @@ export const makeCopyCommand = () => {
     .addOption(concurrency)
     .addOption(ignoreErrors)
     .addOption(outputEntries)
+    .addOption(noCache)
     .option(
       '--search <phrase>',
       'get entries with the search phrase, use quotes for multiple words'

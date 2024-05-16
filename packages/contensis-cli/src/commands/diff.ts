@@ -1,22 +1,23 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { mapContensisOpts } from './globalOptions';
+import { mapContensisOpts, noCache } from './globalOptions';
 
 export const makeDiffCommand = () => {
-  const release = new Command()
+  const diff = new Command()
     .command('diff')
     .description('diff command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
 
-  release
+  diff
     .command('models')
     .description('differences with content models')
     .argument(
       '[model-ids...]',
       'ids of any content types or components to diff (optional)'
     )
+    .addOption(noCache)
     .usage('[model-ids...]')
     .addHelpText(
       'after',
@@ -37,5 +38,5 @@ Example call:
       );
     });
 
-  return release;
+  return diff;
 };

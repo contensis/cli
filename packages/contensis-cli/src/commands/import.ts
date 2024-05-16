@@ -1,12 +1,16 @@
 import { Command, Option } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import {
+  assetTypes,
   commit,
   concurrency,
-  getEntryOptions,
+  contentTypes,
+  entryId,
   ignoreErrors,
   mapContensisOpts,
+  noCache,
   outputEntries,
+  zenql,
 } from './globalOptions';
 
 export const makeImportCommand = () => {
@@ -21,6 +25,7 @@ export const makeImportCommand = () => {
     .command('models')
     .description('import complete content models')
     .argument('[modelIds...]', 'ids of the content models to import (optional)')
+    .addOption(noCache)
     .addOption(commit)
     .addHelpText(
       'after',
@@ -101,15 +106,17 @@ Example call:
       );
     });
 
-  getEntryOptions(
-    program
-      .command('entries')
-      .description('import entries')
-      .argument(
-        '[search phrase]',
-        'get entries with the search phrase, use quotes for multiple words'
-      )
-  )
+  program
+    .command('entries')
+    .description('import entries')
+    .argument(
+      '[search phrase]',
+      'get entries with the search phrase, use quotes for multiple words'
+    )
+    .addOption(entryId)
+    .addOption(zenql)
+    .addOption(contentTypes)
+    .addOption(assetTypes)
     .addOption(commit)
     .option(
       '-preserve --preserve-guids',
@@ -118,6 +125,7 @@ Example call:
     .addOption(concurrency)
     .addOption(outputEntries)
     .addOption(ignoreErrors)
+    .addOption(noCache)
     .addHelpText(
       'after',
       `

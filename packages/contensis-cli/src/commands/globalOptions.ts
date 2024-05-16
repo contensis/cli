@@ -43,6 +43,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   zenQL: opts.zenql,
   transformGuids: !opts.preserveGuids,
   ignoreErrors: opts.ignoreErrors,
+  noCache: !opts.cache,
   concurrency: opts.concurrency ? Number(opts.concurrency) : undefined,
 });
 
@@ -91,10 +92,10 @@ export const delivery = new Option(
   '-delivery --delivery-api',
   'use delivery api to get the entries'
 );
- export const search = new Option(
-   '--search <phrase>',
-   'get entries with the search phrase, use quotes for multiple words'
- );
+export const search = new Option(
+  '--search <phrase>',
+  'get entries with the search phrase, use quotes for multiple words'
+);
 export const zenql = new Option(
   '-q --zenql <zenql>',
   'get entries with a supplied ZenQL statement'
@@ -147,6 +148,11 @@ export const concurrency = new Option(
   'the number of entries to load in parallel'
 ).default(2);
 
+export const noCache = new Option(
+  '--no-cache',
+  'add this flag to ignore internal cache and rebuild all resources from scratch'
+);
+
 export const addConnectOptions = (program: Command) =>
   program.addOption(alias.hideHelp()).addOption(project.hideHelp());
 
@@ -166,13 +172,6 @@ export const addImportOptions = (program: Command) => {
   }
   return program;
 };
-
-export const getEntryOptions = (command: Command) =>
-  command
-    .addOption(entryId)
-    .addOption(zenql)
-    .addOption(contentTypes)
-    .addOption(assetTypes);
 
 export const addGlobalOptions = (program: Command) => {
   for (const command of program.commands) {

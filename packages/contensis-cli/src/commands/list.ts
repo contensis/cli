@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
+import { noCache } from './globalOptions';
 
 export const makeListCommand = () => {
   const list = new Command()
@@ -40,6 +41,7 @@ Example call:
   list
     .command('models')
     .description('print list of content models')
+    .addOption(noCache)
     .addHelpText(
       'after',
       `
