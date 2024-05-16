@@ -10,6 +10,7 @@ import {
   mapContensisOpts,
   noCache,
   outputEntries,
+  saveEntries,
   zenql,
 } from './globalOptions';
 
@@ -126,6 +127,7 @@ Example call:
     .addOption(outputEntries)
     .addOption(ignoreErrors)
     .addOption(noCache)
+    .addOption(saveEntries)
     .addHelpText(
       'after',
       `
@@ -143,6 +145,7 @@ Example call:
         commit: opts.commit,
         fromFile: opts.fromFile,
         logOutput: opts.outputEntries,
+        saveEntries: opts.saveEntries,
       });
     });
 

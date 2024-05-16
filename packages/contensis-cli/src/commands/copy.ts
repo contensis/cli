@@ -9,6 +9,7 @@ import {
   mapContensisOpts,
   noCache,
   outputEntries,
+  saveEntries,
   zenql,
 } from './globalOptions';
 
@@ -44,10 +45,7 @@ export const makeCopyCommand = () => {
     )
     .addOption(entryId)
     .addOption(zenql)
-    .option(
-      '-s --save-entries',
-      "save the entries we're migrating instead of the migration preview when using --output option"
-    )
+    .addOption(saveEntries)
     .usage('<contentTypeId> <fieldId> <destinationId> (all arguments required)')
     .addHelpText(
       'after',

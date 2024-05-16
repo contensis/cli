@@ -1234,7 +1234,8 @@ class ContensisCli {
         await this.HandleFormattingAndOutput(contentModelBackup, () => {
           // print the content models to console
           for (const model of returnModels) {
-            if (!printRequiredBy) { // truncate parts of the output
+            if (!printRequiredBy) {
+              // truncate parts of the output
               delete model.dependencyOf;
               if (model.dependencies?.contentTypes)
                 model.dependencies.contentTypes.forEach(id => (id[1] = []));
@@ -1756,10 +1757,12 @@ class ContensisCli {
     commit,
     fromFile,
     logOutput,
+    saveEntries,
   }: {
     commit: boolean;
     fromFile: string;
     logOutput: string;
+    saveEntries: boolean;
   }) => {
     const { currentEnv, currentProject, log, messages } = this;
 
@@ -1780,8 +1783,13 @@ class ContensisCli {
       const [err, result] = await contensis.MigrateEntries();
 
       if (err) logError(err);
-      else
-        await this.HandleFormattingAndOutput(result, () => {
+      else {
+        const output = saveEntries
+          ? contensis.content.targets[currentProject].migrateEntries?.map(
+              me => me.finalEntry
+            )
+          : result;
+        await this.HandleFormattingAndOutput(output, () => {
           // print the migrateResult to console
           printEntriesMigrateResult(this, result, {
             showAll: logOutput === 'all',
@@ -1789,7 +1797,7 @@ class ContensisCli {
             showChanged: logOutput === 'changes',
           });
         });
-
+      }
       if (
         !err &&
         !result.errors?.length &&

@@ -143,6 +143,11 @@ export const outputEntries = new Option(
   .choices(['errors', 'changes', 'all'])
   .default('errors');
 
+export const saveEntries = new Option(
+  '-save --save-entries',
+  "save the entries we're migrating instead of the migration preview when using --output option"
+);
+
 export const concurrency = new Option(
   '-conc --concurrency <concurrency>',
   'the number of entries to load in parallel'
