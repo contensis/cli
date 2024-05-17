@@ -7,8 +7,10 @@ import {
   contentTypes,
   delivery,
   entryId,
+  latest,
   mapContensisOpts,
   noCache,
+  versionStatus,
   zenql,
 } from './globalOptions';
 
@@ -190,6 +192,8 @@ Example call:
           'field name(s) to order the results by (prefix "-" for descending)'
         )
       )
+      .addOption(latest)
+      .addOption(versionStatus)
       .addOption(delivery);
 
   sharedGetEntryOptions(

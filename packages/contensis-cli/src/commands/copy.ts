@@ -6,10 +6,12 @@ import {
   concurrency,
   entryId,
   ignoreErrors,
+  latest,
   mapContensisOpts,
   noCache,
   outputEntries,
   saveEntries,
+  versionStatus,
   zenql,
 } from './globalOptions';
 
@@ -45,6 +47,8 @@ export const makeCopyCommand = () => {
     )
     .addOption(entryId)
     .addOption(zenql)
+    .addOption(latest)
+    .addOption(versionStatus)
     .addOption(saveEntries)
     .usage('<contentTypeId> <fieldId> <destinationId> (all arguments required)')
     .addHelpText(

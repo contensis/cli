@@ -7,10 +7,12 @@ import {
   contentTypes,
   entryId,
   ignoreErrors,
+  latest,
   mapContensisOpts,
   noCache,
   outputEntries,
   saveEntries,
+  versionStatus,
   zenql,
 } from './globalOptions';
 
@@ -118,6 +120,8 @@ Example call:
     .addOption(zenql)
     .addOption(contentTypes)
     .addOption(assetTypes)
+    .addOption(latest)
+    .addOption(versionStatus)
     .addOption(commit)
     .option(
       '-preserve --preserve-guids',

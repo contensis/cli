@@ -27,7 +27,9 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
     opts.assetType ||
     opts.contentType ||
     opts.dataFormat ||
-    opts.deliveryApi
+    opts.deliveryApi ||
+    opts.latest ||
+    opts.versionStatus
       ? {
           assetTypes: opts.assetType,
           contentTypeIds: opts.contentType,
@@ -38,6 +40,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
           orderBy: opts.orderBy,
           searchTerm: opts.search,
           useDelivery: opts.deliveryApi,
+          versionStatus: opts.latest ? 'latest' : opts.versionStatus,
         }
       : undefined,
   zenQL: opts.zenql,
@@ -110,6 +113,14 @@ export const assetTypes = new Option(
   '-at --asset-type <assetType...>',
   'get assets of given content type(s) e.g. image word pdf'
 );
+export const versionStatus = new Option(
+  '-vs --version-status <versionStatus>',
+  'the entry versions to get'
+)
+  .choices(['latest', 'published'])
+  .default('published');
+
+export const latest = new Option('--latest', 'get the latest entry versions');
 
 /* Import options */
 export const fromFile = new Option(
