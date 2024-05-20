@@ -45,7 +45,7 @@ jobs:
       #     # contensis-cli connect trial-006
       #     # contensis-cli login zengenti 123456
 
-      - uses: google-github-actions/release-please-action@v4
+      - uses: googleapis/release-please-action@v4
         id: release
         with:
           token: ${{secrets.RELEASE_PLEASE_GITHUB_TOKEN}}
