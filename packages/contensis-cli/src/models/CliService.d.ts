@@ -1,3 +1,13 @@
+export type CliUrls =
+  | {
+      api: string;
+      cms: string;
+      liveWeb: string;
+      previewWeb: string;
+      iisWeb: string;
+      iisPreviewWeb: string;
+    }
+  | undefined;
 
 export type OutputFormat = 'json' | 'csv' | 'xml';
 

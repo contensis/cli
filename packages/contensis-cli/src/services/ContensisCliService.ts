@@ -22,7 +22,11 @@ import {
 import ContensisAuthService from './ContensisAuthService';
 
 import { LogMessages } from '~/localisation/en-GB';
-import { OutputFormat, OutputOptionsConstructorArg } from '~/models/CliService';
+import {
+  CliUrls,
+  OutputFormat,
+  OutputOptionsConstructorArg,
+} from '~/models/CliService';
 
 import { readFileAsJSON } from '~/providers/file-provider';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
@@ -78,16 +82,7 @@ class ContensisCli {
 
   sourceAlias?: string;
   targetEnv?: string;
-  urls:
-    | {
-        api: string;
-        cms: string;
-        liveWeb: string;
-        previewWeb: string;
-        iisWeb: string;
-        iisPreviewWeb: string;
-      }
-    | undefined;
+  urls: CliUrls;
   log = Logger;
   messages = LogMessages;
 
