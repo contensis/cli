@@ -36,6 +36,10 @@ export const makeCopyCommand = () => {
       '-t --template <template>',
       'apply a liquidjs template (surrounded by double quotes) to modify the copied field content'
     )
+    .option(
+      '--root-uri <rootUri>',
+      'prefix your public uri to relative links in canvas content'
+    )
     .addOption(commit)
     .addOption(concurrency)
     .addOption(ignoreErrors)
@@ -71,6 +75,7 @@ Example call:
           fieldId,
           destinationId,
           template: opts.template,
+          rootUri: opts.rootUri,
         };
 
         return await cliCommand(
