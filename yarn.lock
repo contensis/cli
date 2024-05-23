@@ -109,10 +109,10 @@
   resolved "https://registry.npmjs.org/@contensis/canvas-html/-/canvas-html-1.0.0.tgz"
   integrity sha512-eooMCs+FunmB5fpYeXfuve2RnYSf/CYgG5GtXKzXngfB6uDx6r3Eyyvu/fCFVrdN6HdB4LiAyhkX3QjcfTANzg==
 
-"@contensis/html-canvas@^1.0.0-beta.3":
-  version "1.0.0-beta.3"
-  resolved "https://registry.npmjs.org/@contensis/html-canvas/-/html-canvas-1.0.0-beta.3.tgz"
-  integrity sha512-Ci5Ly4oq3jwWtT7KSK8mR21/+taNm2gd9BAylgBvhRMmPKNy/P94BmipQNn5xUln+w+Lp3cAdoe0fFbIytYJrw==
+"@contensis/html-canvas@^1.0.0-beta.4":
+  version "1.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@contensis/html-canvas/-/html-canvas-1.0.0-beta.4.tgz#2cd8cdabf4c2cc4f0955924345910c60f7e818a4"
+  integrity sha512-csQI/M947YMGEdidT0+aPGxDmxfUtSgDjp75b5cvvja3A+rw3JJBACQNGh4edKr+yxT61fkzKbRTmUxMCveTqg==
   dependencies:
     htmlparser2 "^9.1.0"
     markdown-it "^14.0.0"
