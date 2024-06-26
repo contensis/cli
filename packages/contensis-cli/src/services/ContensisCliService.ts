@@ -1822,7 +1822,8 @@ class ContensisCli {
             commit
               ? (result.nodesResult?.created || 0) +
                   (result.nodesResult?.updated || 0)
-              : (result.nodesToMigrate[currentProject].totalCount as number)
+              : (result.nodesToMigrate?.[currentProject]
+                  .totalCount as number) || 0
           )
         );
         if (!commit) {
