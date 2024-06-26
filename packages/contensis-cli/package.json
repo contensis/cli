@@ -40,7 +40,7 @@
     "jsonpath-mapper": "^1.1.0",
     "keytar": "^7.9.0",
     "lodash": "^4.17.21",
-    "migratortron": "^1.0.0-beta.56",
+    "migratortron": "^1.0.0-beta.58",
     "nanospinner": "^1.1.0",
     "node-fetch": "^2.6.7",
     "parse-git-config": "^3.0.0",

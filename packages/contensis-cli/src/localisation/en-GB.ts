@@ -4,6 +4,7 @@ import {
   MigrateModelsResult,
   MigrateStatus,
 } from 'migratortron';
+import pl from 'pluralize';
 import { GitHelper } from '~/util/git';
 import { Logger } from '~/util/logger';
 import { winSlash } from '~/util/os';
@@ -29,9 +30,7 @@ export const LogMessages = {
   },
   envs: {
     found: (num: number) =>
-      `environments store found containing ${num} environment${
-        num === 1 ? '' : 's'
-      }`,
+      `environments store found containing ${pl('environment', num, true)}`,
     tip: () =>
       `Connect to a Contensis cloud instance using "contensis connect {cms alias}"`,
   },
@@ -156,7 +155,11 @@ export const LogMessages = {
   },
   nodes: {
     imported: (env: string, commit: boolean, count: number) =>
-      `[${env}] ${commit ? `Imported` : `Will import`} ${count} nodes`,
+      `[${env}] ${commit ? `Imported` : `Will import`} ${pl(
+        'node',
+        count,
+        true
+      )}`,
     failedImport: (env: string) => `[${env}] Unable to import nodes`,
     removed: (env: string, commit: boolean, root: string) =>
       `[${env}] ${commit ? `Deleted` : `Will delete`} nodes at ${root}`,
@@ -212,8 +215,10 @@ export const LogMessages = {
       `No Contensis environment set, connect to your Contensis cloud instance using "contensis connect {cms alias}"`,
   },
   entries: {
-    imported: (env: string, commit: boolean, count: number) =>
-      `[${env}] ${commit ? `Imported` : `Will import`} ${count} entries`,
+    imported: (env: string, commit: boolean, entries: number, nodes = 0) =>
+      `${commit ? `Imported` : `Will import`} ${pl('entry', entries, true)}${
+        nodes > 0 ? ` and ${pl('node', nodes, true)}` : ''
+      } into ${env} environment`,
     failedImport: (env: string) => `[${env}] Unable to import entries`,
     removed: (env: string, commit: boolean) =>
       `[${env}] ${commit ? `Deleted` : `Will delete`} entries`,

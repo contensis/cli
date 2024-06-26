@@ -5,6 +5,7 @@ import { Logger, addNewLines } from './logger';
 import {
   BlockVersion,
   CopyFieldResult,
+  EntriesMigrationResult,
   EntriesResult,
   MigrateModelsResult,
   MigrateNodesTree,
@@ -116,8 +117,8 @@ export const printBlockVersion = (
 };
 
 export const printEntriesMigrateResult = (
-  { log, messages, currentProject }: ContensisCli,
-  migrateResult: EntriesResult | CopyFieldResult,
+  service: ContensisCli,
+  migrateResult: EntriesMigrationResult | EntriesResult | CopyFieldResult,
   {
     action = 'import',
     showDiff = false,
@@ -131,7 +132,7 @@ export const printEntriesMigrateResult = (
   } = {}
 ) => {
   console.log(``);
-
+  const { log, messages, currentProject } = service;
   for (const [contentTypeId, entryRes] of Object.entries(
     migrateResult.entriesToMigrate.entryIds
   ) as [string, any]) {
@@ -229,6 +230,14 @@ export const printEntriesMigrateResult = (
         ? log.successText
         : log.warningText;
 
+      if (isTotalCountRow && 'nodes' in migrateResult) {
+        printNodesMigrateResult(service, migrateResult, {
+          showAll,
+          showDiff,
+          showChanged,
+          isEntriesMigration: true,
+        });
+      }
       console.log(
         `  - ${
           isTotalCountRow
@@ -267,22 +276,24 @@ export const printEntriesMigrateResult = (
 
 export const printNodesMigrateResult = (
   { log, currentProject }: ContensisCli,
-  migrateResult: NodesResult,
+  migrateResult: EntriesMigrationResult | NodesResult,
   {
     action = 'import',
     logLimit = 50,
     showDiff = false,
     showAll = false,
     showChanged = false,
+    isEntriesMigration = false,
   }: {
     action?: 'import' | 'delete';
     logLimit?: number;
     showDiff?: boolean;
     showAll?: boolean;
     showChanged?: boolean;
+    isEntriesMigration?: boolean;
   } = {}
 ) => {
-  log.raw(``);
+  if (!isEntriesMigration) log.raw(``);
   for (const [projectId, counts] of Object.entries(migrateResult.nodes || {})) {
     const importTitle =
       action === 'delete'
@@ -292,14 +303,13 @@ export const printNodesMigrateResult = (
               ? `from project ${log.highlightText(projectId)} `
               : ''
           }to ${log.boldText(log.warningText(currentProject))}`;
-    log.help(importTitle);
+    if (!isEntriesMigration) log.help(importTitle);
 
     const migrateStatusAndCount = migrateResult.nodesToMigrate[
       currentProject
     ] as ProjectNodesToMigrate;
 
-    const existingCount =
-      migrateResult.existing?.[currentProject]?.totalCount || 0;
+    const existingCount = migrateResult.nodes?.[projectId]?.totalCount || 0;
 
     const totalCount = Object.keys(migrateResult.nodesToMigrate.nodeIds).length;
     const existingPercent = counts.totalCount
@@ -320,25 +330,28 @@ export const printNodesMigrateResult = (
     const changedColor =
       changedPercentage === '100' ? log.successText : log.warningText;
 
-    console.log(
-      `  - ${log.highlightText(
-        `totalCount: ${migrateStatusAndCount.totalCount}`
-      )}${
-        changedPercentage === '100'
-          ? ''
-          : existingColor(` [existing: ${`${existingPercent}%`}]`)
-      }${
-        existingPercent === '0'
-          ? ''
-          : changedColor(
-              ` ${
-                changedPercentage === '100'
-                  ? 'up to date'
-                  : `[needs update: ${100 - Number(changedPercentage)}%]`
-              }`
-            )
-      }`
-    );
+    if (!isEntriesMigration || migrateStatusAndCount.totalCount > 0)
+      console.log(
+        `  - ${log.highlightText(
+          `${isEntriesMigration ? '  + nodes' : 'totalCount'}: ${
+            migrateStatusAndCount.totalCount
+          }`
+        )}${
+          changedPercentage === '100'
+            ? ''
+            : existingColor(` [existing: ${`${existingPercent}%`}]`)
+        }${
+          existingPercent === '0'
+            ? ''
+            : changedColor(
+                ` ${
+                  changedPercentage === '100'
+                    ? 'up to date'
+                    : `[needs update: ${100 - Number(changedPercentage)}%]`
+                }`
+              )
+        }`
+      );
   }
   if (migrateResult.errors?.length) {
     console.log(
@@ -468,7 +481,7 @@ export const printModelMigrationResult = (
 
 export const printNodeTreeOutput = (
   { log, messages }: ContensisCli,
-  root: Node | MigrateNodesTree | undefined,
+  root: Node | Partial<MigrateNodesTree> | undefined,
   logDetail = 'errors',
   logLimit = 1000
 ) => {
@@ -496,7 +509,7 @@ export const printNodeTreeOutput = (
   log.line();
 
   const outputNode = (
-    node: Node | MigrateNodesTree,
+    node: Partial<Node | MigrateNodesTree>,
     spaces: string,
     isRoot = false
   ) => {
@@ -506,6 +519,7 @@ export const printNodeTreeOutput = (
     const changesOutput =
       logDetail === 'changes' &&
       'status' in node &&
+      node.status &&
       ['create', 'update'].includes(node.status);
 
     const diffOutput =
@@ -514,7 +528,7 @@ export const printNodeTreeOutput = (
       node.diff?.replaceAll('\n', '');
 
     return `${
-      'status' in node
+      'status' in node && node.status
         ? `${statusColour(node.status)(
             node.status.substring(0, 1).toUpperCase()
           )} `
@@ -531,8 +545,10 @@ export const printNodeTreeOutput = (
         : 'standardText'
     ](
       'isCanonical' in node && node.isCanonical
-        ? log.boldText(fullOutput || isRoot ? node.path : `/${node.slug}`)
-        : fullOutput || isRoot
+        ? log.boldText(
+            fullOutput || isRoot || !node.slug ? node.path : `/${node.slug}`
+          )
+        : fullOutput || isRoot || !node.slug
         ? node.path
         : `/${node.slug}`
     )}${node.entry ? ` ${log.helpText(node.entry.sys.contentTypeId)}` : ''}${
@@ -540,7 +556,7 @@ export const printNodeTreeOutput = (
     } ${'displayName' in node ? log.infoText(node.displayName) : ''}${
       fullOutput || (changesOutput && node.id !== node.originalId)
         ? `~n  ${log.infoText(`id:`)} ${
-            node.id === node.originalId
+            !('originalId' in node) || node.id === node.originalId
               ? node.id
               : `${node.id} ${log.infoText(`<= ${node.originalId}`)}`
           }`
@@ -551,6 +567,7 @@ export const printNodeTreeOutput = (
       node.parentId
         ? `~n  ${log.infoText(
             `parentId: ${
+              !('originalParentId' in node) ||
               node.parentId === node.originalParentId
                 ? node.parentId
                 : `${node.parentId} <= ${node.originalParentId}`
@@ -575,7 +592,10 @@ export const printNodeTreeOutput = (
     }`;
   };
 
-  const outputChildren = (node: Node | undefined, depth = 2) => {
+  const outputChildren = (
+    node: Partial<Node | MigrateNodesTree> | undefined,
+    depth = 2
+  ) => {
     let str = '';
     for (const child of ((node as any)?.children || []) as Node[]) {
       str += `${outputNode(child, Array(depth + 1).join('  '))}\n`;

@@ -1779,10 +1779,11 @@ class ContensisCli {
 
       if (err) logError(err);
       else {
+        const { migrateEntries, nodes } =
+          contensis.content.targets[currentProject];
+
         const output = saveEntries
-          ? contensis.content.targets[currentProject].migrateEntries?.map(
-              me => me.finalEntry
-            )
+          ? migrateEntries?.map(me => me.finalEntry)
           : result;
         await this.HandleFormattingAndOutput(output, () => {
           // print the migrateResult to console
@@ -1791,6 +1792,16 @@ class ContensisCli {
             showDiff: logOutput === 'all' || logOutput === 'changes',
             showChanged: logOutput === 'changes',
           });
+          if (['all', 'changes'].includes(logOutput))
+            printNodeTreeOutput(
+              this,
+              {
+                ...nodes.rootAncestor,
+                status: 'no change',
+                children: nodes.migrateNodes as any,
+              },
+              logOutput
+            );
         });
       }
       if (
@@ -1807,7 +1818,11 @@ class ContensisCli {
             commit
               ? (result.migrateResult?.created || 0) +
                   (result.migrateResult?.updated || 0)
-              : result.entriesToMigrate[currentProject].totalCount
+              : result.entriesToMigrate[currentProject].totalCount,
+            commit
+              ? (result.nodesResult?.created || 0) +
+                  (result.nodesResult?.updated || 0)
+              : (result.nodesToMigrate[currentProject].totalCount as number)
           )
         );
         if (!commit) {
@@ -1960,13 +1975,14 @@ class ContensisCli {
       }
 
       const [err, result] = await contensis.MigrateNodes();
-      const migrateTree =
-        contensis.nodes.targetRepos[currentProject].nodes.migrateNodesTreeView;
 
       if (err) log.raw(``);
       else
         await this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
+          const migrateTree =
+            contensis.nodes.targetRepos[currentProject].nodes
+              .migrateNodesTreeView;
           printNodeTreeOutput(this, migrateTree, logOutput, logLimit);
           printNodesMigrateResult(this, result, {
             showAll: logOutput === 'all',

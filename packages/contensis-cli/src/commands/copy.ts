@@ -9,7 +9,7 @@ import {
   latest,
   mapContensisOpts,
   noCache,
-  outputEntries,
+  outputDetail,
   saveEntries,
   versionStatus,
   zenql,
@@ -43,7 +43,7 @@ export const makeCopyCommand = () => {
     .addOption(commit)
     .addOption(concurrency)
     .addOption(ignoreErrors)
-    .addOption(outputEntries)
+    .addOption(outputDetail)
     .addOption(noCache)
     .option(
       '--search <phrase>',

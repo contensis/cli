@@ -10,6 +10,7 @@ import {
   latest,
   mapContensisOpts,
   noCache,
+  outputDetail,
   outputEntries,
   saveEntries,
   versionStatus,
@@ -128,7 +129,8 @@ Example call:
       'include this flag when you are importing entries that you have previously exported and wish to update'
     )
     .addOption(concurrency)
-    .addOption(outputEntries)
+    .addOption(outputDetail)
+    .addOption(outputEntries) // TODO: retire favouring outputDetail
     .addOption(ignoreErrors)
     .addOption(noCache)
     .addOption(saveEntries)
@@ -148,7 +150,7 @@ Example call:
       ).ImportEntries({
         commit: opts.commit,
         fromFile: opts.fromFile,
-        logOutput: opts.outputEntries,
+        logOutput: opts.outputDetail || opts.outputEntries,
         saveEntries: opts.saveEntries,
       });
     });
