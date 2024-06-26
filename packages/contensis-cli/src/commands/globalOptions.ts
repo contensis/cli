@@ -154,16 +154,6 @@ export const outputDetail = new Option(
   .choices(['errors', 'changes', 'all'])
   .default('errors');
 
-/**
- * Deprecated: use outputDetail instead
- */
-export const outputEntries = new Option(
-  '-oe --output-entries <outputEntries>',
-  'which details of the entries included in the import to output'
-)
-  .choices(['errors', 'changes', 'all'])
-  .default('errors');
-
 export const saveEntries = new Option(
   '-save --save-entries',
   "save the entries we're migrating instead of the migration preview when using --output option"

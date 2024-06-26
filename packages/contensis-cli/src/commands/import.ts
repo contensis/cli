@@ -11,7 +11,6 @@ import {
   mapContensisOpts,
   noCache,
   outputDetail,
-  outputEntries,
   saveEntries,
   versionStatus,
   zenql,
@@ -130,7 +129,6 @@ Example call:
     )
     .addOption(concurrency)
     .addOption(outputDetail)
-    .addOption(outputEntries) // TODO: retire favouring outputDetail
     .addOption(ignoreErrors)
     .addOption(noCache)
     .addOption(saveEntries)
@@ -150,7 +148,7 @@ Example call:
       ).ImportEntries({
         commit: opts.commit,
         fromFile: opts.fromFile,
-        logOutput: opts.outputDetail || opts.outputEntries,
+        logOutput: opts.outputDetail,
         saveEntries: opts.saveEntries,
       });
     });

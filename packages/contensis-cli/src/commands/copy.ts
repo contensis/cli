@@ -85,7 +85,7 @@ Example call:
         ).CopyEntryField({
           commit: opts.commit,
           fromFile: opts.fromFile,
-          logOutput: opts.outputEntries,
+          logOutput: opts.outputDetail,
           saveEntries: opts.saveEntries,
         });
       }
