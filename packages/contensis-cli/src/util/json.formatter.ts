@@ -7,11 +7,13 @@ export const jsonFormatter = <T>(obj: T, fields?: string[]) =>
 
 // Flatten a JSON object such as an entry so there are no
 // nested object and the keys are presented like "sys.version.versionNo": "1.0"
-export const flattenObject = (obj: any) => flatten(cleaner(obj, ['workflow']));
+export const flattenObject = (obj: any) =>
+  flatten(cleaner(obj, ['workflow']), { maxDepth: 99 });
 
 // Unflatten a JSON object such as an entry so the arrays and
 // nested objects are reconstructed - the opposite of flattenObject
-export const unflattenObject = (obj: any) => unflatten(obj);
+export const unflattenObject = (obj: any) =>
+  unflatten(obj, { overwrite: true });
 
 // Will limit and sort an object's keys by an array of supplied fields
 export const limitFields = (obj: any, fields?: string[]): any => {

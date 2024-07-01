@@ -33,16 +33,22 @@ export const csvFormatter = async <T>(entries: T | T[]) => {
 };
 
 export const csvToJson = async <T = any>(data: string): Promise<T[]> => {
-  // return parse(data, {
-  //   columns: true,
-  //   skip_empty_lines: true,
-  // });
   return new Promise((resolve, reject) => {
     parse(
       data,
       {
         columns: true,
         skip_empty_lines: true,
+        cast: (value, context) => {
+          if (context.header || context.column === 'sys.version.versionNo')
+            return value;
+          if (value === '') return undefined;
+          try {
+            return JSON.parse(value);
+          } catch (e) {
+            return value;
+          }
+        },
       },
       (err, records) => {
         if (err) reject(err);
