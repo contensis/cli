@@ -13,11 +13,21 @@ export const csvFormatter = async <T>(entries: T | T[]) => {
 
   // Parse the flattened object to csv
   // const csv = stringify(flatEntries, { header: true });
+  // Create an exhaustive list of columns from the entries array
+  const columns = new Set<string>(flatEntries.map(e => Object.keys(e)).flat());
   const csv = await new Promise<string>((resolve, reject) => {
-    stringify(flatEntries, { header: true }, (err, data) => {
-      if (err) reject(err);
-      resolve(data);
-    });
+    stringify(
+      flatEntries,
+      {
+        header: true,
+        cast: { boolean: (value, context) => `${value}` },
+        columns: [...columns],
+      },
+      (err, data) => {
+        if (err) reject(err);
+        resolve(data);
+      }
+    );
   });
   return csv;
 };
