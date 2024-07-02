@@ -125,6 +125,10 @@ Example call:
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')
     .option('--required-by', 'shows the id(s) that created each dependency')
+    .option(
+      '--export',
+      'export the raw resources that make up the content model(s) (used with --output)'
+    )
     .addOption(noCache)
     .addHelpText(
       'after',
@@ -138,7 +142,7 @@ Example call:
         ['get', 'model', modelIds.join(' ')],
         opts,
         mapContensisOpts(opts)
-      ).PrintContentModels(modelIds, opts.requiredBy);
+      ).PrintContentModels(modelIds, opts);
     });
 
   program

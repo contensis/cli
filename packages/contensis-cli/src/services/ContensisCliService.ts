@@ -4,6 +4,7 @@ import fs from 'fs';
 import inquirer from 'inquirer';
 import fetch from 'node-fetch';
 import path from 'path';
+import clone from 'rfdc';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
 import { Role } from 'contensis-management-api/lib/models';
@@ -1178,7 +1179,7 @@ class ContensisCli {
 
   PrintContentModels = async (
     modelIds: string[] = [],
-    printRequiredBy?: boolean
+    opts: { export?: boolean; printRequiredBy?: boolean }
   ) => {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -1194,62 +1195,72 @@ class ContensisCli {
             modelIds.some(id => id.toLowerCase() === m.id.toLowerCase())
           )
         : undefined;
+      const exportResources: (ContentType | Component)[] = [];
 
-      // Generate a list of contentTypeIds and componentIds from all models
-      // and dependencies
-      const contentTypeIds = Array.from(
-        new Set([
-          ...(returnModels || models || []).map(m => m.id),
-          ...(returnModels || models || [])
-            .map(m => m.dependencies?.contentTypes?.map(c => c[0]) || [])
-            .flat(),
-        ])
-      );
-      const componentIds = Array.from(
-        new Set(
-          (returnModels || models || [])
-            .map(m => m.dependencies?.components?.map(c => c[0]) || [])
-            .flat()
-        )
-      );
+      if (opts.export) {
+        // Generate a list of contentTypeIds and componentIds from all models
+        // and dependencies
+        const contentTypeIds = Array.from(
+          new Set([
+            ...(returnModels || models || []).map(m => m.id),
+            ...(returnModels || models || [])
+              .map(m => m.dependencies?.contentTypes?.map(c => c[0]) || [])
+              .flat(),
+          ])
+        );
+        const componentIds = Array.from(
+          new Set(
+            (returnModels || models || [])
+              .map(m => m.dependencies?.components?.map(c => c[0]) || [])
+              .flat()
+          )
+        );
 
-      // Create an array of all the content types and component definitions
-      // we will use this when outputting to a file
-      const contentModelBackup = [
-        ...contentTypes.filter(c =>
-          contentTypeIds.map(i => i.toLowerCase()).includes(c.id.toLowerCase())
-        ),
-        ...components.filter(c =>
-          componentIds.map(i => i.toLowerCase()).includes(c.id.toLowerCase())
-        ),
-      ];
+        // Create an array of all the content types and component definitions
+        // we will use this when outputting to a file
+        exportResources.push(
+          ...contentTypes.filter(c =>
+            contentTypeIds
+              .map(i => i.toLowerCase())
+              .includes(c.id.toLowerCase())
+          ),
+          ...components.filter(c =>
+            componentIds.map(i => i.toLowerCase()).includes(c.id.toLowerCase())
+          )
+        );
+      }
 
       if (Array.isArray(returnModels)) {
         log.success(messages.models.list(currentProject));
-        await this.HandleFormattingAndOutput(contentModelBackup, () => {
-          // print the content models to console
-          for (const model of returnModels) {
-            if (!printRequiredBy) {
-              // truncate parts of the output
-              delete model.dependencyOf;
-              if (model.dependencies?.contentTypes)
-                model.dependencies.contentTypes.forEach(id => (id[1] = []));
-              if (model.dependencies?.components)
-                model.dependencies.components.forEach(id => (id[1] = []));
-            }
+        await this.HandleFormattingAndOutput(
+          opts.export ? exportResources : returnModels,
+          () => {
+            // print the content models to console
+            for (const model of returnModels) {
+              // create a clone of each model to safely modify
+              const draft = clone()(model);
+              if (!opts.printRequiredBy) {
+                // truncate parts of the output
+                delete draft.dependencyOf;
+                if (draft.dependencies?.contentTypes)
+                  draft.dependencies.contentTypes.forEach(id => id.pop());
+                if (draft.dependencies?.components)
+                  draft.dependencies.components.forEach(id => id.pop());
+              }
 
+              log.raw('');
+              log.object(draft);
+            }
             log.raw('');
-            log.object(model);
           }
-          log.raw('');
-        });
+        );
       } else {
         log.success(
           messages.models.get(currentProject, models?.length.toString() || '0')
         );
         log.raw('');
         if (models?.length) {
-          await this.HandleFormattingAndOutput(contentModelBackup, () => {
+          await this.HandleFormattingAndOutput(exportResources, () => {
             // print the content models to console
             for (const model of models) {
               const components = model.components?.length || 0;

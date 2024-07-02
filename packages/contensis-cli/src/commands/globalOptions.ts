@@ -156,7 +156,7 @@ export const outputDetail = new Option(
 
 export const saveEntries = new Option(
   '-save --save-entries',
-  "save the entries we're migrating instead of the migration preview when using --output option"
+  "save the entries we're migrating instead of the migration preview (used with --output)"
 );
 
 export const concurrency = new Option(
