@@ -1179,7 +1179,7 @@ class ContensisCli {
 
   PrintContentModels = async (
     modelIds: string[] = [],
-    opts: { export?: boolean; printRequiredBy?: boolean }
+    opts: { export?: boolean; requiredBy?: boolean }
   ) => {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -1239,7 +1239,7 @@ class ContensisCli {
             for (const model of returnModels) {
               // create a clone of each model to safely modify
               const draft = clone()(model);
-              if (!opts.printRequiredBy) {
+              if (!opts.requiredBy) {
                 // truncate parts of the output
                 delete draft.dependencyOf;
                 if (draft.dependencies?.contentTypes)
