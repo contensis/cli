@@ -140,6 +140,14 @@ export class Logger {
                               ' | '
                             )}`
                           : ''
+                      }${
+                        field.dataFormat === 'contenttype'
+                          ? `[${field.validations?.allowedDataFormats.dataFormats.join(
+                              ' | '
+                            )}], ${(
+                              field.validations?.allowedIds?.ids || ['*']
+                            ).join(' | ')}`
+                          : ''
                       }>`
                     : ''
                 }${
@@ -195,7 +203,10 @@ export class Logger {
             if (item.length)
               Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
             else Logger.objectRecurse(item, depth + 1, `${indent}  `);
-          else Logger.raw(`${indent}${chalk.grey(`[`)}${item.join(', ')}${chalk.grey(`]`)}`);
+          else
+            Logger.raw(
+              `${indent}${chalk.grey(`[`)}${item.join(', ')}${chalk.grey(`]`)}`
+            );
         } else Logger.raw(`${indent}${item}`);
       }
     } else {
