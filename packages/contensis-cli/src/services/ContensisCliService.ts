@@ -1260,38 +1260,45 @@ class ContensisCli {
         );
         log.raw('');
         if (models?.length) {
-          await this.HandleFormattingAndOutput(exportResources, () => {
-            // print the content models to console
-            for (const model of models) {
-              const components = model.components?.length || 0;
-              const contentTypes = model.contentTypes?.length || 0;
-              const dependencies =
-                (model.dependencies?.components?.length || 0) +
-                (model.dependencies?.contentTypes?.length || 0);
-              const dependencyOf =
-                (model.dependencyOf?.components?.length || 0) +
-                (model.dependencyOf?.contentTypes?.length || 0);
+          await this.HandleFormattingAndOutput(
+            opts.export ? exportResources : models,
+            () => {
+              // print the content models to console
+              for (const model of models) {
+                const components = model.components?.length || 0;
+                const contentTypes = model.contentTypes?.length || 0;
+                const dependencies =
+                  (model.dependencies?.components?.length || 0) +
+                  (model.dependencies?.contentTypes?.length || 0);
+                const dependencyOf =
+                  (model.dependencyOf?.components?.length || 0) +
+                  (model.dependencyOf?.contentTypes?.length || 0);
 
-              const hasAny =
-                components + contentTypes + dependencies + dependencyOf;
-              log.raw(
-                `  - ${log.highlightText(log.boldText(model.id))} ${
-                  hasAny
-                    ? log.infoText(
-                        `{ ${components ? `components: ${components}, ` : ''}${
-                          contentTypes ? `contentTypes: ${contentTypes}, ` : ''
-                        }${
-                          dependencies ? `references: ${dependencies}, ` : ''
-                        }${
-                          dependencyOf ? `required by: ${dependencyOf}` : ''
-                        } }`
-                      )
-                    : ''
-                }`
-              );
+                const hasAny =
+                  components + contentTypes + dependencies + dependencyOf;
+                log.raw(
+                  `  - ${log.highlightText(log.boldText(model.id))} ${
+                    hasAny
+                      ? log.infoText(
+                          `{ ${
+                            components ? `components: ${components}, ` : ''
+                          }${
+                            contentTypes
+                              ? `contentTypes: ${contentTypes}, `
+                              : ''
+                          }${
+                            dependencies ? `references: ${dependencies}, ` : ''
+                          }${
+                            dependencyOf ? `required by: ${dependencyOf}` : ''
+                          } }`
+                        )
+                      : ''
+                  }`
+                );
+              }
+              log.raw('');
             }
-            log.raw('');
-          });
+          );
         }
       }
     }

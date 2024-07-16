@@ -90,6 +90,16 @@ const sharedSecret = new Option(
   'the shared secret to use when logging in with a client id'
 );
 
+/* Model get options */
+export const requiredBy = new Option(
+  '--required-by',
+  'shows the id(s) that created each dependency'
+);
+export const exportOption = new Option(
+  '--export',
+  'export the raw resources that make up the content model(s) (used with --output)'
+);
+
 /* Entry get options */
 export const delivery = new Option(
   '-delivery --delivery-api',

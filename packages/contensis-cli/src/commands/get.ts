@@ -7,9 +7,11 @@ import {
   contentTypes,
   delivery,
   entryId,
+  exportOption,
   latest,
   mapContensisOpts,
   noCache,
+  requiredBy,
   versionStatus,
   zenql,
 } from './globalOptions';
@@ -64,6 +66,38 @@ Example call:
     .action(async (projectId: string, opts) => {
       await cliCommand(['get', 'project', projectId], opts).PrintProject(
         projectId
+      );
+    });
+
+  program
+    .command('proxy')
+    .description('get a proxy')
+    .argument('<proxyId>', 'id of the proxy to get')
+    .addHelpText(
+      'after',
+      `
+  Example call:
+    > get proxy b8b6958f-6ae2-41d5-876a-abc86755fd7b
+  `
+    )
+    .action(async (proxyId: string, opts) => {
+      await cliCommand(['get', 'proxy', proxyId], opts).PrintProxies(proxyId);
+    });
+
+  program
+    .command('renderer')
+    .description('get a renderer')
+    .argument('<rendererId>', 'id of the renderer to get')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > get renderer contensis-website
+`
+    )
+    .action(async (rendererId: string, opts) => {
+      await cliCommand(['get', 'renderer', rendererId], opts).PrintRenderers(
+        rendererId
       );
     });
 
@@ -124,11 +158,8 @@ Example call:
     .command('model')
     .description('get a content model')
     .argument('<contentTypeId...>', 'ids of the content models to get')
-    .option('--required-by', 'shows the id(s) that created each dependency')
-    .option(
-      '--export',
-      'export the raw resources that make up the content model(s) (used with --output)'
-    )
+    .addOption(requiredBy)
+    .addOption(exportOption)
     .addOption(noCache)
     .addHelpText(
       'after',
