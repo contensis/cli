@@ -1354,12 +1354,18 @@ class ContensisCli {
               this,
               migrateResult[currentProject].contentTypes
             );
-
-            log.raw(log.boldText(`\nComponents:`));
-            printModelMigrationResult(
-              this,
-              migrateResult[currentProject].components
-            );
+            // Only output for components if any status has any results
+            if (
+              Object.values(migrateResult[currentProject].components).some(
+                r => r.length > 0
+              )
+            ) {
+              log.raw(log.boldText(`\nComponents:`));
+              printModelMigrationResult(
+                this,
+                migrateResult[currentProject].components
+              );
+            }
           }
         });
     } else {
