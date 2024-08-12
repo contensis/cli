@@ -1,6 +1,7 @@
 import figlet from 'figlet';
 import inquirer from 'inquirer';
 import inquirerPrompt from 'inquirer-command-prompt';
+import { split } from 'split-cmd';
 import commands from './commands';
 import { LogMessages } from './localisation/en-GB';
 import CredentialProvider from './providers/CredentialProvider';
@@ -222,9 +223,10 @@ class ContensisShell {
             if (answers.cmd) {
               const program = commands();
               await program.parseAsync(
-                answers.cmd
-                  .match(/"[^"]+"|[^\s]+/g)
-                  ?.map(e => e.replace(/"(.+)"/, '$1')),
+                split(answers.cmd),
+                // answers.cmd
+                //   .match(/"[^"]+"|[^\s]+/g)
+                //   ?.map(e => e.replace(/"(.+)"/, '$1')),
                 {
                   from: 'user',
                 }

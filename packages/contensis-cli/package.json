@@ -46,6 +46,7 @@
     "parse-git-config": "^3.0.0",
     "patch-package": "^6.4.7",
     "printable-characters": "^1.0.42",
+    "split-cmd": "^1.1.0",
     "xml2js": "^0.4.23",
     "yaml": "^2.3.1"
   },
