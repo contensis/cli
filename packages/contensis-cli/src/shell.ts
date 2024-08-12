@@ -223,7 +223,7 @@ class ContensisShell {
             if (answers.cmd) {
               const program = commands();
               await program.parseAsync(
-                split(answers.cmd),
+                split(answers.cmd).map(e => e.replace(/\\"/g, '"')),
                 // answers.cmd
                 //   .match(/"[^"]+"|[^\s]+/g)
                 //   ?.map(e => e.replace(/"(.+)"/, '$1')),
@@ -309,4 +309,4 @@ process.stdin.on('data', key => {
   }
 });
 
-// process.env.http_proxy = 'http://127.0.0.1:8888';
+process.env.http_proxy = 'http://127.0.0.1:8888';
