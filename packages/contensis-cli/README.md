@@ -1792,9 +1792,9 @@ Consult the command `copy field --help` to see all of the available options
 , in order to transform the contents of a Composer field in an entry to a canvas field type, we achieve this by rendering each item in the Composer as simple HTML representation internally before parsing this markup and converting it to canvas then adding the output to our destination entry field, working in the same way as if we were copying the contents of a rich text field type (containing markup) to a canvas field.
 
 ```shell
-contensis t.durden@example-dev> copy field contentPage composer canvas --output-entries changes        
+contensis t.durden@example-dev> copy field contentPage composer canvas --output-entries changes
   -------------------------------------
- -- IMPORT PREVIEW -- 
+ -- IMPORT PREVIEW --
 [07/05 17:02:51] [INFO] OK to copy contentPage[composer]<objectArray> field into contentPage[canvas]<objectArray> in website on example-dev [canvas]
 [07/05 17:02:51] [INFO] Searching for initial entries in example-dev project 'website'
 [07/05 17:02:53] [INFO] Finding 1 entries in example-dev project 'website'
@@ -1802,7 +1802,7 @@ contensis t.durden@example-dev> copy field contentPage composer canvas --output-
 
 1/1 entries to migrate into [website]
 
- contentTypeId         status     total  
+ contentTypeId         status     total
 ----------------------------------------------
  contentPage    update     1
 ----------------------------------------------
@@ -1833,10 +1833,12 @@ website t.durden@example-dev>
 
 For fine-grained control of what is rendered or copied into the target field we can supply a `--template` option with a string value that is a [LiquidJS](https://liquidjs.com/tutorials/intro-to-liquid.html) template with access to variables we can use to directly drive how the output is written into our target field
 
-The syntax for applying a template with the `copy field` command is 
+The syntax for applying a template with the `copy field` command is
+
 ```shell
 copy field blog description kicker --template "<h2>{{ value }}</h2>"
 ```
+
 in this example the `value` from `description` field will be wrapped in a `<h2>` tag before being added to the `kicker` field
 
 The template must be surrounded in double-quotes and be entered (or pasted) in a single line for it to be parsed correctly with the intended command.
@@ -1846,6 +1848,22 @@ Adding a template containing html? Attributes can be wrapped in single quotes.
 Escape characters and new lines can be introduced inside templates when calling `contensis copy field` from your system shell as a cli command. This is OS/shell dependent and does not work in the Contensis shell (due to the combined layers of command parsing)
 
 Further documentation on using [templates](docs/copy_field_templates.md)
+
+### Copy a hard-coded entry link into a field using a template
+
+Useful to pre-populate an entry link field with a default entry in existing content
+
+```shell
+copy field courseInstance modules modules --zenql "sys.contentTypeId=courseInstance and modules NOT EXISTS" --template "{{ '[ { \"sys\": { \"id\": \"1d6a41de-5a61-474e-ab47-6e1e340d462c\", \"contentTypeId\": \"module\" } } ]' }}" --output-detail changes
+```
+
+This example will populate a repeating entry link field called `modules` within the `courseInstance` content type with the template we've supplied
+
+Using the `copy field` command with a `--zenql` statement to narrow down the entries to update, we can supply a template that is a hard-coded JSON string (with escaped quotes) with an `"id"` that is a valid entry id to link to this field. 
+
+Adding `--output-detail changes` will output a diff for each changed entry to the console. For larger jobs use the `--output file.json` option to review the changes that will be made.
+
+To populate a non-repeating field remove the `[` and `]` from the supplied template
 
 ### Copy a field and save the entries as output
 
