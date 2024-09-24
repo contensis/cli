@@ -256,7 +256,7 @@ Example call:
         ['get', 'assets'],
         opts,
         mapContensisOpts({ dataFormat: 'asset', search, ...opts })
-      ).GetEntries({});
+      ).GetEntries();
     });
 
   sharedGetEntryOptions(

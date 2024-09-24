@@ -51,7 +51,7 @@ export const makePushCommand = () => {
     )
     .option(
       '-pr --provider <sourceProvider>',
-      'the url of the source repository for the supplied image uri'
+      'the source repository provider of the supplied image uri'
     )
     .usage('<block-id> <image uri> [branch] [options]')
     .addHelpText(
