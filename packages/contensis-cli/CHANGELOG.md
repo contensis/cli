@@ -1,5 +1,58 @@
 # Changelog
 
+## [1.3.0](https://github.com/contensis/cli/compare/contensis-cli-v1.2.1...contensis-cli-v1.3.0) (2024-09-24)
+
+
+### Features
+
+* add `--no-defaults` option so we can specify that we don't want to migrate defaults when migrating models ([974d6cd](https://github.com/contensis/cli/commit/974d6cd965387ede09e576d61415c12f622605bc))
+* add `--root-uri` option to `copy field` allows prefixing relative uris when converting to canvas ([34b0d62](https://github.com/contensis/cli/commit/34b0d6221a176728731c4965060502cc06d384fd))
+* add `--save-entries` option in `import entries` to save the entries built in preview when used with `--output` option ([a7b035f](https://github.com/contensis/cli/commit/a7b035f1dd02d573b4a509e45bbdfb40b8d455cd))
+* add `--version-status` option to commands that get entries and a `--latest` option to override version status ([7a3f341](https://github.com/contensis/cli/commit/7a3f3414d44fbe4879d0f9f77abac70a24567553))
+* handle dependent nodes in form confirmation rules when migrating models ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* include defaultParentNodeId from content types in models migration ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* migrate dependent nodes and default assets and entries in models migration ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* resolve asset links in canvas fields as entry dependency in entries migrations ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* support new Resource Picker field in content models ([3a0f94c](https://github.com/contensis/cli/commit/3a0f94c428d55f019ee84972c8ef524533f2fbab))
+* treat resource picker allowed values as model dependencies ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* validate formContentType canvas blocks ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* validate resource picker values when building entries for migration ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+
+
+### Bug Fixes
+
+* `list models` shares options with `get model` ([c118776](https://github.com/contensis/cli/commit/c118776f55ae335576aaeb724293324c4ce655e9))
+* bug with progress bar not completing when loading initial entries for migration ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* canvas content generated in `copy field` has deterministic ids ([6f18515](https://github.com/contensis/cli/commit/6f18515ab5dbaade612b30ec7d178be32e01c5dd))
+* clean up console output when using commit flag in `import models` ([2e1aaa4](https://github.com/contensis/cli/commit/2e1aaa464cc3894c97dcfea6cdadf60c24f41512))
+* csv output does not contain every possible column for every entry and output boolean fields as "true" or "false" ([555ae29](https://github.com/contensis/cli/commit/555ae296688b20074af9195193e3108d8ea83300))
+* display additional info in output of `get contenttype` ([f6cd445](https://github.com/contensis/cli/commit/f6cd445b286f2c0690fe94d97198ad57bdbd4ec2))
+* don't fetch dependent entries from migration target in copy field ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* entries containing taxonomy fields in `copy field` are mapped to management api format ([8057b2a](https://github.com/contensis/cli/commit/8057b2ad7d54a43b103b749062e92c2258565426))
+* handle siteview nodes linked to entries via canvas fields when importing entries ([09576e9](https://github.com/contensis/cli/commit/09576e986d143d65566a3ce2c1366263c3e0e835))
+* incorrect mapping of image attributes in copy field ([f2438a3](https://github.com/contensis/cli/commit/f2438a34383712fce2ce136007c93a16dd0a3696))
+* incorrect total used in progress when migrating models ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* issues with fetching asset dependencies in import entries ([c061991](https://github.com/contensis/cli/commit/c061991a260207965917d9895ca52b94dee1fe3c))
+* parse csv fields to JS types when using `--from-file` with csv in `import entries` ([d141e20](https://github.com/contensis/cli/commit/d141e2011fa478cac6d7cc35826062aca478d5f9))
+* reduce console output with large models in `get models` and add `--required-by` option to log the complete output ([bd31412](https://github.com/contensis/cli/commit/bd31412d98911a2f650c1a59ee261c1e8ecf7211))
+* resolve case insensitive ids when deleting content types and components ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* small console output fixes when outputting models ([67331f3](https://github.com/contensis/cli/commit/67331f3dc21b7fc2828e54161890bdc5f6750f6f))
+* some entries incorrectly marked as `no change` in `import entries` ([f2af65e](https://github.com/contensis/cli/commit/f2af65e26a704dabdf53f2aa080bd5fa738c5e8e))
+* strip escape slashes from quoted strings ([59d6600](https://github.com/contensis/cli/commit/59d660053d3d9efa0ba0e9daa3bf41b3ce62a372))
+* support escape quotes inside quoted args in Contensis shell ([3b3058b](https://github.com/contensis/cli/commit/3b3058bed0496cbafa9ac64e74827b72c0fb7aab))
+* typo in help text in push block command ([9760ea2](https://github.com/contensis/cli/commit/9760ea2b43cfcaf08fb933fb8b61c007119d2bf6))
+* unable to output content model json, added `--export` option to `get model` command ([cac99a5](https://github.com/contensis/cli/commit/cac99a57cda6f221af5e060a871dcbd543b60b39))
+* undefined error in import entries ([2a52a63](https://github.com/contensis/cli/commit/2a52a630f95807a2260a1606c52ced4e5e39f66c))
+
+
+### Performance Improvements
+
+* don't resolve dependencies for entries in the destination environment, as entry dependencies are resolved in the source first ([d87a963](https://github.com/contensis/cli/commit/d87a9635b8194f42690bdf68d4fbcccad135a7d6))
+* much quicker generating content models and maintain a file cache for generated models ([b10bd29](https://github.com/contensis/cli/commit/b10bd2942f533c0e3626f2364283ad46ef2edc21))
+* refactored code for building and migrating content models, providing a context object for each repository involved in the migration ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* refactored code for building entries in migrations ([d92120f](https://github.com/contensis/cli/commit/d92120fdd020f0c363c101a635c7d30b9c91d3e6))
+* use file cache for commands that generate content models, add `no-cache` option to ignore local cache ([b2a2caf](https://github.com/contensis/cli/commit/b2a2caf21446755734bb2f24867e46befd863cfd))
+
 ## [1.2.1](https://github.com/contensis/cli/compare/contensis-cli-v1.2.0...contensis-cli-v1.2.1) (2024-05-09)
 
 
