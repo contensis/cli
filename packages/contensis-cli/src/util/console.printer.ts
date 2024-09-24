@@ -393,7 +393,11 @@ export const printModelMigrationAnalysis = (
     string,
     any
   ][]) {
-    let mainOutput = log.standardText(`  - ${contentTypeId}`);
+    let mainOutput = log.standardText(
+      `  - ${contentTypeId}${
+        model.contentTypeId ? ` ${log.helpText(model.contentTypeId)}` : ''
+      }`
+    );
     let extraOutput = '';
     let errorOutput = '';
     let diffOutput = '';
@@ -416,12 +420,14 @@ export const printModelMigrationAnalysis = (
           mainOutput += log.infoText(
             ` [${messages.migrate.status(projectDetails.status)(
               `${projectId}: ${projectDetails.status}`
-            )}] v${projectDetails.versionNo}`
+            )}]${
+              projectDetails.versionNo ? ` v${projectDetails.versionNo}` : ''
+            }`
           );
           if (projectDetails.diff)
             diffOutput += `      ${log.highlightText(`diff:`)} ${log.infoText(
               highlightDiffText(projectDetails.diff)
-            )}\n`;
+            )}`;
           if (projectDetails.error)
             errorOutput += `      ${log.highlightText(
               `error::`

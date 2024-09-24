@@ -204,14 +204,21 @@ export class Logger {
               Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
             else Logger.objectRecurse(item, depth + 1, `${indent}  `);
           else
-            Logger.raw(
-              `${indent}${chalk.grey(`[`)}${item.join(', ')}${chalk.grey(`]`)}`
-            );
+            Array.isArray(item)
+              ? Logger.raw(
+                  `${indent}${chalk.grey(`[`)}${item.join(', ')}${chalk.grey(
+                    `]`
+                  )}`
+                )
+              : typeof item === 'object' && item
+              ? Logger.objectRecurse(item, depth + 1, `${indent}  `)
+              : Logger.raw(`${indent}${item}`);
         } else Logger.raw(`${indent}${item}`);
       }
     } else {
       let pos = 0;
       for (const [key, value] of Object.entries(content)) {
+        if (key === 'stack') continue; // skip stack output for errors
         const thisIndent =
           pos === 0 ? `${indent.substring(0, indent.length - 2)}- ` : indent;
         if (Array.isArray(value)) {
