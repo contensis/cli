@@ -1267,6 +1267,8 @@ class ContensisCli {
               for (const model of models) {
                 const components = model.components?.length || 0;
                 const contentTypes = model.contentTypes?.length || 0;
+                const defaults =
+                  (model.defaults?.length || 0) + (model.nodes?.length || 0);
                 const dependencies =
                   (model.dependencies?.components?.length || 0) +
                   (model.dependencies?.contentTypes?.length || 0);
@@ -1286,7 +1288,7 @@ class ContensisCli {
                             contentTypes
                               ? `contentTypes: ${contentTypes}, `
                               : ''
-                          }${
+                          }${defaults ? `defaults: ${defaults}, ` : ''}${
                             dependencies ? `references: ${dependencies}, ` : ''
                           }${
                             dependencyOf ? `required by: ${dependencyOf}` : ''
@@ -1339,7 +1341,7 @@ class ContensisCli {
       else
         await this.HandleFormattingAndOutput(result, () => {
           // print the results to console
-          if (!commit) {
+          if (!result.committed) {
             log.raw(log.boldText(`\nContent types:`));
             if (!result.contentTypes) log.info(`- None returned\n`);
             else printModelMigrationAnalysis(this, result.contentTypes);
@@ -1347,23 +1349,58 @@ class ContensisCli {
             log.raw(log.boldText(`\nComponents:`));
             if (!result.components) log.info(`- None returned\n`);
             else printModelMigrationAnalysis(this, result.components);
+
+            if (Object.keys(result.defaults).length) {
+              log.raw(log.boldText(`\nDefaults:`));
+              printModelMigrationAnalysis(this, result.defaults);
+            }
+            if (Object.keys(result.nodes).length) {
+              log.raw(log.boldText(`\nNodes:`));
+              printModelMigrationAnalysis(this, result.nodes);
+            }
+            if (result.errors) {
+              log.raw(log.boldText(`\nErrors:`));
+              log.object(result.errors);
+            }
           } else {
-            const migrateResult = result as MigrateModelsResult;
+            const { modelsResult = {} } = result;
             log.raw(log.boldText(`\nContent types:`));
             printModelMigrationResult(
               this,
-              migrateResult[currentProject].contentTypes
+              modelsResult[currentProject].contentTypes
             );
             // Only output for components if any status has any results
             if (
-              Object.values(migrateResult[currentProject].components).some(
+              Object.values(modelsResult[currentProject].components).some(
                 r => r.length > 0
               )
             ) {
               log.raw(log.boldText(`\nComponents:`));
               printModelMigrationResult(
                 this,
-                migrateResult[currentProject].components
+                modelsResult[currentProject].components
+              );
+            }
+            if (
+              Object.values(modelsResult[currentProject].defaults).some(
+                r => r.length > 0
+              )
+            ) {
+              log.raw(log.boldText(`\nDefaults:`));
+              printModelMigrationResult(
+                this,
+                modelsResult[currentProject].defaults
+              );
+            }
+            if (
+              Object.values(modelsResult[currentProject].nodes).some(
+                r => r.length > 0
+              )
+            ) {
+              log.raw(log.boldText(`\nNodes:`));
+              printModelMigrationResult(
+                this,
+                modelsResult[currentProject].nodes
               );
             }
           }
@@ -1553,14 +1590,15 @@ class ContensisCli {
               `"${result.query.modelIds?.join(', ')}"`
             )}\n`
           );
+          if (result.committed === false) {
+            log.raw(log.boldText(`Content types:`));
+            if (!result.contentTypes) log.info(`- None returned\n`);
+            else printModelMigrationAnalysis(this, result.contentTypes);
 
-          log.raw(log.boldText(`Content types:`));
-          if (!result.contentTypes) log.info(`- None returned\n`);
-          else printModelMigrationAnalysis(this, result.contentTypes);
-
-          log.raw(log.boldText(`Components:`));
-          if (!result.components) log.info(`- None returned\n`);
-          else printModelMigrationAnalysis(this, result.components);
+            log.raw(log.boldText(`\nComponents:`));
+            if (!result.components) log.info(`- None returned\n`);
+            else printModelMigrationAnalysis(this, result.components);
+          }
         });
     }
   };
@@ -1751,13 +1789,19 @@ class ContensisCli {
     withDependents = false,
   }: {
     withDependents?: boolean;
-  }) => {
+  } = {}) => {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensis();
 
     if (contensis) {
       log.line();
       const entries = await contensis.GetEntries({ withDependents });
+      // TODO: iterate entries and add some extra details to help
+      // with importing later
+      // Add a full sys.uri to asset entries
+      // Add sys.metadata.exportCms
+      // Add sys.metadata.exportProjectId
+
       await this.HandleFormattingAndOutput(entries, () =>
         // print the entries to console
         logEntitiesTable({
@@ -1803,11 +1847,10 @@ class ContensisCli {
 
       if (err) logError(err);
       else {
-        const { migrateEntries, nodes } =
-          contensis.content.targets[currentProject];
+        const { entries, nodes } = contensis.content.targets[currentProject];
 
         const output = saveEntries
-          ? migrateEntries?.map(me => me.finalEntry)
+          ? entries.migrate?.map(me => me.toJSON())
           : result;
         await this.HandleFormattingAndOutput(output, () => {
           // print the migrateResult to console
@@ -1899,8 +1942,8 @@ class ContensisCli {
       if (err) logError(err);
       if (result) {
         const output = saveEntries
-          ? contensis.content.copy.targets[currentProject].migrateEntries?.map(
-              me => me.finalEntry
+          ? contensis.content.copy.targets[currentProject].entries.migrate?.map(
+              me => me.toJSON()
             )
           : result;
         await this.HandleFormattingAndOutput(output, () => {
