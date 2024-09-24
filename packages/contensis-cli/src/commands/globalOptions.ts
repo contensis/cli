@@ -46,7 +46,8 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   zenQL: opts.zenql,
   transformGuids: !opts.preserveGuids,
   ignoreErrors: opts.ignoreErrors,
-  noCache: !opts.cache,
+  noCache: !opts.cache, // arg is inverted automatically from `--no-cache` to `cache: false`
+  includeDefaults: opts.defaults, // arg is inverted automatically from `--no-defaults` to `defaults: false`
   concurrency: opts.concurrency ? Number(opts.concurrency) : undefined,
 });
 

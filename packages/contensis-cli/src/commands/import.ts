@@ -30,6 +30,14 @@ export const makeImportCommand = () => {
     .argument('[modelIds...]', 'ids of the content models to import (optional)')
     .addOption(noCache)
     .addOption(commit)
+    .option(
+      '-nod --no-defaults',
+      'ignore any default entries or nodes attached to content types or fields'
+    )
+    .option(
+      '-preserve --preserve-guids',
+      'import any default entries or nodes using the same id as the source'
+    )
     .addHelpText(
       'after',
       `
