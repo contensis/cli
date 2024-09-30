@@ -1350,11 +1350,11 @@ class ContensisCli {
             if (!result.components) log.info(`- None returned\n`);
             else printModelMigrationAnalysis(this, result.components);
 
-            if (Object.keys(result.defaults).length) {
+            if (result.defaults && Object.keys(result.defaults).length) {
               log.raw(log.boldText(`\nDefaults:`));
               printModelMigrationAnalysis(this, result.defaults);
             }
-            if (Object.keys(result.nodes).length) {
+            if (result.nodes && Object.keys(result.nodes).length) {
               log.raw(log.boldText(`\nNodes:`));
               printModelMigrationAnalysis(this, result.nodes);
             }
@@ -1382,7 +1382,7 @@ class ContensisCli {
               );
             }
             if (
-              Object.values(modelsResult[currentProject].defaults).some(
+              Object.values(modelsResult[currentProject].defaults || {}).some(
                 r => r.length > 0
               )
             ) {
@@ -1393,7 +1393,7 @@ class ContensisCli {
               );
             }
             if (
-              Object.values(modelsResult[currentProject].nodes).some(
+              Object.values(modelsResult[currentProject].nodes || {}).some(
                 r => r.length > 0
               )
             ) {
