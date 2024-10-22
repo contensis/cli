@@ -57,6 +57,9 @@
   "git.autofetch": true,
   "files.associations": {
     "*.yaml": "home-assistant"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 
   // "workbench.colorCustomizations": {

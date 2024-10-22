@@ -58,7 +58,7 @@ export const Logging = async (language = 'en-GB') => {
   // const { LogMessages: defaultMessages } = await import(
   //   `../localisation/en-GB.js`
   // );
-  let localisedMessages = defaultMessages;
+  const localisedMessages = defaultMessages;
 
   if (language === 'en-GB') {
     // Using a variable import e.g. `import(`../localisation/${language}.js`);`

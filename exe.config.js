@@ -1,11 +1,11 @@
 const exe = require('@angablue/exe');
-const package = require('./packages/contensis-cli/package.json');
+const packageJson = require('./packages/contensis-cli/package.json');
 
 const build = exe({
   entry: '.',
   out: './bin/contensis-cli.exe',
   pkg: ['--public-packages', '"*"', '--public', '--compress', 'GZip'], // Specify extra pkg arguments
-  version: package.version,
+  version: packageJson.version,
   target: 'latest-win-x64',
   icon: './assets/icon.ico', // Application icons must be in .ico format
   properties: {

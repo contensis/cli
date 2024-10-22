@@ -58,7 +58,7 @@ class ContensisDev extends ContensisRole {
           return pattern.test(blockId);
         } else return false;
       };
-      let { blockId } = await inquirer.prompt({
+      const { blockId } = await inquirer.prompt({
         name: 'blockId',
         type: 'input',
         prefix: '🧱',
@@ -275,7 +275,7 @@ class ContensisDev extends ContensisRole {
 
       const envFilePath = `${projectHome}/.env`;
       const existingEnvFile = readFile(envFilePath);
-      let existingEnvFileArray = (existingEnvFile || '')
+      const existingEnvFileArray = (existingEnvFile || '')
         .split('\n')
         .filter(l => !!l);
 

@@ -33,13 +33,22 @@
     "prestart": "kill-port --port 3000,3001,3002",
     "start": "lerna exec --parallel --stream -- yarn start",
     "start2": "lerna run start --stream",
-    "cli": "npm start --prefix ./packages/contensis-cli/"
+    "cli": "npm start --prefix ./packages/contensis-cli/",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@angablue/exe": "^1.2.0",
+    "@eslint/js": "^9.12.0",
+    "@types/eslint__js": "^8.42.3",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "kill-port": "^2.0.1",
     "lerna": "^7.0.0",
     "pkg": "^5.8.1",
-    "rimraf": "^5.0.1"
+    "prettier": "^3.3.3",
+    "rimraf": "^5.0.1",
+    "typescript-eslint": "^8.8.1"
   }
 }

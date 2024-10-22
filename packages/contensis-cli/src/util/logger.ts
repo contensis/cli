@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import chalk from 'chalk';
 import dateFormat from 'dateformat';
 import deepCleaner from 'deep-cleaner';
@@ -120,9 +119,9 @@ export class Logger {
                 field.id === content.entryTitleField
                   ? '**'
                   : field.validations.minCount?.value ||
-                    typeof field.validations.required?.message !== 'undefined'
-                  ? '*'
-                  : ''
+                      typeof field.validations.required?.message !== 'undefined'
+                    ? '*'
+                    : ''
               }: ${chalk.grey(
                 `${field.dataType}${
                   field.dataFormat
@@ -203,16 +202,17 @@ export class Logger {
             if (item.length)
               Logger.raw(chalk.grey(`${indent}  [${item.join(', ')}]`));
             else Logger.objectRecurse(item, depth + 1, `${indent}  `);
-          else
-            Array.isArray(item)
-              ? Logger.raw(
-                  `${indent}${chalk.grey(`[`)}${item.join(', ')}${chalk.grey(
-                    `]`
-                  )}`
-                )
-              : typeof item === 'object' && item
-              ? Logger.objectRecurse(item, depth + 1, `${indent}  `)
-              : Logger.raw(`${indent}${item}`);
+          else {
+            if (Array.isArray(item))
+              Logger.raw(
+                `${indent}${chalk.grey(`[`)}${item.join(', ')}${chalk.grey(
+                  `]`
+                )}`
+              );
+            else if (typeof item === 'object' && item)
+              Logger.objectRecurse(item, depth + 1, `${indent}  `);
+            else Logger.raw(`${indent}${item}`);
+          }
         } else Logger.raw(`${indent}${item}`);
       }
     } else {
@@ -253,6 +253,7 @@ export class Logger {
     content: string,
     displayLength = 30,
     consoleWidth = process.stdout.columns,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     logMethod: Function = console.info
   ) => {
     if (consoleWidth) {

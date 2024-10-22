@@ -218,7 +218,7 @@ export class RequestHandlerFactory {
     const { manifest, messages, moduleInfo } = this;
 
     if (moduleInfo.install && moduleInfo.version !== moduleInfo.install) {
-      let { apply } =
+      const { apply } =
         moduleInfo.version === '*'
           ? { apply: true }
           : await inquirer.prompt({

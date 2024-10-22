@@ -89,7 +89,7 @@ const determineMost = (chunk: string, items: string[]) => {
   items.forEach(item => {
     itemCount[item] = 0;
   });
-  for (var i = 0; i < chunk.length; i++) {
+  for (let i = 0; i < chunk.length; i++) {
     if (chunk[i] === '"') ignoreString = !ignoreString;
     else if (!ignoreString && chunk[i] in itemCount) {
       currValue = ++itemCount[chunk[i]];
