@@ -1,4 +1,4 @@
-# Contensis CLI
+# [![Contensis](https://github.com/contensis/cli/raw/refs/heads/main/assets/contensis-logo--tiny.svg)](https://www.contensis.com) Contensis CLI
 
 If you are using this package you may want the [Contensis CLI package README](packages/contensis-cli/README.md)
 

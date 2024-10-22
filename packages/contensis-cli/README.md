@@ -1,4 +1,4 @@
-# Contensis CLI
+# [![Contensis](https://github.com/contensis/cli/raw/refs/heads/main/assets/contensis-logo--tiny.svg)](https://www.contensis.com) Contensis CLI
 
 Use Contensis from your favourite terminal
 
