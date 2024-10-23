@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/contensis/cli/compare/contensis-cli-v1.3.0...contensis-cli-v1.3.1) (2024-10-23)
+
+
+### Bug Fixes
+
+* null check console output for model defaults in `import models` command ([0e1d9c9](https://github.com/contensis/cli/commit/0e1d9c980ae1cb0fddc758e913b5b483d6c2979f))
+
 ## [1.3.0](https://github.com/contensis/cli/compare/contensis-cli-v1.2.1...contensis-cli-v1.3.0) (2024-09-24)
 
 
