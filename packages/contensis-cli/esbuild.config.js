@@ -5,7 +5,7 @@ const { globPlugin } = require('esbuild-plugin-glob');
 const { nodeExternalsPlugin } = require('esbuild-node-externals');
 const { replaceTscAliasPaths } = require('tsc-alias');
 
-const watch = !!process.argv.includes('--watch');
+// const watch = !!process.argv.includes('--watch');
 const completed = `${chalk.green('[contensis-cli]')} Build successful 👍\n`;
 
 console.time(completed);
@@ -27,15 +27,15 @@ rimraf('./dist', () => {
       // so the bundles are compatible with the pkg exe builds
       target: 'node12',
       plugins: [globPlugin(), nodeExternalsPlugin()],
-      watch: watch && {
-        onRebuild(error) {
-          if (error) console.error('esbuild watch build failed:', error);
-          else
-            console.log(
-              'esbuild watch build succeeded, waiting for changes...'
-            );
-        },
-      },
+      // watch: watch && {
+      //   onRebuild(error) {
+      //     if (error) console.error('esbuild watch build failed:', error);
+      //     else
+      //       console.log(
+      //         'esbuild watch build succeeded, waiting for changes...'
+      //       );
+      //   },
+      // },
     })
     .then(() => {
       console.timeEnd(' - esbuild complete');
@@ -44,8 +44,4 @@ rimraf('./dist', () => {
       console.timeEnd(' - replace alias paths');
       console.timeEnd(completed);
     })
-    .catch(error => {
-      console.error(error);
-      process.exit(1);
-    });
 });
