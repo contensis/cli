@@ -1800,15 +1800,23 @@ class ContensisCli {
       // Add a full sys.uri to asset entries
       // Add sys.metadata.exportCms
       // Add sys.metadata.exportProjectId
+      const nodes = contensis.content.source.nodes.raw;
+      const combinedOutput = [...entries, ...nodes];
 
-      await this.HandleFormattingAndOutput(entries, () =>
+      await this.HandleFormattingAndOutput(combinedOutput, () => {
         // print the entries to console
         logEntitiesTable({
           entries,
           projectId: currentProject,
           fields: contensis.payload.query?.fields,
-        })
-      );
+        });
+        if (nodes.length)
+          logEntitiesTable({
+            nodes,
+            projectId: currentProject,
+            fields: contensis.payload.query?.fields,
+          });
+      });
     } else {
       log.warning(messages.models.noList(currentProject));
       log.help(messages.connect.tip());
@@ -1849,7 +1857,11 @@ class ContensisCli {
         const { entries, nodes } = contensis.content.targets[currentProject];
 
         const output = saveEntries
-          ? entries.migrate?.map(me => me.toJSON())
+          ? // include entries and dependent nodes when saving entries
+            [
+              entries.migrate?.map(me => me.toJSON()) || [],
+              nodes.migrateNodes.map(mn => mn.node),
+            ].flat()
           : result;
         await this.HandleFormattingAndOutput(output, () => {
           // print the migrateResult to console
