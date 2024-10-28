@@ -107,7 +107,7 @@ class ContensisCli {
     const environments = this.cache.environments || {};
 
     if (!currentEnvironment) return {} as EnvironmentCache;
-    else if (!!environments[currentEnvironment])
+    else if (environments[currentEnvironment])
       return environments[currentEnvironment];
     else {
       return {
@@ -126,14 +126,14 @@ class ContensisCli {
   ) {
     // console.log('args: ', JSON.stringify(args, null, 2));
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [exe, script, verb = '', noun = '', ...restArgs] = args;
     this.verb = verb?.toLowerCase();
     this.noun = noun?.toLowerCase();
     this.thirdArg = restArgs?.[0];
 
-    const commandText = `${this.verb} ${this.noun} ${restArgs ? restArgs.join(' ') : ''
-      }`.trim();
+    const commandText = `${this.verb} ${this.noun} ${
+      restArgs ? restArgs.join(' ') : ''
+    }`.trim();
 
     this.session = new SessionCacheProvider();
 
@@ -295,12 +295,12 @@ class ContensisCli {
     commit?: boolean;
     fromFile?: string;
     importDataType?:
-    | 'entries'
-    | 'contentTypes'
-    | 'components'
-    | 'models'
-    | 'nodes'
-    | 'user-input';
+      | 'entries'
+      | 'contentTypes'
+      | 'components'
+      | 'models'
+      | 'nodes'
+      | 'user-input';
   }) => {
     const source: 'contensis' | 'file' = fromFile ? 'file' : 'contensis';
 
@@ -645,9 +645,10 @@ class ContensisCli {
               color = chalk.white;
             }
             console.log(
-              `${nextCurrentProject === project.id
-                ? `>> ${log.boldText(color(project.id))}`
-                : `    ${color(project.id)}`
+              `${
+                nextCurrentProject === project.id
+                  ? `>> ${log.boldText(color(project.id))}`
+                  : `    ${color(project.id)}`
               } ${log.infoText(
                 `[${project.supportedLanguages
                   .map(l =>
@@ -762,7 +763,8 @@ class ContensisCli {
             modifiedBy,
           } of apiKeys) {
             console.log(
-              `  - ${name}${description ? ` (${description})` : ''
+              `  - ${name}${
+                description ? ` (${description})` : ''
               } [${dateModified.toString().substring(0, 10)} ${modifiedBy}]`
             );
             console.log(`      ${id}`);
@@ -1191,8 +1193,8 @@ class ContensisCli {
       // Models to output to console
       const returnModels = modelIds?.length
         ? models?.filter((m: Model) =>
-          modelIds.some(id => id.toLowerCase() === m.id.toLowerCase())
-        )
+            modelIds.some(id => id.toLowerCase() === m.id.toLowerCase())
+          )
         : undefined;
       const exportResources: (ContentType | Component)[] = [];
 
@@ -1278,17 +1280,22 @@ class ContensisCli {
                 const hasAny =
                   components + contentTypes + dependencies + dependencyOf;
                 log.raw(
-                  `  - ${log.highlightText(log.boldText(model.id))} ${hasAny
-                    ? log.infoText(
-                      `{ ${components ? `components: ${components}, ` : ''
-                      }${contentTypes
-                        ? `contentTypes: ${contentTypes}, `
-                        : ''
-                      }${defaults ? `defaults: ${defaults}, ` : ''}${dependencies ? `references: ${dependencies}, ` : ''
-                      }${dependencyOf ? `required by: ${dependencyOf}` : ''
-                      } }`
-                    )
-                    : ''
+                  `  - ${log.highlightText(log.boldText(model.id))} ${
+                    hasAny
+                      ? log.infoText(
+                          `{ ${
+                            components ? `components: ${components}, ` : ''
+                          }${
+                            contentTypes
+                              ? `contentTypes: ${contentTypes}, `
+                              : ''
+                          }${defaults ? `defaults: ${defaults}, ` : ''}${
+                            dependencies ? `references: ${dependencies}, ` : ''
+                          }${
+                            dependencyOf ? `required by: ${dependencyOf}` : ''
+                          } }`
+                        )
+                      : ''
                   }`
                 );
               }
@@ -1419,7 +1426,8 @@ class ContensisCli {
           for (const contentType of contentTypes) {
             const fieldsLength = contentType.fields?.length || 0;
             console.log(
-              `  - ${contentType.id} [${fieldsLength} field${fieldsLength !== 1 ? 's' : ''
+              `  - ${contentType.id} [${fieldsLength} field${
+                fieldsLength !== 1 ? 's' : ''
               }]`
             );
           }
@@ -1518,10 +1526,9 @@ class ContensisCli {
           contentType.projectId = currentProject;
           delete contentType.uuid;
 
-          const [err, , createStatus] =
-            await contensis.models.targetRepos[
-              currentProject
-            ].repo.UpsertContentType(false, contentType);
+          const [err, , createStatus] = await contensis.models.targetRepos[
+            currentProject
+          ].repo.UpsertContentType(false, contentType);
 
           if (err) log.error(err.message, err);
           if (createStatus) {
@@ -1533,7 +1540,7 @@ class ContensisCli {
               )
             );
             // print the content type to console
-            await this.HandleFormattingAndOutput(contentType, () => { });
+            await this.HandleFormattingAndOutput(contentType, () => {});
           }
         }
       else {
@@ -1611,7 +1618,8 @@ class ContensisCli {
           for (const component of components) {
             const fieldsLength = component.fields?.length || 0;
             console.log(
-              `  - ${component.id} [${fieldsLength} field${fieldsLength !== 1 ? 's' : ''
+              `  - ${component.id} [${fieldsLength} field${
+                fieldsLength !== 1 ? 's' : ''
               }]`
             );
           }
@@ -1709,10 +1717,9 @@ class ContensisCli {
           component.projectId = currentProject;
           delete component.uuid;
 
-          const [err, , createStatus] =
-            await contensis.models.targetRepos[
-              currentProject
-            ].repo.UpsertComponent(false, component);
+          const [err, , createStatus] = await contensis.models.targetRepos[
+            currentProject
+          ].repo.UpsertComponent(false, component);
 
           if (err) log.error(err.message, err);
           if (createStatus) {
@@ -1724,7 +1731,7 @@ class ContensisCli {
               )
             );
             // print the component to console
-            await this.HandleFormattingAndOutput(component, () => { });
+            await this.HandleFormattingAndOutput(component, () => {});
           }
         }
       else {
@@ -1876,13 +1883,13 @@ class ContensisCli {
             commit,
             commit
               ? (result.migrateResult?.created || 0) +
-              (result.migrateResult?.updated || 0)
+                  (result.migrateResult?.updated || 0)
               : result.entriesToMigrate[currentProject].totalCount,
             commit
               ? (result.nodesResult?.created || 0) +
-              (result.nodesResult?.updated || 0)
+                  (result.nodesResult?.updated || 0)
               : (result.nodesToMigrate?.[currentProject]
-                .totalCount as number) || 0
+                  .totalCount as number) || 0
           )
         );
         if (!commit) {
@@ -1935,8 +1942,8 @@ class ContensisCli {
       if (result) {
         const output = saveEntries
           ? contensis.content.copy.targets[currentProject].entries.migrate?.map(
-            me => me.toJSON()
-          )
+              me => me.toJSON()
+            )
           : result;
         await this.HandleFormattingAndOutput(output, () => {
           // print the migrateResult to console
@@ -1962,7 +1969,7 @@ class ContensisCli {
             commit,
             commit
               ? (result.migrateResult?.created || 0) +
-              (result.migrateResult?.updated || 0)
+                  (result.migrateResult?.updated || 0)
               : result.entriesToMigrate[currentProject].totalCount
           )
         );
@@ -2153,14 +2160,14 @@ class ContensisCli {
 
       const filteredResults = subscriptionIdsOrNames?.length
         ? webhooks?.filter(
-          w =>
-            subscriptionIdsOrNames?.some(idname =>
-              w.name?.toLowerCase().includes(idname.toLowerCase())
-            ) ||
-            subscriptionIdsOrNames?.some(
-              id => id.toLowerCase() === w.id.toLowerCase()
-            )
-        )
+            w =>
+              subscriptionIdsOrNames?.some(idname =>
+                w.name?.toLowerCase().includes(idname.toLowerCase())
+              ) ||
+              subscriptionIdsOrNames?.some(
+                id => id.toLowerCase() === w.id.toLowerCase()
+              )
+          )
         : webhooks;
 
       if (Array.isArray(filteredResults)) {
@@ -2187,7 +2194,8 @@ class ContensisCli {
                     version.modified || version.created
                   )
                     .toString()
-                    .substring(0, 10)} ${version.modifiedBy || version.createdBy
+                    .substring(0, 10)} ${
+                    version.modifiedBy || version.createdBy
                   }]`
                 )
               );
@@ -2256,12 +2264,14 @@ class ContensisCli {
             versionsSinceLive,
           } of blocks) {
             console.log(
-              `  - ${id}${description ? ` (${description})` : ''}${madeLive
-                ? ` [${madeLive.toString().substring(0, 10)} v${liveVersion}]`
-                : ''
-              }${versionsSinceLive
-                ? log.warningText(` +${versionsSinceLive}`)
-                : ''
+              `  - ${id}${description ? ` (${description})` : ''}${
+                madeLive
+                  ? ` [${madeLive.toString().substring(0, 10)} v${liveVersion}]`
+                  : ''
+              }${
+                versionsSinceLive
+                  ? log.warningText(` +${versionsSinceLive}`)
+                  : ''
               }`
             );
             for (const branch of branches)
@@ -2326,11 +2336,11 @@ class ContensisCli {
               block,
               !version
                 ? {
-                  showImage: false,
-                  showSource: true,
-                  showStaticPaths: false,
-                  showStatus: false,
-                }
+                    showImage: false,
+                    showSource: true,
+                    showStaticPaths: false,
+                    showStatus: false,
+                  }
                 : undefined
             );
         });
@@ -2357,9 +2367,8 @@ class ContensisCli {
     const contensis = await this.ConnectContensis();
     if (contensis) {
       // Push new block version
-      const [err, blockVersion] = await contensis.blocks.PushBlockVersion(
-        block
-      );
+      const [err, blockVersion] =
+        await contensis.blocks.PushBlockVersion(block);
       if (!err) {
         log.success(
           messages.blocks.pushed(
@@ -2436,9 +2445,8 @@ class ContensisCli {
 
       // If action is release and version is latest, find the latest version number
       if (action === 'release' && version === 'latest') {
-        const [getErr, blockVersion] = await this.GetLatestBlockVersion(
-          blockId
-        );
+        const [getErr, blockVersion] =
+          await this.GetLatestBlockVersion(blockId);
 
         if (getErr) {
           // Log error getting latest block version no
@@ -2525,7 +2533,8 @@ class ContensisCli {
         await this.HandleFormattingAndOutput(renderLogs, () => {
           // print the logs to console
           console.log(
-            `  - ${blockId} ${branch} ${Number(version) ? `v${version}` : version
+            `  - ${blockId} ${branch} ${
+              Number(version) ? `v${version}` : version
             } ${dataCenter ? `[${dataCenter}]` : ''}`
           );
           log.line();
@@ -2578,11 +2587,11 @@ class ContensisCli {
 
           const [lastErr, lastLogs] = following
             ? await contensis.blocks.GetBlockLogs({
-              blockId,
-              branchId: branch,
-              version,
-              dataCenter,
-            })
+                blockId,
+                branchId: branch,
+                version,
+                dataCenter,
+              })
             : [null, null];
 
           if (lastLogs) {
@@ -2630,7 +2639,8 @@ class ContensisCli {
           log.success(messages.proxies.list(currentEnv, env.currentProject));
           for (const { id, name, description, endpoints, version } of proxies) {
             console.log(
-              `  - ${name} [${version.versionNo
+              `  - ${name} [${
+                version.versionNo
               }] ${id} ${log.infoText`${description}`}`
             );
             for (const [language, endpoint] of Object.entries(
@@ -2684,8 +2694,9 @@ class ContensisCli {
             for (const rule of rules)
               if (rule.return)
                 console.log(
-                  log.infoText`      ${rule.return.endpointId ? 'endpointId' : 'blockId'
-                    }: ${rule.return.endpointId || rule.return.blockId}`
+                  log.infoText`      ${
+                    rule.return.endpointId ? 'endpointId' : 'blockId'
+                  }: ${rule.return.endpointId || rule.return.blockId}`
                 );
           }
         });
