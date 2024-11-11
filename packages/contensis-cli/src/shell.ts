@@ -14,6 +14,7 @@ import { LIB_VERSION } from './version';
 class ContensisShell {
   private currentEnvironment!: string;
   private emptyInputCounter: number = 0;
+  private cache!: SessionCache;
   private env!: EnvironmentCache;
   private firstStart = true;
   private userId: string = '';
@@ -22,12 +23,12 @@ class ContensisShell {
 
   private refreshEnvironment = () => {
     // Reload any persisted changes from the disk cache
-    const {
-      cache: { currentEnvironment = '', environments = {} },
-    } = new ContensisCli([]);
+    const { cache } = new ContensisCli([]);
+    this.cache = cache; // read the cache to pre-load suggestions
     // console.log(`refreshing env w/${currentEnvironment}`);
-    this.currentEnvironment = currentEnvironment;
-    this.env = environments[currentEnvironment];
+    this.currentEnvironment = cache.currentEnvironment || '';
+    const environments = cache.environments || {};
+    this.env = environments[this.currentEnvironment];
 
     // Reload logging here to support changing language
     Logging('en-GB').then(({ messages, Log }) => {
@@ -128,12 +129,20 @@ class ContensisShell {
         },
       },
       'connect',
+      ...Object.keys(this.cache.environments || {}).map(
+        alias => `connect ${alias}`
+      ),
       'list envs',
       'quit',
     ];
 
     if (currentEnvironment)
-      availableCommands.push('login', 'list projects', 'set project');
+      availableCommands.push(
+        'login',
+        'list projects',
+        'set project',
+        ...(this.env.projects || []).map(project => `set project ${project}`)
+      );
     if (userId)
       availableCommands.push(
         'copy field',
