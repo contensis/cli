@@ -29,16 +29,18 @@ class SessionCacheProvider {
       } else {
         this.WriteCacheToDisk();
       }
-    } catch (ex) {
+    } catch (ex: any) {
       // Problem reading or parsing cache file
+      Logger.error(ex);
     }
   };
 
   private WriteCacheToDisk = () => {
     try {
       fs.writeFileSync(this.localFilePath, JSON.stringify(this.cache, null, 2));
-    } catch (ex) {
+    } catch (ex: any) {
       // Problem writing session cache to file
+      Logger.error(ex);
     }
   };
 
@@ -91,6 +93,28 @@ class SessionCacheProvider {
       // Problem merging cache data for update
       Logger.error(
         `Problem updating environment "${env}" in environments.json`
+      );
+      Logger.error(ex);
+    }
+    return this.Get();
+  };
+
+  RemoveEnv = (env: string) => {
+    try {
+      const environment = this.cache.environments[env || ''];
+      if (environment) delete this.cache.environments[env || ''];
+
+      this.Update({
+        currentEnvironment:
+          this.cache.currentEnvironment === env
+            ? ''
+            : this.cache.currentEnvironment,
+        environments: this.cache.environments,
+      });
+    } catch (ex: any) {
+      // Problem merging cache data for update
+      Logger.error(
+        `Problem removing environment "${env}" in environments.json`
       );
       Logger.error(ex);
     }

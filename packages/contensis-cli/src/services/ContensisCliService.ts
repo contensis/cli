@@ -211,6 +211,38 @@ class ContensisCli {
     }
   };
 
+  RemoveEnvironment = async (env: string) => {
+    const { log, messages, session } = this;
+    const { currentEnvironment, environments = {} } = this.cache;
+    const envKeys = Object.keys(environments);
+    log.success(messages.envs.found(envKeys.length));
+    if (environments[env]) {
+      // remove env from cache
+      session.RemoveEnv(env);
+      // remove credentials
+      const lastUserId = environments[env].lastUserId;
+      if (lastUserId) {
+        const [err, credentials] = await new CredentialProvider({
+          userId: environments[env].lastUserId,
+          alias: env,
+        }).Init();
+        if (!err && credentials) await credentials.Delete();
+      }
+      log.success(messages.envs.removed(env));
+      // support the output and format options - exporting the history for the
+      // removed alias
+      await this.HandleFormattingAndOutput(environments[env], () => log.line());
+    } else {
+      log.warning(messages.envs.notFound(env));
+    }
+
+    const nextCurrentEnv =
+      currentEnvironment === env ? undefined : currentEnvironment;
+    if (envKeys.length === 0 || !nextCurrentEnv) log.help(messages.envs.tip());
+
+    return nextCurrentEnv;
+  };
+
   Connect = async (environment: string) => {
     const { log, messages, session } = this;
 

@@ -133,6 +133,7 @@ class ContensisShell {
         alias => `connect ${alias}`
       ),
       'list envs',
+      'remove env',
       'quit',
     ];
 
@@ -141,7 +142,7 @@ class ContensisShell {
         'login',
         'list projects',
         'set project',
-        ...(this.env.projects || []).map(project => `set project ${project}`)
+        ...(this.env?.projects || []).map(project => `set project ${project}`)
       );
     if (userId)
       availableCommands.push(

@@ -30,7 +30,11 @@ export const LogMessages = {
   },
   envs: {
     found: (num: number) =>
-      `environments store found containing ${pl('environment', num, true)}`,
+      `Environments store found containing ${pl('environment', num, true)}`,
+    notFound: (alias: string) =>
+      `Environment ${Logger.highlightText(alias)} was not found in session cache`,
+    removed: (alias: string) =>
+      `Removed environment ${Logger.highlightText(alias)} from session cache`,
     tip: () =>
       `Connect to a Contensis cloud instance using "contensis connect {cms alias}"`,
   },

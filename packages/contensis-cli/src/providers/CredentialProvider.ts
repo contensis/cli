@@ -54,12 +54,12 @@ class CredentialProvider {
     }
   };
 
-  Init = async (): Promise<[Error, CredentialProvider]> => {
+  Init = async (): Promise<[Error | null, CredentialProvider]> => {
     await this.Import();
 
     const [err, stored] = (await to(
       this.keytar.getPassword(this.serviceId, this.userId)
-    )) as [Error, string];
+    )) as [Error | null, string];
 
     if (err && this.passwordFallback) {
       this.current = {

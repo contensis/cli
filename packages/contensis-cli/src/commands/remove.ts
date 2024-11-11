@@ -13,6 +13,26 @@ export const makeRemoveCommand = () => {
     .exitOverride();
 
   remove
+    .command('env')
+    .description('Remove a previously connected environment from the CLI')
+    .argument('<alias>', 'the Contensis Cloud alias to remove')
+    .usage('<alias>')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > remove env ludlow-uni-dev
+`
+    )
+    .action(async (alias: string, opts) => {
+      const currentEnvironment = await cliCommand(
+        ['remove', 'env', alias],
+        opts
+      ).RemoveEnvironment(alias);
+      if (!currentEnvironment) await shell().restart();
+    });
+
+  remove
     .command('project')
     .description('remove an entire project')
     .argument('<projectId>', 'the project id to delete')
