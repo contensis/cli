@@ -252,9 +252,8 @@ class ContensisShell {
                     : JSON.stringify(ex, null, 2)
                 }`
               );
-          } finally {
-            return this.contensisPrompt();
           }
+          return this.contensisPrompt();
         }
       })
       .catch((err: Error) => {
