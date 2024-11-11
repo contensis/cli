@@ -9,6 +9,7 @@ import {
   latest,
   mapContensisOpts,
   noCache,
+  noPublish,
   outputDetail,
   saveEntries,
   versionStatus,
@@ -45,6 +46,7 @@ export const makeCopyCommand = () => {
     .addOption(ignoreErrors)
     .addOption(outputDetail)
     .addOption(noCache)
+    .addOption(noPublish)
     .option(
       '--search <phrase>',
       'get entries with the search phrase, use quotes for multiple words'

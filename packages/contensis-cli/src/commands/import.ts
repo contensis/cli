@@ -10,6 +10,7 @@ import {
   latest,
   mapContensisOpts,
   noCache,
+  noPublish,
   outputDetail,
   saveEntries,
   versionStatus,
@@ -139,6 +140,7 @@ Example call:
     .addOption(outputDetail)
     .addOption(ignoreErrors)
     .addOption(noCache)
+    .addOption(noPublish)
     .addOption(saveEntries)
     .addHelpText(
       'after',

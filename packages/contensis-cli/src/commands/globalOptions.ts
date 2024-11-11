@@ -49,6 +49,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   noCache: !opts.cache, // arg is inverted automatically from `--no-cache` to `cache: false`
   includeDefaults: opts.defaults, // arg is inverted automatically from `--no-defaults` to `defaults: false`
   concurrency: opts.concurrency ? Number(opts.concurrency) : undefined,
+  noPublish: !opts.publish, // arg is inverted automatically from `--no-publish` to `publish: false`
 });
 
 /* Output options */
@@ -177,7 +178,12 @@ export const concurrency = new Option(
 
 export const noCache = new Option(
   '--no-cache',
-  'add this flag to ignore internal cache and rebuild all resources from scratch'
+  'ignore internal cache and rebuild all resources from scratch'
+);
+
+export const noPublish = new Option(
+  '--no-publish',
+  'don\'t publish created or updated entries'
 );
 
 export const addConnectOptions = (program: Command) =>
