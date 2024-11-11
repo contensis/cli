@@ -115,6 +115,8 @@ export const LogMessages = {
       `[${env}] Unable to update project ${Logger.highlightText(id)}`,
   },
   migrate: {
+    preview: () => `🔍 IMPORT PREVIEW 🔭`,
+    commit: () => `COMMITTING IMPORT ✨☄️ `,
     models: {
       result: (
         status: keyof MigrateModelsResult['project']['contentTypes']

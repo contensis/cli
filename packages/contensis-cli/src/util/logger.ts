@@ -55,10 +55,10 @@ export class Logger {
     if (progress.active) progress.current.interrupt(message);
     else console.log(message);
   };
-  static warning: LogMethod = content => {
+  static warning: LogMethod = (content, newline = '\n') => {
     const message = `${Logger.getPrefix()} ${Logger.warningText(
       `${Logger.isUserTerminal ? '⚠️ ' : '[WARN]'} ${content}`
-    )}\n`;
+    )}${newline}`;
     if (progress.active) progress.current.interrupt(message);
     else console.log(message);
     // }

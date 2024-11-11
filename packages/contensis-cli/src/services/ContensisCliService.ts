@@ -1363,9 +1363,9 @@ class ContensisCli {
     if (contensis) {
       log.line();
       if (contensis.isPreview) {
-        console.log(log.successText(` -- IMPORT PREVIEW -- `));
+        log.success(messages.migrate.preview());
       } else {
-        console.log(log.warningText(` *** COMMITTING IMPORT *** `));
+        log.warning(messages.migrate.commit());
       }
 
       const [migrateErr, result] = await contensis.MigrateContentModels();
@@ -1877,9 +1877,9 @@ class ContensisCli {
     if (contensis) {
       log.line();
       if (contensis.isPreview) {
-        console.log(log.successText(` -- IMPORT PREVIEW -- `));
+        log.success(messages.migrate.preview());
       } else {
-        console.log(log.warningText(` *** COMMITTING IMPORT *** `));
+        log.warning(messages.migrate.commit());
       }
 
       const [err, result] = await contensis.MigrateEntries();
@@ -1973,9 +1973,9 @@ class ContensisCli {
     if (contensis) {
       log.line();
       if (contensis.isPreview) {
-        console.log(log.successText(` -- IMPORT PREVIEW -- `));
+        log.success(messages.migrate.preview());
       } else {
-        console.log(log.warningText(` *** COMMITTING IMPORT *** `));
+        log.warning(messages.migrate.commit());
       }
 
       const [err, result] = await to(
@@ -2080,9 +2080,9 @@ class ContensisCli {
     if (contensis) {
       log.line();
       if (contensis.isPreview) {
-        console.log(log.successText(` -- IMPORT PREVIEW -- `));
+        log.success(messages.migrate.preview());
       } else {
-        console.log(log.warningText(` *** COMMITTING IMPORT *** `));
+        log.warning(messages.migrate.commit());
       }
 
       const [err, result] = await contensis.MigrateNodes();
