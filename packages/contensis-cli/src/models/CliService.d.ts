@@ -9,7 +9,7 @@ export type CliUrls =
     }
   | undefined;
 
-export type OutputFormat = 'json' | 'csv' | 'xml';
+export type OutputFormat = 'json' | 'csv' | 'html' | 'xml';
 
 export type OutputOptions = {
   format?: OutputFormat;

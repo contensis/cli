@@ -60,8 +60,8 @@ const output = new Option(
 
 const format = new Option(
   '-f --format <format>',
-  'format output as csv, json, xml or table (default)'
-).choices(['csv', 'json', 'xml', 'table']);
+  'format output as csv, json, html, xml or default'
+).choices(['csv', 'json', 'html', 'xml', 'table']);
 
 /* Connect options */
 const alias = new Option(
@@ -183,7 +183,7 @@ export const noCache = new Option(
 
 export const noPublish = new Option(
   '--no-publish',
-  'don\'t publish created or updated entries'
+  "don't publish created or updated entries"
 );
 
 export const addConnectOptions = (program: Command) =>

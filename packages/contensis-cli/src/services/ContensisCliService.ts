@@ -50,6 +50,7 @@ import {
   printNodesMigrateResult,
 } from '~/util/console.printer';
 import { csvFormatter } from '~/util/csv.formatter';
+import { htmlFormatter } from '~/util/html.formatter';
 import { jsonFormatter, limitFields } from '~/util/json.formatter';
 import { xmlFormatter } from '~/util/xml.formatter';
 import { isDebug } from '~/util/debug';
@@ -2764,6 +2765,9 @@ class ContensisCli {
     } else if (format === 'csv') {
       log.raw('');
       log.raw(log.infoText(await csvFormatter(limitFields(obj, fields))));
+    } else if (format === 'html') {
+      log.raw('');
+      log.raw(log.infoText(htmlFormatter(limitFields(obj, fields))));
     } else if (format === 'xml') {
       log.raw('');
       log.raw(log.infoText(xmlFormatter(limitFields(obj, fields))));
@@ -2778,6 +2782,8 @@ class ContensisCli {
       const isText = !tryParse(obj) && typeof obj === 'string';
       if (format === 'csv') {
         writeString = await csvFormatter(limitFields(obj, fields));
+      } else if (format === 'html') {
+        writeString = htmlFormatter(limitFields(obj, fields));
       } else if (format === 'xml') {
         writeString = xmlFormatter(limitFields(obj, fields));
       } else
