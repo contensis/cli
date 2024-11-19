@@ -127,6 +127,7 @@ class ContensisCli {
   ) {
     // console.log('args: ', JSON.stringify(args, null, 2));
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [exe, script, verb = '', noun = '', ...restArgs] = args;
     this.verb = verb?.toLowerCase();
     this.noun = noun?.toLowerCase();
@@ -324,6 +325,7 @@ class ContensisCli {
     commit = false,
     fromFile,
     importDataType,
+    importData,
   }: {
     commit?: boolean;
     fromFile?: string;
@@ -334,10 +336,13 @@ class ContensisCli {
       | 'models'
       | 'nodes'
       | 'user-input';
+    importData?: any[];
   }) => {
-    const source: 'contensis' | 'file' = fromFile ? 'file' : 'contensis';
+    const source: 'contensis' | 'file' =
+      fromFile || importData ? 'file' : 'contensis';
 
-    const fileData = fromFile ? (await readFileAsJSON(fromFile)) || [] : [];
+    const fileData =
+      importData || (fromFile ? (await readFileAsJSON(fromFile)) || [] : []);
 
     if (typeof fileData === 'string')
       throw new Error(`Import file format must be of type JSON`);
@@ -1861,11 +1866,13 @@ class ContensisCli {
     fromFile,
     logOutput,
     saveEntries,
+    data,
   }: {
     commit: boolean;
-    fromFile: string;
+    fromFile?: string;
     logOutput: string;
     saveEntries: boolean;
+    data?: any[];
   }) => {
     const { currentEnv, currentProject, log, messages } = this;
 
@@ -1873,6 +1880,7 @@ class ContensisCli {
       commit,
       fromFile,
       importDataType: 'entries',
+      importData: data,
     });
 
     if (contensis) {
@@ -1903,7 +1911,10 @@ class ContensisCli {
             showDiff: logOutput === 'all' || logOutput === 'changes',
             showChanged: logOutput === 'changes',
           });
-          if (['all', 'changes'].includes(logOutput))
+          if (
+            ['all', 'changes'].includes(logOutput) &&
+            nodes.migrateNodes.length
+          )
             printNodeTreeOutput(
               this,
               {

@@ -1,7 +1,18 @@
 import { Command } from 'commander';
 import mapJson from 'jsonpath-mapper';
-import { PushBlockParams } from 'migratortron';
+import { generateGuid, PushBlockParams } from 'migratortron';
+import path from 'path';
+import { Asset } from 'contensis-delivery-api';
 import { cliCommand } from '~/services/ContensisCliService';
+import {
+  commit,
+  mapContensisOpts,
+  noPublish,
+  outputDetail,
+  saveEntries,
+} from './globalOptions';
+import { jsonFormatter } from '~/util/json.formatter';
+import { cwdPath } from '~/providers/file-provider';
 
 export const makePushCommand = () => {
   const push = new Command()
@@ -10,6 +21,119 @@ export const makePushCommand = () => {
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
     .exitOverride();
+
+  push
+    .command('asset')
+    .description('push an asset')
+    .argument('<content-type-id>', 'the content type id of the asset to push')
+    .argument(
+      '<title>',
+      'the title of the asset as it appears in the cms (use quotes)'
+    )
+    .argument(
+      '[description]',
+      'the description or altText of the asset (use quotes)'
+    )
+    .option(
+      '-from --from-file <fromFile>',
+      'the local file path of the source asset'
+    )
+    .option('-url --from-url <fromUrl>', 'the full url of the source asset')
+    .option(
+      '-to --target-file-path <targetFilePath>',
+      'the file path in the cms project to push the asset to e.g. "/asset-library/"'
+    )
+    .option(
+      '-name --target-file-name <targetFileName>',
+      'set the file name in the cms project'
+    )
+    .option('-i --id <id>', 'push the asset with a specific guid')
+    .addOption(commit)
+    .addOption(noPublish)
+    .addOption(outputDetail)
+    .addOption(saveEntries)
+    .usage('<content-type-id> <title> [description] [options]')
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > push asset pdf "Example file" "An example of a PDF asset" --from-file example.pdf --target-file-path /asset-library/pdf/\n`
+    )
+    .action(
+      async (
+        contentTypeId: string,
+        title: string,
+        description: string,
+        opts
+      ) => {
+        const cli = cliCommand(
+          ['push', 'asset', contentTypeId, title, description],
+          opts,
+          mapContensisOpts({ preserveGuids: true, ...opts, id: undefined })
+        );
+        const mapSourceVars = {
+          contentTypeId,
+          title,
+          description,
+          ...opts,
+        };
+
+        const assetEntry: Asset = mapJson(mapSourceVars, {
+          entryTitle: 'title',
+          title: 'title',
+          entryDescription: 'description',
+          description: 'description',
+          altText: ({ contentTypeId, description }) =>
+            contentTypeId === 'image' ? description : undefined,
+          sys: {
+            dataFormat: () => 'asset',
+            contentTypeId: 'contentTypeId',
+            id: 'id',
+            isPublished: () => true, // can be overridden by !opts.publish
+            properties: {
+              filename: {
+                $path: ['targetFileName', 'fromFile', 'fromUrl'],
+                $formatting: (nameOrPath: string) => {
+                  return path.basename(nameOrPath);
+                },
+              },
+              filePath: {
+                $path: 'targetFilePath',
+                $default: (_, { fromFile, fromUrl }) => {
+                  const toPosixPath = (windowsPath: string) =>
+                    windowsPath.replace(/^(\w):|\\+/g, '/$1');
+
+                  return path.dirname(
+                    toPosixPath(fromFile || fromUrl.split(':/')[1])
+                  );
+                },
+              },
+            },
+            uri: {
+              $path: ['fromFile', 'fromUrl'],
+              $formatting: (from: string) =>
+                from?.startsWith('http') ? from : cwdPath(from),
+            },
+          },
+        });
+
+        if (!assetEntry.sys.id)
+          assetEntry.sys.id = generateGuid(
+            cli.currentEnv,
+            cli.currentProject,
+            `${assetEntry.sys.contentTypeId}-${assetEntry.sys.properties.filePath.replaceAll('/', '').toLowerCase()}-${assetEntry.sys.properties.filename.toLowerCase()}`
+          );
+
+        console.log(jsonFormatter(assetEntry));
+
+        await cli.ImportEntries({
+          commit: opts.commit,
+          logOutput: opts.outputDetail,
+          saveEntries: opts.saveEntries,
+          data: [assetEntry],
+        });
+      }
+    );
 
   push
     .command('block')
