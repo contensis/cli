@@ -1,4 +1,4 @@
-const rimraf = require('rimraf');
+const { rimraf } = require('rimraf');
 const esbuild = require('esbuild');
 const chalk = require('chalk');
 const { globPlugin } = require('esbuild-plugin-glob');
@@ -11,7 +11,7 @@ const completed = `${chalk.green('[contensis-cli]')} Build successful 👍\n`;
 console.time(completed);
 console.time(' - rimraf complete');
 
-rimraf('./dist', () => {
+rimraf('./dist').then(() => {
   console.timeEnd(' - rimraf complete');
   console.time(' - esbuild complete');
   esbuild
@@ -43,5 +43,5 @@ rimraf('./dist', () => {
       replaceTscAliasPaths();
       console.timeEnd(' - replace alias paths');
       console.timeEnd(completed);
-    })
+    });
 });
