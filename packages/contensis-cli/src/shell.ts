@@ -199,7 +199,8 @@ class ContensisShell {
         'set role description',
         'set role assignments',
         'set role enabled',
-        'set role permissions'
+        'set role permissions',
+        'update field'
       );
 
     const prompt = inquirer.createPromptModule();

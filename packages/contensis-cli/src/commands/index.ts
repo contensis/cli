@@ -20,6 +20,7 @@ import { makeLoginCommand } from './login';
 import { makePushCommand } from './push';
 import { makeRemoveCommand } from './remove';
 import { makeSetCommand } from './set';
+import { makeUpdateCommand } from './update';
 
 const commands = () => {
   const program = new Command()
@@ -88,6 +89,9 @@ const commands = () => {
   );
   program.addCommand(
     addConnectOptions(makeSetCommand()).copyInheritedSettings(program)
+  );
+  program.addCommand(
+    addGlobalOptions(makeUpdateCommand()).copyInheritedSettings(program)
   );
 
   return program;

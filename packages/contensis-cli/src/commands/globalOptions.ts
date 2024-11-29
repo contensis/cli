@@ -16,6 +16,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
       : undefined,
   models: opts.modelIds,
   copyField: opts.copyField,
+  updateField: opts.updateField,
   // convert various cli options into MigrateRequest.query format
   query:
     opts.id ||

@@ -76,7 +76,7 @@ Example call:
           contentTypeId,
           fieldId,
           destinationId,
-          template: opts.template,
+          template,
           rootUri: opts.rootUri,
         };
 
