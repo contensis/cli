@@ -115,8 +115,8 @@ export const LogMessages = {
       `[${env}] Unable to update project ${Logger.highlightText(id)}`,
   },
   migrate: {
-    preview: () => `🔍 IMPORT PREVIEW 🔭`,
-    commit: () => `COMMITTING IMPORT ✨☄️ `,
+    preview: (verb = 'IMPORT') => `🔍 ${verb} PREVIEW 🔭`,
+    commit: (verb = 'IMPORT') => `COMMITTING ${verb} ✨☄️ `,
     models: {
       result: (
         status: keyof MigrateModelsResult['project']['contentTypes']
@@ -226,6 +226,15 @@ export const LogMessages = {
         nodes > 0 ? ` and ${pl('node', nodes, true)}` : ''
       } into ${env} environment`,
     failedImport: (env: string) => `[${env}] Unable to import entries`,
+    update: {
+      preview: () => LogMessages.migrate.preview('UPDATE FIELD'),
+      commit: () => LogMessages.migrate.preview('FIELD UPDATES'),
+      success: (env: string, commit: boolean, entries: number, nodes = 0) =>
+        `${commit ? `Updated` : `Will update`} ${pl('entry', entries, true)}${
+          nodes > 0 ? ` and ${pl('node', nodes, true)}` : ''
+        } in ${env} environment`,
+      failed: (env: string) => `[${env}] Unable to update any entries`,
+    },
     removed: (env: string, commit: boolean) =>
       `[${env}] ${commit ? `Deleted` : `Will delete`} entries`,
     failedRemove: (env: string) => `[${env}] Unable to delete entries`,

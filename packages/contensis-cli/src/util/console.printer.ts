@@ -125,7 +125,7 @@ export const printEntriesMigrateResult = (
     showAll = false,
     showChanged = false,
   }: {
-    action?: 'import' | 'delete';
+    action?: 'import' | 'update' | 'delete';
     showDiff?: boolean;
     showAll?: boolean;
     showChanged?: boolean;
@@ -138,7 +138,7 @@ export const printEntriesMigrateResult = (
   ) as [string, any]) {
     for (const [originalId, entryStatus] of Object.entries(entryRes) as [
       string,
-      any
+      any,
     ][]) {
       if (
         showAll ||
@@ -191,17 +191,21 @@ export const printEntriesMigrateResult = (
     migrateResult.entries || {}
   ) as [string, any][]) {
     log.help(
-      `${action} from project ${
-        action === 'delete'
-          ? log.warningText(currentProject)
-          : `${log.highlightText(projectId)} to ${log.boldText(
-              log.warningText(currentProject)
-            )}`
-      }`
+      action === 'update'
+        ? `update entries in project ${log.boldText(
+            log.warningText(currentProject)
+          )}`
+        : `${action} from project ${
+            action === 'delete'
+              ? log.warningText(currentProject)
+              : `${log.highlightText(projectId)} to ${log.boldText(
+                  log.warningText(currentProject)
+                )}`
+          }`
     );
     for (const [contentTypeId, count] of Object.entries(contentTypeCounts) as [
       string,
-      number
+      number,
     ][]) {
       const isTotalCountRow = contentTypeId === 'totalCount';
       const migrateStatusAndCount =
@@ -227,8 +231,8 @@ export const printEntriesMigrateResult = (
       const changedColor = isTotalCountRow
         ? log.helpText
         : changedPercentage === '100'
-        ? log.successText
-        : log.warningText;
+          ? log.successText
+          : log.warningText;
 
       if (isTotalCountRow && 'nodes' in migrateResult) {
         printNodesMigrateResult(service, migrateResult, {
@@ -257,8 +261,8 @@ export const printEntriesMigrateResult = (
                   isTotalCountRow
                     ? `[to ${action}: ${noChangeOrTotalEntriesCount}]`
                     : changedPercentage === '100'
-                    ? 'up to date'
-                    : `[needs update: ${100 - Number(changedPercentage)}%]`
+                      ? 'up to date'
+                      : `[needs update: ${100 - Number(changedPercentage)}%]`
                 }`
               )
         }`
@@ -391,7 +395,7 @@ export const printModelMigrationAnalysis = (
 ) => {
   for (const [contentTypeId, model] of Object.entries(result) as [
     string,
-    any
+    any,
   ][]) {
     let mainOutput = log.standardText(
       `  - ${contentTypeId}${
@@ -415,7 +419,7 @@ export const printModelMigrationAnalysis = (
       if (key === 'projects') {
         for (const [projectId, projectDetails] of Object.entries(details) as [
           string,
-          any
+          any,
         ][]) {
           mainOutput += log.infoText(
             ` [${messages.migrate.status(projectDetails.status)(
@@ -460,7 +464,7 @@ export const printModelMigrationResult = (
 ) => {
   for (const [status, ids] of Object.entries(result) as [
     MigrateResultStatus,
-    string[]
+    string[],
   ][]) {
     if (ids?.length) {
       if (status === 'errors') {
@@ -555,8 +559,8 @@ export const printNodeTreeOutput = (
             fullOutput || isRoot || !node.slug ? node.path : `/${node.slug}`
           )
         : fullOutput || isRoot || !node.slug
-        ? node.path
-        : `/${node.slug}`
+          ? node.path
+          : `/${node.slug}`
     )}${node.entry ? ` ${log.helpText(node.entry.sys.contentTypeId)}` : ''}${
       node.childCount ? ` +${node.childCount}` : ``
     } ${'displayName' in node ? log.infoText(node.displayName) : ''}${

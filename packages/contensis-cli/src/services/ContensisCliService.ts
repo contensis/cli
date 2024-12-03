@@ -627,7 +627,7 @@ class ContensisCli {
     if (contensis) {
       // Retrieve token for env
       const [error, token] = await to(
-        contensis.content.sourceRepo.repo.BearerToken()
+        contensis.content.source.repo.BearerToken()
       );
       if (token) {
         // Print bearer token to console
@@ -1079,7 +1079,7 @@ class ContensisCli {
     if (contensis) {
       // Retrieve workflows list for env
       const [workflowsErr, workflows] =
-        await contensis.content.sourceRepo.workflows.GetWorkflows();
+        await contensis.content.source.workflows.GetWorkflows();
 
       if (Array.isArray(workflows)) {
         log.success(messages.workflows.list(currentEnv));
@@ -1145,7 +1145,7 @@ class ContensisCli {
     if (contensis) {
       // Retrieve workflows list for env
       const [workflowsErr, workflows] =
-        await contensis.content.sourceRepo.workflows.GetWorkflows();
+        await contensis.content.source.workflows.GetWorkflows();
 
       if (Array.isArray(workflows)) {
         log.success(messages.workflows.list(currentEnv));
@@ -1564,7 +1564,7 @@ class ContensisCli {
           contentType.projectId = currentProject;
           delete contentType.uuid;
 
-          const [err, , createStatus] = await contensis.models.targetRepos[
+          const [err, , createStatus] = await contensis.models.targets[
             currentProject
           ].repo.UpsertContentType(false, contentType);
 
@@ -1755,7 +1755,7 @@ class ContensisCli {
           component.projectId = currentProject;
           delete component.uuid;
 
-          const [err, , createStatus] = await contensis.models.targetRepos[
+          const [err, , createStatus] = await contensis.models.targets[
             currentProject
           ].repo.UpsertComponent(false, component);
 
@@ -2066,9 +2066,9 @@ class ContensisCli {
     if (contensis) {
       log.line();
       if (contensis.isPreview) {
-        log.success(messages.migrate.preview());
+        log.success(messages.entries.update.preview());
       } else {
-        log.warning(messages.migrate.commit());
+        log.warning(messages.entries.update.commit());
       }
 
       const [err, result] = await to(
@@ -2085,6 +2085,7 @@ class ContensisCli {
         await this.HandleFormattingAndOutput(output, () => {
           // print the migrateResult to console
           printEntriesMigrateResult(this, result, {
+            action: 'update',
             showAll: logOutput === 'all',
             showDiff: logOutput === 'all' || logOutput === 'changes',
             showChanged: logOutput === 'changes',
@@ -2101,7 +2102,7 @@ class ContensisCli {
             (result.migrateResult?.created || result.migrateResult?.updated)))
       ) {
         log.success(
-          messages.entries.imported(
+          messages.entries.update.success(
             currentEnv,
             commit,
             commit
@@ -2115,7 +2116,7 @@ class ContensisCli {
           log.help(messages.entries.commitTip());
         }
       } else {
-        log.error(messages.entries.failedImport(currentEnv), err);
+        log.error(messages.entries.update.failed(currentEnv), err);
         if (!result?.entriesToMigrate?.[currentProject]?.totalCount)
           log.help(messages.entries.notFound(currentEnv));
       }
@@ -2135,7 +2136,7 @@ class ContensisCli {
         log.error(messages.nodes.failedGet(currentProject), err);
         return;
       }
-      const root = contensis.nodes.sourceRepo.nodes.tree;
+      const root = contensis.nodes.source.nodes.tree;
 
       log.success(messages.nodes.get(currentProject, rootPath, depth));
 
@@ -2184,8 +2185,7 @@ class ContensisCli {
         await this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
           const migrateTree =
-            contensis.nodes.targetRepos[currentProject].nodes
-              .migrateNodesTreeView;
+            contensis.nodes.targets[currentProject].nodes.migrateNodesTreeView;
           printNodeTreeOutput(this, migrateTree, logOutput, logLimit);
           printNodesMigrateResult(this, result, {
             showAll: logOutput === 'all',
@@ -2257,8 +2257,7 @@ class ContensisCli {
           // print the migrateResult to console
           printNodeTreeOutput(
             this,
-            contensis.nodes.targetRepos[currentProject].nodes
-              .migrateNodesTreeView
+            contensis.nodes.targets[currentProject].nodes.migrateNodesTreeView
           );
           // printNodesMigrateResult(this, result, {
           //   action: 'delete',
