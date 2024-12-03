@@ -32,56 +32,69 @@ To build an executable for your operating system
 
 - `yarn run build:exe` \* outputting to `bin/` folder
 
+- `yarn run build:exe:win` (for Windows)
+
+## Add / update packages
+
+Each of the package folders will contain their own respective `package.json` with their own `dependencies` and `devDependencies` and so on...
+
+To install or update a dependency in the contensis-cli package run the command:
+
+- `yarn workspace contensis-cli add --save migratortron@latest`
+
+To install or update a development-only dependency in the contensis-cli package run the command:
+
+- `yarn workspace contensis-cli add --dev <package-names>`
+
+After managing workspace packages it is good to run `yarn run bootstrap` afterwards to ensure the monorepo packages are correctly hoisted and linked before continuing development
+
+### Workspace root
+
+The root of this workspace project contains dev dependencies that are required for the workspace, or all packages to function in the context of the monorepo
+
+To install or update a development dependency in the workspace root run the command:
+
+- `yarn add -W --dev eslint`
+
 ## Release
 
 To create a new version (prerelease)
 
-- Simply make a commit or merge to the `main` branch and the GitHub Actions should take care of the rest
+- Simply make a commit or merge to the `main` branch and the [`build` GitHub action]() should take care of the rest
 - The package will be built and published to npm.js - available to install with `npm i -g contensis-cli@prerelease`
 - Binaries from each commit's build workflow are uploaded to the job summary as build assets
 
-To prepare the next release version
+Prepare the next release version
 
-- `cd packages/contensis-cli`
-- Update the package version with one of
-  - `npm version patch`
-  - `npm version minor`
-  - `npm version major`
-  - `npm version 1.0.1`
-- Delete the created `package-lock.json` file at the root (this is not needed as we have a `yarn.lock`)
-- Run and check version
-  - `npm start`
-  - `--version` (in the shell prompt)
-- Commiting:
-- Commit message should include the phrases `[nobuild]` e.g **prep: release files [nobuild]**
-- Commit files should be:
-  - `yarn.lock`
-  - `package-lock.json` (packages/contensis-cli)
-  - `package.json` (packages/contensis-cli)
-  - `verison.ts` (packages/contensis-cli/src)
+- The next release is taken care of by the [Release Please Action](https://github.com/marketplace/actions/release-please-action)
+- Each valid commit to `main` will be analysed for changes automatically in the build action
+- The next version, changelog and GitHub Release tag / notes will be brought together by the [Release Please Action](https://github.com/marketplace/actions/release-please-action)
+- A Pull Request will be created/updated containing the next CLI version and you can view the changelog for that version in the PR description with your last commit message added to it
 
-To create a release
+Make the release
 
-- Create a new release from the repo [Releases page](https://github.com/contensis/cli/releases/new)
-- The release version will match the `package.json` version in `/packages/contensis-cli` (prefixed with "v" e.g. "v1.0.1")
-- A new git tag will be created matching the release version
-- Release notes are typed out and will be a summary of key changes since last release tag
-- Release assets are found in the summary page of the last GitHub build pipeline (stored as build artifacts). Download the artifact for each OS, unzip and then attach them (upload) the extracted files to this new release.
-- Pre-releases are supported and are indicated with the "Set as a pre-release" flag in the GitHub Release
-- A GitHub Action will be triggered by creating the release. The workflow will publish the release version to npm.js (if it does not currently exist). Also push a release tag to the latest [`Docker`](https://github.com/contensis/cli/pkgs/container/cli%2Fmain%2Fapp) image.
-- If the release workflow fails, it can be manually run any time with a workflow trigger from the GitHub Action page - the input will be either "latest" or "prerelease"
+- Simply `Squash and merge` the open [Pull Request](https://github.com/contensis/cli/pulls)
+- Any merge conflicts reported here are tiny and can be resolved in the GitHub UI accepting all changes from the `release-please` branch and rejecting all the interim changes made in `main`
+- The [Release Please Action](https://github.com/marketplace/actions/release-please-action) will trigger a new build in the CI, this time the build will return `release` variables.
+- A tag and a [GitHub release](https://github.com/contensis/cli/releases) will be created for the Pull Request version you merged and the [`release` action workflow](https://github.com/contensis/cli/blob/main/.github/workflows/release.yml) will be triggered
+- The `release` workflow will publish release versions to:
+
+  - npm.js `contensis-cli@latest`
+  - docker [`ghcr.io/contensis/cli/main/app:release`](https://github.com/contensis/cli/pkgs/container/cli%2Fmain%2Fapp)
+  - chocolatey (requires moderator review before public release)
+  - homebrew tap (check the [tap repository](https://github.com/contensis/homebrew-cli))
 
 ## Related repositories / packages
 
-A few other resources exist as ways to consume Contensis CLI - the source code is included in this repository unless that platform requires the respective assets to be hosted in a git repository of its own
+A few other resources exist as ways to consume Contensis CLI - the source code for building for those targets is included in this repository unless that platform requires the respective assets to be hosted in a git repository of its own
 
 ### NPM package
 
-https://www.npmjs.com/package/contensis-cli
+https://www.npmjs.com/package/contensis-cli | [Source](https://github.com/contensis/cli/tree/main/packages/contensis-cli)
 
 ### Chocolatey package
 
-https://community.chocolatey.org/packages/contensis-cli
+https://community.chocolatey.org/packages/contensis-cli | [Source](https://github.com/contensis/cli/tree/main/installers/chocolatey)
 
 ### Homebrew tap & formula
 
@@ -89,8 +102,9 @@ https://github.com/contensis/homebrew-cli
 
 ### GitHub Actions
 
-https://github.com/marketplace/actions/contensis-cli-action
-https://github.com/marketplace/actions/contensis-block-push-action
+https://github.com/marketplace/actions/contensis-cli-action | [Source](https://github.com/contensis/cli-action)
+
+https://github.com/marketplace/actions/contensis-block-push | [Source](https://github.com/contensis/block-push)
 
 ### GitLab reusable workflows
 
