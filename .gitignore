@@ -1,3 +1,5 @@
+bin
+bundle
 dist
 node_modules
 environments.json

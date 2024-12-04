@@ -1,0 +1,11 @@
+{
+  "main": "./bundle/cli.js",
+  "output": "cli.blob",
+  "disableExperimentalSEAWarning": true,
+  "useSnapshot": true,
+  "codeCache": true,
+  "assets": {
+    "bundle/fonts/Block.flf": "bundle/fonts/Block.flf",
+    "bundle/keytar-F4YAPN53.node": "bundle/keytar-F4YAPN53.node"
+  }
+}
