@@ -225,6 +225,7 @@ contensis >
 - [Get started](#get-started)
 - [Connect to a Contensis Cloud environment](#connect-to-a-contensis-cloud-environment)
 - [Login to a connected Contensis environment](#login-to-a-connected-contensis-environment)
+- [Manage connected environments](#manage-connected-environments)
 - [Manage Projects](#manage-projects)
   - [List projects](#list-projects)
   - [Set current project](#set-current-project)
@@ -278,16 +279,20 @@ contensis >
   - [Import from a file](#import-from-a-file-1)
   - [Import entries further reading](#import-entries-further-reading)
 - [Remove entries](#remove-entries)
+- [Push asset](#push-asset)
 - [Copy an entry field](#copy-an-entry-field)
   - [Copy a simple entry field](#copy-a-simple-entry-field)
   - [Limit entries when copying field content](#limit-entries-when-copying-field-content)
   - [Copy a composer into a canvas field](#copy-a-composer-into-a-canvas-field)
   - [Copy a field using a template](#copy-a-field-using-a-template)
   - [Copy a field and save the entries as output](#copy-a-field-and-save-the-entries-as-output)
+- [Update an entry field](#update-an-entry-field)
 
 ## Get started
 
-Press `[tab]` key at any time to show suggested commands or to attempt to auto-complete the command you are typign
+Press `[tab]` key at any time to show suggested commands or to attempt to auto-complete the command you are typing
+
+You can use tab to auto-complete a `connect <alias>` or `set project <project-id>` command for the environment(s) you are connected to
 
 ```shell
 >> Available commands:
@@ -353,6 +358,31 @@ contensis t.durden@example-dev>
 If you are logging in via a script or service you will likely be using an API key set up in Contensis, you would provide the full credentials with the command `login {clientId} -s {sharedSecret}`.
 
 If you need to skip this step for any reason you could [pass connection details anywhere](#pass-connection-details-anywhere)
+
+## Manage connected environments
+
+See a list of all previously connected environments with the `list envs` command
+
+Use the `remove env` command followed by the cloud alias if you wish to remove any of these environments from your CLI cache
+
+```shell
+contensis t.durden@example-dev> list envs
+[cli] ✅ Environments store found containing 7 environments
+  - demoSite
+  - * example-dev
+  - forms
+  - insytful
+  - leif
+  - trial-00
+  - webinar
+
+contensis t.durden@example-dev> remove env trial-00
+[cli] ✅ Environments store found containing 7 environments
+[cli] ✅ Removed environment trial-00 from session cache
+  -------------------------------------
+
+contensis t.durden@example-dev>
+```
 
 ## Manage Projects
 
@@ -624,7 +654,9 @@ contensis t.durden@example-dev>
 
 ### Get entries
 
-Use the `get entries` command
+Use the `get entries` command to search for entries using the Management API
+
+Many options are available that can be used to return the right list of entries: run `get entries --help`
 
 The simplest usage is `get entries {keyword}` or `get entries "{search phrase}"`
 
@@ -818,7 +850,7 @@ website t.durden@example-dev>
 
 Override the output format with the `--format` or `-f` option.
 
-Available options are: `json`, `xml` or `csv`
+Available options are: `json`, `csv`, `xml` or `html`
 
 The `--format` and `--output` options are available with most commands (check command `--help`)
 
@@ -1521,7 +1553,7 @@ The output will be the same as the `import models` examples above
 
 ### Import from another Contensis environment
 
-Connect to your "source" environment first, ensure you can fetch the entries you plan on importing from here and your query / filters are working to fetch exactly the data you are expecting with the `get entries` command. Add the `--dependents` option to fetch all of the entries that will eventually be imported.
+Connect to your "source" environment first, ensure you can fetch the entries you plan on importing from here and your query / filters are working to fetch exactly the data you are expecting with the `get entries` command. Add the `--dependents` option to your `get entries` test commands to fetch all of the entries that will eventually be imported.
 
 When you are happy you can fetch only the data you intend to import, connect to the "target" environment (and project) then use the same query as before except with the `import entries` command
 
@@ -1715,6 +1747,22 @@ website t.durden@example-dev>
 
 <sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
 
+## Push asset
+
+The `push asset` command allows you to push a single file into your Contensis instance
+
+The file can be local
+
+```shell
+push asset image "Bicycle" "A child's bicycle" --from-file "C:\Users\t.durden\Pictures\bicycle.png" --target-file-path /image-library/samples/
+```
+
+Or the file can be downloaded from a http location
+
+```shell
+push asset image "Bicycle" "A child's bicycle" --from-url "https://thumbs.example.com/modern-child-bicycle.jpg" --target-file-path /image-library/samples/
+```
+
 ## Copy an entry field
 
 This command allows us to copy the contents of one entry field to another, this is useful if, for example - when a field is named incorrectly, or was specified originally as one field type but we would like to curate and present this content differently in future.
@@ -1859,7 +1907,7 @@ copy field courseInstance modules modules --zenql "sys.contentTypeId=courseInsta
 
 This example will populate a repeating entry link field called `modules` within the `courseInstance` content type with the template we've supplied
 
-Using the `copy field` command with a `--zenql` statement to narrow down the entries to update, we can supply a template that is a hard-coded JSON string (with escaped quotes) with an `"id"` that is a valid entry id to link to this field. 
+Using the `copy field` command with a `--zenql` statement to narrow down the entries to update, we can supply a template that is a hard-coded JSON string (with escaped quotes) with an `"id"` that is a valid entry id to link to this field.
 
 Adding `--output-detail changes` will output a diff for each changed entry to the console. For larger jobs use the `--output file.json` option to review the changes that will be made.
 
@@ -1875,4 +1923,28 @@ Add the `--save-entries` option to the `copy field` command, remember to also in
 
 ```shell
 copy field contentPage composer canvas --save-entries --output canvas-entries.json
+```
+
+## Update an entry field
+
+The `update field` command can be thought of as a "find and replace" feature, where we can look for a particular value (or RegExp) in a list of entries and replace any found values with a supplied replacement value.
+
+```shell
+update field content "find me" "replacement value"
+```
+
+A number of ways exist to limit the entries we check and make changes with
+
+```shell
+update field content "Em.*?mith" "Emma Davies" --zenql "searchContent~'Emma Smith'"
+```
+
+```shell
+update field content "Em.*?mith" "Emma Davies" --search "Emma Smith"
+```
+
+Update one or more entries by their id
+
+```shell
+update field content "Em.*?mith" "Emma Davies" --id defb707b-fcfa-4c7e-baf8-6472edb5ec25 c92390dd-7bb1-5f5d-8fbd-0d7f41232ac3
 ```
