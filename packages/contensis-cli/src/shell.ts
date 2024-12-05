@@ -186,6 +186,7 @@ class ContensisShell {
         'list roles',
         'list webhooks',
         'list workflows',
+        'push asset',
         'push block',
         'remove components',
         'remove contenttypes',
