@@ -195,10 +195,10 @@ export const printEntriesMigrateResult = (
         ? `update entries in project ${log.boldText(
             log.warningText(currentProject)
           )}`
-        : `${action} from project ${
+        : `${action}${
             action === 'delete'
-              ? log.warningText(currentProject)
-              : `${log.highlightText(projectId)} to ${log.boldText(
+              ? ` from project ${log.warningText(currentProject)}`
+              : `${projectId ? ` from project ${log.highlightText(projectId)}` : ''} to ${log.boldText(
                   log.warningText(currentProject)
                 )}`
           }`
