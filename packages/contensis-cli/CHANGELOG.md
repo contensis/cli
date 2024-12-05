@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.4.0](https://github.com/contensis/cli/compare/contensis-cli-v1.3.0...contensis-cli-v1.4.0) (2024-12-05)
+
+
+### Features
+
+* add `--format html` option to output results to a HTML table ([b607f39](https://github.com/contensis/cli/commit/b607f399be300e8a00c8e89e2d21e1fe3300b3e3))
+* add `--no-publish` option to commands that import entries so any committed entries are left in draft workflow state ([a2db317](https://github.com/contensis/cli/commit/a2db3171db8ba4acc7c4309a5be356487646676b))
+* add `push asset` command to push a supplied asset to a location in the cms ([af9e41a](https://github.com/contensis/cli/commit/af9e41a9d88eeed5caac3c50d606959d89cbcce1))
+* add `remove env` command to remove a cached environment connection ([bd774df](https://github.com/contensis/cli/commit/bd774df78423ab59d3ac6a651d2320944d3fb56c))
+* add `update field` command to find a specific phrase in an entry field and replace it with another in all returned entries ([9e56024](https://github.com/contensis/cli/commit/9e5602499566fa7227d145bcf84d13c2867714aa))
+* read environments and current environment projects from session cache and add these to autocomplete `connect` and `set project` commands ([9c2ff36](https://github.com/contensis/cli/commit/9c2ff36c888a0cff5debba46628520f0a55f5f15))
+
+
+### Bug Fixes
+
+* add missing command to autocomplete available commands ([e3c5a99](https://github.com/contensis/cli/commit/e3c5a9918d4fbe3ceac6440f7725f368726dc915))
+* less false positives when diffing built entries in `import`, `copy` and `update` commands ([cf34914](https://github.com/contensis/cli/commit/cf34914d3c2eed9f62241e4042aef21fc9999539))
+* null check console output for model defaults in `import models` command ([0e1d9c9](https://github.com/contensis/cli/commit/0e1d9c980ae1cb0fddc758e913b5b483d6c2979f))
+* refine console messaging in `update field` command ([7fd9eab](https://github.com/contensis/cli/commit/7fd9eab63daed9cae0bb24d48be34d1a4542e082))
+* sort environments alphabetically in `list envs` output ([80166ce](https://github.com/contensis/cli/commit/80166ce721bbee9ffe524b38e559f998055beb85))
+* tidy up console messaging for some import operations ([8f18611](https://github.com/contensis/cli/commit/8f18611f5ba5d29c370c126b60458a60155c17b2))
+
 ## [1.3.0](https://github.com/contensis/cli/compare/contensis-cli-v1.2.1...contensis-cli-v1.3.0) (2024-09-24)
 
 
