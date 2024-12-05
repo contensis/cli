@@ -200,7 +200,7 @@ class ContensisCli {
   PrintEnvironments = async () => {
     const { log, messages } = this;
     const { currentEnvironment, environments = {} } = this.cache;
-    const envKeys = Object.keys(environments);
+    const envKeys = Object.keys(environments).sort();
     log.success(messages.envs.found(envKeys.length));
     await this.HandleFormattingAndOutput(envKeys, () => {
       // print the envKeys to console
