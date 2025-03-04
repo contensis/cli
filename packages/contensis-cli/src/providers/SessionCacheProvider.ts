@@ -3,7 +3,7 @@ import path from 'path';
 import clone from 'lodash/cloneDeep';
 import mergeWith from 'lodash/mergeWith';
 import unionBy from 'lodash/unionBy';
-import { appRootDir } from './file-provider';
+import { appRootDir, checkDir } from './file-provider';
 import { isJson, tryParse } from '~/util';
 import { Logger } from '~/util/logger';
 
@@ -13,6 +13,7 @@ class SessionCacheProvider {
 
   constructor() {
     this.localFilePath = path.join(appRootDir, 'environments.json');
+    checkDir(this.localFilePath); // ensure the .contensis home folder exists
     this.cache = {
       currentTimestamp: new Date().toISOString(),
       environments: {},
