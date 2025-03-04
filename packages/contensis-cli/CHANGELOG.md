@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/contensis/cli/compare/contensis-cli-v1.4.0...contensis-cli-v1.4.1) (2025-03-04)
+
+
+### Bug Fixes
+
+* issue downloading assets from some environments in `import` commands and progress/error logging fixes when loading assets ([4c8852a](https://github.com/contensis/cli/commit/4c8852a2c0baec4859cb0f9939a5195d1a4130a6))
+* missing environments.json error for new users ([1716094](https://github.com/contensis/cli/commit/171609437b1b483490578f53a499a6dae25855ea))
+
 ## [1.4.0](https://github.com/contensis/cli/compare/contensis-cli-v1.3.0...contensis-cli-v1.4.0) (2024-12-05)
 
 
