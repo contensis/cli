@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 # COPY .yarnrc .
 COPY packages/contensis-cli/package.json .
 COPY packages/contensis-cli/patches patches
-RUN yarn global add patch-package --silent --non-interactive --cache-folder ./cache
+RUN yarn global add patch-package --silent
 COPY .yarnrc.yml .
 RUN yarn install --silent
 # RUN yarn run postinstall
