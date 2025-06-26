@@ -43,9 +43,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "kill-port": "^2.0.1",
     "lerna": "^8.1.9",
-    "patch-package": "^8.0.0",
     "pkg": "^5.8.1",
-    "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.4.1",
     "rimraf": "^6.0.1",
     "typescript-eslint": "^8.17.0"
