@@ -12,7 +12,7 @@ COPY packages/contensis-cli/package.json .
 COPY packages/contensis-cli/patches patches
 RUN yarn global add patch-package --silent --non-interactive --cache-folder ./cache
 COPY .yarnrc.yml .
-RUN yarn install --silent --non-interactive --prefer-offline --cache-folder ./cache
+RUN yarn install --silent
 # RUN yarn run postinstall
 
 FROM ${builder_image} AS build
