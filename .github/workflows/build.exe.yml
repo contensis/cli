@@ -52,6 +52,11 @@ jobs:
         with:
           ref: 'main'
 
+      - name: Setup Node.js ${{ matrix.node-version }} to enable Corepack
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
       - name: Enable Corepack
         run: corepack enable
 
@@ -59,11 +64,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: yarn
 
-      - name: Install yarn
-        if: matrix.os == 'arm64'
-        run: |
-          npm install --global yarn
+      # - name: Install yarn
+      #   if: matrix.os == 'arm64'
+      #   run: |
+      #     npm install --global yarn
 
       - name: Install additional dependencies
         if: matrix.os == 'ubuntu-22.04'
@@ -75,7 +81,7 @@ jobs:
 
       - name: Setup os specific environment
         run: |
-          yarn run bootstrap
+          yarn install --silent
           yarn run build
 
       - name: Prepare system keyring (Linux)
