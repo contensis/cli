@@ -6,11 +6,12 @@ FROM ${builder_base} AS prepare
 
 # RUN apk add --no-cache libsecret-dev
 WORKDIR /usr/src/app
-COPY .yarn .yarn
-COPY .yarnrc .
+# COPY .yarn .yarn
+# COPY .yarnrc .
 COPY packages/contensis-cli/package.json .
 COPY packages/contensis-cli/patches patches
 RUN yarn global add patch-package --silent --non-interactive --cache-folder ./cache
+COPY .yarnrc.yml .
 RUN yarn install --silent --non-interactive --prefer-offline --cache-folder ./cache
 # RUN yarn run postinstall
 

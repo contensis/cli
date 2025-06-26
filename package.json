@@ -51,5 +51,6 @@
     "prettier": "^3.4.1",
     "rimraf": "^6.0.1",
     "typescript-eslint": "^8.17.0"
-  }
+  },
+  "packageManager": "yarn@4.9.1"
 }
