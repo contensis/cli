@@ -7,3 +7,4 @@ inquirer-command-prompt-history.json
 *.log
 *.tgz
 installers/chocolatey/*.nupkg
+.yarn/install-state.gz
