@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/contensis/cli/compare/contensis-cli-v1.4.1...contensis-cli-v1.5.0) (2025-06-26)
+
+
+### Features
+
+* support for tags and tag groups ([935aeec](https://github.com/contensis/cli/commit/935aeec68af5afd12c8b35e44a157b4047ac2b7a))
+
+
+### Bug Fixes
+
+* duplicated projects in shell autocomplete after recent change to projects structure held in `environments.json` cache ([84d895f](https://github.com/contensis/cli/commit/84d895f51a672b3cf09ed01350245c8c4772568d))
+
 ## [1.4.1](https://github.com/contensis/cli/compare/contensis-cli-v1.4.0...contensis-cli-v1.4.1) (2025-03-04)
 
 
