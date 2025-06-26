@@ -20,7 +20,7 @@
   },
   "scripts": {
     "prepare": "lerna run prepare",
-    "postinstall": "npx patch-package --error-on-fail",
+    "postinstall": "npx patch-package --error-on-fail --patch-dir packages/contensis-cli/patches",
     "build": "lerna run build --stream",
     "build:exe": "pkg --no-bytecode --public-packages \"*\" --public --compress GZip --output bin/contensis-cli .",
     "build:exe:win": "node exe.config.js",
