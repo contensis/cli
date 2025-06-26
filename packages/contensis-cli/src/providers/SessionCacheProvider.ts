@@ -61,12 +61,11 @@ class SessionCacheProvider {
         ) {
           return unionBy(val, src, 'createdDate');
         }
-        if (key === 'projects')
-          return Array.isArray(val) ? [...new Set([...val, ...src])] : src;
+        if (key === 'projects') return Array.isArray(val) ? val : src;
 
         if (Array.isArray(val)) return val.concat(src);
       });
-      
+
       this.cache.currentTimestamp = new Date().toISOString();
       this.cache.version = LIB_VERSION;
 
