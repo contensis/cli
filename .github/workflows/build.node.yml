@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies, build and package
         if: contains(github.event.head_commit.message, '[nobuild]') != true
         run: |
-          yarn install --silent
+          yarn install --no-scripts --silent
           yarn run build
           cd packages/contensis-cli
           npm pack
