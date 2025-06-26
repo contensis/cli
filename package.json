@@ -20,6 +20,7 @@
   },
   "scripts": {
     "prepare": "lerna run prepare",
+    "postinstall": "npx patch-package --error-on-fail",
     "build": "lerna run build --stream",
     "build:exe": "pkg --no-bytecode --public-packages \"*\" --public --compress GZip --output bin/contensis-cli .",
     "build:exe:win": "node exe.config.js",

@@ -13,7 +13,7 @@ COPY packages/contensis-cli/patches patches
 RUN yarn global add patch-package --silent
 COPY .yarnrc.yml .
 RUN yarn install --silent
-# RUN yarn run prepare
+# RUN yarn run postinstall
 
 FROM ${builder_image} AS build
 COPY packages/contensis-cli/esbuild.config.js .
@@ -31,7 +31,7 @@ COPY packages/contensis-cli/patches patches
 # adds almost 100MB to the container
 RUN npm install patch-package --global --prefer-offline --no-audit
 RUN npm install --audit=false --production --loglevel error
-RUN npm run prepare
+RUN npm run patches
 
 FROM ${app_base} AS app
 WORKDIR /usr/src/app
