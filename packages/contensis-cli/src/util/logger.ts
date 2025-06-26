@@ -8,7 +8,7 @@ import {
   strlen,
 } from 'printable-characters';
 // import ProgressBar from 'progress';
-import { isSysError, tryStringify } from '.';
+import { isSysError, tryStringify } from './assert';
 
 type LogMethod = (content: string) => void;
 type LogErrorMethod = (content: string, err?: any, newline?: string) => void;
@@ -20,6 +20,22 @@ type LogErrorFunc = (
   msg?: string,
   level?: 'error' | 'critical'
 ) => void;
+
+const cleanseError = (e: any) => {
+  if (e && typeof e === 'object') {
+    if (isSysError(e) && e instanceof Error) return e.toString();
+    if (e.type === 'undefined') delete e.type;
+    if (e.status === 500) delete e.status;
+    delete e.stack;
+  }
+  return JSON.stringify(e, null, 2);
+};
+
+const errorMessages = (errors: any) => {
+  if (Array.isArray(errors))
+    return errors.map(error => cleanseError(error)).join('\n\n');
+  return cleanseError(errors);
+};
 
 export class Logger {
   static isUserTerminal = !!process.stdout.columns;
@@ -45,11 +61,7 @@ export class Logger {
   static error: LogErrorMethod = (content, err, newline = '\n') => {
     const message = `${Logger.getPrefix()} ${Logger.errorText(
       `${Logger.isUserTerminal ? '❌' : '[ERROR]'} ${content}${
-        err
-          ? `\n\n${Logger.infoText(
-              isSysError(err) ? err.toString() : JSON.stringify(err, null, 2)
-            )}`
-          : ''
+        err ? `\n${Logger.infoText(errorMessages(err))}` : ''
       }`
     )}${newline}`;
     if (progress.active) progress.current.interrupt(message);

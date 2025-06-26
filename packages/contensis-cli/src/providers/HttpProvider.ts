@@ -4,7 +4,7 @@ import fs from 'fs';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 
-import { isJson, tryParse } from '~/util';
+import { isJson, tryParse } from '~/util/assert';
 import { enhancedFetch } from '~/util/fetch';
 class HttpProvider {
   constructor() {}

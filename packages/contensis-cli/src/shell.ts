@@ -142,7 +142,7 @@ class ContensisShell {
         'login',
         'list projects',
         'set project',
-        ...(this.env?.projects || []).map(project => `set project ${project}`)
+        ...(this.env?.projects || []).map(project => `set project ${project.id}`)
       );
     if (userId)
       availableCommands.push(
@@ -150,6 +150,9 @@ class ContensisShell {
         'create key',
         'create project',
         'create role',
+        'create tag',
+        'create taggroup',
+        'create tags in',
         'diff models',
         'execute block action release',
         'execute block action makelive',
@@ -167,6 +170,8 @@ class ContensisShell {
         'get proxy',
         'get renderer',
         'get role',
+        'get tag',
+        'get taggroup',
         'get token',
         'get version',
         'get webhook',
@@ -176,6 +181,8 @@ class ContensisShell {
         'import entries',
         'import models',
         'import nodes',
+        'import tags',
+        'import taggroups',
         'list blocks',
         'list contenttypes',
         'list components',
@@ -184,6 +191,9 @@ class ContensisShell {
         'list proxies',
         'list renderers',
         'list roles',
+        'list tags',
+        'list tags in',
+        'list taggroups',
         'list webhooks',
         'list workflows',
         'push asset',
@@ -194,6 +204,9 @@ class ContensisShell {
         'remove entries',
         'remove nodes',
         'remove role',
+        'remove tags',
+        'remove tags in',
+        'remove taggroup',
         'set project name',
         'set project description',
         'set role name',

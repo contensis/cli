@@ -5,6 +5,7 @@ type SessionCache = {
     [alias: string]: EnvironmentCache;
   };
   history: string[];
+  version: string;
 };
 
 type EnvironmentCache = {
@@ -12,7 +13,7 @@ type EnvironmentCache = {
   passwordFallback?: string;
   authToken?: string;
   currentProject?: string;
-  projects: string[];
+  projects: { id: string; primaryLanguage: string }[];
   history: CliCommand[];
   versionStatus: 'latest' | 'published';
 };

@@ -1,6 +1,5 @@
 import { Argument, Command, Option } from 'commander';
 import { merge } from 'lodash';
-import { cliCommand } from '~/services/ContensisCliService';
 import {
   addGlobalOptions,
   assetTypes,
@@ -15,6 +14,8 @@ import {
   versionStatus,
   zenql,
 } from './globalOptions';
+import { cliCommand } from '~/services/ContensisCliService';
+import { isUuid } from '~/util/assert';
 
 export const makeGetCommand = () => {
   const program = new Command()
@@ -115,6 +116,52 @@ Example call:
     .action(async (roleNameOrId: string, opts) => {
       await cliCommand(['get', 'role', roleNameOrId], opts).PrintRole(
         roleNameOrId
+      );
+    });
+
+  program
+    .command('tag')
+    .description('get a tag')
+    .argument('[idOrLabel]', 'find a tag with this id or label')
+    .option('-in --group <groupId>', 'id of the tag group containing tags')
+    .option('-l --language <language>', 'find tags in the supplied language')
+    .option('-d --dependents', 'find and return tag groups for all found tags')
+    .addHelpText(
+      'after',
+      `
+    Example call:
+      > get tag "Places" --group topics
+      > get tag "Places" -in topics
+      > get tag "Lieux" --language fr-FR -in topics
+      > get tag d4267b35-0d25-41ae-bce9-eeb490c793f4
+    `
+    )
+    .action(async (idOrlabel: string, opts) => {
+      await cliCommand(['get', 'tag', idOrlabel], opts).PrintTag(
+        {
+          id: isUuid(idOrlabel) ? idOrlabel : undefined,
+          groupId: opts.group,
+          label: isUuid(idOrlabel) ? undefined : idOrlabel,
+          language: opts.language,
+        },
+        opts.dependents
+      );
+    });
+
+  program
+    .command('taggroup')
+    .description('get a tag group')
+    .argument('<groupId>', 'id of the tag group to get')
+    .addHelpText(
+      'after',
+      `
+  Example call:
+    > get taggroup topics
+  `
+    )
+    .action(async (groupId: string, opts) => {
+      await cliCommand(['get', 'taggroup', groupId], opts).PrintTagGroup(
+        groupId
       );
     });
 

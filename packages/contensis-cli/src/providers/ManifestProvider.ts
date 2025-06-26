@@ -1,4 +1,4 @@
-import { tryParse } from '~/util';
+import { tryParse } from '~/util/assert';
 import { appPath, readFile, writeFile } from './file-provider';
 
 export type CliModule = {

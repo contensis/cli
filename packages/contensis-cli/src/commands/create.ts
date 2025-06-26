@@ -1,7 +1,9 @@
 import { Command } from 'commander';
 import { Project } from 'contensis-core-api';
+import { addGlobalOptions, commit } from './globalOptions';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
+import { toApiId } from '~/util/api-ids';
 
 export const makeCreateCommand = () => {
   const create = new Command()
@@ -9,6 +11,7 @@ export const makeCreateCommand = () => {
     .description('create command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
+    .enablePositionalOptions()
     .exitOverride();
 
   create
@@ -38,6 +41,7 @@ export const makeCreateCommand = () => {
           description,
           primaryLanguage: opts.language,
           supportedLanguages: opts.supportedLanguages || [],
+          deliverySysExclusions: [],
         };
 
         const project = await cliCommand(
@@ -88,6 +92,120 @@ Example call:
         permissions: { contentTypes: [], entries: [] },
       });
     });
+
+  create
+    .command('taggroup')
+    .description('create a new tag group')
+    .argument('<groupId>', 'the API id of the tag group to create')
+    .argument('<"Name">', 'the name of the tag group to create')
+    .argument('["Description"]', 'a description for the tag group')
+    .option(
+      '--tags <tagNames...>',
+      'a list of tag names to create under the new tag group'
+    )
+    .addOption(commit)
+    .addHelpText(
+      'after',
+      `
+  Example call:
+    > create taggroup example "Example tags" "This group is a test" 
+    > create taggroup topics "Topics" --tags Books Faces History Places Spelling \n`
+    )
+    .action(
+      async (groupId: string, name: string, description: string, opts) => {
+        const tagGroup = {
+          id: groupId,
+          name,
+          description,
+        };
+
+        await cliCommand(
+          ['create', 'taggroup', groupId, name],
+          opts
+        ).ImportTagGroups({
+          commit: opts.commit,
+          data: [tagGroup],
+          tags: opts.tags?.map((label: string) => ({
+            groupId,
+            label: { 'en-GB': label },
+            value: toApiId(label, 'camelCase', true),
+          })),
+        });
+      }
+    );
+
+  const tags = create
+    .command('tags')
+    .description('create new tags in a tag group')
+    .argument('<"Label"...>', 'create tag(s) with label(s)')
+    .passThroughOptions()
+    .option('-in --group <groupId>', 'create tags in this tag group')
+    .addOption(commit)
+    .addHelpText(
+      'after',
+      `
+    Example call:
+      > create tags "Test tag" --group example
+      > create tags Books Faces History Places Spelling -in topics \n`
+    )
+    .action(async (tagLabels: string[], opts) => {
+      const groupId = opts.group;
+      const cli = cliCommand(['create', 'tags', ...tagLabels], opts);
+
+      const language =
+        cli.env.projects.find(p => p.id === cli.env.currentProject)
+          ?.primaryLanguage || 'en-GB';
+
+      await cli.ImportTags({
+        commit: opts.commit,
+        data: tagLabels.map(label => ({
+          groupId,
+          label: { [language]: label },
+          value: toApiId(label, 'camelCase', true),
+        })),
+      });
+    });
+
+  tags
+    .command('in')
+    .description('create new tags in a tag group')
+    .argument('<groupId>', 'create tag(s) in this tag group')
+    .argument('<"Label"...>', 'create tag(s) with label(s)')
+    .addOption(commit)
+    .addHelpText(
+      'after',
+      `
+    Example call:
+      > create tags in example "Tag 1" "Second Tag" Third
+      > create tags ih topics Books Faces History Places Spelling \n`
+    )
+    .action(async (groupId: string, tagLabels: string[], opts, cmd) => {
+      // workaround for opts.commit being always false
+      // read the (shared) options that were parsed by the parent cmd
+      // https://github.com/tj/commander.js/issues/476#issuecomment-1675757628
+      const parentOptions = cmd.optsWithGlobals();
+
+      const cli = cliCommand(['create', 'tags', 'in', groupId, ...tagLabels], {
+        ...opts,
+        ...parentOptions,
+      });
+
+      const language =
+        cli.env.projects.find(p => p.id === cli.env.currentProject)
+          ?.primaryLanguage || 'en-GB';
+
+      await cli.ImportTags({
+        commit: parentOptions.commit,
+        data: tagLabels.map(label => ({
+          groupId,
+          label: { [language]: label },
+          value: toApiId(label, 'camelCase', true),
+        })),
+      });
+    });
+
+  // Add global opts for inner sub-commands
+  addGlobalOptions(tags);
 
   return create;
 };

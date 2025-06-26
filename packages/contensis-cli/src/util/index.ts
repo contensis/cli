@@ -1,42 +1,8 @@
+import { ICreateTag, ICreateTagGroup } from 'contensis-management-api';
 import mergeWith from 'lodash/mergeWith';
 import { Logger } from './logger';
 import { LogMessages as enGB } from '../localisation/en-GB.js';
-
-export const isSharedSecret = (str = '') =>
-  str.length > 80 && str.split('-').length === 3 ? str : undefined;
-
-export const isPassword = (str = '') =>
-  !isSharedSecret(str) ? str : undefined;
-
-export const tryParse = (str: any) => {
-  try {
-    return typeof str === 'object' ? str : JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-};
-
-export const isJson = (str?: string) =>
-  typeof str === 'object' || !!tryParse(str);
-
-export const tryStringify = (obj: any) => {
-  try {
-    return typeof obj === 'object' ? JSON.stringify(obj) : obj;
-  } catch (e) {
-    return obj;
-  }
-};
-
-export const isSysError = (error: any): error is Error =>
-  error?.message !== undefined && error.stack;
-
-export const isUuid = (str: string) => {
-  // Regular expression to check if string is a valid UUID
-  const regexExp =
-    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-
-  return regexExp.test(str);
-};
+import { isObject } from 'lodash';
 
 export const url = (alias: string, project: string) => {
   const projectAndAlias =
@@ -73,4 +39,17 @@ export const Logging = async (language = 'en-GB') => {
     ) as typeof defaultMessages,
     Log: Logger,
   };
+};
+
+export const splitTagsAndGroups = (
+  tagsAndGroups: unknown[] = [],
+  tags: ICreateTag[] = [],
+  groups: ICreateTagGroup[] = []
+) => {
+  for (const item of tagsAndGroups) {
+    if (isObject(item) && 'id' in item) {
+      if ('name' in item) groups.push(item as ICreateTagGroup);
+      else tags.push(item as ICreateTag);
+    }
+  }
 };

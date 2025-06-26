@@ -246,6 +246,15 @@ contensis >
   - [Get entries using the Delivery API](#get-entries-using-the-delivery-api)
   - [Output results to a file](#output-results-to-a-file)
 - [Format output](#format-output)
+- [Manage tags and tag groups](#manage-tags-and-tag-groups)
+  - [List tag groups](#list-tag-groups)
+  - [List tags](#list-tags)
+  - [List tags in group](#list-tags-in-group)
+  - [Create tag group](#create-tag-group)
+  - [Create tags](#create-tags)
+  - [Create tags in group](#create-tags-in-group)
+  - [Remove tags](#remove-tags)
+  - [Remove tags in group](#remove-tags-in-group)
 - [Manage API keys](#manage-api-keys)
   - [List keys](#list-keys)
   - [Create key](#create-key)
@@ -274,6 +283,7 @@ contensis >
 - [Import content models](#import-content-models)
   - [Import from another Contensis environment](#import-from-another-contensis-environment)
   - [From a file](#from-a-file)
+- [Import tags and groups](#import-tags-and-groups)
 - [Import entries](#import-entries)
   - [Import from another Contensis environment](#import-from-another-contensis-environment-1)
   - [Import from a file](#import-from-a-file-1)
@@ -856,6 +866,283 @@ The `--format` and `--output` options are available with most commands (check co
 
 Output will normally default to JSON when saved with the `--output` flag.
 
+## Manage tags and tag groups
+
+You can use the cli or shell to manage tags and groups that can be used to attach tags to content entries
+
+### List tag groups
+
+Separate collections of tags are organised and stored in tag groups. Each tag belongs to one tag group.
+
+```shell
+website t.durden@example-dev> list taggroups
+[cli] ✅ [example-dev] Retrieved 2 tag groups
+
+  id: keywords
+  name: Keywords
+  description: Contains keyword tags to categorise, filter, and enhance asset discoverability in the CMS
+  tagCount: 0
+
+  id: resourcesTagGroup
+  name: Resources Tag Group
+  description: A tag group that holds tags to show available resources
+  tagCount: 2
+
+website t.durden@example-dev>
+```
+
+### List tags
+
+List tags across all groups or provide further options to filter the output
+
+```shell
+website t.durden@example-dev> list tags
+[24/06 15:52:18] [INFO] Fetching tags in all groups from example-dev website
+[cli] ✅ [example-dev] Retrieved 2 tags
+
+  groupId: resourcesTagGroup
+  id: 01346722-cafc-4c01-9688-a28ea6291fa5
+  value: tag1
+  label:
+  - en-GB: Tag 1
+  usageCount: 1
+
+  groupId: resourcesTagGroup
+  id: bd32ebdb-ab99-40c7-a45b-cd221e00f4d2
+  value: tag2
+  label:
+  - en-GB: Tag 2
+  usageCount: 1
+
+website t.durden@example-dev>
+```
+
+### List tags in group
+
+List a collection of tags in a particular group, providing options to further filter the output
+
+```shell
+[24/06 15:53:21] [INFO] Fetching tags in group resourcesTagGroup from example-dev website
+[cli] ✅ [example-dev] Retrieved 2 tags
+
+  groupId: resourcesTagGroup
+  id: 01346722-cafc-4c01-9688-a28ea6291fa5
+  value: tag1
+  label:
+  - en-GB: Tag 1
+  usageCount: 1
+
+  groupId: resourcesTagGroup
+id: bd32ebdb-ab99-40c7-a45b-cd221e00f4d2
+  value: tag2
+  label:
+  - en-GB: Tag 2
+  usageCount: 1
+
+website t.durden@example-dev>
+```
+
+### Create tag group
+
+Create a new collection of tags by first creating a new tag group, also create some tags in this group by supplying tag name(s) with the `--tags` option
+
+```shell
+website t.durden@example-dev> create taggroup topics "Topics" --tags Books Faces History Places Spelling
+  -------------------------------------
+[cli] ✅ 🔍 IMPORT PREVIEW 🔭
+[25/06 14:03:46] [INFO] Fetching tags in all groups from target environment example-dev website
+
+1/1 tag group to migrate into website
+
+ status     total
+-----------------------
+ create     1
+-----------------------
+
+ id      status    name    description
+--------------------------------------------
+ topics  create    Topics
+--------------------------------------------
+
+5/5 tags to migrate into website
+
+ status     total
+-----------------------
+ create     5
+-----------------------
+
+ id                                    value     status    groupId  label
+------------------------------------------------------------------------------------------
+ 109eb3e9-98c9-5ab2-b9df-f1c80af3ac5c  books     create    topics   {"en-GB":"Books"}
+ d59eddbe-cb9f-51ab-9d22-532f63cd7893  faces     create    topics   {"en-GB":"Faces"}
+ c4cc205f-d543-55c7-8f1a-7490275be437  history   create    topics   {"en-GB":"History"}
+ a7702648-df77-5fbb-b5ec-26a148a39b52  places    create    topics   {"en-GB":"Places"}
+ d8fe7193-6fe7-5c03-bf2e-590e151c47e7  spelling  create    topics   {"en-GB":"Spelling"}
+------------------------------------------------------------------------------------------
+
+[25/06 14:03:46] [OK] Tags migration preview ready
+
+[cli] ✅ Will import 1 tag group and 5 tags into example-dev environment
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
+
+### Create tags
+
+Create one or more tags providing the tag name(s), each name is separated by a space and any tag that contains a space should be wrapped in "double quotes". Specify the tag group to create the tags in with the required `--group` option.
+
+### Create tags in group
+
+Create one or more tags in a tag group providing the `groupId` first and then the tag name(s). Seperate each tag to create by a space and any tag that contains a space should be wrapped in "double quotes"
+
+```shell
+website t.durden@example-dev> create tags in topics Books Faces History Places Spelling
+  -------------------------------------
+[cli] ✅ 🔍 IMPORT PREVIEW 🔭
+[25/06 16:41:41] [INFO] Fetching tags in all groups from target environment example-dev website
+            
+No tag group to migrate into website            
+
+ status     total  
+-----------------------
+ no change  1
+-----------------------
+
+No tags to migrate into website            
+
+ status     total  
+-----------------------
+ no change  5
+-----------------------
+
+[25/06 16:41:42] [OK] Tags migration preview ready
+
+[cli] ❌ [example-dev] Unable to create tags
+
+website t.durden@example-dev>
+```
+
+### Remove tags
+
+Delete one or more tags, provide specific tag ids or delete all tags with the `--all` option
+
+```shell
+website t.durden@example-dev> remove tags 109eb3e9-98c9-5ab2-b9df-f1c80af3ac5c d59eddbe-cb9f-51ab-9d22-532f63cd7893
+  -------------------------------------
+[cli] ✅ 🔍 DELETE PREVIEW 🔭
+[25/06 15:08:53] [INFO] Fetching 2 tags from target environment example-dev website
+[25/06 15:08:53] [INFO] Delete tags preview ready
+
+  groupId: topics
+  id: 109eb3e9-98c9-5ab2-b9df-f1c80af3ac5c
+  value: books
+  label:
+  - en-GB: Books
+  usageCount: 0
+  status: delete
+
+  groupId: topics
+  id: d59eddbe-cb9f-51ab-9d22-532f63cd7893
+  value: faces
+  label:
+  - en-GB: Faces
+  usageCount: 0
+  status: delete
+
+[cli] ✅ [example-dev] Will delete 2 tags
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev> 
+```
+
+### Remove tags in group
+
+Delete one or more tags in a specific tag group, provide options to filter the returned tags or delete all tags with the `--all` option
+
+```shell
+website t.durden@example-dev> remove tags in topics --all
+  -------------------------------------
+[cli] ✅ 🔍 DELETE PREVIEW 🔭
+[25/06 14:15:20] [INFO] Fetching tags in group topics from target environment example-dev website
+[25/06 14:15:21] [INFO] Delete tags preview ready
+
+  groupId: topics
+  id: 109eb3e9-98c9-5ab2-b9df-f1c80af3ac5c
+  value: books
+  label:
+  - en-GB: Books
+  usageCount: 0
+  status: delete
+
+  groupId: topics
+  id: d59eddbe-cb9f-51ab-9d22-532f63cd7893
+  value: faces
+  label:
+  - en-GB: Faces
+  usageCount: 0
+  status: delete
+
+  groupId: topics
+  id: c4cc205f-d543-55c7-8f1a-7490275be437
+  value: history
+  label:
+  - en-GB: History
+  usageCount: 0
+  status: delete
+
+  groupId: topics
+  id: a7702648-df77-5fbb-b5ec-26a148a39b52
+  value: places
+  label:
+  - en-GB: Places
+  usageCount: 0
+  status: delete
+
+  groupId: topics
+  id: d8fe7193-6fe7-5c03-bf2e-590e151c47e7
+  value: spelling
+  label:
+  - en-GB: Spelling
+  usageCount: 0
+  status: delete
+
+[cli] ✅ [example-dev] Will delete 5 tags
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
+
+### Remove tag group
+
+When all tags have been removed from the tag group we are able to delete the tag group
+
+```shell
+website t.durden@example-dev> remove taggroup topics
+  -------------------------------------
+[cli] ✅ 🔍 DELETE PREVIEW 🔭
+[25/06 14:50:42] [INFO] Delete tag groups preview ready
+
+  id: topics
+  name: Topics
+  version:
+  - versionNo: 1.0
+    created: 2025-06-25T13:06:46.273Z
+    createdBy: testzengenti
+    modified: 2025-06-25T13:06:46.273Z
+    modifiedBy: testzengenti
+  tagCount: 0
+
+[cli] ✅ [example-dev] Will delete tag group topics
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
+
 ## Manage API keys
 
 You can use the cli or shell to manage API keys that are used to provide access to external application integrations
@@ -1090,7 +1377,7 @@ website t.durden@example-dev> set role enabled "Test role"
 [cli] ✅ Succesfully updated role
 
   id: 1329b3cc-0267-480e-a115-b0beaae8fe5b
-  projectId: migratortron
+  projectId: website
   name: Test role
   description: Role to demonstrate cli
   enabled: true
@@ -1548,6 +1835,78 @@ website t.durden@example-dev> import models --from-file ./content-models.json
 The output will be the same as the `import models` examples above
 
 <sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
+
+## Import tags and groups
+### Import from another Contensis environment
+
+Connect to your "source" environment, ensure you can fetch the tags from this environment first and that these are the right tags you plan on importing to your "target" environment.
+
+Choose your required options to check that the right tags will eventually be imported with the `list tags` or `list tags in <groupId>` command
+
+When you are happy the expected tags are being returned for your import, you should then `connect` to your "target" environment (and `set project`) and when we are successfully connected to our target project, call the `import tags` command, ensuring you add any arguments you used with your `list tags` check earlier.
+
+#### Import all tags (and groups) from the source project
+
+```shell
+website t.durden@example-dev> import tags --source-alias example-dev --source-project-id leif
+  -------------------------------------
+[cli] ✅ 🔍 IMPORT PREVIEW 🔭
+[25/06 15:26:37] [INFO] Fetching tags in all groups from example-dev leif
+[25/06 15:26:37] [INFO] Fetching tags in all groups from target environment example-dev website
+            
+1/2 tag groups to migrate into website            
+
+ status     total  
+-----------------------
+ create     1
+ no change  1
+-----------------------
+
+ id                       status    name                        description                         
+------------------------------------------------------------------------------------------------
+ newGroup                 create    New group
+------------------------------------------------------------------------------------------------
+
+            
+5/7 tags to migrate into website            
+
+ status     total  
+-----------------------
+ create     5
+ no change  2
+-----------------------
+
+ id                                    value  status    groupId              label              
+------------------------------------------------------------------------------------------------
+ 02bcb977-1196-4c3f-a921-d2dfce3ca32b  new1   create    newGroup             {"en-GB":"New 1"}  
+ f48eb862-7b73-4a77-a2af-09492a88a8f0  new2   create    newGroup             {"en-GB":"New 2"}  
+ 8673e419-55c9-4ba0-bcd7-28c7c6fa46cc  new3   create    newGroup             {"en-GB":"New 3"}  
+ 90a11d09-3727-45c2-a0df-86f1865828ab  tag3   create    newGroup             {"en-GB":"Tag 3"}  
+ d4267b35-0d25-41ae-bce9-eeb490c793f4  tag3   create    resourcesTagGroup    {"en-GB":"Tag 3"}  
+------------------------------------------------------------------------------------------------
+
+[25/06 15:26:38] [OK] Tags migration preview ready
+
+[cli] ✅ Will import 5 tags into example-dev environment
+
+[cli] ⏩ Add --commit flag to commit the previewed changes
+
+website t.durden@example-dev>
+```
+
+### Import from a file
+
+Import resources directly from a JSON file. The path can be relative or absolute. The file will be processed as an array of Tags (and Tag Groups). Generate a JSON file by exporting some existing tags using the command `list tags --output tags.json`.
+
+```shell
+website t.durden@example-dev> import tags --from-file ./tags.json
+```
+```shell
+website t.durden@example-dev> import taggroups --from-file ./taggroups.json
+```
+```shell
+website t.durden@example-dev> import tags --from-file ./tags-and-groups.json
+```
 
 ## Import entries
 

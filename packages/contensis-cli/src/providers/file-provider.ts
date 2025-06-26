@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { homedir } from 'os';
 import path from 'path';
-import { tryParse } from '~/util';
+import { tryParse } from '~/util/assert';
 import { csvToJson, detectCsv } from '~/util/csv.formatter';
 import { unflattenObject } from '~/util/json.formatter';
 import { Logger } from '~/util/logger';

@@ -115,8 +115,18 @@ export const LogMessages = {
       `[${env}] Unable to update project ${Logger.highlightText(id)}`,
   },
   migrate: {
+    commitTip: () => `Add --commit flag to commit the previewed changes`,
     preview: (verb = 'IMPORT') => `🔍 ${verb} PREVIEW 🔭`,
     commit: (verb = 'IMPORT') => `COMMITTING ${verb} ✨☄️ `,
+    imported: (
+      env: string,
+      commit: boolean,
+      entities: { [noun: string]: number }
+    ) =>
+      `${commit ? `Imported` : `Will import`} ${Object.entries(entities)
+        .map(([noun, count]) => pl(noun, count, true))
+        .join(' and ')} into ${env} environment`,
+
     models: {
       result: (
         status: keyof MigrateModelsResult['project']['contentTypes']
@@ -161,11 +171,7 @@ export const LogMessages = {
   },
   nodes: {
     imported: (env: string, commit: boolean, count: number) =>
-      `[${env}] ${commit ? `Imported` : `Will import`} ${pl(
-        'node',
-        count,
-        true
-      )}`,
+      LogMessages.migrate.imported(env, commit, { node: count }),
     failedImport: (env: string) => `[${env}] Unable to import nodes`,
     removed: (env: string, commit: boolean, root: string) =>
       `[${env}] ${commit ? `Deleted` : `Will delete`} nodes at ${root}`,
@@ -222,9 +228,10 @@ export const LogMessages = {
   },
   entries: {
     imported: (env: string, commit: boolean, entries: number, nodes = 0) =>
-      `${commit ? `Imported` : `Will import`} ${pl('entry', entries, true)}${
-        nodes > 0 ? ` and ${pl('node', nodes, true)}` : ''
-      } into ${env} environment`,
+      LogMessages.migrate.imported(env, commit, {
+        entry: entries,
+        node: nodes,
+      }),
     failedImport: (env: string) => `[${env}] Unable to import entries`,
     update: {
       preview: () => LogMessages.migrate.preview('UPDATE FIELD'),
@@ -239,7 +246,6 @@ export const LogMessages = {
       `[${env}] ${commit ? `Deleted` : `Will delete`} entries`,
     failedRemove: (env: string) => `[${env}] Unable to delete entries`,
     notFound: (env: string) => `[${env}] Entries were not found`,
-    commitTip: () => `Add --commit flag to commit the previewed changes`,
   },
   keys: {
     list: (env: string) => `[${env}] API keys:`,
@@ -343,6 +349,53 @@ export const LogMessages = {
       `[${env}] Deleted role ${Logger.highlightText(id)}\n`,
     failedRemove: (env: string, id: string) =>
       `[${env}] Unable to delete role ${Logger.highlightText(id)}`,
+  },
+  taggroups: {
+    list: (env: string, length: number) =>
+      `[${env}] Retrieved ${pl('tag group', length, true)}`,
+    noList: (env: string) => `[${env}] Cannot retrieve tag groups`,
+    noneExist: () => `Create a tag group with "create taggroup <name>"`,
+    imported: (env: string, commit: boolean, groups: number, tags: number) =>
+      LogMessages.migrate.imported(env, commit, {
+        'tag group': groups,
+        tag: tags,
+      }),
+    failedGet: (env: string, name: string) =>
+      `[${env}] Unable to find a tag group ${Logger.highlightText(name)}`,
+    created: (env: string, name: string) =>
+      `[${env}] Created tag group ${Logger.highlightText(name)}\n`,
+    tip: () =>
+      `Give access to your role with "set role assignments", allow your role to do things with "set role permissions"`,
+    failedCreate: (env: string, name?: string) =>
+      `[${env}] Unable to create ${name ? `tag group ${Logger.highlightText(name)}` : 'tag groups'}`,
+    removed: (env: string, id: string, commit: boolean) =>
+      `[${env}] ${
+        commit ? `Deleted` : `Will delete`
+      } tag group ${Logger.highlightText(id)}\n`,
+    failedRemove: (env: string, id: string) =>
+      `[${env}] Unable to delete tag group ${Logger.highlightText(id)}`,
+  },
+  tags: {
+    list: (env: string, length: number) =>
+      `[${env}] Retrieved ${pl('tag', length, true)}`,
+    noList: (env: string) => `[${env}] Cannot retrieve tags`,
+    noneExist: () =>
+      `Create a tag with "create tag in <groupId> <tag label(s)...>"`,
+    imported: (env: string, commit: boolean, tags: number) =>
+      LogMessages.migrate.imported(env, commit, { tag: tags }),
+    failedGet: (env: string) => `[${env}] Unable to find tags`,
+    created: (env: string, name: string) =>
+      `[${env}] Created tag ${Logger.highlightText(name)}\n`,
+    failedCreate: (env: string, name?: string) =>
+      `[${env}] Unable to create ${name ? `tag ${Logger.highlightText(name)}` : 'tags'}`,
+    removed: (env: string, length: number, commit: boolean) =>
+      `[${env}] ${
+        !length
+          ? 'No tags to delete'
+          : `${commit ? `Deleted` : `Will delete`} ${pl('tag', length, true)}\n`
+      }`,
+    failedRemove: (env: string, length: number) =>
+      `[${env}] Unable to delete tags with ${pl('error', length)}`,
   },
   blocks: {
     runningStatus: (status: BlockRunningStatus | 'broken') => {

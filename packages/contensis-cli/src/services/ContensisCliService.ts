@@ -7,7 +7,13 @@ import path from 'path';
 import clone from 'rfdc';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
-import { Role } from 'contensis-management-api/lib/models';
+import {
+  ICreateTag,
+  ICreateTagGroup,
+  Role,
+  Tag,
+  TagGroup,
+} from 'contensis-management-api';
 import {
   ContensisMigrationService,
   MigrateRequest,
@@ -32,15 +38,15 @@ import { readFileAsJSON } from '~/providers/file-provider';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import CredentialProvider from '~/providers/CredentialProvider';
 
+import { splitTagsAndGroups, url } from '~/util';
+import { sanitiseIds } from '~/util/api-ids';
 import {
   isPassword,
   isSharedSecret,
   isUuid,
   tryParse,
   tryStringify,
-  url,
-} from '~/util';
-import { sanitiseIds } from '~/util/api-ids';
+} from '~/util/assert';
 import {
   printBlockVersion,
   printEntriesMigrateResult,
@@ -58,6 +64,18 @@ import { diffLogStrings } from '~/util/diff';
 import { findByIdOrName } from '~/util/find';
 import { logError, Logger } from '~/util/logger';
 import { promiseDelay } from '~/util/timers';
+import { GetTagsArgs } from 'migratortron/dist/services/TagsMigrationService';
+import { GetTagGroupsArgs } from 'migratortron/dist/services/TagGroupsMigrationService';
+
+type ImportDataType =
+  | 'entries'
+  | 'contentTypes'
+  | 'components'
+  | 'models'
+  | 'nodes'
+  | 'tagGroups'
+  | 'tags'
+  | 'user-input';
 
 let insecurePasswordWarningShown = false;
 
@@ -326,20 +344,18 @@ class ContensisCli {
     fromFile,
     importDataType,
     importData,
+    mixedData,
   }: {
     commit?: boolean;
     fromFile?: string;
-    importDataType?:
-      | 'entries'
-      | 'contentTypes'
-      | 'components'
-      | 'models'
-      | 'nodes'
-      | 'user-input';
+    importDataType?: ImportDataType;
     importData?: any[];
+    mixedData?: {
+      [K in ImportDataType]?: any[];
+    };
   }) => {
     const source: 'contensis' | 'file' =
-      fromFile || importData ? 'file' : 'contensis';
+      fromFile || importData || mixedData ? 'file' : 'contensis';
 
     const fileData =
       importData || (fromFile ? (await readFileAsJSON(fromFile)) || [] : []);
@@ -389,7 +405,7 @@ class ContensisCli {
         if (source === 'file' || importDataType === 'user-input') {
           this.contensis = new ContensisMigrationService(
             {
-              concurrency: 3,
+              concurrency: 2,
               outputProgress: true,
               ...contensisOpts,
               target: {
@@ -402,13 +418,14 @@ class ContensisCli {
                 assetHostname: this.urls?.previewWeb,
               },
               ...(importDataType ? { [importDataType]: fileData } : {}),
+              ...(mixedData || {}),
             },
             !commit
           );
         } else if (source === 'contensis') {
           this.contensis = new ContensisMigrationService(
             {
-              concurrency: 3,
+              concurrency: 2,
               outputProgress: true,
               ...contensisOpts,
               source: {
@@ -663,7 +680,10 @@ class ContensisCli {
               : undefined;
 
         session.UpdateEnv({
-          projects: projects.map(p => p.id),
+          projects: projects.map(p => ({
+            id: p.id,
+            primaryLanguage: p.primaryLanguage,
+          })),
           currentProject: nextCurrentProject,
         });
 
@@ -740,8 +760,8 @@ class ContensisCli {
     let nextProjectId: string | undefined;
     if (env?.projects.length > 0 && env?.lastUserId) {
       nextProjectId = env.projects.find(
-        p => p.toLowerCase() === projectId.toLowerCase()
-      );
+        p => p.id.toLowerCase() === projectId.toLowerCase()
+      )?.id;
       if (nextProjectId) {
         env.currentProject = nextProjectId;
         session.UpdateEnv(env);
@@ -932,9 +952,9 @@ class ContensisCli {
                 )}: ${permissions.contentTypes
                   .map(
                     p =>
-                      `${p.id} [${p.actions.join(',')}] ${(
-                        p as any
-                      ).languages.join(' ')}`
+                      `${p.id} [${p.actions?.join(',')}] ${
+                        (p as any).languages?.join(' ') || ''
+                      }`
                   )
                   .join(', ')}`
               );
@@ -1045,6 +1065,13 @@ class ContensisCli {
     const contensis = await this.ConnectContensis();
 
     if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        log.success(messages.migrate.preview());
+      } else {
+        log.warning(messages.migrate.commit());
+      }
+
       // Retrieve roles list for env
       const [rolesErr, roles] = await to(contensis.roles.GetRoles());
 
@@ -1068,6 +1095,433 @@ class ContensisCli {
       if (rolesErr) {
         log.error(messages.roles.noList(currentEnv));
         log.error(jsonFormatter(rolesErr));
+      }
+    }
+  };
+
+  PrintTagGroup = async (groupId: string) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve taggroups list for env
+      const [groupsErr, groups] = await contensis.tags.GetTagGroups({
+        id: groupId,
+      });
+
+      if (Array.isArray(groups)) {
+        log.success(messages.taggroups.list(currentEnv, groups.length));
+
+        if (groups.length)
+          await this.HandleFormattingAndOutput(groups[0], () => {
+            log.raw('');
+            log.object(groups[0]);
+          });
+        else log.error(messages.taggroups.failedGet(currentEnv, groupId));
+      }
+
+      if (groupsErr)
+        log.error(messages.taggroups.noList(currentEnv), groupsErr);
+    }
+  };
+
+  PrintTagGroups = async (query: string) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve tag groups list for env
+      const [groupsErr, groups] = await contensis.tags.GetTagGroups({
+        q: query,
+      });
+
+      if (Array.isArray(groups)) {
+        log.success(messages.taggroups.list(currentEnv, groups.length));
+
+        if (!groups.length) log.help(messages.taggroups.noneExist());
+
+        await this.HandleFormattingAndOutput(groups, () => {
+          // print the tag groups to console
+
+          for (const { version, ...group } of groups) {
+            log.raw('');
+            log.object(group);
+          }
+        });
+      }
+
+      if (groupsErr)
+        log.error(messages.taggroups.noList(currentEnv), groupsErr);
+    }
+  };
+
+  ImportTagGroups = async ({
+    commit,
+    fromFile,
+    getBy,
+    data,
+    tags,
+    save,
+  }: {
+    commit: boolean;
+    fromFile?: string;
+    getBy?: GetTagGroupsArgs;
+    data?: ICreateTagGroup[];
+    tags?: ICreateTag[];
+    save?: boolean;
+  }) => {
+    const { currentEnv, currentProject, log, messages } = this;
+
+    const contensis = await this.ConnectContensisImport({
+      commit,
+      fromFile,
+      importDataType: tags ? 'user-input' : 'tagGroups',
+      mixedData: {
+        tagGroups: data,
+        tags: tags,
+      },
+    });
+
+    if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        log.success(messages.migrate.preview());
+      } else {
+        log.warning(messages.migrate.commit());
+      }
+
+      // contensis.payload.tagGroups = data;
+      const method = tags?.length
+        ? contensis.tags.MigrateTags
+        : contensis.tags.MigrateTagGroups;
+      const [err, result] = await to(method(getBy));
+
+      if (err) logError(err);
+      else {
+        const { tags } = contensis.content.targets[currentProject];
+        await this.HandleFormattingAndOutput(
+          save
+            ? [
+                ...tags.migrateGroups.map(g => g.toJSON()),
+                ...tags.migrateTags.map(t => t.toJSON()),
+              ]
+            : result,
+          () => {}
+        );
+      }
+
+      const tagsToMigrate =
+        (result as any)?.tagsToMigrate?.[currentProject]?.totalCount || 0;
+      const groupsToMigrate = (result?.groupsToMigrate?.[currentProject]
+        ?.totalCount || 0) as number;
+
+      const tagsCommitted =
+        ((result as any)?.tagsResult?.created || 0) +
+        ((result as any)?.tagsResult?.updated || 0);
+
+      const groupsCommitted =
+        (result?.groupsResult?.created || 0) +
+        (result?.groupsResult?.updated || 0);
+      if (
+        !err &&
+        !result.errors?.length &&
+        ((!commit && tagsToMigrate + groupsToMigrate) ||
+          (commit && tagsCommitted + groupsCommitted))
+      ) {
+        log.success(
+          messages.taggroups.imported(
+            currentEnv,
+            commit,
+            commit ? groupsCommitted : groupsToMigrate,
+            commit ? tagsCommitted : tagsToMigrate
+          )
+        );
+        if (!commit) {
+          log.raw(``);
+          log.help(messages.migrate.commitTip());
+        }
+      } else {
+        log.error(
+          messages.taggroups.failedCreate(currentEnv, data?.[0].name),
+          err
+        );
+      }
+      if (tagsCommitted)
+        log.success(messages.tags.imported(currentEnv, commit, tagsCommitted));
+    } else {
+      log.warning(messages.models.noList(currentProject));
+      log.help(messages.connect.tip());
+    }
+  };
+
+  RemoveTagGroup = async (groupId: string, commit = false) => {
+    const { currentEnv, currentProject, log, messages } = this;
+    const contensis = await this.ConnectContensisImport({
+      commit,
+    });
+    if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        log.success(messages.migrate.preview('DELETE'));
+      } else {
+        log.warning(messages.migrate.commit('DELETE'));
+      }
+      const result = await contensis.tags.DeleteTagGroups({ id: groupId });
+
+      // print the results to console
+      await this.HandleFormattingAndOutput(result, () => {
+        log.raw('');
+        log.object(result.existing[currentProject].groups?.[0]);
+      });
+      if (result.errors?.length) {
+        log.error(
+          messages.taggroups.failedRemove(currentEnv, groupId),
+          result.errors[0]
+        );
+      } else {
+        log.success(
+          messages.taggroups.removed(currentEnv, groupId, !contensis.isPreview)
+        );
+        if (!commit) {
+          log.raw(``);
+          log.help(messages.migrate.commitTip());
+        }
+      }
+    }
+  };
+
+  PrintTag = async (getBy?: GetTagsArgs, withDependents = false) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve tags list for env
+      const [tagsErr, result] = await contensis.tags.GetTags(getBy, {
+        withDependents,
+      });
+
+      if (Array.isArray(result)) {
+        let tags: ICreateTag[] = [];
+        const groups: ICreateTagGroup[] = [];
+        if (withDependents) splitTagsAndGroups(result, tags, groups);
+        else tags = result;
+
+        log.success(messages.tags.list(currentEnv, tags.length));
+
+        if (tags)
+          await this.HandleFormattingAndOutput(result, () => {
+            // print the tags to console
+            for (const tag of tags) {
+              log.raw('');
+              log.object(tag);
+            }
+            if (groups.length) {
+              log.raw('');
+              log.success(messages.taggroups.list(currentEnv, groups.length));
+
+              for (const group of groups) {
+                log.raw('');
+                log.object(group);
+              }
+            }
+          });
+        else log.error(messages.tags.failedGet(currentEnv));
+      }
+
+      if (tagsErr) log.error(messages.tags.noList(currentEnv), tagsErr);
+    }
+  };
+
+  PrintTags = async (getBy?: GetTagsArgs, withDependents = false) => {
+    const { currentEnv, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    if (contensis) {
+      // Retrieve tags list for env
+      const [tagsErr, result] = await contensis.tags.GetTags(getBy, {
+        withDependents,
+      });
+
+      if (Array.isArray(result)) {
+        let tags: Tag[] = [];
+        const groups: TagGroup[] = [];
+        if (withDependents) splitTagsAndGroups(result, tags, groups);
+        else tags = result;
+        log.success(messages.tags.list(currentEnv, tags.length));
+
+        if (!tags.length) log.help(messages.tags.noneExist());
+
+        await this.HandleFormattingAndOutput(result, () => {
+          // print the tags to console
+          for (const { version, ...tag } of tags) {
+            log.raw('');
+            log.object(tag);
+          }
+          if (groups.length) {
+            log.raw('');
+            log.success(messages.taggroups.list(currentEnv, groups.length));
+
+            for (const { version, ...group } of groups) {
+              log.raw('');
+              log.object(group);
+            }
+          }
+        });
+      }
+
+      if (tagsErr) log.error(messages.tags.noList(currentEnv), tagsErr);
+    }
+  };
+
+  ImportTags = async ({
+    commit,
+    fromFile,
+    getBy,
+    data,
+    save,
+  }: {
+    commit: boolean;
+    fromFile?: string;
+    getBy?: GetTagsArgs;
+    data?: ICreateTag[];
+    save?: boolean;
+  }) => {
+    const { currentEnv, currentProject, log, messages } = this;
+
+    const mixedData: {
+      tags: ICreateTag[];
+      tagGroups: ICreateTagGroup[];
+    } = { tags: [], tagGroups: [] };
+
+    if (data) {
+      mixedData.tags = data;
+      mixedData.tagGroups = [...new Set(data.map(t => t.groupId))].map(
+        id =>
+          ({
+            id,
+          }) as ICreateTagGroup
+      );
+    }
+    if (fromFile) {
+      // File may contain mix of tags and tag groups, separate those here
+      const fileData = fromFile ? (await readFileAsJSON(fromFile)) || [] : [];
+      splitTagsAndGroups(fileData, mixedData.tags, mixedData.tagGroups);
+    }
+
+    const contensis = await this.ConnectContensisImport({
+      commit,
+      importDataType: 'tags',
+      mixedData,
+    });
+
+    if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        log.success(messages.migrate.preview());
+      } else {
+        log.warning(messages.migrate.commit());
+      }
+
+      contensis.payload.tags = data;
+      const [err, result] = await to(contensis.tags.MigrateTags(getBy));
+
+      if (err) logError(err);
+      else {
+        const { tags } = contensis.content.targets[currentProject];
+        await this.HandleFormattingAndOutput(
+          save
+            ? [
+                ...tags.migrateGroups.map(g => g.toJSON()),
+                ...tags.migrateTags.map(t => t.toJSON()),
+              ]
+            : result,
+          () => {}
+        );
+      }
+      if (
+        !err &&
+        !result.errors?.length &&
+        ((!commit && result.tagsToMigrate[currentProject].totalCount) ||
+          (commit &&
+            (result.tagsResult?.created || result.tagsResult?.updated)))
+      ) {
+        log.success(
+          messages.tags.imported(
+            currentEnv,
+            commit,
+            commit
+              ? (result.tagsResult?.created || 0) +
+                  (result.tagsResult?.updated || 0)
+              : (result.tagsToMigrate[currentProject].totalCount as number)
+          )
+        );
+        if (!commit) {
+          log.raw(``);
+          log.help(messages.migrate.commitTip());
+        }
+      } else {
+        log.error(
+          messages.tags.failedCreate(
+            currentEnv,
+            data?.length === 1 ? data?.[0].label['en-GB'] : undefined
+          ),
+          err
+        );
+      }
+    } else {
+      log.warning(messages.models.noList(currentProject));
+      log.help(messages.connect.tip());
+    }
+  };
+
+  RemoveTags = async (getBy: GetTagsArgs, commit = false) => {
+    const { currentEnv, currentProject, log, messages } = this;
+
+    this.contensisOpts.concurrency = 1;
+    const contensis = await this.ConnectContensisImport({
+      commit,
+      importDataType: 'user-input', // 'user-input' import type does not require a source cms
+    });
+    if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        log.success(messages.migrate.preview('DELETE'));
+      } else {
+        log.warning(messages.migrate.commit('DELETE'));
+      }
+      const result = await contensis.tags.DeleteTags(getBy);
+      const deleted =
+        (commit
+          ? result.tagsResult?.deleted
+          : (result.tagsToMigrate[currentProject].delete as number)) || 0;
+
+      // print the results to console
+      await this.HandleFormattingAndOutput(result, () => {
+        const tags = result.existing[currentProject].tags;
+        for (const { version, ...tag } of tags || []) {
+          const { status, error } =
+            result.tagsToMigrate.tagIds[tag.groupId][tag.id][currentProject];
+          log.raw('');
+          log.object({
+            ...tag,
+            status,
+            error,
+          });
+        }
+      });
+      if (result.errors?.length) {
+        log.error(
+          messages.tags.failedRemove(currentEnv, result.errors.length),
+          result.errors
+        );
+      } else {
+        log.success(
+          messages.tags.removed(currentEnv, deleted, !contensis.isPreview)
+        );
+        if (!commit && deleted) {
+          log.raw(``);
+          log.help(messages.migrate.commitTip());
+        }
       }
     }
   };
@@ -1784,6 +2238,8 @@ class ContensisCli {
 
   RemoveEntries = async (commit = false) => {
     const { currentEnv, currentProject, log, messages } = this;
+
+    this.contensisOpts.concurrency = 1;
     const contensis = await this.ConnectContensisImport({
       commit,
       importDataType: 'user-input', // 'user-input' import type does not require a source cms
@@ -1812,7 +2268,7 @@ class ContensisCli {
         log.success(messages.entries.removed(currentEnv, commit));
         if (!commit) {
           log.raw(``);
-          log.help(messages.entries.commitTip());
+          log.help(messages.migrate.commitTip());
         }
       } else {
         log.error(messages.entries.failedRemove(currentEnv), err);
@@ -1950,7 +2406,7 @@ class ContensisCli {
         );
         if (!commit) {
           log.raw(``);
-          log.help(messages.entries.commitTip());
+          log.help(messages.migrate.commitTip());
         }
       } else {
         log.error(messages.entries.failedImport(currentEnv), err);
@@ -2031,7 +2487,7 @@ class ContensisCli {
         );
         if (!commit) {
           log.raw(``);
-          log.help(messages.entries.commitTip());
+          log.help(messages.migrate.commitTip());
         }
       } else {
         log.error(messages.entries.failedImport(currentEnv), err);
@@ -2113,7 +2569,7 @@ class ContensisCli {
         );
         if (!commit) {
           log.raw(``);
-          log.help(messages.entries.commitTip());
+          log.help(messages.migrate.commitTip());
         }
       } else {
         log.error(messages.entries.update.failed(currentEnv), err);

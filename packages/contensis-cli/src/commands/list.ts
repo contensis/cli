@@ -1,6 +1,11 @@
 import { Command } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
-import { exportOption, mapContensisOpts, noCache } from './globalOptions';
+import {
+  addGlobalOptions,
+  exportOption,
+  mapContensisOpts,
+  noCache,
+} from './globalOptions';
 
 export const makeListCommand = () => {
   const list = new Command()
@@ -8,6 +13,7 @@ export const makeListCommand = () => {
     .description('list command')
     .addHelpText('after', `\n`)
     .showHelpAfterError(true)
+    .enablePositionalOptions()
     .exitOverride();
 
   list
@@ -156,6 +162,76 @@ Example call:
       await cliCommand(['list', 'roles'], opts).PrintRoles();
     });
 
+  const tags = list
+    .command('tags')
+    .description('print list of tags')
+    .argument('[label]', 'filter by tags that match this label')
+    .passThroughOptions()
+    .option('-in --group <groupId>', 'id of the tag group containing tags')
+    .option('-i --id <ids...>', 'limit output to the supplied tag id(s)')
+    .option('-l --language <language>', 'find tags in the supplied language')
+    .option('-d --dependents', 'find and return tag groups for all found tags')
+    .addHelpText(
+      'after',
+      `
+    Example call:
+      > list tags
+    `
+    )
+    .action(async (label, opts) => {
+      await cliCommand(['list', 'tags'], { ...opts, label }).PrintTags(
+        {
+          id: opts.id?.length === 1 ? opts.id[0] : undefined,
+          ids: opts.id?.length > 1 ? opts.id : undefined,
+          groupId: opts.group,
+          label,
+          language: opts.language,
+        },
+        opts.dependents
+      );
+    });
+
+  tags
+    .command('in')
+    .description('print list of tags in a group')
+    .argument('<groupId>', 'id of the tag group containing tags')
+    .option('--label <label>', 'filter by tags that match this label')
+    .option(
+      '-l --language <language>',
+      'find tags by a label in a specific language'
+    )
+    .addHelpText(
+      'after',
+      `
+      Example call:
+        > list tags in example
+      `
+    )
+    .action(async (groupId: string, opts) => {
+      await cliCommand(['list', 'tags', 'in'], {
+        ...opts,
+        groupId,
+      }).PrintTags({
+        ...opts,
+        groupId,
+      });
+    });
+
+  list
+    .command('taggroups')
+    .description('print list of tag groups')
+    .argument('[query]', 'filter tag groups')
+    .addHelpText(
+      'after',
+      `
+  Example call:
+    > list taggroups
+  `
+    )
+    .action(async (query, opts) => {
+      await cliCommand(['list', 'taggroups'], opts).PrintTagGroups(query);
+    });
+
   list
     .command('webhooks')
     .description('print list of webhooks')
@@ -181,6 +257,9 @@ Example call:
     .action(async opts => {
       await cliCommand(['list', 'workflows'], opts).PrintWorkflows();
     });
+
+  // Add global opts for inner sub-commands
+  addGlobalOptions(tags);
 
   return list;
 };

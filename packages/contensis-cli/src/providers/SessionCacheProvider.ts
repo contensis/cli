@@ -4,8 +4,9 @@ import clone from 'lodash/cloneDeep';
 import mergeWith from 'lodash/mergeWith';
 import unionBy from 'lodash/unionBy';
 import { appRootDir, checkDir } from './file-provider';
-import { isJson, tryParse } from '~/util';
+import { isJson, tryParse } from '~/util/assert';
 import { Logger } from '~/util/logger';
+import { LIB_VERSION } from '~/version';
 
 class SessionCacheProvider {
   private localFilePath: string;
@@ -18,6 +19,7 @@ class SessionCacheProvider {
       currentTimestamp: new Date().toISOString(),
       environments: {},
       history: [],
+      version: LIB_VERSION,
     };
     this.ReadCacheFromDisk();
   }
@@ -64,7 +66,10 @@ class SessionCacheProvider {
 
         if (Array.isArray(val)) return val.concat(src);
       });
+      
       this.cache.currentTimestamp = new Date().toISOString();
+      this.cache.version = LIB_VERSION;
+
       this.WriteCacheToDisk();
     } catch (ex: any) {
       // Problem merging cache data for update

@@ -208,6 +208,92 @@ Example call:
       });
     });
 
+  program
+    .command('taggroups')
+    .description('import taggroups')
+    .argument('[query]', 'apply a filter')
+    .option('-i --id <ids...>', 'limit to the supplied tag group id(s)')
+    .addOption(commit)
+    .option(
+      '-preserve --preserve-guids',
+      'include this flag when you are importing tags that you have previously exported and wish to update'
+    )
+    .addOption(concurrency)
+    .addOption(ignoreErrors)
+    .option(
+      '--save',
+      "save the tag groups we're migrating instead of the migration preview (used with --output)"
+    )
+    .addHelpText(
+      'after',
+      `
+  Example call:
+    > import taggroups --source-cms example-dev --source-project-id microsite --zenql "sys.contentTypeId = blog"
+    > import taggroups --from-file myImportData.json --preserve-guids
+  `
+    )
+    .action(async (query: string, opts) => {
+      await cliCommand(
+        ['import', 'taggroups'],
+        opts,
+        mapContensisOpts(opts)
+      ).ImportTagGroups({
+        commit: opts.commit,
+        fromFile: opts.fromFile,
+        getBy: {
+          id: opts.id?.length === 1 ? opts.id[0] : undefined,
+          ids: opts.id?.length > 1 ? opts.id : undefined,
+          q: query,
+        },
+        save: opts.save,
+      });
+    });
+
+  program
+    .command('tags')
+    .description('import tags')
+    .option('-in --group <groupId>', 'id of the tag group containing tags')
+    .option('--label <label>', 'filter by tags that match this label')
+    .option('-l --language <language>', 'find tags in the supplied language')
+    .option('-i --id <ids...>', 'limit to the supplied tag group id(s)')
+    .addOption(commit)
+    .option(
+      '-preserve --preserve-guids',
+      'include this flag when you are importing tags that you have previously exported and wish to update'
+    )
+    .addOption(concurrency)
+    .addOption(ignoreErrors)
+    .option(
+      '--save',
+      "save the tags we're migrating instead of the migration preview (used with --output)"
+    )
+    .addHelpText(
+      'after',
+      `
+    Example call:
+      > import tags --source-cms example-dev --source-project-id microsite --group example
+      > import tags --from-file myImportData.json --preserve-guids
+    `
+    )
+    .action(async (opts) => {
+      await cliCommand(
+        ['import', 'tags'],
+        opts,
+        mapContensisOpts(opts)
+      ).ImportTags({
+        commit: opts.commit,
+        fromFile: opts.fromFile,
+        getBy: {
+          groupId: opts.group,
+          id: opts.id?.length === 1 ? opts.id[0] : undefined,
+          ids: opts.id?.length > 1 ? opts.id : undefined,
+          label: opts.label,
+          language: opts.language,
+        },
+        save: opts.save,
+      });
+    });
+
   return program;
 };
 
