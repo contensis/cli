@@ -19,15 +19,15 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
-        os: [ubuntu-22.04, windows-2019, macos-13, arm64]
+        node-version: [22.x]
+        os: [ubuntu-24.04, windows-2022, macos-13, arm64]
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             friendlyName: Ubuntu x64
             fileName: linux
             exeName: contensis-cli-linux
             homebrewFormula: contensis-cli-linux
-          - os: windows-2019
+          - os: windows-2022
             friendlyName: Windows x64
             fileName: win
             exeName: contensis-cli-win.exe
@@ -72,7 +72,7 @@ jobs:
       #     npm install --global yarn
 
       - name: Install additional dependencies
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           sudo apt-get -qq -y install gnome-keyring \
                                libsecret-1-dev \
@@ -81,11 +81,11 @@ jobs:
 
       - name: Setup os specific environment
         run: |
-          yarn install --silent
+          yarn install --silent --no-immutable
           yarn run build
 
       - name: Prepare system keyring (Linux)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-24.04'
         run: |
           echo "Install keyring..."
           pip3 install --upgrade pip
@@ -99,7 +99,7 @@ jobs:
           python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
 
       - name: Build Windows executable and get app version
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-2022'
         run: |
           yarn run build:exe:win
           cd bin
@@ -109,7 +109,7 @@ jobs:
           exit 0
 
       - name: Build Linux/macOS executable from os native sources and get app version
-        if: matrix.os != 'windows-2019'
+        if: matrix.os != 'windows-2022'
         run: |
           yarn run build:exe
           cd bin && ls -lah
@@ -125,7 +125,7 @@ jobs:
           ./contensis-cli get entries
 
       - name: Rename executable to include platform
-        run: ${{ matrix.os == 'windows-2019' && env.WIN || env.COMMAND }}
+        run: ${{ matrix.os == 'windows-2022' && env.WIN || env.COMMAND }}
         env:
           COMMAND: mv bin/contensis-cli bin/${{ matrix.exeName }}
           WIN: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "${{ matrix.exeName }}"
@@ -145,30 +145,30 @@ jobs:
 
         # Handle Chocolatey version bump and release
       - name: Make a copy of the exe for chocolatey
-        if: inputs.release && matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2022'
         run: Copy-Item -Path ".\bin\contensis-cli-win.exe" ".\installers\chocolatey\tools"
 
       - name: Set contensis-cli.nuspec version for chocolatey
-        if: inputs.release && matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2022'
         uses: Thundernerd/dotnet-project-version-updater@v1.2
         with:
           file: ${{ env.CHOCO_NUSPEC }}
           version: ${{ env.APP_VERSION }}
 
       - name: Package chocolatey release
-        if: inputs.release && matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2022'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
           args: pack ${{ env.CHOCO_NUSPEC }} --version ${{ env.APP_VERSION }} --outputdirectory installers\chocolatey
 
       - name: Set chocolatey publish key
-        if: inputs.release && matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2022'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
           args: apikey --key="'${{ secrets.CHOCOLATEY_API_KEY }}'" --source="'https://push.chocolatey.org/'"
 
       - name: Publish release to chocolatey
-        if: inputs.release && matrix.os == 'windows-2019'
+        if: inputs.release && matrix.os == 'windows-2022'
         uses: crazy-max/ghaction-chocolatey@v3
         with:
           args: push installers\chocolatey\contensis-cli.${{ env.APP_VERSION }}.nupkg --source="'https://push.chocolatey.org/'" --debug --verbose
