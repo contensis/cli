@@ -49,7 +49,7 @@ jobs:
       #     block-id: cli-ci-block
       #     auto-release: false
       #     image-uri: ${{ steps.build.outputs.image-uri }}
-      #     alias: zenhub-dev
+      #     alias: automotron
       #     project-id: contensis
       #     client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
       #     shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}
@@ -63,7 +63,7 @@ jobs:
         with:
           cli-version: latest
           command: get entries
-          alias: zenhub-dev
+          alias: automotron
           project-id: migratortron
           client-id: ${{ secrets.CONTENSIS_CLIENT_ID }}
           shared-secret: ${{ secrets.CONTENSIS_SHARED_SECRET }}

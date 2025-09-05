@@ -122,7 +122,7 @@ jobs:
           CONTAINER_CONTEXT: 'true'
         run: |
           cd bin
-          ./contensis-cli connect zenhub-dev -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
+          ./contensis-cli connect automotron -p migratortron -id ${{ secrets.CONTENSIS_CLIENT_ID }} -s ${{ secrets.CONTENSIS_SHARED_SECRET }}
           ./contensis-cli get entries
 
       - name: Rename executable to include platform
