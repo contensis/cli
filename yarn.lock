@@ -3050,7 +3050,7 @@ __metadata:
     inquirer-command-prompt: "npm:^0.1.0"
     keytar: "npm:^7.9.0"
     lodash: "npm:^4.17.21"
-    migratortron: "npm:^1.0.0-beta.75"
+    migratortron: "npm:^1.0.0-beta.76"
     nanospinner: "npm:^1.2.0"
     node-fetch: "npm:^2.6.7"
     nodemon: "npm:^2.0.18"
@@ -7159,7 +7159,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"migratortron@npm:^1.0.0-beta.75, migratortron@workspace:packages/migratortron-1000":
+"migratortron@npm:^1.0.0-beta.76, migratortron@workspace:packages/migratortron-1000":
   version: 0.0.0-use.local
   resolution: "migratortron@workspace:packages/migratortron-1000"
   dependencies:
