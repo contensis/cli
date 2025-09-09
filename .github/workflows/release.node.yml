@@ -46,7 +46,7 @@ jobs:
           echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
 
       - id: publish
-        name: Install dependencies, build and set APP_VERSION output variable
+        name: Publish to npm
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag ${{ inputs.tag }} --ignore-scripts --workspace contensis-cli
