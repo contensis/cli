@@ -66,9 +66,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: yarn
 
-      # This was added to set up a local keyring on linux runners to avoid
-      # `[WARN] Could not connect to local keystore - your password could be stored unencrypted!`
-      # but it does not work
+      # # This was added to set up a local keyring on linux runners to avoid
+      # # `[WARN] Could not connect to local keystore - your password could be stored unencrypted!`
+      # # but it does not work
       # - name: Install additional dependencies
       #   if: matrix.os == 'ubuntu-24.04'
       #   run: |
@@ -83,19 +83,23 @@ jobs:
           yarn install --silent --no-immutable
           yarn run build
 
-      - name: Prepare system keyring (Linux)
-        if: matrix.os == 'ubuntu-24.04'
-        run: |
-          echo "Install keyring..."
-          pip3 install --upgrade pip
-          pip3 install keyring
-          echo "Prepare D-Bus session..."
-          export $(dbus-launch)
-          dbus-launch
-          gnome-keyring-daemon --start --daemonize --components=secrets
-          echo 'neil' | gnome-keyring-daemon -r -d --unlock
-          echo "Create a test key using script..."
-          python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
+
+      # # This was added to set up a local keyring on linux runners to avoid
+      # # `[WARN] Could not connect to local keystore - your password could be stored unencrypted!`
+      # # but it does not work
+      # - name: Prepare system keyring (Linux)
+      #   if: matrix.os == 'ubuntu-24.04'
+      #   run: |
+      #     echo "Install keyring..."
+      #     pip3 install --upgrade pip
+      #     pip3 install keyring
+      #     echo "Prepare D-Bus session..."
+      #     export $(dbus-launch)
+      #     dbus-launch
+      #     gnome-keyring-daemon --start --daemonize --components=secrets
+      #     echo 'neil' | gnome-keyring-daemon -r -d --unlock
+      #     echo "Create a test key using script..."
+      #     python -c "import keyring;keyring.set_password('system', 'login', 'pwd');"
 
       - name: Build Windows executable and get app version
         if: matrix.os == 'windows-2022'
