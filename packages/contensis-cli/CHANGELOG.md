@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.0](https://github.com/contensis/cli/compare/contensis-cli-v1.4.1...contensis-cli-v1.5.0) (2025-09-09)
+
+
+### Features
+
+* bump canvas package versions for latest features ([a444377](https://github.com/contensis/cli/commit/a44437798501a5ff640fcb99c3f17dc9e2b9cdcd))
+* support for tags and tag groups ([935aeec](https://github.com/contensis/cli/commit/935aeec68af5afd12c8b35e44a157b4047ac2b7a))
+
+
+### Bug Fixes
+
+* always look to resolve "latest" entries in a target environment when importing entries ([eb74bce](https://github.com/contensis/cli/commit/eb74bce59566665e3f35fb3196e947f5efd61bfc))
+* console errors and logging tweaks when importing entries ([b5aecf8](https://github.com/contensis/cli/commit/b5aecf80afac8b79113e218331f706713f219b7b))
+* duplicated projects in shell autocomplete after recent change to projects structure held in `environments.json` cache ([84d895f](https://github.com/contensis/cli/commit/84d895f51a672b3cf09ed01350245c8c4772568d))
+* resolve shared options in `list tags in` sub-command ([835ca09](https://github.com/contensis/cli/commit/835ca0936364cf7c1d35c4c48b4c734c04b2f533))
+
 ## [1.4.1](https://github.com/contensis/cli/compare/contensis-cli-v1.4.0...contensis-cli-v1.4.1) (2025-03-04)
 
 
