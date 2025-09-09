@@ -207,12 +207,19 @@ Example call:
         > list tags in example
       `
     )
-    .action(async (groupId: string, opts) => {
+    .action(async (groupId: string, opts, cmd) => {
+      // workaround for shared options being always unavailable
+      // read the (shared) options that were parsed by the parent cmd
+      // https://github.com/tj/commander.js/issues/476#issuecomment-1675757628
+      const parentOptions = cmd.optsWithGlobals();
+
       await cliCommand(['list', 'tags', 'in'], {
         ...opts,
+        ...parentOptions,
         groupId,
       }).PrintTags({
         ...opts,
+        ...parentOptions,
         groupId,
       });
     });
