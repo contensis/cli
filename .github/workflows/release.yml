@@ -33,4 +33,4 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/build.exe.yml
     with:
-      release: ${{ github.event_name == 'release' }}
+      release: ${{ github.event_name == 'release' || inputs.tag }}

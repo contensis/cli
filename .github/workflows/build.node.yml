@@ -11,7 +11,6 @@ jobs:
   build:
     name: Build, test and publish
     runs-on: ubuntu-24.04
-    # if: startsWith(github.event.head_commit.message, 'docs:') != true && contains(github.ref_name, github.event.head_commit.message) != true
 
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +25,6 @@ jobs:
           cache: yarn
 
       - name: Install dependencies, build and package
-        if: contains(github.event.head_commit.message, '[nobuild]') != true
         run: |
           yarn install --silent --inline-builds --no-immutable
           yarn run build
@@ -34,7 +32,6 @@ jobs:
           npm pack
 
       # - name: Test install and run some cli commands
-      #   if: contains(github.event.head_commit.message, '[nobuild]') != true
       #   env:
       #     CMSG: ${{ toJSON(github.event.head_commit.message) }}
       #   run: |
@@ -64,7 +61,7 @@ jobs:
           echo "npm_tag=${{ steps.release.outputs.releases_created != 'true' && 'prerelease' || 'latest' }}" >> $GITHUB_OUTPUT
 
       - name: Increment prerelease package version and build package
-        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')
+        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nopublish]')
         run: |
           cd packages/contensis-cli
           npm version prerelease --preid=beta --no-git-tag-version
@@ -73,7 +70,7 @@ jobs:
           echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
       - name: Push prerelease version increment to GIT
-        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')
+        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nopublish]')
         run: |
           git config user.email "github@zengenti.com"
           git config user.name "$GITHUB_ACTOR"
@@ -85,7 +82,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish prerelease with ${{ steps.check.outputs.npm_tag }} tag
-        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nobuild]') && !contains(github.event.head_commit.message, '[nopublish]')
+        if: steps.release.outputs.releases_created != 'true' && !contains(github.event.head_commit.message, '[nopublish]')
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag ${{ steps.check.outputs.npm_tag }} --ignore-scripts --workspace contensis-cli
