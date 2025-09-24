@@ -167,8 +167,11 @@ class ContensisCli {
     }
 
     this.format = outputOpts?.format;
-    this.output =
-      outputOpts?.output && path.join(process.cwd(), outputOpts.output);
+    this.output = outputOpts?.output
+      ? path.isAbsolute(outputOpts.output)
+        ? outputOpts.output
+        : path.join(process.cwd(), outputOpts.output)
+      : undefined;
 
     const currentEnvironment = outputOpts?.alias || this.currentEnv;
     const environments = this.cache.environments || {};
