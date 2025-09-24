@@ -51,6 +51,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   includeDefaults: opts.defaults, // arg is inverted automatically from `--no-defaults` to `defaults: false`
   concurrency: opts.concurrency ? Number(opts.concurrency) : undefined,
   noPublish: !opts.publish, // arg is inverted automatically from `--no-publish` to `publish: false`
+  outputLogs: opts.logLevel,
 });
 
 /* Output options */
@@ -160,6 +161,13 @@ export const ignoreErrors = new Option(
   'commit the import ignoring any reported errors'
 ).default(false);
 
+export const logLevel = new Option(
+  '-ll --log-level <logLevel>',
+  'set the logging level to output more detailed logs'
+)
+  .choices(['debug', 'info', 'warning', 'error', 'none'])
+  .default('warning');
+
 export const outputDetail = new Option(
   '-od --output-detail <outputDetail>',
   'how much detail to output from the import'
@@ -209,6 +217,7 @@ export const addImportOptions = (program: Command) => {
 
 export const addGlobalOptions = (program: Command) => {
   for (const command of program.commands) {
+    command.addOption(logLevel.hideHelp());
     addOutputAndFormatOptions(command);
     addConnectOptions(command);
     addAuthenticationOptions(command);
