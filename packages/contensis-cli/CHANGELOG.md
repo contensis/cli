@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.0](https://github.com/contensis/cli/compare/contensis-cli-v1.5.0...contensis-cli-v1.6.0) (2025-09-24)
+
+
+### Features
+
+* add `--log-level` global option to increase logging verbosity in many commands ([8538b15](https://github.com/contensis/cli/commit/8538b15e0ed9a3524418416fa656876319d0a887))
+
+
+### Bug Fixes
+
+* avoid duplicate error logging in import commands ([0ec27a5](https://github.com/contensis/cli/commit/0ec27a5d13f3e7179c9825480b19920028744e49))
+* import tag groups mixed with content models when using `--from-file` in `import models` ([bcd6c11](https://github.com/contensis/cli/commit/bcd6c11e4da1e0807156048f4088ddc73a0b0ac4))
+* improve console output when there are no changes to make in `import tags` and `import entries` ([7a4ad75](https://github.com/contensis/cli/commit/7a4ad753b1acfa91fd43d203927500aee68f8efd))
+* include tag groups in `list models` output ([759f8a2](https://github.com/contensis/cli/commit/759f8a24615e1c916c717e00f51c7c284e7fc9dd))
+* supplying absolute file path when using `--output` option ([78e4e87](https://github.com/contensis/cli/commit/78e4e87254c916b916ed3837d6411456b439e238))
+
 ## [1.5.0](https://github.com/contensis/cli/compare/contensis-cli-v1.4.1...contensis-cli-v1.5.0) (2025-09-09)
 
 
