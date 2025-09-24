@@ -273,8 +273,8 @@ export const printEntriesMigrateResult = (
     console.log(
       `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
     );
-    for (const error of migrateResult.errors)
-      log.error(error.message, null, '');
+    // for (const error of migrateResult.errors)
+    //   log.error(error.message, null, '');
   }
 };
 
