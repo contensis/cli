@@ -2132,7 +2132,7 @@ The required inputs for using `copy field` are:
 - `fieldId`: the field id containing the source data
 - `destinationId`: the target field id where the data will be copied to
 
-Copying field data from one field to another can only be done with fields that exist in the content type, and with the source and destination field types are metioned in the [transformation matrix](docs/copy_field_transformation_matrix.md)
+Copying field data from one field to another can only be done with fields that exist in the content type, and with the source and destination field types are metioned in the [transformation matrix](https://github.com/contensis/cli/blob/main/packages/contensis-cli/docs/copy_field_transformation_matrix.md)
 
 Similar to the `import` commands, the `copy` command is safe to run again and again for testing and reviewing the output. The changes are made to the entries permanently when the `--commit` option is added.
 
@@ -2254,7 +2254,7 @@ Adding a template containing html? Attributes can be wrapped in single quotes.
 
 Escape characters and new lines can be introduced inside templates when calling `contensis copy field` from your system shell as a cli command. This is OS/shell dependent and does not work in the Contensis shell (due to the combined layers of command parsing)
 
-Further documentation on using [templates](docs/copy_field_templates.md)
+Further documentation on using [templates](https://github.com/contensis/cli/blob/main/packages/contensis-cli/docs/copy_field_templates.md)
 
 ### Copy a hard-coded entry link into a field using a template
 
