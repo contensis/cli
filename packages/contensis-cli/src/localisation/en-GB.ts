@@ -246,6 +246,7 @@ export const LogMessages = {
       `[${env}] ${commit ? `Deleted` : `Will delete`} entries`,
     failedRemove: (env: string) => `[${env}] Unable to delete entries`,
     notFound: (env: string) => `[${env}] Entries were not found`,
+    noChange: (env: string) => `[${env}] No changes to be made`,
   },
   keys: {
     list: (env: string) => `[${env}] API keys:`,
@@ -396,6 +397,7 @@ export const LogMessages = {
       }`,
     failedRemove: (env: string, length: number) =>
       `[${env}] Unable to delete tags with ${pl('error', length)}`,
+    noChange: (env: string) => `[${env}] No changes to be made`,
   },
   blocks: {
     runningStatus: (status: BlockRunningStatus | 'broken') => {

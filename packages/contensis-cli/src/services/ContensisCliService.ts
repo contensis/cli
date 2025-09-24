@@ -1463,13 +1463,22 @@ class ContensisCli {
           log.help(messages.migrate.commitTip());
         }
       } else {
-        log.error(
-          messages.tags.failedCreate(
-            currentEnv,
-            data?.length === 1 ? data?.[0].label['en-GB'] : undefined
-          ),
-          err
-        );
+        const noChanges =
+          result?.tagsToMigrate?.[currentProject]?.['no change'] &&
+          result.tagsToMigrate[currentProject].totalCount === 0 &&
+          result.groupsToMigrate[currentProject].totalCount === 0;
+
+        if (noChanges && !err && !result.errors?.length) {
+          log.help(messages.tags.noChange(currentEnv));
+        } else {
+          log.error(
+            messages.tags.failedCreate(
+              currentEnv,
+              data?.length === 1 ? data?.[0].label['en-GB'] : undefined
+            ),
+            err
+          );
+        }
       }
     } else {
       log.warning(messages.models.noList(currentProject));
@@ -2412,9 +2421,24 @@ class ContensisCli {
           log.help(messages.migrate.commitTip());
         }
       } else {
-        log.error(messages.entries.failedImport(currentEnv), err);
-        if (!result?.entriesToMigrate?.[currentProject]?.totalCount)
-          log.help(messages.entries.notFound(currentEnv));
+        const noChanges =
+          Object.values(result?.entriesToMigrate?.[currentProject]).every(
+            status =>
+              typeof status === 'number' || (status['no change'] || 0) > 0
+          ) && result.entriesToMigrate[currentProject].totalCount === 0;
+
+        if (
+          noChanges &&
+          !err &&
+          !result?.migrateResult?.errors &&
+          !result?.nodesResult?.errors
+        ) {
+          log.help(messages.entries.noChange(currentEnv));
+        } else {
+          log.error(messages.entries.failedImport(currentEnv), err);
+          if (!result?.entriesToMigrate?.[currentProject]?.totalCount)
+            log.help(messages.entries.notFound(currentEnv));
+        }
       }
     } else {
       log.warning(messages.models.noList(currentProject));
