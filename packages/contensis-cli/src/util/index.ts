@@ -1,3 +1,4 @@
+import { ContentType, Component } from 'contensis-core-api';
 import { ICreateTag, ICreateTagGroup } from 'contensis-management-api';
 import mergeWith from 'lodash/mergeWith';
 import { Logger } from './logger';
@@ -50,6 +51,19 @@ export const splitTagsAndGroups = (
     if (isObject(item) && 'id' in item) {
       if ('name' in item) groups.push(item as ICreateTagGroup);
       else tags.push(item as ICreateTag);
+    }
+  }
+};
+
+export const splitTagGroupsInModels = (
+  mixedData: unknown[] = [],
+  models: (ContentType | Component)[] = [],
+  groups: ICreateTagGroup[] = []
+) => {
+  for (const item of mixedData) {
+    if (isObject(item) && 'id' in item) {
+      if (!('dataFormat' in item)) groups.push(item as ICreateTagGroup);
+      else models.push(item as ContentType | Component);
     }
   }
 };

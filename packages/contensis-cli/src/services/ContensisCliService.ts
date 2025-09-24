@@ -38,7 +38,7 @@ import { readFileAsJSON } from '~/providers/file-provider';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import CredentialProvider from '~/providers/CredentialProvider';
 
-import { splitTagsAndGroups, url } from '~/util';
+import { splitTagGroupsInModels, splitTagsAndGroups, url } from '~/util';
 import { sanitiseIds } from '~/util/api-ids';
 import {
   isPassword,
@@ -1839,16 +1839,25 @@ class ContensisCli {
   }) => {
     const { currentProject, log, messages } = this;
 
-    const fileData = fromFile
-      ? (await readFileAsJSON<(ContentType | Component)[]>(fromFile)) || []
-      : [];
-    if (typeof fileData === 'string')
-      throw new Error(`Import file format must be of type JSON`);
+    const mixedData: {
+      models: (ContentType | Component)[];
+      tagGroups: ICreateTagGroup[];
+    } = { models: [], tagGroups: [] };
+
+    if (fromFile) {
+      // File may contain mix of content types, components and tag groups, separate those here
+      const fileData = fromFile ? (await readFileAsJSON(fromFile)) || [] : [];
+      splitTagGroupsInModels(fileData, mixedData.models, mixedData.tagGroups);
+    }
+    // const fileData = fromFile
+    //   ? (await readFileAsJSON<(ContentType | Component | TagGroup)[]>(fromFile)) || []
+    //   : [];
+    // if (typeof fileData === 'string')
+    //   throw new Error(`Import file format must be of type JSON`);
 
     const contensis = await this.ConnectContensisImport({
       commit,
-      fromFile,
-      importDataType: 'models',
+      mixedData,
     });
 
     if (contensis) {
@@ -1874,6 +1883,10 @@ class ContensisCli {
             if (!result.components) log.info(`- None returned\n`);
             else printModelMigrationAnalysis(this, result.components);
 
+            if (result.tagGroups && Object.keys(result.tagGroups).length) {
+              log.raw(log.boldText(`\nTag Groups:`));
+              printModelMigrationAnalysis(this, result.tagGroups);
+            }
             if (result.defaults && Object.keys(result.defaults).length) {
               log.raw(log.boldText(`\nDefaults:`));
               printModelMigrationAnalysis(this, result.defaults);
@@ -1903,6 +1916,17 @@ class ContensisCli {
               printModelMigrationResult(
                 this,
                 modelsResult[currentProject].components
+              );
+            }
+            if (
+              Object.values(modelsResult[currentProject].tagGroups || {}).some(
+                r => r.length > 0
+              )
+            ) {
+              log.raw(log.boldText(`\nTag Groups:`));
+              printModelMigrationResult(
+                this,
+                modelsResult[currentProject].tagGroups
               );
             }
             if (
