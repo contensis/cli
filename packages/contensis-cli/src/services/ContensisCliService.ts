@@ -1693,6 +1693,7 @@ class ContensisCli {
       const models = await contensis.models.contentModels();
       const contentTypes = await contensis.models.contentTypes();
       const components = await contensis.models.components();
+      const tagGroups = await contensis.models.tagGroups();
 
       // Models to output to console
       const returnModels = modelIds?.length
@@ -1700,11 +1701,11 @@ class ContensisCli {
             modelIds.some(id => id.toLowerCase() === m.id.toLowerCase())
           )
         : undefined;
-      const exportResources: (ContentType | Component)[] = [];
+      const exportResources: (ContentType | Component | TagGroup)[] = [];
 
       if (opts.export) {
-        // Generate a list of contentTypeIds and componentIds from all models
-        // and dependencies
+        // Generate a list of contentTypeIds, componentIds and tagGroupIds from all models
+        // and their dependencies
         const contentTypeIds = Array.from(
           new Set([
             ...(returnModels || models || []).map(m => m.id),
@@ -1720,9 +1721,16 @@ class ContensisCli {
               .flat()
           )
         );
+        const tagGroupIds = Array.from(
+          new Set(
+            (returnModels || models || [])
+              .map(m => m.dependencies?.tagGroups?.map(g => g[0]) || [])
+              .flat()
+          )
+        );
 
-        // Create an array of all the content types and component definitions
-        // we will use this when outputting to a file
+        // Create an array of all the content types, component and tag group
+        // definitions, we will use this when outputting to a file
         exportResources.push(
           ...contentTypes.filter(c =>
             contentTypeIds
@@ -1731,6 +1739,9 @@ class ContensisCli {
           ),
           ...components.filter(c =>
             componentIds.map(i => i.toLowerCase()).includes(c.id.toLowerCase())
+          ),
+          ...tagGroups.filter(g =>
+            tagGroupIds.map(i => i.toLowerCase()).includes(g.id.toLowerCase())
           )
         );
       }
@@ -1772,17 +1783,23 @@ class ContensisCli {
               for (const model of models) {
                 const components = model.components?.length || 0;
                 const contentTypes = model.contentTypes?.length || 0;
+                const tagGroups = model.tagGroups?.length || 0;
                 const defaults =
                   (model.defaults?.length || 0) + (model.nodes?.length || 0);
                 const dependencies =
                   (model.dependencies?.components?.length || 0) +
-                  (model.dependencies?.contentTypes?.length || 0);
+                  (model.dependencies?.contentTypes?.length || 0) +
+                  (model.dependencies?.tagGroups?.length || 0);
                 const dependencyOf =
                   (model.dependencyOf?.components?.length || 0) +
                   (model.dependencyOf?.contentTypes?.length || 0);
 
                 const hasAny =
-                  components + contentTypes + dependencies + dependencyOf;
+                  components +
+                  contentTypes +
+                  tagGroups +
+                  dependencies +
+                  dependencyOf;
                 log.raw(
                   `  - ${log.highlightText(log.boldText(model.id))} ${
                     hasAny
@@ -1793,6 +1810,8 @@ class ContensisCli {
                             contentTypes
                               ? `contentTypes: ${contentTypes}, `
                               : ''
+                          }${
+                            tagGroups ? `tagGroups: ${tagGroups}, ` : ''
                           }${defaults ? `defaults: ${defaults}, ` : ''}${
                             dependencies ? `references: ${dependencies}, ` : ''
                           }${
