@@ -52,6 +52,12 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   concurrency: opts.concurrency ? Number(opts.concurrency) : undefined,
   noPublish: !opts.publish, // arg is inverted automatically from `--no-publish` to `publish: false`
   outputLogs: opts.logLevel,
+  stopLevel:
+    typeof opts.stopLevel === 'number'
+      ? Number(opts.stopLevel)
+      : typeof opts.dependents === 'number'
+        ? Number(opts.dependents)
+        : undefined,
 });
 
 /* Output options */
@@ -194,6 +200,11 @@ export const noPublish = new Option(
   '--no-publish',
   "don't publish created or updated entries"
 );
+
+export const stopLevel = new Option(
+  '-d --stop-level <stopLevel>',
+  'the level at which to stop resolving dependent entries (may result in incomplete entries)'
+).argParser(parseInt);
 
 export const addConnectOptions = (program: Command) =>
   program.addOption(alias.hideHelp()).addOption(project.hideHelp());

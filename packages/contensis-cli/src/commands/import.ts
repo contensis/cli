@@ -13,6 +13,7 @@ import {
   noPublish,
   outputDetail,
   saveEntries,
+  stopLevel,
   versionStatus,
   zenql,
 } from './globalOptions';
@@ -39,6 +40,7 @@ export const makeImportCommand = () => {
       '-preserve --preserve-guids',
       'import any default entries or nodes using the same id as the source'
     )
+    .addOption(ignoreErrors)
     .addHelpText(
       'after',
       `
@@ -131,6 +133,7 @@ Example call:
     .addOption(assetTypes)
     .addOption(latest)
     .addOption(versionStatus)
+    .addOption(stopLevel)
     .addOption(commit)
     .option(
       '-preserve --preserve-guids',
@@ -275,7 +278,7 @@ Example call:
       > import tags --from-file myImportData.json --preserve-guids
     `
     )
-    .action(async (opts) => {
+    .action(async opts => {
       await cliCommand(
         ['import', 'tags'],
         opts,
