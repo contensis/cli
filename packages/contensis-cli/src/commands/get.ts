@@ -315,9 +315,16 @@ Example call:
         'get entries with the search phrase, use quotes for multiple words'
       )
       .addOption(contentTypes)
-      .option(
-        '-d --dependents',
-        'find and return any dependencies of all found entries'
+      .addOption(
+        new Option(
+          '-d --dependents [depth]',
+          'find and return any dependencies of all found entries (optionally limit the number of dependency levels)'
+        ).argParser(value => {
+          // If value is undefined, treat as boolean true
+          if (value === undefined) return true;
+          const num = Number(value);
+          return isNaN(num) ? true : num;
+        })
       )
   )
     .addOption(

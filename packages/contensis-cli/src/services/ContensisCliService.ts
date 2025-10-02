@@ -1857,7 +1857,7 @@ class ContensisCli {
 
     const contensis = await this.ConnectContensisImport({
       commit,
-      mixedData,
+      mixedData: mixedData.models.length ? mixedData : undefined,
     });
 
     if (contensis) {
@@ -2036,6 +2036,7 @@ class ContensisCli {
         );
         // print the results to console
         await this.HandleFormattingAndOutput(result, log.object);
+        if (!commit) log.help(messages.migrate.commitTip());
       }
     }
   };
@@ -2097,6 +2098,7 @@ class ContensisCli {
         );
         await this.HandleFormattingAndOutput(result, log.object);
       }
+      if (!commit) log.help(messages.migrate.commitTip());
     }
   };
 
@@ -2227,6 +2229,8 @@ class ContensisCli {
         );
         // print the results to console
         await this.HandleFormattingAndOutput(result, log.object);
+
+        if (!commit) log.help(messages.migrate.commitTip());
       }
     }
   };
@@ -2288,6 +2292,7 @@ class ContensisCli {
         );
         await this.HandleFormattingAndOutput(result, log.object);
       }
+      if (!commit) log.help(messages.migrate.commitTip());
     }
   };
 
