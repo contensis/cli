@@ -28,17 +28,17 @@ import {
 import ContensisAuthService from './ContensisAuthService';
 
 import { LogMessages } from '~/localisation/en-GB';
+import { MixedFileData } from '~/mappers/MixedFileData';
 import {
   CliUrls,
   OutputFormat,
   OutputOptionsConstructorArg,
 } from '~/models/CliService';
 
-import { readFileAsJSON } from '~/providers/file-provider';
 import SessionCacheProvider from '../providers/SessionCacheProvider';
 import CredentialProvider from '~/providers/CredentialProvider';
 
-import { splitTagGroupsInModels, splitTagsAndGroups, url } from '~/util';
+import { url } from '~/util';
 import { sanitiseIds } from '~/util/api-ids';
 import {
   isPassword,
@@ -66,16 +66,6 @@ import { logError, Logger } from '~/util/logger';
 import { promiseDelay } from '~/util/timers';
 import { GetTagsArgs } from 'migratortron/dist/services/TagsMigrationService';
 import { GetTagGroupsArgs } from 'migratortron/dist/services/TagGroupsMigrationService';
-
-type ImportDataType =
-  | 'entries'
-  | 'contentTypes'
-  | 'components'
-  | 'models'
-  | 'nodes'
-  | 'tagGroups'
-  | 'tags'
-  | 'user-input';
 
 let insecurePasswordWarningShown = false;
 
@@ -344,27 +334,21 @@ class ContensisCli {
 
   ConnectContensisImport = async ({
     commit = false,
+    noSource = false,
     fromFile,
-    importDataType,
     importData,
-    mixedData,
   }: {
     commit?: boolean;
+    noSource?: boolean;
     fromFile?: string;
-    importDataType?: ImportDataType;
-    importData?: any[];
-    mixedData?: {
-      [K in ImportDataType]?: any[];
-    };
+    importData?: MixedFileData;
   }) => {
-    const source: 'contensis' | 'file' =
-      fromFile || importData || mixedData ? 'file' : 'contensis';
+    const source: 'contensis' | 'user-input' =
+      fromFile || importData || noSource ? 'user-input' : 'contensis';
 
-    const fileData =
-      importData || (fromFile ? (await readFileAsJSON(fromFile)) || [] : []);
-
-    if (typeof fileData === 'string')
-      throw new Error(`Import file format must be of type JSON`);
+    const mixedData = fromFile
+      ? await new MixedFileData().readFile(fromFile)
+      : importData;
 
     const { contensisOpts, currentEnv, env, log, messages, sourceAlias } = this;
     const environments = this.cache.environments || {};
@@ -405,7 +389,7 @@ class ContensisCli {
       const cachedTargetPassword = targetCredentials?.current?.password;
 
       if (cachedSourcePassword && cachedTargetPassword) {
-        if (source === 'file' || importDataType === 'user-input') {
+        if (source === 'user-input') {
           this.contensis = new ContensisMigrationService(
             {
               concurrency: 2,
@@ -420,7 +404,6 @@ class ContensisCli {
                 targetProjects: [env.currentProject || ''],
                 assetHostname: this.urls?.previewWeb,
               },
-              ...(importDataType ? { [importDataType]: fileData } : {}),
               ...(mixedData || {}),
             },
             !commit
@@ -1175,14 +1158,17 @@ class ContensisCli {
   }) => {
     const { currentEnv, currentProject, log, messages } = this;
 
+    let importData;
+    if (tags) {
+      importData = new MixedFileData();
+      importData.tags = tags;
+      importData.tagGroups = data || [];
+    }
+
     const contensis = await this.ConnectContensisImport({
       commit,
       fromFile,
-      importDataType: tags ? 'user-input' : 'tagGroups',
-      mixedData: {
-        tagGroups: data,
-        tags: tags,
-      },
+      importData,
     });
 
     if (contensis) {
@@ -1304,10 +1290,7 @@ class ContensisCli {
       });
 
       if (Array.isArray(result)) {
-        let tags: ICreateTag[] = [];
-        const groups: ICreateTagGroup[] = [];
-        if (withDependents) splitTagsAndGroups(result, tags, groups);
-        else tags = result;
+        const { tags, tagGroups } = new MixedFileData(result);
 
         log.success(messages.tags.list(currentEnv, tags.length));
 
@@ -1318,11 +1301,13 @@ class ContensisCli {
               log.raw('');
               log.object(tag);
             }
-            if (groups.length) {
+            if (tagGroups.length) {
               log.raw('');
-              log.success(messages.taggroups.list(currentEnv, groups.length));
+              log.success(
+                messages.taggroups.list(currentEnv, tagGroups.length)
+              );
 
-              for (const group of groups) {
+              for (const group of tagGroups) {
                 log.raw('');
                 log.object(group);
               }
@@ -1346,25 +1331,22 @@ class ContensisCli {
       });
 
       if (Array.isArray(result)) {
-        let tags: Tag[] = [];
-        const groups: TagGroup[] = [];
-        if (withDependents) splitTagsAndGroups(result, tags, groups);
-        else tags = result;
+        const { tags, tagGroups } = new MixedFileData(result);
         log.success(messages.tags.list(currentEnv, tags.length));
 
         if (!tags.length) log.help(messages.tags.noneExist());
 
         await this.HandleFormattingAndOutput(result, () => {
           // print the tags to console
-          for (const { version, ...tag } of tags) {
+          for (const { version, ...tag } of tags as Tag[]) {
             log.raw('');
             log.object(tag);
           }
-          if (groups.length) {
+          if (tagGroups.length) {
             log.raw('');
-            log.success(messages.taggroups.list(currentEnv, groups.length));
+            log.success(messages.taggroups.list(currentEnv, tagGroups.length));
 
-            for (const { version, ...group } of groups) {
+            for (const { version, ...group } of tagGroups as TagGroup[]) {
               log.raw('');
               log.object(group);
             }
@@ -1391,30 +1373,23 @@ class ContensisCli {
   }) => {
     const { currentEnv, currentProject, log, messages } = this;
 
-    const mixedData: {
-      tags: ICreateTag[];
-      tagGroups: ICreateTagGroup[];
-    } = { tags: [], tagGroups: [] };
+    let importData;
 
     if (data) {
-      mixedData.tags = data;
-      mixedData.tagGroups = [...new Set(data.map(t => t.groupId))].map(
+      importData = new MixedFileData();
+      importData.tags = data;
+      importData.tagGroups = [...new Set(data.map(t => t.groupId))].map(
         id =>
           ({
             id,
           }) as ICreateTagGroup
       );
     }
-    if (fromFile) {
-      // File may contain mix of tags and tag groups, separate those here
-      const fileData = fromFile ? (await readFileAsJSON(fromFile)) || [] : [];
-      splitTagsAndGroups(fileData, mixedData.tags, mixedData.tagGroups);
-    }
 
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'tags',
-      mixedData,
+      fromFile,
+      importData,
     });
 
     if (contensis) {
@@ -1492,7 +1467,7 @@ class ContensisCli {
     this.contensisOpts.concurrency = 1;
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input', // 'user-input' import type does not require a source cms
+      noSource: true,
     });
     if (contensis) {
       log.line();
@@ -1839,25 +1814,9 @@ class ContensisCli {
   }) => {
     const { currentProject, log, messages } = this;
 
-    const mixedData: {
-      models: (ContentType | Component)[];
-      tagGroups: ICreateTagGroup[];
-    } = { models: [], tagGroups: [] };
-
-    if (fromFile) {
-      // File may contain mix of content types, components and tag groups, separate those here
-      const fileData = fromFile ? (await readFileAsJSON(fromFile)) || [] : [];
-      splitTagGroupsInModels(fileData, mixedData.models, mixedData.tagGroups);
-    }
-    // const fileData = fromFile
-    //   ? (await readFileAsJSON<(ContentType | Component | TagGroup)[]>(fromFile)) || []
-    //   : [];
-    // if (typeof fileData === 'string')
-    //   throw new Error(`Import file format must be of type JSON`);
-
     const contensis = await this.ConnectContensisImport({
       commit,
-      mixedData: mixedData.models.length ? mixedData : undefined,
+      fromFile,
     });
 
     if (contensis) {
@@ -2013,7 +1972,7 @@ class ContensisCli {
     const { currentProject, log, messages } = this;
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input', // 'user-input' import type does not require a source cms
+      noSource: true,
     });
     if (contensis) {
       const [err, result] = await contensis.DeleteContentTypes(contentTypeIds);
@@ -2053,23 +2012,18 @@ class ContensisCli {
   ) => {
     const { currentProject, log, messages } = this;
 
-    let fileData = fromFile
-      ? (await readFileAsJSON<ContentType[]>(fromFile)) || []
-      : [];
-    if (typeof fileData === 'string')
-      throw new Error(`Import file format must be of type JSON`);
-
-    if (!Array.isArray(fileData)) fileData = [fileData];
+    let importData;
+    if (fromFile) importData = await new MixedFileData().readFile(fromFile);
 
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: fromFile ? 'user-input' : undefined,
+      noSource: !!fromFile,
     });
 
     if (contensis) {
       if (fromFile)
         // Pass each content type to the target repo
-        for (const contentType of fileData) {
+        for (const contentType of importData.models) {
           // Fix invalid data
           contentType.projectId = currentProject;
           delete contentType.uuid;
@@ -2112,22 +2066,16 @@ class ContensisCli {
   ) => {
     const { log } = this;
 
-    let fileData = fromFile
-      ? (await readFileAsJSON<ContentType[]>(fromFile)) || []
-      : [];
-    if (typeof fileData === 'string')
-      throw new Error(`Import file format must be of type JSON`);
+    let importData;
+    if (fromFile) importData = await new MixedFileData().readFile(fromFile);
 
-    if (!Array.isArray(fileData)) fileData = [fileData];
-
-    const contensis = await this.ConnectContensisImport({
-      fromFile,
-      importDataType: 'models',
-    });
+    const contensis = await this.ConnectContensisImport({ fromFile });
 
     if (contensis) {
       const [err, result] = (await to(
-        contensis.models.Diff(fileData.length ? fileData : modelIds)
+        contensis.models.Diff(
+          importData.models.length ? importData.models : modelIds
+        )
       )) as [Error | null, ContentTypesResult | undefined];
 
       if (err) log.error(err.message, err);
@@ -2201,10 +2149,12 @@ class ContensisCli {
 
   RemoveComponents = async (componentIds: string[], commit = false) => {
     const { currentProject, log, messages } = this;
+
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input', // 'user-input' import type does not require a source cms
+      noSource: true,
     });
+
     if (contensis) {
       const [err, result] = await contensis.DeleteContentTypes(
         undefined,
@@ -2247,23 +2197,18 @@ class ContensisCli {
   ) => {
     const { currentProject, log, messages } = this;
 
-    let fileData = fromFile
-      ? (await readFileAsJSON<Component[]>(fromFile)) || []
-      : [];
-    if (typeof fileData === 'string')
-      throw new Error(`Import file format must be of type JSON`);
-
-    if (!Array.isArray(fileData)) fileData = [fileData];
+    let importData;
+    if (fromFile) importData = await new MixedFileData().readFile(fromFile);
 
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: fromFile ? 'user-input' : undefined,
+      noSource: !!fromFile,
     });
 
     if (contensis) {
       // Pass each component to the target repo
       if (fromFile)
-        for (const component of fileData) {
+        for (const component of importData.models) {
           // Fix invalid data
           component.projectId = currentProject;
           delete component.uuid;
@@ -2302,7 +2247,7 @@ class ContensisCli {
     this.contensisOpts.concurrency = 1;
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input', // 'user-input' import type does not require a source cms
+      noSource: true,
     });
 
     if (contensis) {
@@ -2392,11 +2337,13 @@ class ContensisCli {
   }) => {
     const { currentEnv, currentProject, log, messages } = this;
 
+    let importData;
+    if (data) importData = new MixedFileData(data);
+
     const contensis = await this.ConnectContensisImport({
       commit,
       fromFile,
-      importDataType: 'entries',
-      importData: data,
+      importData,
     });
 
     if (contensis) {
@@ -2510,7 +2457,6 @@ class ContensisCli {
     const contensis = await this.ConnectContensisImport({
       commit,
       fromFile,
-      importDataType: 'entries',
     });
 
     if (contensis) {
@@ -2591,7 +2537,6 @@ class ContensisCli {
     const contensis = await this.ConnectContensisImport({
       commit,
       fromFile,
-      importDataType: 'entries',
     });
 
     if (contensis) {
@@ -2698,7 +2643,6 @@ class ContensisCli {
     const contensis = await this.ConnectContensisImport({
       commit,
       fromFile,
-      importDataType: 'nodes',
     });
 
     if (contensis) {
@@ -2773,7 +2717,7 @@ class ContensisCli {
     const { currentEnv, currentProject, log, messages } = this;
     const contensis = await this.ConnectContensisImport({
       commit,
-      importDataType: 'user-input', // 'user-input' import type does not require a source cms
+      noSource: true,
     });
 
     if (contensis) {
