@@ -37,6 +37,10 @@ export const makeImportCommand = () => {
       'ignore any default entries or nodes attached to content types or fields'
     )
     .option(
+      '-nov --no-validations',
+      'import fields with validations removed'
+    )
+    .option(
       '-preserve --preserve-guids',
       'import any default entries or nodes using the same id as the source'
     )

@@ -49,6 +49,7 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   ignoreErrors: opts.ignoreErrors,
   noCache: !opts.cache, // arg is inverted automatically from `--no-cache` to `cache: false`
   includeDefaults: opts.defaults, // arg is inverted automatically from `--no-defaults` to `defaults: false`
+  includeValidations: opts.validations, // arg is inverted automatically from `--no-validations` to `validations: false`
   concurrency: opts.concurrency ? Number(opts.concurrency) : undefined,
   noPublish: !opts.publish, // arg is inverted automatically from `--no-publish` to `publish: false`
   outputLogs: opts.logLevel,
