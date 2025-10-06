@@ -227,10 +227,17 @@ export const LogMessages = {
       `No Contensis environment set, connect to your Contensis cloud instance using "contensis connect {cms alias}"`,
   },
   entries: {
-    imported: (env: string, commit: boolean, entries: number, nodes = 0) =>
+    imported: (
+      env: string,
+      commit: boolean,
+      entries: number,
+      nodes = 0,
+      tags = 0
+    ) =>
       LogMessages.migrate.imported(env, commit, {
         entry: entries,
         node: nodes,
+        tag: tags,
       }),
     failedImport: (env: string) => `[${env}] Unable to import entries`,
     update: {

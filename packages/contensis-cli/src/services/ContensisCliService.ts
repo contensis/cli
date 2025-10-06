@@ -2411,7 +2411,12 @@ class ContensisCli {
               ? (result.nodesResult?.created || 0) +
                   (result.nodesResult?.updated || 0)
               : (result.nodesToMigrate?.[currentProject]
-                  .totalCount as number) || 0
+                  .totalCount as number) || 0,
+            commit
+              ? (result.tagsResult?.created || 0) +
+                  (result.tagsResult?.updated || 0)
+              : (result.tagsToMigrate?.[currentProject].totalCount as number) ||
+                  0
           )
         );
         if (!commit) {
@@ -2429,7 +2434,8 @@ class ContensisCli {
           noChanges &&
           !err &&
           !result?.migrateResult?.errors &&
-          !result?.nodesResult?.errors
+          !result?.nodesResult?.errors &&
+          !result?.tagsResult?.errors
         ) {
           log.help(messages.entries.noChange(currentEnv));
         } else {
