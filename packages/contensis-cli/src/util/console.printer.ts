@@ -140,14 +140,14 @@ export const printEntriesMigrateResult = (
       string,
       any,
     ][]) {
+      const projectStatus = Object.entries(
+        Object.entries(entryStatus[currentProject])[0]
+      )[1][1] as any;
       if (
         showAll ||
         (showChanged &&
-          (
-            Object.entries(
-              Object.entries(entryStatus[currentProject])[0]
-            )[1][1] as any
-          ).status !== 'no change')
+          projectStatus.status !== 'no change' &&
+          projectStatus.status !== 'ignore')
       ) {
         console.log(
           log.infoText(
@@ -215,7 +215,8 @@ export const printEntriesMigrateResult = (
       const existingPercent = ((existingCount / count) * 100).toFixed(0);
       const noChangeOrTotalEntriesCount =
         typeof migrateStatusAndCount !== 'number'
-          ? migrateStatusAndCount?.['no change'] || 0
+          ? (migrateStatusAndCount?.['no change'] || 0) +
+            (migrateStatusAndCount?.['ignore'] || 0)
           : migrateStatusAndCount;
 
       const changedPercentage = (
@@ -434,7 +435,7 @@ export const printModelMigrationAnalysis = (
             )}`;
           if (projectDetails.error)
             errorOutput += `      ${log.highlightText(
-              `error::`
+              `error:`
             )} ${log.errorText(projectDetails.error)}`;
         }
       }
