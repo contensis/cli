@@ -2358,13 +2358,16 @@ class ContensisCli {
 
       if (err) logError(err);
       else {
-        const { entries, nodes } = contensis.content.targets[currentProject];
+        const { entries, nodes, tags } =
+          contensis.content.targets[currentProject];
 
         const output = saveEntries
-          ? // include entries and dependent nodes when saving entries
+          ? // include entries and dependent nodes (or tags) when saving entries
             [
               entries.migrate?.map(me => me.toJSON()) || [],
               nodes.migrateNodes.map(mn => mn.node),
+              tags.migrateTags.map(mt => mt.toJSON()),
+              tags.migrateGroups.map(mg => mg.toJSON()),
             ].flat()
           : result;
         await this.HandleFormattingAndOutput(output, () => {
