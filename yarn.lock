@@ -3245,7 +3245,7 @@ __metadata:
     inquirer-command-prompt: "npm:^0.1.0"
     keytar: "npm:^7.9.0"
     lodash: "npm:^4.17.21"
-    migratortron: "npm:^1.0.0-beta.79"
+    migratortron: "npm:^1.0.0-beta.80"
     nanospinner: "npm:^1.2.0"
     node-fetch: "npm:^2.6.7"
     nodemon: "npm:^2.0.18"
@@ -3470,7 +3470,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:^3.1.2, cross-fetch@npm:^3.2.0":
+"cross-fetch@npm:^3.2.0":
   version: 3.2.0
   resolution: "cross-fetch@npm:3.2.0"
   dependencies:
@@ -4016,16 +4016,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enterprise-fetch@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "enterprise-fetch@npm:1.0.0"
+"enterprise-fetch@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "enterprise-fetch@npm:2.0.1"
   dependencies:
     abort-controller: "npm:^3.0.0"
     await-to-js: "npm:^3.0.0"
-    cross-fetch: "npm:^3.1.2"
-    https-proxy-agent: "npm:^5.0.0"
+    https-proxy-agent: "npm:^7.0.6"
+    node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
-  checksum: 10c0/065a61eb4f11edef7cb5e4842e5f8c9e800097afc5ae42db77dd18acf2e4cb6aa55889f7f93729e28fb76b40114d1c18263bddd98cd57004bd3b2fe27c784108
+    undici: "npm:^7.16.0"
+  checksum: 10c0/a4f8395defe98cf2be2eda7fedce09696694f830d8370d00cfe166354cdcd037dacc4330372b857a8bef93dd4101a3973e6d8806c4baf638db2ae9ea238a7c04
   languageName: node
   linkType: hard
 
@@ -5874,7 +5875,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"https-proxy-agent@npm:^7.0.1":
+"https-proxy-agent@npm:^7.0.1, https-proxy-agent@npm:^7.0.6":
   version: 7.0.6
   resolution: "https-proxy-agent@npm:7.0.6"
   dependencies:
@@ -7388,7 +7389,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"migratortron@npm:^1.0.0-beta.79, migratortron@workspace:packages/migratortron-1000":
+"migratortron@npm:^1.0.0-beta.80, migratortron@workspace:packages/migratortron-1000":
   version: 0.0.0-use.local
   resolution: "migratortron@workspace:packages/migratortron-1000"
   dependencies:
@@ -7416,7 +7417,7 @@ __metadata:
     deep-cleaner: "npm:^1.2.1"
     deep-sort-object: "npm:^1.0.2"
     deepmerge: "npm:^4.3.1"
-    enterprise-fetch: "npm:^1.0.0"
+    enterprise-fetch: "npm:^2.0.1"
     esbuild: "npm:^0.25.9"
     esbuild-node-externals: "npm:^1.18.0"
     esbuild-plugin-d.ts: "npm:^1.3.1"
@@ -11049,6 +11050,13 @@ __metadata:
   version: 7.8.0
   resolution: "undici-types@npm:7.8.0"
   checksum: 10c0/9d9d246d1dc32f318d46116efe3cfca5a72d4f16828febc1918d94e58f6ffcf39c158aa28bf5b4fc52f410446bc7858f35151367bd7a49f21746cab6497b709b
+  languageName: node
+  linkType: hard
+
+"undici@npm:^7.16.0":
+  version: 7.16.0
+  resolution: "undici@npm:7.16.0"
+  checksum: 10c0/efd867792e9f233facf9efa0a087e2d9c3e4415c0b234061b9b40307ca4fa01d945fee4d43c7b564e1b80e0d519bcc682f9f6e0de13c717146c00a80e2f1fb0f
   languageName: node
   linkType: hard
 
