@@ -1440,8 +1440,8 @@ class ContensisCli {
       } else {
         const noChanges =
           result?.tagsToMigrate?.[currentProject]?.['no change'] &&
-          result.tagsToMigrate[currentProject].totalCount === 0 &&
-          result.groupsToMigrate[currentProject].totalCount === 0;
+          result?.tagsToMigrate?.[currentProject].totalCount === 0 &&
+          result?.groupsToMigrate?.[currentProject].totalCount === 0;
 
         if (noChanges && !err && !result.errors?.length) {
           log.help(messages.tags.noChange(currentEnv));
@@ -2425,10 +2425,10 @@ class ContensisCli {
         }
       } else {
         const noChanges =
-          Object.values(result?.entriesToMigrate?.[currentProject]).every(
+          Object.values(result?.entriesToMigrate?.[currentProject] || {}).every(
             status =>
               typeof status === 'number' || (status['no change'] || 0) > 0
-          ) && result.entriesToMigrate[currentProject].totalCount === 0;
+          ) && result?.entriesToMigrate?.[currentProject].totalCount === 0;
 
         if (
           noChanges &&
