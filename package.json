@@ -15,7 +15,7 @@
       "node_modules/figlet/fonts/*"
     ],
     "targets": [
-      "latest"
+      "node22"
     ]
   },
   "scripts": {
@@ -37,6 +37,7 @@
     "@angablue/exe": "2",
     "@eslint/js": "^9.16.0",
     "@types/eslint__js": "^8.42.3",
+    "@yao-pkg/pkg": "^6.10.1",
     "esbuild-plugin-copy": "^2.1.1",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
@@ -44,7 +45,6 @@
     "eslint-plugin-prettier": "^5.2.1",
     "kill-port": "^2.0.1",
     "lerna": "^8.1.9",
-    "pkg": "^5.8.1",
     "prettier": "^3.4.1",
     "rimraf": "^6.0.1",
     "typescript-eslint": "^8.17.0"
