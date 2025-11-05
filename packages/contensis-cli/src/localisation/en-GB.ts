@@ -124,8 +124,11 @@ export const LogMessages = {
       entities: { [noun: string]: number }
     ) =>
       `${commit ? `Imported` : `Will import`} ${Object.entries(entities)
-        .map(([noun, count]) => pl(noun, count, true))
-        .join(' and ')} into ${env} environment`,
+        .map(
+          ([noun, count], i, arr) =>
+            `${i > 0 ? (i === arr.length - 1 ? ' and ' : ', ') : ''}${pl(noun, count, true)}`
+        )
+        .join('')} into ${env} environment`,
 
     models: {
       result: (
