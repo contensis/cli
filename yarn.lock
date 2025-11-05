@@ -3446,7 +3446,7 @@ __metadata:
     inquirer-command-prompt: "npm:^0.1.0"
     keytar: "npm:^7.9.0"
     lodash: "npm:^4.17.21"
-    migratortron: "npm:^1.0.0-beta.81"
+    migratortron: "npm:^1.0.0-beta.82"
     nanospinner: "npm:^1.2.0"
     node-fetch: "npm:^2.6.7"
     nodemon: "npm:^2.0.18"
@@ -5991,13 +5991,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"has@npm:^1.0.3":
-  version: 1.0.4
-  resolution: "has@npm:1.0.4"
-  checksum: 10c0/82c1220573dc1f0a014a5d6189ae52a1f820f99dfdc00323c3a725b5002dcb7f04e44f460fea7af068474b2dd7c88cbe1846925c84017be9e31e1708936d305b
-  languageName: node
-  linkType: hard
-
 "hasown@npm:^2.0.2":
   version: 2.0.2
   resolution: "hasown@npm:2.0.2"
@@ -6447,21 +6440,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-core-module@npm:2.9.0":
-  version: 2.9.0
-  resolution: "is-core-module@npm:2.9.0"
-  dependencies:
-    has: "npm:^1.0.3"
-  checksum: 10c0/056fe4c5f9f383dc1c1b0dc3250c300880b9b1e17e1885077d64a1667926ecc11ba696776597616bfd2fd7f87c7476c01b127a0c842b4821bee2414d0e296e6e
-  languageName: node
-  linkType: hard
-
-"is-core-module@npm:^2.13.0, is-core-module@npm:^2.16.0, is-core-module@npm:^2.16.1, is-core-module@npm:^2.5.0":
-  version: 2.16.1
-  resolution: "is-core-module@npm:2.16.1"
+"is-core-module@npm:2.14.0":
+  version: 2.14.0
+  resolution: "is-core-module@npm:2.14.0"
   dependencies:
     hasown: "npm:^2.0.2"
-  checksum: 10c0/898443c14780a577e807618aaae2b6f745c8538eca5c7bc11388a3f2dc6de82b9902bcc7eb74f07be672b11bbe82dd6a6edded44a00cb3d8f933d0459905eedd
+  checksum: 10c0/ae8dbc82bd20426558bc8d20ce290ce301c1cfd6ae4446266d10cacff4c63c67ab16440ade1d72ced9ec41c569fbacbcee01e293782ce568527c4cdf35936e4c
   languageName: node
   linkType: hard
 
@@ -7636,7 +7620,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"migratortron@npm:^1.0.0-beta.81, migratortron@workspace:packages/migratortron-1000":
+"migratortron@npm:^1.0.0-beta.82, migratortron@workspace:packages/migratortron-1000":
   version: 0.0.0-use.local
   resolution: "migratortron@workspace:packages/migratortron-1000"
   dependencies:
