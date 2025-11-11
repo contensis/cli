@@ -40,12 +40,27 @@ brew install contensis-cli-linux
 Install the package via [`npm`](https://www.npmjs.com/package/contensis-cli) as a global module (requires [Node.js](https://nodejs.org/en/download/))
 
 ```shell
-npm i --global contensis-cli@prerelease
+npm i --global contensis-cli
 ```
 
 If you use `nvm` and are frequently switching your local `node` version it will also switch your global `node_modules` each time, it is recommended use one of the binary installations instead.
 
-## Install from source
+## Try out a prerelease version
+
+You can check the change logs for any upcoming release, there will be an [open pull request](https://github.com/contensis/cli/pulls)
+
+### Executable from build Artifacts
+
+- Click on the latest build pipeline from the [Actions page](https://github.com/contensis/cli/actions)
+- At the bottom there will be Artifacts - download and unzip the correct version for your platform.
+- Run the unzipped executable, you will need to bypass any security warnings or prompts you might encounter.
+
+### Prerelease version from NPM
+
+- `npx contensis-cli@prerelease`
+- Note: your local Node.js version must be a compatible version, today we recommend Node.js v22
+
+## Run from source
 
 Clone the [repository](https://github.com/contensis/cli) and follow the instructions in the [`README`](https://github.com/contensis/cli#readme)
 
