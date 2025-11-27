@@ -16,6 +16,26 @@ if (!globalThis.crypto) {
   globalThis.crypto = crypto.webcrypto;
 }
 
+/** enterprise-fetch v2 uses the native node fetch if available which
+ *  does not work with Management API file uploads correctly,
+ * so we force it to fallback to use the older `node-fetch` implementation
+ * which the Management API is deisgned to work with.
+ * Native fetch shows this when uploading an asset: 
+
+content-length: 17
+
+[object FormData]
+ * where node-fetch show this
+Content-Length: 53427
+
+----------------------------220769149404052112875897
+Content-Disposition: form-data; name="file"; filename="default-meta1.jpg"
+Content-Type: image/jpeg
+
+...binary data...
+*/
+globalThis.fallbackFetch = true;
+
 /**
  * Run cli command or launch shell
  */
