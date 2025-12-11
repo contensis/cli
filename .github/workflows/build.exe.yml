@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x]
-        os: [ubuntu-24.04, windows-2022, macos-13, arm64]
+        os: [ubuntu-24.04, windows-2022, macos-15-intel, arm64]
         include:
           - os: ubuntu-24.04
             friendlyName: Ubuntu x64
@@ -31,7 +31,7 @@ jobs:
             friendlyName: Windows x64
             fileName: win
             exeName: contensis-cli-win.exe
-          - os: macos-13
+          - os: macos-15-intel
             friendlyName: macOS x64
             fileName: mac
             exeName: contensis-cli-mac
@@ -115,7 +115,7 @@ jobs:
         if: matrix.os != 'windows-2022'
         run: |
           yarn run build:exe
-          cd bin && ls -lah
+          cd bin && ls -lah 
           chmod +x contensis-cli
           echo "APP_VERSION=$(./contensis-cli --version)" >> $GITHUB_ENV
 

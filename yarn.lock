@@ -4227,8 +4227,8 @@ __metadata:
   linkType: hard
 
 "enterprise-fetch@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "enterprise-fetch@npm:2.0.1"
+  version: 2.0.2
+  resolution: "enterprise-fetch@npm:2.0.2"
   dependencies:
     abort-controller: "npm:^3.0.0"
     await-to-js: "npm:^3.0.0"
@@ -4236,7 +4236,7 @@ __metadata:
     node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
     undici: "npm:^7.16.0"
-  checksum: 10c0/a4f8395defe98cf2be2eda7fedce09696694f830d8370d00cfe166354cdcd037dacc4330372b857a8bef93dd4101a3973e6d8806c4baf638db2ae9ea238a7c04
+  checksum: 10c0/ef668d919f54e914630631ac24114134e878b3d0f516f6a496c9d7ee81849e7148d9f8d1ef7beda1f7f210497c90938918f3e56c4aa3f78dd63e19edb6d581f6
   languageName: node
   linkType: hard
 

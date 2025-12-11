@@ -6,7 +6,7 @@
       "packages/*"
     ]
   },
-  "main": "packages/contensis-cli/dist/index.js",
+  "main": "packages/contensis-cli/cli.js",
   "bin": {
     "contensis": "./packages/contensis-cli/cli.js"
   },
