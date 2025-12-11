@@ -3436,7 +3436,6 @@ __metadata:
     csv: "npm:^6.3.11"
     dayjs: "npm:^1.11.13"
     diff: "npm:^7.0.0"
-    enterprise-fetch: "npm:^2.0.2"
     esbuild: "npm:^0.24.0"
     esbuild-node-externals: "npm:^1.15.0"
     esbuild-plugin-glob: "npm:^2.2.3"
@@ -4227,7 +4226,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enterprise-fetch@npm:^2.0.1, enterprise-fetch@npm:^2.0.2":
+"enterprise-fetch@npm:^2.0.1":
   version: 2.0.2
   resolution: "enterprise-fetch@npm:2.0.2"
   dependencies:
