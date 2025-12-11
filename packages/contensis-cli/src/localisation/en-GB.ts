@@ -245,7 +245,7 @@ export const LogMessages = {
     failedImport: (env: string) => `[${env}] Unable to import entries`,
     update: {
       preview: () => LogMessages.migrate.preview('UPDATE FIELD'),
-      commit: () => LogMessages.migrate.preview('FIELD UPDATES'),
+      commit: () => LogMessages.migrate.commit('FIELD UPDATES'),
       success: (env: string, commit: boolean, entries: number, nodes = 0) =>
         `${commit ? `Updated` : `Will update`} ${pl('entry', entries, true)}${
           nodes > 0 ? ` and ${pl('node', nodes, true)}` : ''

@@ -2,6 +2,8 @@
 
 Use Contensis from your favourite terminal
 
+- [Windows Terminal](https://github.com/microsoft/terminal?tab=readme-ov-file#installing-and-running-windows-terminal) is strongly recommended over classic PowerShell for Windows users
+
 Download the executable for your operating system from the [Releases page](https://github.com/contensis/cli/releases) and add it to a folder in your local `PATH`
 
 or use your preferred installation method below
@@ -1017,17 +1019,17 @@ website t.durden@example-dev> create tags in topics Books Faces History Places S
   -------------------------------------
 [cli] ✅ 🔍 IMPORT PREVIEW 🔭
 [25/06 16:41:41] [INFO] Fetching tags in all groups from target environment example-dev website
-            
-No tag group to migrate into website            
 
- status     total  
+No tag group to migrate into website
+
+ status     total
 -----------------------
  no change  1
 -----------------------
 
-No tags to migrate into website            
+No tags to migrate into website
 
- status     total  
+ status     total
 -----------------------
  no change  5
 -----------------------
@@ -1070,7 +1072,7 @@ website t.durden@example-dev> remove tags 109eb3e9-98c9-5ab2-b9df-f1c80af3ac5c d
 
 [cli] ⏩ Add --commit flag to commit the previewed changes
 
-website t.durden@example-dev> 
+website t.durden@example-dev>
 ```
 
 ### Remove tags in group
@@ -1852,6 +1854,7 @@ The output will be the same as the `import models` examples above
 <sup><sub>Add the `--commit` option to make the changes, be very careful using this! There is no going back</sub></sup>
 
 ## Import tags and groups
+
 ### Import from another Contensis environment
 
 Connect to your "source" environment, ensure you can fetch the tags from this environment first and that these are the right tags you plan on importing to your "target" environment.
@@ -1868,36 +1871,36 @@ website t.durden@example-dev> import tags --source-alias example-dev --source-pr
 [cli] ✅ 🔍 IMPORT PREVIEW 🔭
 [25/06 15:26:37] [INFO] Fetching tags in all groups from example-dev leif
 [25/06 15:26:37] [INFO] Fetching tags in all groups from target environment example-dev website
-            
-1/2 tag groups to migrate into website            
 
- status     total  
+1/2 tag groups to migrate into website
+
+ status     total
 -----------------------
  create     1
  no change  1
 -----------------------
 
- id                       status    name                        description                         
+ id                       status    name                        description
 ------------------------------------------------------------------------------------------------
  newGroup                 create    New group
 ------------------------------------------------------------------------------------------------
 
-            
-5/7 tags to migrate into website            
 
- status     total  
+5/7 tags to migrate into website
+
+ status     total
 -----------------------
  create     5
  no change  2
 -----------------------
 
- id                                    value  status    groupId              label              
+ id                                    value  status    groupId              label
 ------------------------------------------------------------------------------------------------
- 02bcb977-1196-4c3f-a921-d2dfce3ca32b  new1   create    newGroup             {"en-GB":"New 1"}  
- f48eb862-7b73-4a77-a2af-09492a88a8f0  new2   create    newGroup             {"en-GB":"New 2"}  
- 8673e419-55c9-4ba0-bcd7-28c7c6fa46cc  new3   create    newGroup             {"en-GB":"New 3"}  
- 90a11d09-3727-45c2-a0df-86f1865828ab  tag3   create    newGroup             {"en-GB":"Tag 3"}  
- d4267b35-0d25-41ae-bce9-eeb490c793f4  tag3   create    resourcesTagGroup    {"en-GB":"Tag 3"}  
+ 02bcb977-1196-4c3f-a921-d2dfce3ca32b  new1   create    newGroup             {"en-GB":"New 1"}
+ f48eb862-7b73-4a77-a2af-09492a88a8f0  new2   create    newGroup             {"en-GB":"New 2"}
+ 8673e419-55c9-4ba0-bcd7-28c7c6fa46cc  new3   create    newGroup             {"en-GB":"New 3"}
+ 90a11d09-3727-45c2-a0df-86f1865828ab  tag3   create    newGroup             {"en-GB":"Tag 3"}
+ d4267b35-0d25-41ae-bce9-eeb490c793f4  tag3   create    resourcesTagGroup    {"en-GB":"Tag 3"}
 ------------------------------------------------------------------------------------------------
 
 [25/06 15:26:38] [OK] Tags migration preview ready
@@ -1916,9 +1919,11 @@ Import resources directly from a JSON file. The path can be relative or absolute
 ```shell
 website t.durden@example-dev> import tags --from-file ./tags.json
 ```
+
 ```shell
 website t.durden@example-dev> import taggroups --from-file ./taggroups.json
 ```
+
 ```shell
 website t.durden@example-dev> import tags --from-file ./tags-and-groups.json
 ```
