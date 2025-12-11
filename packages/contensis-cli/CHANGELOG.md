@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.6.0](https://github.com/contensis/cli/compare/contensis-cli-v1.5.0...contensis-cli-v1.6.0) (2025-12-11)
+
+
+### Features
+
+* `--dependents` option accepts a number to stop fetching entry dependencies at the specified depth in `get entries` ([209fe7d](https://github.com/contensis/cli/commit/209fe7d87acba1b5fc419a19179ca698e8993a64))
+* add `--log-level` global option to increase logging verbosity in many commands ([8538b15](https://github.com/contensis/cli/commit/8538b15e0ed9a3524418416fa656876319d0a887))
+* add `--no-validations` option to import models with all field validations removed ([0f9a4c0](https://github.com/contensis/cli/commit/0f9a4c03300f01de6ff441e271fe592b81105c16))
+* add `--stop-level` option to stop resolving entry dependencies at the specified level in `import entries` ([4e0b9c6](https://github.com/contensis/cli/commit/4e0b9c6bf826503c9ed4a040c523092d8b3179b6))
+* prune unreferenced dependencies from built entries with error status or where a field has not been mapped to a target entry in `import entries` ([6bbe628](https://github.com/contensis/cli/commit/6bbe628586d525447a8ad0a2fcc920cb159ee3cf))
+* taxonomy fields excluded when importing models ([06fe2f6](https://github.com/contensis/cli/commit/06fe2f68c14c9c53da28ee4e486dd686f3482cd1))
+
+
+### Bug Fixes
+
+* added field validation checks for entry, image and list fields when building entries for migration ([30f7235](https://github.com/contensis/cli/commit/30f72350645ad04ad5bd11f5ee8524619d2c6a95))
+* asset uploads incompatible with Node.js native fetch ([b98e786](https://github.com/contensis/cli/commit/b98e786530973448d18e715bb4501a7943b01978))
+* avoid 409 conflict errors when deleting nested components ([06fe2f6](https://github.com/contensis/cli/commit/06fe2f68c14c9c53da28ee4e486dd686f3482cd1))
+* avoid duplicate error logging in import commands ([0ec27a5](https://github.com/contensis/cli/commit/0ec27a5d13f3e7179c9825480b19920028744e49))
+* entries incorrectly being fetched from Delivery API causing tag fields to fail with `import entries` ([df38de5](https://github.com/contensis/cli/commit/df38de592c88e6a5e0940de1f1da10104e4f7df2))
+* export dependency tags and tag groups along with dependency nodes when using `--save-entries` option with `import entries` ([0c8029d](https://github.com/contensis/cli/commit/0c8029d67fbb16c33c2b26119836c6461fa398f8))
+* handle mix of entity types when importing data from JSON file so we can import entries containing nodes or import models containing default entries and tag groups ([621da46](https://github.com/contensis/cli/commit/621da4635539b0b141f20af43c9076cfae70e137))
+* implement rate limiting when deleting entries ([06fe2f6](https://github.com/contensis/cli/commit/06fe2f68c14c9c53da28ee4e486dd686f3482cd1))
+* import tag groups mixed with content models when using `--from-file` in `import models` ([bcd6c11](https://github.com/contensis/cli/commit/bcd6c11e4da1e0807156048f4088ddc73a0b0ac4))
+* improve console output when importing entries with dependent tags ([84af771](https://github.com/contensis/cli/commit/84af7719a304fa9759f359c558396986ce8d668e))
+* improve console output when there are no changes to make in `import tags` and `import entries` ([7a4ad75](https://github.com/contensis/cli/commit/7a4ad753b1acfa91fd43d203927500aee68f8efd))
+* include tag groups in `list models` output ([759f8a2](https://github.com/contensis/cli/commit/759f8a24615e1c916c717e00f51c7c284e7fc9dd))
+* null check console output with `import tags` and `import entries` ([58bf59f](https://github.com/contensis/cli/commit/58bf59f8a45e251109a58e86d8e5e7ad50a3a096))
+* null check for `versionNo` when building entries fetched from the Delivery API in entries commands ([afa524b](https://github.com/contensis/cli/commit/afa524bd6e593fb7d2c2454cbd2a2c62f59b219d))
+* resolve tags correctly when building entries with `copy field` and `update field` ([4ad5446](https://github.com/contensis/cli/commit/4ad5446f09006d2a497b4aeed908ec3f1a2ea177))
+* supplying absolute file path when using `--output` option ([78e4e87](https://github.com/contensis/cli/commit/78e4e87254c916b916ed3837d6411456b439e238))
+* unresolved tags no longer trigger an error when building entries in migration or copy commands ([f1dd397](https://github.com/contensis/cli/commit/f1dd39776e81be909970c46bdbd334c12135a0bb))
+* use Contensis Image API when downloading assets from a source CMS ([06fe2f6](https://github.com/contensis/cli/commit/06fe2f68c14c9c53da28ee4e486dd686f3482cd1))
+* use correct grammar in console output when migrating different content entites ([5726941](https://github.com/contensis/cli/commit/5726941959a0ea24ade785d9f13c77f7b1fc3d53))
+
 ## [1.5.0](https://github.com/contensis/cli/compare/contensis-cli-v1.4.1...contensis-cli-v1.5.0) (2025-09-09)
 
 
