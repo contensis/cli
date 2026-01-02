@@ -14,7 +14,7 @@ on:
 jobs:
   node:
     name: npm@latest
-    uses: ./.github/workflows/release.node.yml
+    uses: ./.github/workflows/publish.npm.yml
     with:
       tag: ${{ (github.event_name == 'release' && github.event.release.prerelease == true && 'prerelease' || 'latest') || inputs.tag }}
     secrets: inherit
