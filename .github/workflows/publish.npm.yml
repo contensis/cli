@@ -77,4 +77,4 @@ jobs:
       - id: publish
         name: Publish to npm
         if: contains(github.event.head_commit.message, '[nopublish]') == false
-        run: npm publish --tag ${{ inputs.tag }} --ignore-scripts --provenance --access public --workspace contensis-cli
+        run: npm publish --tag ${{ inputs.tag }} --ignore-scripts --access public --workspace contensis-cli
