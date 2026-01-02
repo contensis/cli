@@ -4,8 +4,9 @@ on:
   workflow_call:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: write # for release-please
+  id-token: write # for npm trusted publishing
+  pull-requests: write # for release-please
 
 jobs:
   build:
