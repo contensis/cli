@@ -19,7 +19,8 @@ on:
         default: 'latest'
 
 permissions:
-  id-token: write
+  contents: write # for git push prerelease version bump
+  id-token: write # for npm trusted publishing
 
 jobs:
   publish:

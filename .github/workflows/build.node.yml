@@ -5,12 +5,11 @@ on:
 
 permissions:
   contents: write # for release-please
-  id-token: write # for npm trusted publishing
   pull-requests: write # for release-please
 
 jobs:
   build:
-    name: Build, test and publish
+    name: Build, test and update next release
     runs-on: ubuntu-24.04
     outputs:
       npm_tag: ${{ steps.check.outputs.npm_tag }}
@@ -72,3 +71,6 @@ jobs:
     with:
       tag: ${{ needs.build.outputs.npm_tag }}
     secrets: inherit
+    permissions:
+      contents: write # for git push prerelease version bump
+      id-token: write # for npm trusted publishing
