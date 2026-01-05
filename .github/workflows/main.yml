@@ -22,9 +22,11 @@ jobs:
   build:
     if: github.event_name == 'push'
     uses: ./.github/workflows/build.yml
+    secrets: inherit
 
   release:
     if: github.event_name != 'push'
     uses: ./.github/workflows/release.yml
+    secrets: inherit
     with:
       tag: latest
