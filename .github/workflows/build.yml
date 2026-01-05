@@ -1,9 +1,7 @@
-name: Build and deploy
+name: Build and publish prerelease
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
   node:

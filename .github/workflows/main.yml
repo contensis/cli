@@ -1,0 +1,30 @@
+# Using a common workflow to trigger either a build or a release based on the event type
+# in order to use npm trusted publishing which allows configuration from one workflow only
+# and the configured workflow filename must be the parent that was triggered by the event
+
+name: Build or release workflow trigger
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The NPM version tag to use, "latest" will become the default package version, or "prerelease"'
+        required: true
+        default: 'latest'
+
+jobs:
+  build:
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/build.yml
+
+  release:
+    if: github.event_name != 'push'
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: latest

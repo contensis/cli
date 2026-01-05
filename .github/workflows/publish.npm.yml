@@ -11,13 +11,6 @@ on:
         description: 'The latest app version in `package.json`'
         value: ${{ jobs.publish.outputs.version }}
 
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'The NPM version tag to use, "latest" will become the default package version, or "prerelease"'
-        required: true
-        default: 'latest'
-
 permissions:
   contents: write # for git push prerelease version bump
   id-token: write # for npm trusted publishing

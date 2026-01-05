@@ -1,15 +1,11 @@
 name: Release version
 
 on:
-  release:
-    types:
-      - published
-  workflow_dispatch:
+  workflow_call:
     inputs:
       tag:
-        description: 'The NPM version tag to use, "latest" will become the default package version, or "prerelease"'
         required: true
-        default: 'latest'
+        type: string
 
 jobs:
   node:
@@ -18,6 +14,8 @@ jobs:
     with:
       tag: ${{ (github.event_name == 'release' && github.event.release.prerelease == true && 'prerelease' || 'latest') || inputs.tag }}
     secrets: inherit
+    permissions:
+      id-token: write # for npm trusted publishing
 
   docker:
     name: docker:release
