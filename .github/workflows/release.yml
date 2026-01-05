@@ -15,6 +15,7 @@ jobs:
       tag: ${{ (github.event_name == 'release' && github.event.release.prerelease == true && 'prerelease' || 'latest') || inputs.tag }}
     secrets: inherit
     permissions:
+      contents: write # for git push prerelease version bump
       id-token: write # for npm trusted publishing
 
   docker:
