@@ -150,6 +150,11 @@ Example call:
       false
     )
     .option(
+      '--make-live',
+      'whether to make the pushed block version live immediately',
+      false
+    )
+    .option(
       '-cid --commit-id <commitId>',
       'the id of the source git commit for the supplied image uri'
     )
@@ -196,6 +201,7 @@ Example call:
 
       const blockRequest = mapJson(mapSourceVars, {
         release: { $path: 'release', $default: () => false },
+        makeLive: { $path: 'makeLive', $default: () => false },
         id: ['blockId'],
         image: () => {
           const lastIndexOfColon = imageUri.lastIndexOf(':');
