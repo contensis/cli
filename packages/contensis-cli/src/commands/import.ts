@@ -36,10 +36,7 @@ export const makeImportCommand = () => {
       '-nod --no-defaults',
       'ignore any default entries or nodes attached to content types or fields'
     )
-    .option(
-      '-nov --no-validations',
-      'import fields with validations removed'
-    )
+    .option('-nov --no-validations', 'import fields with validations removed')
     .option(
       '-preserve --preserve-guids',
       'import any default entries or nodes using the same id as the source'
@@ -175,6 +172,12 @@ Example call:
     .command('nodes')
     .description('import nodes')
     .argument('[root]', 'import nodes from the specified path e.g. /blog', '/')
+    .addOption(
+      new Option(
+        '-d --depth <depth>',
+        'import nodes with children to a specified depth'
+      ).argParser(parseInt)
+    )
     .option(
       '-preserve --preserve-guids',
       'include this flag when you are importing nodes that you have previously exported and wish to update'

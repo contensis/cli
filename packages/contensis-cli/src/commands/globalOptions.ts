@@ -54,11 +54,13 @@ export const mapContensisOpts = (opts: any = {}): MigrateRequest => ({
   noPublish: !opts.publish, // arg is inverted automatically from `--no-publish` to `publish: false`
   outputLogs: opts.logLevel,
   stopLevel:
-    typeof opts.stopLevel === 'number'
+    typeof opts.stopLevel === 'number' // stopLevel is used with `import entries`
       ? Number(opts.stopLevel)
-      : typeof opts.dependents === 'number'
+      : typeof opts.dependents === 'number' // dependents is used with `get entries`
         ? Number(opts.dependents)
-        : undefined,
+        : typeof opts.depth === 'number' // depth is used with `import nodes`
+          ? Number(opts.depth)
+          : undefined,
 });
 
 /* Output options */
