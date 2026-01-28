@@ -183,6 +183,7 @@ class ContensisShell {
         'import nodes',
         'import tags',
         'import taggroups',
+        'import webhooks',
         'list blocks',
         'list contenttypes',
         'list components',

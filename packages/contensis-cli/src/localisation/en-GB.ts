@@ -521,12 +521,17 @@ export const LogMessages = {
     list: (env: string) => `[${env}] Webhook subscriptions:`,
     noList: (env: string) => `[${env}] Cannot retrieve webhook subscriptions`,
     noneExist: () => `No webhook subscriptions exist`,
+    imported: (env: string, commit: boolean, webhooks: number) =>
+      LogMessages.migrate.imported(env, commit, { webhook: webhooks }),
+    noChange: (env: string) => `[${env}] No changes to be made`,
     created: (env: string, name: string) =>
       `[${env}] Created Webhook subscription ${Logger.highlightText(name)}`,
-    failedCreate: (env: string, name: string) =>
-      `[${env}] Unable to create Webhook subscription ${Logger.highlightText(
-        name
-      )}`,
+    failedCreate: (env: string, name?: string) =>
+      `[${env}] Unable to create ${name ? `webhook ${Logger.highlightText(name)}` : 'webhooks'}`,
+    // failedCreate: (env: string, name: string) =>
+    //   `[${env}] Unable to create Webhook subscription ${Logger.highlightText(
+    //     name
+    //   )}`,
     deleted: (env: string, id: string) =>
       `[${env}] Deleted Webhook subscription ${Logger.highlightText(id)}`,
     failedDelete: (env: string, id: string) =>

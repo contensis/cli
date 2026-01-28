@@ -12,6 +12,7 @@ import {
   MigrateStatus,
   NodesResult,
   ProjectNodesToMigrate,
+  WebhooksResult,
 } from 'migratortron';
 import ContensisCli from '~/services/ContensisCliService';
 
@@ -370,6 +371,57 @@ export const printNodesMigrateResult = (
         })
         .join('\n'),
       logLimit
+    );
+  }
+};
+
+export const printWebhooksMigrateResult = (
+  service: ContensisCli,
+  migrateResult: WebhooksResult,
+  {
+    showDiff = false,
+    showAll = false,
+    showChanged = false,
+  }: {
+    showDiff?: boolean;
+    showAll?: boolean;
+    showChanged?: boolean;
+  } = {}
+) => {
+  console.log(``);
+  const { log, messages } = service;
+
+  for (const [originalId, webhookStatus] of Object.entries(
+    migrateResult.webhooksToMigrate.webhookIds
+  )) {
+    if (
+      showAll ||
+      (showChanged &&
+        webhookStatus.status !== 'no change' &&
+        webhookStatus.status !== 'ignore')
+    ) {
+      console.log(
+        log.infoText(
+          `${messages.migrate.status(webhookStatus.status)(`${webhookStatus.status}`)} ${originalId}${
+            webhookStatus.id !== originalId
+              ? ` -> ${webhookStatus.id}\n  `
+              : ' '
+          }`
+        ) + `${webhookStatus.name}`
+      );
+
+      if (webhookStatus.error) log.error(webhookStatus.error);
+      if (webhookStatus.diff && showDiff) {
+        console.log(
+          `  ${log.infoText(`diff: ${highlightDiffText(webhookStatus.diff)}`)}\n`
+        );
+      }
+    }
+  }
+
+  if (migrateResult.errors?.length) {
+    console.log(
+      `  - ${log.errorText(`errors: ${migrateResult.errors.length}`)}\n`
     );
   }
 };

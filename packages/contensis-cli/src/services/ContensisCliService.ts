@@ -54,6 +54,7 @@ import {
   printModelMigrationResult,
   printNodeTreeOutput,
   printNodesMigrateResult,
+  printWebhooksMigrateResult,
 } from '~/util/console.printer';
 import { csvFormatter } from '~/util/csv.formatter';
 import { htmlFormatter } from '~/util/html.formatter';
@@ -1833,7 +1834,7 @@ class ContensisCli {
       else
         await this.HandleFormattingAndOutput(result, () => {
           // print the results to console
-          if (!result.committed) {
+          if (result && !result?.committed) {
             log.raw(log.boldText(`\nContent types:`));
             if (!result.contentTypes) log.info(`- None returned\n`);
             else printModelMigrationAnalysis(this, result.contentTypes);
@@ -1859,7 +1860,7 @@ class ContensisCli {
               log.object(result.errors);
             }
           } else {
-            const { modelsResult = {} } = result;
+            const { modelsResult = {} } = result || {};
             log.raw(log.boldText(`\nContent types:`));
             printModelMigrationResult(
               this,
@@ -2267,8 +2268,8 @@ class ContensisCli {
         });
       if (
         !err &&
-        ((!commit && result.entriesToMigrate[currentProject].totalCount) ||
-          (commit && result.migrateResult?.deleted))
+        ((!commit && result?.entriesToMigrate[currentProject].totalCount) ||
+          (commit && result?.migrateResult?.deleted))
       ) {
         log.success(messages.entries.removed(currentEnv, commit));
         if (!commit) {
@@ -2357,7 +2358,7 @@ class ContensisCli {
       const [err, result] = await contensis.MigrateEntries();
 
       if (err) logError(err);
-      else {
+      else if (result) {
         const { entries, nodes, tags } =
           contensis.content.targets[currentProject];
 
@@ -2394,19 +2395,19 @@ class ContensisCli {
       }
       if (
         !err &&
-        !result.errors?.length &&
-        ((!commit && result.entriesToMigrate[currentProject].totalCount) ||
+        !result?.errors?.length &&
+        ((!commit && result?.entriesToMigrate[currentProject].totalCount) ||
           (commit &&
-            (result.migrateResult?.created || result.migrateResult?.updated)))
+            (result?.migrateResult?.created || result?.migrateResult?.updated)))
       ) {
         log.success(
           messages.entries.imported(
             currentEnv,
             commit,
             commit
-              ? (result.migrateResult?.created || 0) +
-                  (result.migrateResult?.updated || 0)
-              : result.entriesToMigrate[currentProject].totalCount,
+              ? (result?.migrateResult?.created || 0) +
+                  (result?.migrateResult?.updated || 0)
+              : result?.entriesToMigrate[currentProject].totalCount,
             commit
               ? (result.nodesResult?.created || 0) +
                   (result.nodesResult?.updated || 0)
@@ -2665,7 +2666,7 @@ class ContensisCli {
       const [err, result] = await contensis.MigrateNodes();
 
       if (err) log.raw(``);
-      else
+      else if (result)
         await this.HandleFormattingAndOutput(result, () => {
           // print the migrateResult to console
           const migrateTree =
@@ -2688,9 +2689,9 @@ class ContensisCli {
 
       if (
         !err &&
-        (!result.errors?.length || this.contensisOpts.ignoreErrors) &&
+        (!result?.errors?.length || this.contensisOpts.ignoreErrors) &&
         ((!commit && nodesMigrateCount) ||
-          (commit && (nodesCreated || nodesUpdated || result.errors?.length)))
+          (commit && (nodesCreated || nodesUpdated || result?.errors?.length)))
       ) {
         let totalCount: number;
         if (commit) {
@@ -2751,8 +2752,8 @@ class ContensisCli {
       }
       if (
         !err &&
-        ((!commit && result.nodesToMigrate[currentProject].totalCount) ||
-          (commit && result.nodesResult?.deleted))
+        ((!commit && result?.nodesToMigrate[currentProject].totalCount) ||
+          (commit && result?.nodesResult?.deleted))
       ) {
         log.success(
           messages.nodes.removed(currentEnv, commit, contensis.nodes.rootPath)
@@ -2809,7 +2810,7 @@ class ContensisCli {
             } of filteredResults) {
               console.log(
                 log.infoText(
-                  `  ${chalk.bold.white`- ${name}`} ${id} [${(
+                  `${chalk.bold.white`${enabled ? '🟢' : '🔴'}  ${name}`} ${id} [${(
                     version.modified || version.created
                   )
                     .toString()
@@ -2819,6 +2820,9 @@ class ContensisCli {
                 )
               );
               if (description) console.log(log.infoText`    ${description}`);
+              console.log(
+                `    ${log.infoText`enabled`}: ${chalk[enabled ? 'green' : 'red'](enabled)}`
+              );
               console.log(`    ${log.infoText`[${method}]`} ${url}`);
               if (headers && Object.keys(headers).length) {
                 console.log(`    ${log.infoText`headers`}:`);
@@ -2849,8 +2853,6 @@ class ContensisCli {
                     templates
                   ).join(' ')}`
                 );
-              if (enabled === false)
-                console.log(`    ${log.infoText`enabled`}: ${enabled}`);
             }
           });
         }
@@ -2860,6 +2862,90 @@ class ContensisCli {
         log.error(messages.webhooks.noList(currentEnv));
         log.error(jsonFormatter(webhooksErr));
       }
+    }
+  };
+
+  ImportWebhooks = async ({
+    commit,
+    fromFile,
+    logOutput,
+    enabled = false,
+    disabled = false,
+  }: {
+    commit: boolean;
+    fromFile?: string;
+    logOutput: string;
+    enabled?: boolean;
+    disabled?: boolean;
+  }) => {
+    const { currentEnv, currentProject, log, messages } = this;
+
+    const contensis = await this.ConnectContensisImport({
+      commit,
+      fromFile,
+    });
+
+    if (contensis) {
+      log.line();
+      if (contensis.isPreview) {
+        log.success(messages.migrate.preview());
+      } else {
+        log.warning(messages.migrate.commit());
+      }
+
+      const [err, result] = await to(
+        contensis.webhooks.MigrateWebhooks({
+          // trying to simulate XOR logic, setting enabled arg from
+          // enabled or disabled option only if one of them is set
+          enabled: enabled !== disabled ? enabled || !disabled : undefined,
+        })
+      );
+
+      if (err) logError(err);
+      else if (result) {
+        await this.HandleFormattingAndOutput(result, () => {
+          printWebhooksMigrateResult(this, result, {
+            showAll: logOutput === 'all',
+            showDiff: logOutput === 'all' || logOutput === 'changes',
+            showChanged: logOutput === 'changes',
+          });
+        });
+      }
+      if (
+        !err &&
+        !result.errors?.length &&
+        ((!commit && result.webhooksToMigrate[currentProject].totalCount) ||
+          (commit &&
+            (result.webhooksResult?.created || result.webhooksResult?.updated)))
+      ) {
+        log.success(
+          messages.webhooks.imported(
+            currentEnv,
+            commit,
+            commit
+              ? (result.webhooksResult?.created || 0) +
+                  (result.webhooksResult?.updated || 0)
+              : (result.webhooksToMigrate[currentProject].totalCount as number)
+          )
+        );
+        if (!commit) {
+          log.raw(``);
+          log.help(messages.migrate.commitTip());
+        }
+      } else {
+        const noChanges =
+          result?.webhooksToMigrate?.[currentProject]?.['no change'] &&
+          result?.webhooksToMigrate?.[currentProject].totalCount === 0;
+
+        if (noChanges && !err && !result.errors?.length) {
+          log.help(messages.webhooks.noChange(currentEnv));
+        } else {
+          log.error(messages.webhooks.failedCreate(currentEnv), err);
+        }
+      }
+    } else {
+      log.warning(messages.models.noList(currentProject));
+      log.help(messages.connect.tip());
     }
   };
 

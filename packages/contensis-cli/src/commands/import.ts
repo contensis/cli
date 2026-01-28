@@ -301,6 +301,44 @@ Example call:
       });
     });
 
+  program
+    .command('webhooks')
+    .description('import webhooks')
+    .argument('[name]', 'import webhooks with this name')
+    .option('-i --id <ids...>', 'limit to the supplied webhook id(s)')
+    .option('--enabled', 'import enabled webhooks only')
+    .option('--disabled', 'import disabled webhooks only')
+    .addOption(commit)
+    .addOption(
+      new Option(
+        '-od --output-detail <outputDetail>',
+        'how much detail to output from the import'
+      )
+        .choices(['errors', 'changes', 'all'])
+        .default('changes')
+    )
+    .addHelpText(
+      'after',
+      `
+    Example call:
+      > import webhooks --source-cms example-dev --source-project-id microsite
+      > import webhooks --from-file myImportData.json
+    `
+    )
+    .action(async (name, opts) => {
+      await cliCommand(
+        ['import', 'webhooks'],
+        opts,
+        mapContensisOpts({ ...opts, id: opts.ids, search: name })
+      ).ImportWebhooks({
+        commit: opts.commit,
+        fromFile: opts.fromFile,
+        logOutput: opts.outputDetail,
+        enabled: opts.enabled,
+        disabled: opts.disabled,
+      });
+    });
+
   return program;
 };
 
