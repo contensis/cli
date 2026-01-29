@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.7.0](https://github.com/contensis/cli/compare/contensis-cli-v1.6.0...contensis-cli-v1.7.0) (2026-01-29)
+
+
+### Features
+
+* add `--makeLive` option to push block command ([73425fc](https://github.com/contensis/cli/commit/73425fc068c7a8acf40dba600655d104cb899e22))
+* import child nodes to a specified depth with new `--depth` option in import nodes ([5e70cef](https://github.com/contensis/cli/commit/5e70cef060989e9283b28aed1bad66ffe8ee5ad3))
+* import webhooks command ([47dae7d](https://github.com/contensis/cli/commit/47dae7d984639fa8460c2344042e2fef91643bfb))
+
+
+### Bug Fixes
+
+* `ERR_INVALID_ARG_TYPE` when downloading releases in dev requests command ([9c076d6](https://github.com/contensis/cli/commit/9c076d6b8a618e4bc32837908da92fdd7d759635))
+* better highlight enabled status in list webhooks command ([47dae7d](https://github.com/contensis/cli/commit/47dae7d984639fa8460c2344042e2fef91643bfb))
+* do not fetch children of nodes that were resolved as dependents of entries ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* falsely detecting changes to existing nodes when a partial node is supplied in the payload ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* ignore errors generated when building default nodes for models migrations ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* log fetch errors when hydrating source and target repositories ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* validate image dimensions against the resolved asset instead of the value from the link field in the parent entry removing false warnings in entries migrations ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+
 ## [1.6.0](https://github.com/contensis/cli/compare/contensis-cli-v1.5.0...contensis-cli-v1.6.0) (2025-12-11)
 
 
