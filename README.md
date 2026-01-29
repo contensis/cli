@@ -2,12 +2,9 @@
 
 ## 📖 Looking for documentation?
 
-> **👉 You probably want the [Contensis CLI Package README →](packages/contensis-cli/README.md)**
-> - installation methods
-> - CLI usage
-> - command documentation
+**👉 You probably want the [Contensis CLI Package README →](packages/contensis-cli/README.md)**
 
-> This is the development monorepo.
+> This is the development monorepo. **For CLI usage, installation, and command documentation**, please visit the package README.
 
 ---
 
@@ -87,7 +84,6 @@ Make the release
 - The [Release Please Action](https://github.com/marketplace/actions/release-please-action) will trigger a new build in the CI, this time the build will return `release` variables.
 - A tag and a [GitHub release](https://github.com/contensis/cli/releases) will be created for the Pull Request version you merged and the [`release` action workflow](https://github.com/contensis/cli/blob/main/.github/workflows/release.yml) will be triggered
 - The `release` workflow will publish release versions to:
-
   - npm.js `contensis-cli@latest`
   - docker [`ghcr.io/contensis/cli/main/app:release`](https://github.com/contensis/cli/pkgs/container/cli%2Fmain%2Fapp)
   - chocolatey (requires moderator review before public release)
