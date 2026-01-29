@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import { FetchInit } from 'enterprise-fetch';
 import fs from 'fs';
 import { Readable } from 'stream';
-import { finished } from 'stream/promises';
+import { pipeline } from 'stream/promises';
 
 import { isJson, tryParse } from '~/util/assert';
 import { enhancedFetch } from '~/util/fetch';
@@ -42,7 +42,7 @@ class HttpProvider {
     const res = await fetch(url);
     if (res.ok && res.body !== null) {
       const fileStream = fs.createWriteStream(destination, { flags: 'wx' });
-      await finished(Readable.fromWeb(res.body as any).pipe(fileStream));
+      await pipeline(Readable.from(res.body), fileStream);
     }
   }
 }
