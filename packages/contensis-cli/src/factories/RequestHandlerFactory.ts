@@ -6,7 +6,7 @@ import { LogMessages } from '~/localisation/en-GB';
 import GitHubCliModuleProvider from '~/providers/GitHubCliModuleProvider';
 
 import ManifestProvider from '~/providers/ManifestProvider';
-import { appRootDir, checkDir, joinPath } from '~/providers/file-provider';
+import { appRootDir, joinPath, pathExists } from '~/providers/file-provider';
 import { isDebug } from '~/util/debug';
 import { Logger } from '~/util/logger';
 
@@ -237,6 +237,14 @@ export class RequestHandlerFactory {
         manifest.writeModule(this.name, this.moduleInfo);
 
         // TODO: clean up user folder by deleting old version(s)}
+      }
+    } else if (moduleInfo.version) {
+      // Validate the installed version exists
+      if (!pathExists(this.exePath)) {
+        // If not, set the version to force re-download and recreate
+        Logger.warning(messages.devrequests.missingBinary(moduleInfo.version));
+        this.version = moduleInfo.version;
+        await this.Create();
       }
     }
   }

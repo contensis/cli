@@ -718,5 +718,7 @@ export const LogMessages = {
       `Request handler exited with code ${code}\n`,
     errored: (error: Error) =>
       `Could not launch request handler due to error \n${error}`,
+    missingBinary: (version: string) =>
+      `Could not locate request handler module ${version}, attempting to reinstall`,
   },
 };
