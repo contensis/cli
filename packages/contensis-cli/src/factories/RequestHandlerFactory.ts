@@ -117,10 +117,10 @@ export class RequestHandlerFactory {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // keep the method running until we can return
-      while (true === true) {
-        if (!isRunning) return;
+      while (isRunning) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
+      return;
     };
   }
 
@@ -146,8 +146,8 @@ export class RequestHandlerFactory {
       else
         log.warning(messages.devrequests.install.notFound(moduleInfo.github));
 
-    const downloadSpecificRelease =
-      version && !checkDir('c') && release?.tag_name;
+    // checkDir(this.exePath);
+    const downloadSpecificRelease = version && release?.tag_name;
 
     // Should we download an update?
     if (
