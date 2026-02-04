@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { devCommand } from '~/services/ContensisDevService';
 
 export const makeDevCommand = () => {
@@ -58,6 +58,10 @@ Example call:
       '--release <release>',
       'launch a specific release version of the request handler'
     )
+    .option(
+      '--override [override...]',
+      'override configurations for other blocks'
+    )
     .usage('[block-id] [local-uri]')
     .addHelpText(
       'after',
@@ -70,7 +74,7 @@ Example call:
       await devCommand(
         ['dev', 'requests', blockId.join(' ')],
         opts
-      ).ExecRequestHandler(blockId, opts?.args, opts.release);
+      ).ExecRequestHandler(blockId, opts?.override, opts?.args, opts.release);
     });
 
   return dev;

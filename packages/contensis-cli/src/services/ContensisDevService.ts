@@ -1,3 +1,4 @@
+import { search } from '@inquirer/prompts';
 import ansiEscapes from 'ansi-escapes';
 import to from 'await-to-js';
 import inquirer from 'inquirer';
@@ -413,10 +414,11 @@ class ContensisDev extends ContensisRole {
 
   ExecRequestHandler = async (
     blockId: string[],
+    blockOverrides: string[] | boolean,
     overrideArgs: string[] = [],
     version?: string
   ) => {
-    const { debug, log, messages } = this;
+    const { currentEnv, currentProject, debug, log, messages } = this;
 
     const spinner = !debug
       ? createSpinner(messages.devrequests.launch())
@@ -425,43 +427,105 @@ class ContensisDev extends ContensisRole {
     // Ensure request handler is available to use
     const requestHandler = await createRequestHandler(version);
 
-    // Generate args for request handler using CLI methods
-    const args = new RequestHandlerArgs(this);
-    spinner?.start();
-    await args.Create();
-    spinner?.success();
+    // Get the available blocks for the project
+    const contensis = await this.ConnectContensis();
+    if (contensis) {
+      const blockBranches = new Map<string, string>();
 
-    // Prompt block id and dev uri to run locally (if not supplied)
-    const blockIdChoices = args.siteConfig?.blocks.map(block => block.id) || [];
-    blockIdChoices.push('none');
-    const defaultDeveloperUri = 'http://localhost:3000';
+      const [err, projectBlocks] = await contensis.blocks.GetBlocks();
+      if (err) log.error(messages.blocks.noList(currentEnv, currentProject));
+      else if (projectBlocks) {
+        // Prompt block id and dev uri to run locally (if not supplied)
+        const blockIdChoices = projectBlocks.map(block => block.id) || [];
+        blockIdChoices.push('none');
+        const defaultDeveloperUri = 'http://localhost:3000';
 
-    const { overrideBlockId, overrideUri } = blockId.length
-      ? {
-          overrideBlockId: blockId[0],
-          overrideUri: blockId?.[1] || defaultDeveloperUri,
+        const { developmentBlockId, developmentBlockUri } = blockId.length
+          ? {
+              developmentBlockId: blockId[0],
+              developmentBlockUri: blockId?.[1] || defaultDeveloperUri,
+            }
+          : await inquirer.prompt([
+              {
+                type: 'list',
+                prefix: '🧱',
+                message: messages.devrequests.overrideBlock(),
+                name: 'developmentBlockId',
+                choices: blockIdChoices,
+              },
+              {
+                type: 'input',
+                prefix: '🔗',
+                message: messages.devrequests.overrideUri(),
+                name: 'developmentBlockUri',
+                default: defaultDeveloperUri,
+              },
+            ]);
+
+        // Prompt for other block overrides (e.g. branch)
+        if (blockOverrides) {
+          // Prompt for which blocks to override
+          const blockIdChoices =
+            projectBlocks
+              // ?.filter(block => block.id !== developmentBlockId)
+              ?.map(block => ({
+                name: `${block.id}${block.description ? ` (${block.description})` : ''}`,
+                value: block.id,
+              })) || [];
+          blockIdChoices.push({ name: 'none', value: 'none' });
+
+          const { overrideBlockIds } = Array.isArray(blockOverrides)
+            ? {
+                overrideBlockIds: blockOverrides
+                  .map(bId => projectBlocks.find(b => b.id === bId)?.id)
+                  .filter(Boolean) as string[],
+              }
+            : await inquirer.prompt<{ overrideBlockIds: string[] }>([
+                {
+                  type: 'checkbox',
+                  prefix: '🧱',
+                  message: messages.devrequests.overrideBlocks(),
+                  name: 'overrideBlockIds',
+                  choices: blockIdChoices,
+                  // default: blockIdChoices.findIndex(b => b.value === 'none'),
+                },
+              ]);
+
+          // For each block to override, prompt for the branch to use
+          for (const overrideBlockId of overrideBlockIds) {
+            if (overrideBlockId === 'none') continue;
+            const choices = projectBlocks
+              .find(b => b.id === overrideBlockId)
+              ?.branches.map(b => b.id);
+            if (choices) {
+              const overrideBranch = await search<string>({
+                message: `🌿 ${messages.devrequests.overrideBranch(overrideBlockId)}`,
+                source: input => {
+                  input = input || '';
+                  const fuzzyResult = input
+                    ? choices?.filter(choice =>
+                        choice.toLowerCase().includes(input.toLowerCase())
+                      )
+                    : choices;
+                  return fuzzyResult || [];
+                },
+              });
+              blockBranches.set(overrideBlockId, overrideBranch);
+            }
+          }
         }
-      : await inquirer.prompt([
-          {
-            type: 'list',
-            prefix: '🧱',
-            message: messages.devrequests.overrideBlock(),
-            name: 'overrideBlockId',
-            choices: blockIdChoices,
-          },
-          {
-            type: 'input',
-            prefix: '🔗',
-            message: messages.devrequests.overrideUri(),
-            name: 'overrideUri',
-            default: defaultDeveloperUri,
-          },
-        ]);
 
-    args.overrideBlock(overrideBlockId, overrideUri);
+        // Generate args for request handler using CLI methods
+        const args = new RequestHandlerArgs(projectBlocks, blockBranches, this);
+        spinner?.start();
+        await args.Create();
+        args.overrideBlock(developmentBlockId, developmentBlockUri);
+        spinner?.success();
 
-    // Launch request handler
-    await requestHandler(args.getArgs(overrideArgs));
+        // Launch request handler
+        await requestHandler(args.getArgs(overrideArgs));
+      }
+    }
   };
 }
 export const devCommand = (

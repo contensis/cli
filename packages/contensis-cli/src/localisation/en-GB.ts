@@ -712,6 +712,9 @@ export const LogMessages = {
     launch: () => `Launching request handler for local development`,
     overrideBlock: () => `Which block will you be running?`,
     overrideUri: () => `How to access your development site`,
+    overrideBlocks: () => `Which blocks will you be overriding?`,
+    overrideBranch: (blockId: string) =>
+      `Which branch would you like ${blockId} to target?`,
     spawn: () =>
       `If you see a firewall popup requesting network access, it is safe to approve`,
     exited: (code: number | null) =>

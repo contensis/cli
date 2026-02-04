@@ -1,4 +1,4 @@
-import { ContensisMigrationService } from 'migratortron';
+import { Block, ContensisMigrationService } from 'migratortron';
 import PQueue from 'p-queue';
 import ContensisCli from '~/services/ContensisCliService';
 
@@ -43,11 +43,14 @@ interface ISiteConfigYaml {
 }
 
 class RequestHandlerArgs {
-  private cli;
   args?: string[];
   siteConfig?: ISiteConfigYaml;
 
-  constructor(cli: ContensisCli) {
+  constructor(
+    public blocks: Block[],
+    public blockBranches: Map<string, string>,
+    private cli: ContensisCli
+  ) {
     this.cli = cli;
   }
 
@@ -59,7 +62,6 @@ class RequestHandlerArgs {
 
   buildSiteConfig = async () => {
     const { currentEnv, currentProject, env, log, messages, urls } = this.cli;
-    const contensis = await this.cli.ConnectContensis();
 
     const siteConfig: ISiteConfigYaml = {
       alias: currentEnv,
@@ -73,28 +75,31 @@ class RequestHandlerArgs {
       renderers: [],
     };
 
-    const getBlocks = async (contensis: ContensisMigrationService) => {
-      const [err, blocksRaw] = await contensis.blocks.GetBlocks();
-      if (err)
-        log.error(messages.blocks.noList(currentEnv, env.currentProject));
-
-      // const blocksRaw = await cli.PrintBlocks();
-
+    const getBlockVersions = async (contensis: ContensisMigrationService) => {
       const blocks: BlockJson[] = [];
       const queue = new PQueue({ concurrency: 4 });
-      for (const block of blocksRaw || []) {
+      for (const block of this.blocks || []) {
         queue.add(async () => {
           // Retrieve block version
+          const branch =
+            // If we've set an override branch
+            this.blockBranches.get(block.id) ||
+            // If the block has no master/main branch, use the first branch
+            !block.branches.find(br => ['master', 'main'].includes(br.id))
+              ? block.branches[0]?.id
+              : // Else use default for Contensis to fetch master or main
+                'default';
+
           const [err, versions] = await contensis.blocks.GetBlockVersions(
             block.id,
-            'default',
+            branch,
             'latest'
           );
           if (err || versions?.length === 0)
             log.warning(
               messages.blocks.noGet(
                 block.id,
-                'default',
+                branch,
                 'latest',
                 currentEnv,
                 env.currentProject
@@ -118,10 +123,10 @@ class RequestHandlerArgs {
       return blocks;
     };
 
-    if (contensis) {
+    if (this.cli.contensis) {
       const [blocks, renderers] = await Promise.all([
-        getBlocks(contensis),
-        contensis.renderers.GetRenderers(),
+        getBlockVersions(this.cli.contensis),
+        this.cli.contensis.renderers.GetRenderers(),
       ]);
 
       siteConfig.blocks = blocks;

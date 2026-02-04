@@ -28,6 +28,7 @@
   "license": "ISC",
   "dependencies": {
     "@action-validator/core": "^0.6.0",
+    "@inquirer/prompts": "^8.2.0",
     "adm-zip": "^0.5.16",
     "app-root-path": "^3.1.0",
     "chalk": "^4.1.2",
