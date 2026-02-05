@@ -10,6 +10,7 @@ import {
   removeFile,
 } from './file-provider';
 import { doRetry } from '~/util/fetch';
+import { isWindows } from '~/util/os';
 
 type GitHubApiRelease =
   Endpoints['GET /repos/{owner}/{repo}/releases/latest']['response']['data'];
@@ -85,17 +86,16 @@ class GitHubCliModuleProvider {
       cmd: string;
       path: string;
       unzip?: boolean;
-      platforms: [NodeJS.Platform, string][];
+      platforms: [NodeJS.Platform, NodeJS.Architecture, string][];
     }
   ) {
     // find os-specific asset
-    const platform = platforms.find(p => p[0] === os.platform()) || [
-      os.platform(),
-      os.platform(),
-    ];
+    const platform = platforms.find(
+      p => p[0] === os.platform() && p[1] === os.arch()
+    ) || [os.platform(), os.arch(), `${os.platform()}-${os.arch()}`];
 
     const asset = release.assets.find(r =>
-      r.name.toLowerCase().includes(platform[1])
+      r.name.toLowerCase().includes(platform[2])
     );
 
     // download asset
@@ -114,12 +114,12 @@ class GitHubCliModuleProvider {
         removeFile(filePath);
       }
 
-      if (os.platform() !== 'win32') addExecutePermission(joinPath(path, cmd));
+      if (!isWindows()) addExecutePermission(joinPath(path, cmd));
     } else
       throw new Error(
         `no asset found in release ${
           release.tag_name
-        } for platform ${os.platform()}\n${release.html_url}`
+        } for platform ${os.platform()} and architecture ${os.arch()}\n${release.html_url}`
       );
   }
 }

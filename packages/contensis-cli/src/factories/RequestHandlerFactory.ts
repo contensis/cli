@@ -177,9 +177,12 @@ export class RequestHandlerFactory {
           path: downloadPath,
           // Map NodeJS os platform to release asset name
           platforms: [
-            ['win32', 'win-x64'],
-            ['darwin', 'osx-x64'],
-            ['linux', 'linux-x64'],
+            ['win32', 'arm64', 'win-arm64'],
+            ['win32', 'x64', 'win-x64'],
+            ['darwin', 'arm64', 'osx-arm64'],
+            ['darwin', 'x64', 'osx-x64'],
+            ['linux', 'arm64', 'linux-arm64'],
+            ['linux', 'x64', 'linux-x64'],
           ],
         });
       } catch (ex: any) {
