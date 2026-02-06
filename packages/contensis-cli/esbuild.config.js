@@ -5,7 +5,6 @@ const { globPlugin } = require('esbuild-plugin-glob');
 const { nodeExternalsPlugin } = require('esbuild-node-externals');
 const { replaceTscAliasPaths } = require('tsc-alias');
 
-// const watch = !!process.argv.includes('--watch');
 const completed = `${chalk.green('[contensis-cli]')} Build successful 👍\n`;
 
 console.time(completed);
@@ -16,9 +15,9 @@ rimraf('./dist').then(() => {
   console.time(' - esbuild complete');
   esbuild
     .build({
-      entryPoints: ['src/**/*.[jt]s'],
+      entryPoints: ['src/index.ts', 'src/shell.ts'],
       outdir: 'dist',
-      bundle: false,
+      bundle: true,
       minify: false,
       platform: 'node',
       format: 'cjs',
@@ -26,16 +25,11 @@ rimraf('./dist').then(() => {
       // needs to be node12 to transform dynamic imports into requires
       // so the bundles are compatible with the pkg exe builds
       target: 'node12',
-      plugins: [globPlugin(), nodeExternalsPlugin()],
-      // watch: watch && {
-      //   onRebuild(error) {
-      //     if (error) console.error('esbuild watch build failed:', error);
-      //     else
-      //       console.log(
-      //         'esbuild watch build succeeded, waiting for changes...'
-      //       );
-      //   },
-      // },
+      plugins: [globPlugin(), nodeExternalsPlugin({
+        allowList: [/^@inquirer\//],
+        dependencies: true,
+        // forceExternalList: ['keytar', '@action-validator/core', 'figlet', 'node-fetch', 'enterprise-fetch']
+      })],
     })
     .then(() => {
       console.timeEnd(' - esbuild complete');
