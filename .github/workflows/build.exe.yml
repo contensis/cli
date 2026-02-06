@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         node-version: [22.x]
-        os: [ubuntu-24.04, windows-2022, macos-15-intel, arm64]
+        os: [ubuntu-24.04, windows-2022, macos-15-intel, macos-15, arm64]
         include:
           - os: ubuntu-24.04
             friendlyName: Ubuntu x64
@@ -36,6 +36,11 @@ jobs:
             fileName: mac
             exeName: contensis-cli-mac
             homebrewFormula: contensis-cli
+          - os: macos-15
+            friendlyName: macOS arm64
+            fileName: mac-arm64
+            exeName: contensis-cli-mac-arm64
+            homebrewFormula: contensis-cli-arm64
           - os: arm64
             friendlyName: Linux arm64
             fileName: linux-arm64
