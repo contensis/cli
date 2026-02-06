@@ -28,6 +28,7 @@ rimraf('./dist').then(() => {
       plugins: [globPlugin(), nodeExternalsPlugin({
         allowList: [/^@inquirer\//],
         dependencies: true,
+        forceExternalList: ['enterprise-fetch']
         // forceExternalList: ['keytar', '@action-validator/core', 'figlet', 'node-fetch', 'enterprise-fetch']
       })],
     })
