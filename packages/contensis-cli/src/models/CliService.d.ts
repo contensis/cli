@@ -1,3 +1,5 @@
+import ContensisCli from '~/services/ContensisCliService';
+
 export type CliUrls =
   | {
       api: string;
@@ -33,7 +35,9 @@ export interface IImportOptions {
   sourceProjectId?: string;
 }
 
-export type OutputOptionsConstructorArg = OutputOptions &
+export type OutputOptionsConstructorArg = {
+  logLevel?: ContensisCli['logLevel'];
+} & OutputOptions &
   IConnectOptions &
   IImportOptions;
 

@@ -62,6 +62,12 @@ Example call:
       '--override [override...]',
       'override configurations for other blocks'
     )
+    .addOption(
+      new Option(
+        '-ll --log-level <logLevel>',
+        'set the request handler logging level'
+      ).choices(['debug', 'information', 'warning', 'error', 'none'])
+    )
     .usage('[block-id] [local-uri]')
     .addHelpText(
       'after',

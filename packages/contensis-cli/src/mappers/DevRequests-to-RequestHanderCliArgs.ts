@@ -179,6 +179,9 @@ class RequestHandlerArgs {
         args.push('--password', client.password);
     }
 
+    if (cli.logLevel && !args.find(a => a === '--log-level'))
+      args.push('--log-level', cli.logLevel);
+
     return args;
   };
 

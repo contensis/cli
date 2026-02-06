@@ -94,6 +94,9 @@ class ContensisCli {
   targetEnv?: string;
   urls: CliUrls;
   log = Logger;
+  /** Currently used to pass to other modules such as migratortron and request handler
+   * and less-so in the CLI service itself */
+  logLevel?: 'debug' | 'info' | 'warning' | 'error' | 'none';
   messages = LogMessages;
 
   verb: string;
@@ -157,6 +160,7 @@ class ContensisCli {
       );
     }
 
+    this.logLevel = outputOpts?.logLevel;
     this.format = outputOpts?.format;
     this.output = outputOpts?.output
       ? path.isAbsolute(outputOpts.output)
