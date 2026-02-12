@@ -8,8 +8,10 @@ import clone from 'rfdc';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
 import {
+  ICreateNode,
   ICreateTag,
   ICreateTagGroup,
+  Node,
   Role,
   Tag,
   TagGroup,
@@ -23,6 +25,7 @@ import {
   Model,
   BlockActionType,
   logEntitiesTable,
+  Renderer,
 } from 'migratortron';
 
 import ContensisAuthService from './ContensisAuthService';
@@ -2774,6 +2777,142 @@ class ContensisCli {
     }
   };
 
+  CreateOrUpdateNode = async (
+    nodePathOrId: string,
+    nodeUpdates: Partial<Node>,
+    displayName?: string | undefined,
+    slug?: string | undefined,
+    language?: string | undefined
+  ) => {
+    const { currentEnv, currentProject, log, messages } = this;
+    const contensis = await this.ConnectContensis();
+
+    const nodePath = nodePathOrId.startsWith('/') ? nodePathOrId : undefined;
+    let nodeId = isUuid(nodePathOrId) ? nodePathOrId : undefined;
+
+    let existingNode: Node | undefined;
+    let parentNode: Node | undefined;
+    let updateNode: Node | undefined;
+
+    if (contensis) {
+      // Retrieve node
+      if (nodePath) {
+        const [, nodesByPath] = await to(contensis.nodes.GetNodes(nodePath, 0));
+
+        if (Array.isArray(nodesByPath) && nodesByPath[0]?.id) {
+          nodeId = nodesByPath[0].id;
+        }
+      }
+
+      if (nodeId) {
+        // Get the management node so we can update it
+        const [, nodeById] = await to(
+          contensis.source.repo.GetNodeById(nodeId)
+        );
+
+        if (nodeById) existingNode = nodeById;
+      }
+
+      // TODO: resolve any renderer id to its uuid so we can support passing the regular id for ease of use
+      if (!existingNode) {
+        // Build a node object to create or reject if there is not enough data
+
+        if (!language) {
+          const project =
+            await contensis.source.repo.GetProject(currentProject);
+          language = project?.primaryLanguage || 'en-GB';
+        }
+
+        if (!nodeUpdates.parentId) {
+          // Find the node's parentId from the path if possible
+          if (!nodePath)
+            throw new Error(
+              `A node with id "${nodeId}" does not exist, and a path was not provided to find the parent node.`
+            );
+
+          const parentPath =
+            nodePath.substring(0, nodePath.lastIndexOf('/')) || '/';
+          const [, parentNodesByPath] = await to(
+            contensis.nodes.GetNodes(parentPath, 0)
+          );
+
+          if (!parentNodesByPath?.[0]?.id)
+            throw new Error(
+              `A node with id "${nodeId}" does not exist, and the parent node could not be found at path "${parentPath}".`
+            );
+          else parentNode = parentNodesByPath[0] as unknown as Node;
+        }
+        const pathSlug = nodePath?.substring(nodePath.lastIndexOf('/') + 1);
+
+        const createNode: ICreateNode = {
+          id: nodeId,
+          parentId: nodeUpdates.parentId || parentNode?.id,
+          projectId: currentProject,
+          displayName: displayName
+            ? {
+                [language]: displayName,
+              }
+            : nodeUpdates.displayName
+              ? nodeUpdates.displayName
+              : pathSlug
+                ? {
+                    [language]: pathSlug,
+                  }
+                : (undefined as any),
+          slug: slug
+            ? {
+                [language]: slug,
+              }
+            : nodeUpdates.slug
+              ? nodeUpdates.slug
+              : pathSlug
+                ? {
+                    [language]: pathSlug,
+                  }
+                : (undefined as any),
+          entryId: nodeUpdates.entryId,
+          isCanonical: nodeUpdates.isCanonical,
+          renderer: nodeUpdates.renderer,
+          proxy: nodeUpdates.proxy,
+          includeInMenu: nodeUpdates.includeInMenu,
+        };
+
+        // Validate createNode
+        updateNode = createNode as Node;
+      } else {
+        updateNode = { ...existingNode, ...nodeUpdates };
+      }
+
+      if (updateNode) {
+        log.info(messages.nodes.setPayload());
+        log.object(updateNode);
+        const [err, newNode] = await contensis.source.repo.UpdateOrCreateNode(
+          existingNode as Node,
+          updateNode
+        );
+
+        if (err)
+          log.error(
+            messages.nodes[existingNode ? 'failedSet' : 'failedCreate'](
+              currentEnv,
+              nodePathOrId
+            ),
+            err
+          );
+        else if (newNode) {
+          log.success(
+            messages.nodes[existingNode ? 'set' : 'created'](
+              currentEnv,
+              newNode.id
+            )
+          );
+
+          await this.HandleFormattingAndOutput(newNode, log.object);
+        }
+      }
+    }
+  };
+
   PrintWebhookSubscriptions = async (subscriptionIdsOrNames?: string[]) => {
     const { currentEnv, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -3372,7 +3511,6 @@ class ContensisCli {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   PrintRenderers = async (rendererId?: string) => {
     const { currentEnv, env, log, messages } = this;
     const contensis = await this.ConnectContensis();
@@ -3381,19 +3519,27 @@ class ContensisCli {
       const [err, renderers] = await contensis.renderers.GetRenderers();
 
       if (Array.isArray(renderers)) {
-        await this.HandleFormattingAndOutput(renderers, () => {
+        const result = rendererId
+          ? ([renderers.find(r => r.id === rendererId)].filter(
+              Boolean
+            ) as Renderer[])
+          : renderers || [];
+
+        await this.HandleFormattingAndOutput(result, () => {
           // print the renderers to console
           log.success(messages.renderers.list(currentEnv, env.currentProject));
           for (const {
+            uuid,
             id,
             description,
             assignedContentTypes,
             rules,
             version,
-          } of renderers) {
+          } of result) {
             console.log(
               `  - ${id} [${version.versionNo}] ${log.infoText`${description}`}`
             );
+            console.log(log.infoText`      uuid: ${uuid}`);
             if (assignedContentTypes?.length)
               console.log(
                 log.infoText`      assignedContentTypes: ${assignedContentTypes.join(
@@ -3409,7 +3555,7 @@ class ContensisCli {
                 );
           }
         });
-        return renderers;
+        return result;
       }
 
       if (err) {

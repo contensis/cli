@@ -72,6 +72,54 @@ Example call:
     });
 
   create
+    .command('node')
+    .description('create a new site view node')
+    .argument('<"node path or id">', 'the path or id of the node to create')
+    .argument(
+      '["display name"]',
+      'provide a separate display name for the node (optional)'
+    )
+    .argument(
+      '["slug"]',
+      'provide a slug for the node (defaults to slug from provided node path)'
+    )
+    .option(
+      '--include-in-menu',
+      'set include in menu flag on the created node',
+      false
+    )
+    .option(
+      '--language <language>',
+      'language of the node to create (defaults to current project primary language)'
+    )
+    .option('--entry-id <entryId>', 'attach an entry to the node')
+    .usage(
+      '<"node path or id"> ["display name"] (both args in "double quotes")'
+    )
+    .addHelpText(
+      'after',
+      `
+Example call:
+  > create node /test "Test Node" --include-in-menu\n`
+    )
+    .action(
+      async (
+        pathOrId: string,
+        displayName: string,
+        slug: string,
+        opts: any
+      ) => {
+        await cliCommand(['create', 'node', pathOrId], opts).CreateOrUpdateNode(
+          pathOrId,
+          opts,
+          displayName,
+          slug,
+          opts.language
+        );
+      }
+    );
+
+  create
     .command('role')
     .description('create a new role')
     .argument('<"Role name">', 'the name of the role to create')

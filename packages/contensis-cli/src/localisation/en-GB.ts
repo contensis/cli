@@ -188,6 +188,14 @@ export const LogMessages = {
         depth ? ` to a depth of ${depth}` : ``
       }\n`,
     noChange: (env: string) => `[${env}] No changes to be made`,
+    setPayload: () => `Updating node with details\n`,
+    set: (env: string) => `[${env}] Succesfully updated node\n`,
+    failedSet: (env: string, name?: string) =>
+      `[${env}] Unable to update node ${Logger.highlightText(name)}`,
+    created: (env: string, name: string) =>
+      `[${env}] Created node ${Logger.highlightText(name)}\n`,
+    failedCreate: (env: string, name?: string) =>
+      `[${env}] Unable to create node ${Logger.highlightText(name)}`,
   },
   contenttypes: {
     list: (projectId: string) =>
