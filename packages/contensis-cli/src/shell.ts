@@ -142,12 +142,15 @@ class ContensisShell {
         'login',
         'list projects',
         'set project',
-        ...(this.env?.projects || []).map(project => `set project ${project.id}`)
+        ...(this.env?.projects || []).map(
+          project => `set project ${project.id}`
+        )
       );
     if (userId)
       availableCommands.push(
         'copy field',
         'create key',
+        'create node',
         'create project',
         'create role',
         'create tag',
@@ -208,6 +211,8 @@ class ContensisShell {
         'remove tags',
         'remove tags in',
         'remove taggroup',
+        'set node entry',
+        'set node renderer',
         'set project name',
         'set project description',
         'set role name',
