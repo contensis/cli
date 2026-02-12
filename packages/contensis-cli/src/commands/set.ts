@@ -1,4 +1,4 @@
-import { Argument, Command } from 'commander';
+import { Argument, Command, Option } from 'commander';
 import { cliCommand } from '~/services/ContensisCliService';
 import { shell } from '~/shell';
 
@@ -178,6 +178,21 @@ Example call:
       '--entry-languages [entry-languages...]',
       'the entry languages to add to the role permissions'
     )
+    .addOption(
+      new Option(
+        '--block-actions [block-actions...]',
+        'the block actions to add to the role permissions'
+      ).choices([
+        'push',
+        'release',
+        'manageLive',
+        'manualStartStop',
+        'markAsBroken',
+        'delete',
+        'view',
+        '*',
+      ])
+    )
     .addHelpText(
       'after',
       `
@@ -194,6 +209,9 @@ Example call:
               actions: opts.entryActions || [],
               languages: opts.entryLanguages || [],
             })),
+            blocks: opts.blockActions
+              ? { actions: opts.blockActions }
+              : undefined,
           },
         }
       );
