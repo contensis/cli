@@ -222,8 +222,22 @@ Example call:
           },
           repositoryUrl: {
             $path: ['repositoryUrl', 'CI_PROJECT_URL', 'GITHUB_REPOSITORY'],
-            $formatting: (url: string, { GITHUB_ACTIONS }) => {
-              if (GITHUB_ACTIONS) url = `https://github.com/${url}`;
+            $formatting: (
+              url: string,
+              {
+                GITHUB_ACTIONS,
+                repositoryUrl,
+                CI_PROJECT_URL,
+                GITHUB_REPOSITORY,
+              }
+            ) => {
+              // Temporary logging
+              console.log(`repositoryUrl ${repositoryUrl}`);
+              console.log(`CI_PROJECT_URL ${CI_PROJECT_URL}`);
+              console.log(`GITHUB_REPOSITORY ${GITHUB_REPOSITORY}`);
+
+              if (GITHUB_ACTIONS && !url.startsWith(`https://`))
+                url = `https://github.com/${url}`;
 
               if (url && !url.endsWith('.git')) return `${url}.git`;
               return url;
