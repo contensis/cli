@@ -2886,6 +2886,7 @@ class ContensisCli {
       if (updateNode) {
         log.info(messages.nodes.setPayload());
         log.object(updateNode);
+        log.raw('');
         const [err, newNode] = await contensis.source.repo.UpdateOrCreateNode(
           existingNode as Node,
           updateNode
