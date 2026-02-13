@@ -59,7 +59,7 @@ jobs:
 
       - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/cli-action
-        uses: contensis/cli-action@v1
+        uses: contensis/cli-action@docker-version-fix
         with:
           cli-version: latest
           command: get entries
