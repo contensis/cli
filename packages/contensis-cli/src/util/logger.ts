@@ -322,11 +322,10 @@ export const logError: LogErrorFunc = (
 export const addNewLines = (
   message = '',
   newLineSeparater = '\n',
-  atPosition = process.stdout.columns
+  atPosition = process.stdout.columns || 0
 ) => {
-  if (message === '' || atPosition === 0) {
-    return '';
-  }
+  if (message === '') return '';
+  if (atPosition === 0) return message;
 
   let result = '';
   let lengthCounter = 0;
