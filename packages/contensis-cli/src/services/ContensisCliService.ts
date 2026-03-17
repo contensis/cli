@@ -2405,7 +2405,12 @@ class ContensisCli {
         !result?.errors?.length &&
         ((!commit && result?.entriesToMigrate[currentProject].totalCount) ||
           (commit &&
-            (result?.migrateResult?.created || result?.migrateResult?.updated)))
+            (result?.migrateResult?.created ||
+              result?.migrateResult?.updated ||
+              result?.nodesResult?.created ||
+              result?.nodesResult?.updated ||
+              result?.tagsResult?.created ||
+              result?.tagsResult?.updated)))
       ) {
         log.success(
           messages.entries.imported(
