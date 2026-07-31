@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.7.0](https://github.com/contensis/cli/compare/contensis-cli-v1.6.0...contensis-cli-v1.7.0) (2026-07-31)
+
+
+### Features
+
+* add `--log-level` option to dev requests command ([b7e1209](https://github.com/contensis/cli/commit/b7e1209fa61e93b6fc5b791ab6e2fe47042cacc1))
+* add `--makeLive` option to push block command ([73425fc](https://github.com/contensis/cli/commit/73425fc068c7a8acf40dba600655d104cb899e22))
+* add `--override` option to dev requests command to support configuration for specific blocks ([9e64d82](https://github.com/contensis/cli/commit/9e64d82b4becd19adae39e2bc839a059f94188a3))
+* added `--block-actions` option in `set role permissions` command ([9549cd4](https://github.com/contensis/cli/commit/9549cd40107540f2f97df0e3eae57d70acccabac))
+* added `create node` command ([c7aaadf](https://github.com/contensis/cli/commit/c7aaadfce58d280ea475f4aff48ee7818ce5be12))
+* added `set node entry` and `set node renderer` commands ([5a726f8](https://github.com/contensis/cli/commit/5a726f8b817faea7f9361e954a4dfe752f7d5b76))
+* added support for arm64 ([4a08aef](https://github.com/contensis/cli/commit/4a08aef1be53753f643f7ce218c6deb282270e4f))
+* import child nodes to a specified depth with new `--depth` option in import nodes ([5e70cef](https://github.com/contensis/cli/commit/5e70cef060989e9283b28aed1bad66ffe8ee5ad3))
+* import webhooks command ([47dae7d](https://github.com/contensis/cli/commit/47dae7d984639fa8460c2344042e2fef91643bfb))
+* support new `html_to_canvas` custom filter in liquid templates ([ad55d6c](https://github.com/contensis/cli/commit/ad55d6ca7c68e2a400f49eeb338c081571238a3f))
+
+
+### Bug Fixes
+
+* `ERR_INVALID_ARG_TYPE` when downloading releases in dev requests command ([9c076d6](https://github.com/contensis/cli/commit/9c076d6b8a618e4bc32837908da92fdd7d759635))
+* better highlight enabled status in list webhooks command ([47dae7d](https://github.com/contensis/cli/commit/47dae7d984639fa8460c2344042e2fef91643bfb))
+* component field data inside canvas fields not mapped when allowing all types to be used in a "kitchen sink" canvas field configuration ([86ee6e1](https://github.com/contensis/cli/commit/86ee6e1ddda6dadbbde830f68840732c185fc843))
+* do not fetch children of nodes that were resolved as dependents of entries ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* fallback to the first block branch if no overrides or default branch exists for a block in dev requests command ([9e64d82](https://github.com/contensis/cli/commit/9e64d82b4becd19adae39e2bc839a059f94188a3))
+* falsely detecting changes to existing nodes when a partial node is supplied in the payload ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* handle missing binary when launching local request handler module with dev requests command ([c1502e3](https://github.com/contensis/cli/commit/c1502e3fe8be619ec4fc18fcb7fba38a30bd4178))
+* ignore errors generated when building default nodes for models migrations ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* inaccurate console output when migrating a mix of assets with `import entries` and no entries have been updated ([24a0a90](https://github.com/contensis/cli/commit/24a0a903365144bd253d0d1514e814da10637125))
+* log fetch errors when hydrating source and target repositories ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* potential hang when running `import nodes` command in a non-interactive terminal such as Docker in CI ([5ba5620](https://github.com/contensis/cli/commit/5ba56204b67a47b929827947bac14d92c4603fe7))
+* small formatting issue in push block payload with github docker changes as of today ([9db7cd7](https://github.com/contensis/cli/commit/9db7cd7a21391c398c63b3a5189d0fa3c11c0856))
+* typo in help for import entries ([9d477db](https://github.com/contensis/cli/commit/9d477db30351985f353f3d5b89ef2fb90b149915))
+* validate image dimensions against the resolved asset instead of the value from the link field in the parent entry removing false warnings in entries migrations ([614bf79](https://github.com/contensis/cli/commit/614bf795d1d23b0a7e75ec32f8ca0868c2a0414b))
+* Windows executables built with older versions of pkg and Node, exe build is now consistent across all platforms ([47981c9](https://github.com/contensis/cli/commit/47981c9a4e75384ee5bbf6e0d598793cb7ad8094))
+
 ## [1.6.0](https://github.com/contensis/cli/compare/contensis-cli-v1.5.0...contensis-cli-v1.6.0) (2025-12-11)
 
 
