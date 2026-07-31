@@ -352,3 +352,115 @@ Or we can refer to other fields in the `entry` variable
 ```handlebars
 {{entry.text}}{% if entry.heading %} - {{entry.heading}}{% endif %}
 ```
+
+### Transforming fields inside Canvas blocks
+
+Canvas fields contain an array of blocks (objects with `id`, `type`, `value`, `properties`). Some blocks are components (`_component` type with `properties.component`) that hold nested fields inside `value`. To transform those inner fields - for example converting a rich text field inside a component to canvas format - you need to rebuild the canvas array by iterating over the blocks and selectively transforming the ones you need.
+
+This is done using the `capture` tag to build the output as a JSON string, then `from_json | json` to validate and minify the result.
+
+#### Example: Convert rich text to canvas inside a component block
+
+Given a canvas field containing a `linkedComponent` block with a `richText` field:
+
+```json
+{
+  "id": "5b03fe6a",
+  "type": "_component",
+  "properties": { "component": "linkedComponent" },
+  "value": {
+    "entry": [{ "sys": { "id": "abc123", "dataFormat": "entry" } }],
+    "title": "My component",
+    "richText": "<h2>Original rich text</h2>",
+    "canvas": null
+  }
+}
+```
+
+This template converts `richText` to canvas via `html_to_canvas`, storing it in the `canvas` field. Other blocks pass through unchanged:
+
+```handlebars
+{% capture out %}
+[
+{%- for b in value -%}
+{%- if forloop.index0 > 0 %},{% endif -%}
+{%- if b.properties.component == "linkedComponent" -%}
+{
+  "id": {{ b.id | json }},
+  "type": {{ b.type | json }},
+  "properties": {{ b.properties | json }},
+  "value": {
+    "entry": {{ b.value.entry | json }},
+    "title": {{ b.value.title | json }},
+    "richText": {{ b.value.richText | json }},
+    "canvas": {% if b.value.richText and b.value.richText != "" %}{{ b.value.richText | html_to_canvas | json }}{% else %}{{ b.value.canvas | json }}{% endif %}
+  }
+}
+{%- else -%}
+{{ b | json }}
+{%- endif -%}
+{%- endfor -%}
+]
+{% endcapture %}
+{{ out | from_json | json }}
+```
+
+#### How it works
+
+1. `{% capture out %}` starts building the output as a JSON string
+2. The outer `[` opens the canvas array
+3. `{% for b in value %}` iterates over every block in the canvas
+4. `{% if b.properties.component == "linkedComponent" %}` matches the block we want to transform
+5. Each field in the block is mapped with `|json` to ensure valid JSON output (strings get quotes, objects serialize correctly)
+6. The `canvas` field conditionally applies `html_to_canvas` when `richText` exists, otherwise passes the existing value through
+7. `{% else %}` passes non-matching blocks through unchanged via `{{ b | json }}`
+8. `{% endcapture %}` closes the string, then `{{ out | from_json | json }}` parses and re-serializes to validate the JSON
+
+#### Why `|json` is needed on every mapped field
+
+Without it, strings would render bare (invalid JSON: `hello` instead of `"hello"`) and objects would render as `[object Object]`. The `|json` filter handles strings, objects, arrays, nulls, and booleans correctly.
+
+#### Handling nested component blocks
+
+If a canvas block contains a repeatable array of sub-components, you can nest the same pattern. For example, a `nestingLinkedComponent` block has `linkedComponent[]` items, each with their own `richText` and `canvas`:
+
+```handlebars
+{% capture out %}
+[
+{%- for b in value -%}
+{%- if forloop.index0 > 0 %},{% endif -%}
+{%- if b.properties.component == "nestingLinkedComponent" -%}
+{
+  "id": {{ b.id | json }},
+  "type": {{ b.type | json }},
+  "properties": {{ b.properties | json }},
+  "value": {
+    "linkedComponent": [
+    {%- for it in b.value.linkedComponent -%}
+    {%- if forloop.index0 > 0 %},{% endif -%}
+    {
+      "entry": {{ it.entry | json }},
+      "title": {{ it.title | json }},
+      "richText": {{ it.richText | json }},
+      "canvas": {% if it.richText and it.richText != "" %}{{ it.richText | html_to_canvas | json }}{% else %}{{ it.canvas | json }}{% endif %}
+    }
+    {%- endfor -%}
+    ],
+    "singleLinkedComponent": {
+      "entry": {{ b.value.singleLinkedComponent.entry | json }},
+      "title": {{ b.value.singleLinkedComponent.title | json }},
+      "richText": {{ b.value.singleLinkedComponent.richText | json }},
+      "canvas": {% if b.value.singleLinkedComponent.richText and b.value.singleLinkedComponent.richText != "" %}{{ b.value.singleLinkedComponent.richText | html_to_canvas | json }}{% else %}{{ b.value.singleLinkedComponent.canvas | json }}{% endif %}
+    }
+  }
+}
+{%- else -%}
+{{ b | json }}
+{%- endif -%}
+{%- endfor -%}
+]
+{% endcapture %}
+{{ out | from_json | json }}
+```
+
+The same `richText` to `canvas` conversion is applied to each item in the repeatable `linkedComponent` array and to the singular `singleLinkedComponent` block.
