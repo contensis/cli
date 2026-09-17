@@ -35,18 +35,19 @@ Example call:
     .command('renderer')
     .description('assign a renderer to a node')
     .argument('<"node path or id">', 'the path or id of the node to update')
-    .argument('<rendererUuid>', 'the renderer uuid to assign to the node')
+    .argument('<rendererUuidOrName>', 'the renderer uuid, id or name to assign to the node')
     .option(
       '--is-partial-match-root',
       'should the renderer be used as the partial match root for the node',
       false
     )
-    .usage('<"node path or id"> <rendererUuid>')
+    .usage('<"node path or id"> <rendererUuidOrName>')
     .addHelpText(
       'after',
       `
 Example call:
-  > set node renderer /path 1502f64e-e9b1-436b-b62f-e273f639ecb6 --is-partial-match-root\n`
+  > set node renderer /path 1502f64e-e9b1-436b-b62f-e273f639ecb6 --is-partial-match-root
+  > set node renderer /path my-block --is-partial-match-root\n`
     )
     .action(async (nodePathOrId: string, rendererId: string, opts) => {
       await cliCommand(['set', 'node', 'renderer'], opts).CreateOrUpdateNode(

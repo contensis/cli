@@ -325,6 +325,10 @@ export const LogMessages = {
       `[${env}] Unable to find renderer ${Logger.highlightText(
         name
       )} in project ${projectId}`,
+    resolved: (env: string, name: string, uuid: string) =>
+      `[${env}] Resolved renderer ${Logger.highlightText(
+        name
+      )} to uuid ${Logger.highlightText(uuid)}`,
     created: (env: string, name: string, projectId: string) =>
       `[${env}] Created renderer ${Logger.highlightText(
         name

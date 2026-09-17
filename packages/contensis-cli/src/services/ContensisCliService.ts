@@ -2819,7 +2819,32 @@ class ContensisCli {
         if (nodeById) existingNode = nodeById;
       }
 
-      // TODO: resolve any renderer id to its uuid so we can support passing the regular id for ease of use
+      // Resolve a friendly renderer id/name to its uuid for ease of use
+      const rendererRef = nodeUpdates.renderer?.id;
+      if (rendererRef && !isUuid(rendererRef)) {
+        const [, renderers] = await contensis.renderers.GetRenderers();
+        const match = renderers?.find(
+          r =>
+            r.id?.toLowerCase() === rendererRef.toLowerCase() ||
+            r.name?.toLowerCase() === rendererRef.toLowerCase()
+        );
+        if (match) {
+          log.info(
+            messages.renderers.resolved(
+              currentEnv,
+              rendererRef,
+              match.uuid
+            )
+          );
+          nodeUpdates.renderer.id = match.uuid;
+        } else {
+          log.error(
+            messages.renderers.failedGet(currentEnv, rendererRef, currentProject)
+          );
+          return;
+        }
+      }
+
       if (!existingNode) {
         // Build a node object to create or reject if there is not enough data
 
