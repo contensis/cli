@@ -5,6 +5,7 @@ import inquirer from 'inquirer';
 import fetch from 'node-fetch';
 import path from 'path';
 import clone from 'rfdc';
+import type { CommanderError } from 'commander';
 
 import { Component, ContentType, Project } from 'contensis-core-api';
 import {
@@ -74,9 +75,9 @@ import { GetTagGroupsArgs } from 'migratortron/dist/services/TagGroupsMigrationS
 let insecurePasswordWarningShown = false;
 
 class ContensisCli {
-  static quit = (error?: Error) => {
+  static quit = (error?: CommanderError) => {
     process.removeAllListeners('exit');
-    const exitCode = error ? 1 : 0;
+    const exitCode = error?.exitCode ?? (error ? 1 : 0);
 
     // console.info(`\nExiting contensis-cli with exit code: ${exitCode}\n`);
     process.exit(exitCode);
