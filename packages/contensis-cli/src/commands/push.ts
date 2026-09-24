@@ -212,6 +212,13 @@ Example call:
         },
         projectId: () => cli.env.currentProject || '',
         source: {
+          // Provenance resolution order per field:
+          //  1. explicit cli flag (camelCase key from commander opts)
+          //  2. CONTENSIS_* env var - a safe channel for CI actions to supply
+          //     values without embedding them in the command string (where mapped)
+          //  3. generic CI variables the runner exports
+          // The mapper skips empty/undefined candidates and uses the first
+          // non-empty value, so unset optional vars never mask a fallback.
           provider: {
             $path: ['provider'],
             $return: (provider: string, { GITHUB_ACTIONS, GITLAB_CI }) => {
@@ -234,7 +241,11 @@ Example call:
           commit: {
             id: ['commitId', 'CI_COMMIT_SHORT_SHA', 'GITHUB_SHA'],
             message: {
-              $path: ['commitMessage', 'CI_COMMIT_MESSAGE'], // ${{ github.event.head_commit.message }}
+              $path: [
+                'commitMessage',
+                'CONTENSIS_COMMIT_MESSAGE',
+                'CI_COMMIT_MESSAGE',
+              ], // ${{ github.event.head_commit.message }}
               $formatting: (msg?: string) =>
                 msg?.replace(/\\n/g, ' ').replace(/\\n/g, ' ').trim(),
             },
