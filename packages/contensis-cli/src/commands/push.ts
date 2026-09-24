@@ -228,7 +228,12 @@ Example call:
             },
           },
           repositoryUrl: {
-            $path: ['repositoryUrl', 'CI_PROJECT_URL', 'GITHUB_REPOSITORY'],
+            $path: [
+              'repositoryUrl',
+              'CONTENSIS_REPOSITORY_URL',
+              'CI_PROJECT_URL',
+              'GITHUB_REPOSITORY',
+            ],
             $formatting: (url: string, { GITHUB_ACTIONS }) => {
               if (GITHUB_ACTIONS && !url.startsWith(`https://`))
                 url = `https://github.com/${url}`;
@@ -239,7 +244,12 @@ Example call:
           },
           branch: ['branch', 'CI_COMMIT_REF_NAME', 'GITHUB_REF_NAME'],
           commit: {
-            id: ['commitId', 'CI_COMMIT_SHORT_SHA', 'GITHUB_SHA'],
+            id: [
+              'commitId',
+              'CONTENSIS_COMMIT_ID',
+              'CI_COMMIT_SHORT_SHA',
+              'GITHUB_SHA',
+            ],
             message: {
               $path: [
                 'commitMessage',
@@ -249,10 +259,20 @@ Example call:
               $formatting: (msg?: string) =>
                 msg?.replace(/\\n/g, ' ').replace(/\\n/g, ' ').trim(),
             },
-            dateTime: ['commitDatetime', 'CI_COMMIT_TIMESTAMP'], // ${{ github.event.head_commit.timestamp }}
-            authorEmail: ['authorEmail', 'GITLAB_USER_EMAIL', 'GITHUB_ACTOR'], // ${{ github.event.head_commit.author.email }}
+            dateTime: [
+              'commitDatetime',
+              'CONTENSIS_COMMIT_DATETIME',
+              'CI_COMMIT_TIMESTAMP',
+            ], // ${{ github.event.head_commit.timestamp }}
+            authorEmail: [
+              'authorEmail',
+              'CONTENSIS_AUTHOR_EMAIL',
+              'GITLAB_USER_EMAIL',
+              'GITHUB_ACTOR',
+            ], // ${{ github.event.head_commit.author.email }}
             committerEmail: [
               'committerEmail',
+              'CONTENSIS_COMMITTER_EMAIL',
               'GITLAB_USER_EMAIL',
               'GITHUB_TRIGGERING_ACTOR',
             ], // ${{ github.event.head_commit.committer.email }}
