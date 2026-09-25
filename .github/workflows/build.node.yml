@@ -2,6 +2,13 @@ name: Node.js CI
 
 on:
   workflow_call:
+    outputs:
+      npm_tag:
+        description: 'The npm dist-tag to publish under ("prerelease" or "latest")'
+        value: ${{ jobs.build.outputs.npm_tag }}
+      releases_created:
+        description: 'Whether release-please created a release from this push'
+        value: ${{ jobs.build.outputs.releases_created }}
 
 permissions:
   contents: write # for release-please

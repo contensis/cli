@@ -1,9 +1,16 @@
+const fs = require('fs');
 const { rimraf } = require('rimraf');
 const esbuild = require('esbuild');
 const chalk = require('chalk');
 const { globPlugin } = require('esbuild-plugin-glob');
 const { nodeExternalsPlugin } = require('esbuild-node-externals');
 const { replaceTscAliasPaths } = require('tsc-alias');
+
+// embed the current package version into the build
+// (package.json is the single source of truth; this used to be a `prebuild`
+// npm lifecycle script, which lerna/yarn builds never fire - see release 1.7.0)
+const { version } = require('./package.json');
+fs.writeFileSync('./src/version.ts', `export const LIB_VERSION = ${JSON.stringify(version)};\n`);
 
 const completed = `${chalk.green('[contensis-cli]')} Build successful 👍\n`;
 

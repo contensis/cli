@@ -33,3 +33,4 @@ jobs:
     uses: ./.github/workflows/build.exe.yml
     with:
       release: ${{ github.event_name == 'release' || inputs.tag }}
+      version: ${{ needs.node.outputs.version }} # only prints in workflow logs

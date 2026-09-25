@@ -11,7 +11,9 @@ jobs:
     secrets: inherit
 
   docker:
-    if: contains(github.event.head_commit.message, '[nobuild]') != true
+    # skip when this push IS the release merge - the release workflow rebuilds
+    # and owns the latest/release/version tags (avoids the retag race with it)
+    if: contains(github.event.head_commit.message, '[nobuild]') != true && needs.node.outputs.releases_created != 'true'
     name: ghcr.io:latest
     # technically does not require node/build and could run in parallel
     needs: node

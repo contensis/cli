@@ -6,6 +6,10 @@ on:
       release:
         type: boolean
         default: false
+      version:
+        description: 'Version being built (informational - echoed in job logs; empty on prerelease runs)'
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       release:
@@ -123,6 +127,14 @@ jobs:
           cd bin && ls -lah 
           chmod +x contensis-cli
           echo "APP_VERSION=$(./contensis-cli --version)" >> $GITHUB_ENV
+
+      - name: Log built app version
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          echo "Release version context: ${RELEASE_VERSION:-n/a (prerelease build)}"
+          echo "Built executable version:  $APP_VERSION"
 
       - name: Run some tests with executable
         env:

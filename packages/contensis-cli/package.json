@@ -16,7 +16,6 @@
     "prestart": "npm run build",
     "start": "npm run cli",
     "dev:shell": "npm run prestart && nodemon --watch dist --inspect=9229 ./dist/shell.js",
-    "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "build": "node esbuild.config.js",
     "build:watch": "node esbuild.config.js --watch",
     "cli": "node --inspect=9229 ./cli.js",
