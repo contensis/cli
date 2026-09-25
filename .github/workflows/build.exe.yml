@@ -57,12 +57,12 @@ jobs:
       CHOCO_NUSPEC: installers/chocolatey/contensis-cli.nuspec
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: 'main'
 
       - name: Setup Node.js ${{ matrix.node-version }} to enable Corepack
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -70,7 +70,7 @@ jobs:
         run: corepack enable
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
           cache: yarn
@@ -151,7 +151,7 @@ jobs:
           WIN: Rename-Item -Path ".\bin\contensis-cli.exe" -NewName "${{ matrix.exeName }}"
 
       - name: Archive packaged artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: contensis-cli-${{ env.APP_VERSION }}-${{ matrix.fileName }}
           path: bin/contensis-cli*
@@ -177,24 +177,24 @@ jobs:
 
       - name: Package chocolatey release
         if: inputs.release && matrix.os == 'windows-2022'
-        uses: crazy-max/ghaction-chocolatey@v3
+        uses: crazy-max/ghaction-chocolatey@v4
         with:
           args: pack ${{ env.CHOCO_NUSPEC }} --version ${{ env.APP_VERSION }} --outputdirectory installers\chocolatey
 
       - name: Set chocolatey publish key
         if: inputs.release && matrix.os == 'windows-2022'
-        uses: crazy-max/ghaction-chocolatey@v3
+        uses: crazy-max/ghaction-chocolatey@v4
         with:
           args: apikey --key="'${{ secrets.CHOCOLATEY_API_KEY }}'" --source="'https://push.chocolatey.org/'"
 
       - name: Publish release to chocolatey
         if: inputs.release && matrix.os == 'windows-2022'
-        uses: crazy-max/ghaction-chocolatey@v3
+        uses: crazy-max/ghaction-chocolatey@v4
         with:
           args: push installers\chocolatey\contensis-cli.${{ env.APP_VERSION }}.nupkg --source="'https://push.chocolatey.org/'" --debug --verbose
 
         # Handle Homebrew version bump and release
-      - uses: mislav/bump-homebrew-formula-action@v3
+      - uses: mislav/bump-homebrew-formula-action@v4
         if: inputs.release && matrix.homebrewFormula
         env:
           COMMITTER_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}

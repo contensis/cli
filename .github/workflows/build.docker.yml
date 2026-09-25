@@ -13,13 +13,13 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: 'main'
 
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -59,7 +59,7 @@ jobs:
 
       - name: Get entries from Contensis (Test `contensis/cli-action`)
         # uses: ./.github/actions/cli-action
-        uses: contensis/cli-action@docker-version-fix
+        uses: contensis/cli-action@v1
         with:
           cli-version: latest
           command: get entries

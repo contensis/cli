@@ -23,7 +23,7 @@ jobs:
       # github.sha resolves to the release target commit on `release` events
       # and to the dispatched ref on `workflow_dispatch`, so the image is always
       # built from the exact sources being released (no retag of mutable :latest)
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Log into container registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
