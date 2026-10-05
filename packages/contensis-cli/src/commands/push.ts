@@ -195,8 +195,8 @@ Example call:
         blockId,
         imageUri,
         branch,
-        ...opts,
         ...process.env,
+        ...opts,
       };
 
       const blockRequest = mapJson(mapSourceVars, {
