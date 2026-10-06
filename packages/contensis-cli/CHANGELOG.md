@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.1](https://github.com/contensis/cli/compare/contensis-cli-v1.7.0...contensis-cli-v1.7.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* prevent environment variables of the same name overriding supplied CLI options (and defaults) in `push block` command ([8927407](https://github.com/contensis/cli/commit/89274070f6d0e1122e9aeb42f7c889760ef26c98))
+* releases showing incorrect version due to prebuild scripts not firing and resolved a docker release race condition ([31398bf](https://github.com/contensis/cli/commit/31398bf073e29c3e8bb75e40ea6c589c8fe61fc4))
+
 ## [1.7.0](https://github.com/contensis/cli/compare/contensis-cli-v1.6.0...contensis-cli-v1.7.0) (2026-09-24)
 
 
