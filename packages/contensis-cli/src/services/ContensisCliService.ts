@@ -692,7 +692,7 @@ class ContensisCli {
           )) {
             let color;
             try {
-              color = chalk.keyword((project as any).color);
+            color = chalk.keyword(project.color);
             } catch (ex) {
               Logger.debug(`${ex}`);
               color = chalk.white;

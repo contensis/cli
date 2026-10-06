@@ -3714,7 +3714,7 @@ __metadata:
     inquirer-command-prompt: "npm:^0.1.0"
     keytar: "npm:^7.9.0"
     lodash: "npm:^4.17.21"
-    migratortron: "npm:^1.0.0-beta.89"
+    migratortron: "npm:^1.0.0-beta.91"
     nanospinner: "npm:^1.2.0"
     node-fetch: "npm:^2.6.7"
     nodemon: "npm:^2.0.18"
@@ -3733,35 +3733,35 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"contensis-core-api@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "contensis-core-api@npm:1.2.1"
+"contensis-core-api@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "contensis-core-api@npm:1.2.5"
   dependencies:
     detect-node: "npm:^2.1.0"
     es6-promise: "npm:^4.2.6"
     tslib: "npm:^2.8.1"
-  checksum: 10c0/4ce4c54c9ac11f22b347cc012cacb4f028be91b67498ac6e98708c059589871a325e168da3f33643421f0c8f45044b6dff5bb40986b849a95c0bf362cf76d9ed
+  checksum: 10c0/2ccd20617683f7d8f27f738b43ff40e22b35b57331f8572d4a2f8882c5694b9ccc5d6600a98860d496b9d37aa90763ff922565161b328f2d4a8f023fbe028777
   languageName: node
   linkType: hard
 
-"contensis-delivery-api@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "contensis-delivery-api@npm:1.6.1"
+"contensis-delivery-api@npm:^1.6.3":
+  version: 1.6.3
+  resolution: "contensis-delivery-api@npm:1.6.3"
   dependencies:
-    contensis-core-api: "npm:^1.2.1"
+    contensis-core-api: "npm:^1.2.5"
     cross-fetch: "npm:^3.2.0"
     es6-promise: "npm:^4.2.8"
     tslib: "npm:^2.8.1"
     whatwg-fetch: "npm:^3.0.0"
-  checksum: 10c0/95f9ecce6aa5e1f254e9fdf3eda87525a1b6aecd4a51184f16ef1e8126df722b26532fa23b184375fa60aac0d0c50850f9024febb50d0d949f3f87555e082990
+  checksum: 10c0/d080252e7f14b3c822e340e7dec0f6048bf595d667292511d4da3b24e7cee6c0a8c19ebfa421e17e7d09998b408e6b4a5f370688994efb72af9c71c9e3ed3a37
   languageName: node
   linkType: hard
 
-"contensis-management-api@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "contensis-management-api@npm:2.4.0"
+"contensis-management-api@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "contensis-management-api@npm:2.4.1"
   dependencies:
-    contensis-core-api: "npm:^1.2.1"
+    contensis-core-api: "npm:^1.2.5"
     cross-fetch: "npm:^3.2.0"
     es6-promise: "npm:^4.2.8"
     form-data: "npm:^4.0.2"
@@ -3769,7 +3769,7 @@ __metadata:
     node-fetch: "npm:^2.7.0"
     tslib: "npm:^2.4.0"
     whatwg-fetch: "npm:^3.6.20"
-  checksum: 10c0/d2f0be78e68864a9f80a73894cf225d239a72ea155d7b6d96485678722e9cab95660cd273f1e75ca429f17722a528a098e4326606d0cc687bbe07d8d8c0f4d44
+  checksum: 10c0/935e8fde3dcdefe67ab2f1cd6285c370d31a65e3517aa4d4119c813661e71b890d1d013d9b8116b4c818e4335cfbe6662886a01d81ce03192bd8a6183782d1d1
   languageName: node
   linkType: hard
 
@@ -4534,7 +4534,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"entities@npm:^4.2.0, entities@npm:^4.4.0, entities@npm:^4.5.0":
+"entities@npm:^4.2.0, entities@npm:^4.5.0":
   version: 4.5.0
   resolution: "entities@npm:4.5.0"
   checksum: 10c0/5b039739f7621f5d1ad996715e53d964035f75ad3b9a4d38c6b3804bb226e282ffeae2443624d8fdd9c47d8e926ae9ac009c54671243f0c3294c26af7cc85250
@@ -5671,7 +5671,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.0, form-data@npm:^4.0.2":
+"form-data@npm:^4.0.0":
   version: 4.0.3
   resolution: "form-data@npm:4.0.3"
   dependencies:
@@ -5681,6 +5681,19 @@ __metadata:
     hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
   checksum: 10c0/f0cf45873d600110b5fadf5804478377694f73a1ed97aaa370a74c90cebd7fe6e845a081171668a5476477d0d55a73a4e03d6682968fa8661eac2a81d651fcdb
+  languageName: node
+  linkType: hard
+
+"form-data@npm:^4.0.2":
+  version: 4.0.6
+  resolution: "form-data@npm:4.0.6"
+  dependencies:
+    asynckit: "npm:^0.4.0"
+    combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.4"
+    mime-types: "npm:^2.1.35"
+  checksum: 10c0/43947a77bf0ff45c6ceed789778982d47a3f3e720a74b71721174ebf3310a5f1a8be1d6b38a3ee3688e8a18a2c4273073ec0844cd37efda3eaf46d41c9c318ff
   languageName: node
   linkType: hard
 
@@ -6331,6 +6344,15 @@ __metadata:
   dependencies:
     function-bind: "npm:^1.1.2"
   checksum: 10c0/3769d434703b8ac66b209a4cca0737519925bbdb61dd887f93a16372b14694c63ff4e797686d87c90f08168e81082248b9b028bad60d4da9e0d1148766f56eb9
+  languageName: node
+  linkType: hard
+
+"hasown@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "hasown@npm:2.0.4"
+  dependencies:
+    function-bind: "npm:^1.1.2"
+  checksum: 10c0/2d8de939e270b70618f8cebb69746620db10617dbb495bc66ddad326955ea24d3ca4af133aff3eb7c1853e0218f867bc2b050ec26fe02e3aea58f880ffc5e506
   languageName: node
   linkType: hard
 
@@ -7677,12 +7699,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"linkify-it@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "linkify-it@npm:5.0.0"
+"linkify-it@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "linkify-it@npm:5.0.2"
   dependencies:
     uc.micro: "npm:^2.0.0"
-  checksum: 10c0/ff4abbcdfa2003472fc3eb4b8e60905ec97718e11e33cca52059919a4c80cc0e0c2a14d23e23d8c00e5402bc5a885cdba8ca053a11483ab3cc8b3c7a52f88e2d
+  checksum: 10c0/dd70b1735a13d41a2cff0a058ac3771166038f23f6aff004dd53873cf985c64b107902fe0b544a5b3d1ff6e63249cf9c648fb3ae9f285481db48f56887adb0d6
   languageName: node
   linkType: hard
 
@@ -7893,18 +7915,18 @@ __metadata:
   linkType: hard
 
 "markdown-it@npm:^14.0.0":
-  version: 14.1.0
-  resolution: "markdown-it@npm:14.1.0"
+  version: 14.3.2
+  resolution: "markdown-it@npm:14.3.2"
   dependencies:
     argparse: "npm:^2.0.1"
-    entities: "npm:^4.4.0"
-    linkify-it: "npm:^5.0.0"
+    entities: "npm:^4.5.0"
+    linkify-it: "npm:^5.0.2"
     mdurl: "npm:^2.0.0"
     punycode.js: "npm:^2.3.1"
     uc.micro: "npm:^2.1.0"
   bin:
     markdown-it: bin/markdown-it.mjs
-  checksum: 10c0/9a6bb444181d2db7016a4173ae56a95a62c84d4cbfb6916a399b11d3e6581bf1cc2e4e1d07a2f022ae72c25f56db90fbe1e529fca16fbf9541659dc53480d4b4
+  checksum: 10c0/51d03a244bbacc84aa7229fd784ccc16a76cb853cf93f668c4dfc1e9eb22d03138678e7743accac2304e03151a995068492fde56c7a9fbe6785b4169036cf590
   languageName: node
   linkType: hard
 
@@ -7916,9 +7938,9 @@ __metadata:
   linkType: hard
 
 "mdurl@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "mdurl@npm:2.0.0"
-  checksum: 10c0/633db522272f75ce4788440669137c77540d74a83e9015666a9557a152c02e245b192edc20bc90ae953bbab727503994a53b236b4d9c99bdaee594d0e7dd2ce0
+  version: 2.1.0
+  resolution: "mdurl@npm:2.1.0"
+  checksum: 10c0/aed11a75b791d596c7104fa6a3d84680e87cd2bfdb32ecfe512e795481d40a64b21d627b325ffd58aadcd15faf7498ac06130b8f198ebec437aceeead24bd1b1
   languageName: node
   linkType: hard
 
@@ -7979,44 +8001,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"migratortron@npm:^1.0.0-beta.89":
-  version: 1.0.0-beta.89
-  resolution: "migratortron@npm:1.0.0-beta.89"
-  dependencies:
-    "@contensis/canvas-html": "npm:^1.3.0"
-    "@contensis/html-canvas": "npm:^1.2.0"
-    await-to-js: "npm:^3.0.0"
-    byte-size: "npm:^9.0.1"
-    chalk: "npm:^4.1.2"
-    console-table-printer: "npm:^2.12.1"
-    contensis-delivery-api: "npm:^1.6.1"
-    contensis-management-api: "npm:^2.4.0"
-    dateformat: "npm:^4.6.3"
-    deep-cleaner: "npm:^1.2.1"
-    deep-sort-object: "npm:^1.0.2"
-    deepmerge: "npm:^4.3.1"
-    enterprise-fetch: "npm:^2.0.1"
-    express: "npm:^5.1.0"
-    jsonpath-mapper: "npm:^2.0.3"
-    liquidjs: "npm:^10.21.0"
-    lodash: "npm:^4.17.21"
-    minimist: "npm:^1.2.8"
-    module-alias: "npm:^2.2.3"
-    nock: "npm:^14.0.10"
-    p-queue: "npm:^6.6.2"
-    pluralize: "npm:^8.0.0"
-    printable-characters: "npm:^1.0.42"
-    progress: "npm:^2.0.3"
-    prompts: "npm:^2.4.2"
-    rfdc: "npm:^1.4.1"
-    uuid-by-string: "npm:^4.0.0"
-  bin:
-    migratortron: cli.js
-  checksum: 10c0/537bb06ddf21fba92ad1c61f68d240ceb7b38bb535009e2cc2ee0bcbad8d76561f247c7fad08503909c1deb585d8bc71e117fc8217d00dbe6ed56bab15d6e0c4
-  languageName: node
-  linkType: hard
-
-"migratortron@workspace:packages/migratortron-1000":
+"migratortron@npm:^1.0.0-beta.91, migratortron@workspace:packages/migratortron-1000":
   version: 0.0.0-use.local
   resolution: "migratortron@workspace:packages/migratortron-1000"
   dependencies:
@@ -8037,8 +8022,8 @@ __metadata:
     chai: "npm:^4.5.0"
     chalk: "npm:^4.1.2"
     console-table-printer: "npm:^2.12.1"
-    contensis-delivery-api: "npm:^1.6.1"
-    contensis-management-api: "npm:^2.4.0"
+    contensis-delivery-api: "npm:^1.6.3"
+    contensis-management-api: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     dateformat: "npm:^4.6.3"
     deep-cleaner: "npm:^1.2.1"
