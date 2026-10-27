@@ -264,7 +264,8 @@ class ContensisShell {
               );
             }
           } catch (ex: any) {
-            const str = ex.toString();
+            // a rejection can carry anything, including nothing at all
+            const str = String(ex);
             if (!str.includes('CommanderError'))
               logError(
                 ex,

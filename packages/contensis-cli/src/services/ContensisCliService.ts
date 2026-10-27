@@ -3427,78 +3427,84 @@ class ContensisCli {
         let needsNewLine = false;
         let counter = 0;
 
-        // remove existing listeners and add them back afterwards
+        // Ctrl+C belongs to the shell again only once the loop is done, so the
+        // handler stays mounted for the whole follow - including a poll still
+        // in flight - and the saved listeners go back in the `finally`.
         const listeners = process.listeners('SIGINT');
 
         process.removeAllListeners('SIGINT');
+
+        const delay = promiseDelay(5 * 1000, null);
+        const stopFollowing = () => {
+          following = false;
+          delay.cancel();
+        };
+
         // add listener to update following to false and break out
         process.on('SIGINT', () => {
+          if (!following) return;
           Logger.warning(
             messages.blocks.stopFollow(blockId, currentEnv, env.currentProject)
           );
           stopFollowing();
         });
 
-        const delay = promiseDelay(5 * 1000, null);
-        const stopFollowing = () => {
-          following = false;
-          delay.cancel();
+        try {
+          while (following) {
+            if (counter++ > 300) {
+              Logger.warning(
+                messages.blocks.timeoutFollow(
+                  blockId,
+                  currentEnv,
+                  env.currentProject
+                )
+              );
+              stopFollowing();
+            }
 
+            // wait n. seconds then poll for logs again
+            await delay.wait();
+
+            const [lastErr, lastLogs] = following
+              ? await contensis.blocks.GetBlockLogs({
+                  blockId,
+                  branchId: branch,
+                  version,
+                  dataCenter,
+                })
+              : [null, null];
+
+            if (lastLogs) {
+              // Find the difference and output it next
+              const difference = diffLogStrings(lastLogs, alreadyShown);
+              if (difference) {
+                if (needsNewLine) {
+                  console.log('');
+                }
+                // Take the trailing newline off of the logged output to
+                // avoid blank lines inbetween logs fetched sequentially
+                const render = removeTrailingNewline(difference);
+                console.log(log.infoText(render));
+
+                // Add what we've just rendered to already shown "cache"
+                alreadyShown += `${render}\n`;
+                needsNewLine = false;
+              } else {
+                // If no difference output a dot
+                process.stdout.write('.');
+                needsNewLine = true;
+              }
+            } else if (lastErr) {
+              // If error output an x
+              process.stdout.write('x');
+              needsNewLine = true;
+            }
+          }
+        } finally {
           // Add back the listeners we removed previously
           process.removeAllListeners('SIGINT');
           for (const listener of listeners)
             process.addListener('SIGINT', listener);
-        };
-
-        while (following) {
-          if (counter++ > 300) {
-            Logger.warning(
-              messages.blocks.timeoutFollow(
-                blockId,
-                currentEnv,
-                env.currentProject
-              )
-            );
-            stopFollowing();
-          }
-
-          // wait n. seconds then poll for logs again
-          await delay.wait();
-
-          const [lastErr, lastLogs] = following
-            ? await contensis.blocks.GetBlockLogs({
-                blockId,
-                branchId: branch,
-                version,
-                dataCenter,
-              })
-            : [null, null];
-
-          if (lastLogs) {
-            // Find the difference and output it next
-            const difference = diffLogStrings(lastLogs, alreadyShown);
-            if (difference) {
-              if (needsNewLine) {
-                console.log('');
-              }
-              // Take the trailing newline off of the logged output to
-              // avoid blank lines inbetween logs fetched sequentially
-              const render = removeTrailingNewline(difference);
-              console.log(log.infoText(render));
-
-              // Add what we've just rendered to already shown "cache"
-              alreadyShown += `${render}\n`;
-              needsNewLine = false;
-            } else {
-              // If no difference output a dot
-              process.stdout.write('.');
-              needsNewLine = true;
-            }
-          } else if (lastErr) {
-            // If error output an x
-            process.stdout.write('x');
-            needsNewLine = true;
-          }
         }
       }
     }

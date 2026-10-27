@@ -1,24 +1,24 @@
 export const promiseDelay = (delay: number, value: any) => {
-  let timeout: NodeJS.Timeout | null;
-  let _reject: PromiseRejectionEvent['reason'];
+  let timeout: NodeJS.Timeout | null = null;
+  let resolve: ((value: any) => void) | null = null;
 
   const wait = () =>
-    new Promise((resolve, reject) => {
-      _reject = reject;
-      timeout = setTimeout(resolve, delay, value);
+    new Promise(r => {
+      resolve = r;
+      timeout = setTimeout(r, delay, value);
     });
 
-  const promise = wait();
   return {
-    promise,
+    wait,
+    // cancelling is not a failure: the waiter re-checks its own state, so
+    // resolve early rather than reject the awaiting loop out of existence
     cancel() {
       if (timeout) {
         clearTimeout(timeout);
         timeout = null;
-        _reject();
-        _reject = null;
+        resolve?.(value);
+        resolve = null;
       }
     },
-    wait,
   };
 };
