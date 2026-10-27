@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.2](https://github.com/contensis/cli/compare/contensis-cli-v1.7.1...contensis-cli-v1.7.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* choices for `dataCenter` argument were not an exhaustive list in `get block logs` command ([7996df5](https://github.com/contensis/cli/commit/7996df5e47894f0cf01a18a6892f426add294772))
+* ending follow mode with `CTRL+C` returns to Contensis shell prompt instead of terminating to system shell in `get block logs` command ([0211d39](https://github.com/contensis/cli/commit/0211d393ee35d87c1a1326f09a57c24d8d42a1d6))
+
 ## [1.7.1](https://github.com/contensis/cli/compare/contensis-cli-v1.7.0...contensis-cli-v1.7.1) (2026-10-06)
 
 
