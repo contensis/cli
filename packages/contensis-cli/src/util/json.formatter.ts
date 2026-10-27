@@ -1,9 +1,10 @@
 import { flatten, unflatten } from 'flat';
 import cleaner from 'deep-cleaner';
+import { deconstructIfError } from './error';
 
 // Format a JSON object for a nice output
 export const jsonFormatter = <T>(obj: T, fields?: string[]) =>
-  JSON.stringify(limitFields(obj, fields), null, 2);
+  JSON.stringify(limitFields(deconstructIfError(obj), fields), null, 2);
 
 // Flatten a JSON object such as an entry so there are no
 // nested object and the keys are presented like "sys.version.versionNo": "1.0"

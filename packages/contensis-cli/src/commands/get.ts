@@ -423,13 +423,11 @@ Example call:
     .addArgument(
       new Argument(
         '[dataCenter]',
-        'the datacentre of the block to get logs for'
-      )
-        .choices(['hq', 'london', 'manchester', 'all'])
-        .default('all')
+        'the datacentre to get logs for (e.g. london, manchester, hq or all)'
+      ).default('all')
     )
     .option('-t --follow', 'follow block logs in near realtime', false)
-    .usage('get block logs [blockId] [branch] [version] [dataCenter]')
+    .usage('[blockId] [branch] [version] [dataCenter]')
     .addHelpText(
       'after',
       `
@@ -443,7 +441,7 @@ Example call:
         blockId: string,
         branch: string,
         version: string,
-        dataCenter: 'hq' | 'manchester' | 'london' | 'all',
+        dataCenter: string,
         opts
       ) => {
         const parentOpts = block.opts() || {};

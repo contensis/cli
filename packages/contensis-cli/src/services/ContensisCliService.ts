@@ -3382,7 +3382,7 @@ class ContensisCli {
     blockId: string,
     branch: string,
     version: string,
-    dataCenter: 'hq' | 'manchester' | 'london' | undefined,
+    dataCenter: string | undefined,
     follow = false
   ) => {
     const { currentEnv, env, log, messages } = this;
